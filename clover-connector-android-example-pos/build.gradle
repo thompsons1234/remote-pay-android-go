@@ -1,0 +1,25 @@
+group = 'com.clover.sdk'
+version = '1-SNAPSHOT'
+
+apply from: file("${androidBuild}/app.gradle")
+
+android.defaultConfig {
+
+        minSdkVersion 17
+        targetSdkVersion 17
+        multiDexEnabled true
+}
+
+android.dexOptions {
+        preDexLibraries = false;
+}
+
+
+dependencies {
+    //compile 'org.clover:remote-client-lib:15-SNAPSHOT'
+    compile project(':clover-connector-android')
+    compile 'org.java-websocket:Java-WebSocket:1.3.0'
+    compile 'com.clover:remote-terminal-lib:15-SNAPSHOT'
+    //compile 'com.android.support:support-v4:22.2.1'
+    //compile 'com.google.android.gms:play-services:7.5.0'
+}

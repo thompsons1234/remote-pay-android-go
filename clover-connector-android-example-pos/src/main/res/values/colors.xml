@@ -1,0 +1,41 @@
+<resources>
+  <color name="black">#000000</color>
+  <color name="white">#FFFFFF</color>
+
+  <color name="verydarkgrayishblue">#263338</color>
+  <color name="verydarkgrayishcyan">#354246</color>
+  <color name="transparentverydarkgrayishcyan">#AA354246</color>
+  <color name="darkgrayishviolet">#A7A0AC</color>
+  <color name="lightgrayishblue">#CFDBE0</color>
+  <color name="darkgrayishblue">#808285</color>
+  <color name="lightgray">#C0C0C0</color>
+  <color name="clover_green">#547554</color>
+
+  <color name="transparentblack">#80000000</color>
+  <color name="transparentwhite">#80FFFFFF</color>
+
+  <color name="reorderbackground">#263338</color>
+  <color name="reordertext">#FFFFFF</color>
+
+  // receipt options
+  <color name="white_transparent_80">#CCFFFFFF</color>
+  <color name="white_transparent_40">#66FFFFFF</color>
+  <color name="white_transparent_50">#80FFFFFF</color>
+  <color name="white_transparent_30">#4CFFFFFF</color>
+
+  <color name="black_transparent_80">#CC000000</color>
+  <color name="black_transparent_75">#BF000000</color>
+  <color name="black_transparent_50">#80000000</color>
+  <color name="black_transparent_30">#4C000000</color>
+
+  <color name="theme_primary">#243238</color>
+  <color name="theme_accent_1">#85f5e2</color>
+  <color name="theme_accent_2">#1985f5e2</color>
+  <color name="overlay_white">#354246</color>
+
+  <color name="button_pane">@android:color/transparent</color>
+  <color name="content_pane">@android:color/white</color>
+  <color name="progress">#333</color>
+
+  <color name="clover_badge_color">#5656A0</color>
+</resources>
