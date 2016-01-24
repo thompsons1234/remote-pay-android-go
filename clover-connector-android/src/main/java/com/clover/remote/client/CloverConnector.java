@@ -1,20 +1,54 @@
+/*
+ * Copyright (C) 2016 Clover Network, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * You may obtain a copy of the License at
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.clover.remote.client;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import com.clover.common.analytics.ALog;
+import android.util.Log;
 import com.clover.common2.Signature2;
 import com.clover.common2.payments.PayIntent;
 import com.clover.remote.client.device.CloverDevice;
 import com.clover.remote.client.device.CloverDeviceConfiguration;
 import com.clover.remote.client.device.CloverDeviceFactory;
-import com.clover.remote.client.messages.*;
+import com.clover.remote.client.messages.AuthRequest;
+import com.clover.remote.client.messages.AuthResponse;
+import com.clover.remote.client.messages.CloseoutResponse;
+import com.clover.remote.client.messages.CloverDeviceEvent;
+import com.clover.remote.client.messages.ManualRefundRequest;
+import com.clover.remote.client.messages.ManualRefundResponse;
+import com.clover.remote.client.messages.RefundPaymentRequest;
+import com.clover.remote.client.messages.RefundPaymentResponse;
+import com.clover.remote.client.messages.SaleRequest;
+import com.clover.remote.client.messages.SaleResponse;
+import com.clover.remote.client.messages.SignatureVerifyRequest;
+import com.clover.remote.client.messages.TipAdjustAuthRequest;
+import com.clover.remote.client.messages.TipAdjustAuthResponse;
+import com.clover.remote.client.messages.TransactionResponse;
+import com.clover.remote.client.messages.VoidPaymentRequest;
+import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.client.transport.CloverTransport;
-import com.clover.remote.client.transport.CloverTransportObserver;
 import com.clover.remote.order.DisplayDiscount;
 import com.clover.remote.order.DisplayLineItem;
 import com.clover.remote.order.DisplayOrder;
-import com.clover.remote.order.operation.*;
+import com.clover.remote.order.operation.DiscountsAddedOperation;
+import com.clover.remote.order.operation.DiscountsDeletedOperation;
+import com.clover.remote.order.operation.LineItemsAddedOperation;
+import com.clover.remote.order.operation.LineItemsDeletedOperation;
+import com.clover.remote.order.operation.OrderDeletedOperation;
 import com.clover.remote.terminal.InputOption;
 import com.clover.remote.terminal.KeyPress;
 import com.clover.remote.terminal.TxState;
@@ -26,15 +60,10 @@ import com.clover.sdk.v3.payments.Payment;
 import com.clover.sdk.v3.payments.Refund;
 import com.google.gson.Gson;
 
-import java.lang.Exception;
-import java.lang.String;
 import java.util.ArrayList;
 import java.util.List;
 
 
-/**
- * Created by blakewilliams on 12/12/15.
- */
 public class CloverConnector implements ICloverConnector {
 
     private static final int KIOSK_CARD_ENTRY_METHODS = 1 << 15;
@@ -645,10 +674,10 @@ public class CloverConnector implements ICloverConnector {
                     if(lastPRR.getRefundObj().getId().equals(refund.getId())) {
                         cloverConnector.broadcaster.notifyOnRefundPaymentResponse(lastPRR);
                     } else {
-                        ALog.e(this, "%s", "The last PaymentRefundResponse has a different refund than this refund in finishOk");
+                        Log.e(getClass().getName(), "The last PaymentRefundResponse has a different refund than this refund in finishOk");
                     }
                 } else {
-                    ALog.e(this, "%s", "Shouldn't get an onFinishOk with having gotten an onPaymentRefund!");
+                    Log.e(getClass().getName(), "Shouldn't get an onFinishOk with having gotten an onPaymentRefund!");
                 }
             } finally {
                 cloverConnector.device.doShowWelcomeScreen();

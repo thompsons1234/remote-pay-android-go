@@ -1,12 +1,35 @@
 group = 'com.clover.sdk'
-version = '1-SNAPSHOT'
+version = '0.1-SNAPSHOT'
 
-apply from: file("${androidBuild}/lib.gradle")
+apply plugin: 'com.android.library'
+apply plugin: 'android-maven'
 
+repositories {
+  mavenLocal()
+  mavenCentral()
+  flatDir {
+    dirs '../lib'
+  }
+}
+
+android {
+  lintOptions {
+    abortOnError false
+  }
+  compileSdkVersion 21
+  buildToolsVersion "22.0.1"
+
+  defaultConfig {
+    minSdkVersion 16
+    targetSdkVersion 17
+  }
+}
 defaultTasks 'install'
 
 dependencies {
-  compile 'com.clover:remote-protocol-lib:16-SNAPSHOT'
-  compile 'com.clover.sdk:clover-android-sdk:133-SNAPSHOT'
+  //compile 'com.clover:remote-protocol-lib:16-SNAPSHOT'
+  compile project(':remote-pay-lib')
+  compile(name:'clover-android-sdk', ext:'aar')
+  compile 'com.google.code.gson:gson:2.3.1'
   compile 'org.java-websocket:Java-WebSocket:1.3.0'
 }

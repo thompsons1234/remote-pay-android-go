@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2016 Clover Network, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * You may obtain a copy of the License at
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.clover.remote.client.lib.example;
 
 import android.app.Activity;
@@ -9,38 +25,45 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.*;
-import com.clover.common.analytics.ALog;
-import com.clover.common.util.CurrencyUtils;
-import com.clover.common2.Signature2;
+import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 import com.clover.remote.client.CloverConnector;
 import com.clover.remote.client.ICloverConnectorListener;
 import com.clover.remote.client.device.WebSocketCloverDeviceConfiguration;
-import com.clover.remote.client.lib.example.model.*;
-import com.clover.remote.client.messages.*;
-import com.clover.remote.order.DisplayDiscount;
-import com.clover.remote.order.DisplayLineItem;
-import com.clover.remote.order.DisplayOrder;
-import com.clover.remote.protocol.CloverSdkDeserializer;
-import com.clover.remote.protocol.CloverSdkSerializer;
+import com.clover.remote.client.lib.example.model.POSCard;
+import com.clover.remote.client.lib.example.model.POSDiscount;
+import com.clover.remote.client.lib.example.model.POSExchange;
+import com.clover.remote.client.lib.example.model.POSItem;
+import com.clover.remote.client.lib.example.model.POSOrder;
+import com.clover.remote.client.lib.example.model.POSPayment;
+import com.clover.remote.client.lib.example.model.POSRefund;
+import com.clover.remote.client.lib.example.model.POSStore;
+import com.clover.remote.client.messages.AuthResponse;
+import com.clover.remote.client.messages.CaptureAuthResponse;
+import com.clover.remote.client.messages.CaptureCardResponse;
+import com.clover.remote.client.messages.CloseoutResponse;
+import com.clover.remote.client.messages.CloverDeviceErrorEvent;
+import com.clover.remote.client.messages.CloverDeviceEvent;
+import com.clover.remote.client.messages.ManualRefundResponse;
+import com.clover.remote.client.messages.RefundPaymentResponse;
+import com.clover.remote.client.messages.SaleResponse;
+import com.clover.remote.client.messages.SignatureVerifyRequest;
+import com.clover.remote.client.messages.TipAdjustAuthResponse;
+import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.protocol.message.TipAddedMessage;
 import com.clover.remote.terminal.InputOption;
 import com.clover.remote.terminal.TxState;
-import com.clover.sdk.v1.ResultStatus;
 import com.clover.sdk.v3.payments.CardTransactionType;
-import com.clover.sdk.v3.payments.Payment;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
 
 
 public class ExamplePOSActivity extends Activity implements CurrentOrderFragment.OnFragmentInteractionListener, AvailableItem.OnFragmentInteractionListener, OrdersFragment.OnFragmentInteractionListener, RegisterFragment.OnFragmentInteractionListener, SignatureFragment.OnFragmentInteractionListener, ProcessingFragment.OnFragmentInteractionListener {
@@ -447,7 +470,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                         builder.setTitle("Refund Error").
                         setMessage("There was an error refunding the payment");
                         builder.create().show();
-                        ALog.d(this, "%s", "Got refund response of " + response.getCode());
+                        Log.d(getClass().getName(), "Got refund response of " + response.getCode());
                     }
                 }
 
@@ -475,7 +498,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                             }
                         }
                     } else {
-                        ALog.d(this, "%s", "Got refund response of " + response.getCode());
+                        Log.d(getClass().getName(), "Got refund response of " + response.getCode());
                     }
                 }
 

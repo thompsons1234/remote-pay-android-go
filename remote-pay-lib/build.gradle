@@ -1,0 +1,31 @@
+group = 'com.clover.sdk'
+version = '0.1-SNAPSHOT'
+
+apply plugin: 'com.android.library'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    flatDir {
+        dirs '../lib'
+    }
+}
+
+android {
+    lintOptions {
+        abortOnError false
+    }
+    compileSdkVersion 21
+    buildToolsVersion "22.0.1"
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 17
+    }
+}
+defaultTasks 'install'
+
+dependencies {
+    compile 'com.google.code.gson:gson:2.3.1'
+    compile(name:'clover-android-sdk', ext:'aar')
+}

@@ -1,13 +1,23 @@
+/*
+ * Copyright (C) 2016 Clover Network, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * You may obtain a copy of the License at
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.clover.remote.client.transport;
 
 import android.os.AsyncTask;
-import android.widget.Toast;
-import com.clover.common.analytics.ALog;
-import com.clover.remote.client.ICloverConnectorListener;
-import com.clover.remote.protocol.RemoteMessage;
-import com.clover.remote.protocol.message.*;
-import com.clover.sdk.v3.payments.Credit;
-import com.clover.sdk.v3.payments.Payment;
+import android.util.Log;
 import com.google.gson.Gson;
 import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
@@ -16,15 +26,9 @@ import org.java_websocket.framing.Framedata;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-/**
- * Created by blakewilliams on 12/15/15.
- */
 public class WebSocketCloverTransport extends CloverTransport {
     Gson gson = new Gson();
     WebSocketClient webSocket;
@@ -49,7 +53,7 @@ public class WebSocketCloverTransport extends CloverTransport {
 
         if(webSocket != null) {
             try {
-                ALog.d(this, "%s", "Sending message to WebSocket: " + message);
+                Log.d(getClass().getName(), "Sending message to WebSocket: " + message);
                 webSocket.send(message);
                 /*new AsyncTask() {
                     @Override
@@ -129,7 +133,7 @@ public class WebSocketCloverTransport extends CloverTransport {
             @Override
             public void onMessage(String message) {
                 for(CloverTransportObserver observer : observers) {
-                    ALog.d(this, "%s", "Got message: " + message);
+                    Log.d(getClass().getName(), "Got message: " + message);
                     observer.onMessage(message);
                 }
             }
@@ -137,7 +141,7 @@ public class WebSocketCloverTransport extends CloverTransport {
             @Override
             public void onClose(int code, String reason, boolean remote) {
                 //Toast.makeText(CloverConnector.this, "Socket Closed", Toast.LENGTH_SHORT).show();
-                ALog.d(this, "%s", reason);
+                Log.d(getClass().getName(), reason);
                 status = "Disconnected";
                 for(CloverTransportObserver listener : observers) {
                     listener.onDeviceDisconnected(WebSocketCloverTransport.this);
