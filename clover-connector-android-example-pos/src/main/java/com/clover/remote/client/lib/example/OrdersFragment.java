@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2016 Clover Network, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * You may obtain a copy of the License at
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.clover.remote.client.lib.example;
 
 import android.app.Activity;
@@ -7,10 +23,12 @@ import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 import com.clover.remote.client.CloverConnector;
@@ -28,6 +46,7 @@ import com.clover.remote.client.lib.example.model.POSStore;
 import com.clover.remote.client.lib.example.model.StoreObserver;
 import com.clover.remote.client.lib.example.adapter.OrdersListViewAdapter;
 import com.clover.remote.client.messages.RefundPaymentRequest;
+import com.clover.remote.client.messages.TipAdjustAuthRequest;
 import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.sdk.v3.order.VoidReason;
 
@@ -153,11 +172,20 @@ public class OrdersFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 final POSPayment posPayment = (POSPayment) paymentsListView.getItemAtPosition(position);
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                String[] paymentOptions = new String[]{"Void Payment", "Refund Payment"/*, "Tip Adjust Payment"*/};
+                String[] paymentOptions = null;
+
+                if(posPayment.getPaymentStatus() == POSPayment.Status.AUTHORIZED) {
+                    paymentOptions = new String[]{"Void Payment", "Refund Payment", "Tip Adjust Payment"};
+                } else if(posPayment.getPaymentStatus() == POSPayment.Status.PAID) {
+                    paymentOptions = new String[]{"Void Payment", "Refund Payment"};
+                } else {
+                    return;
+                }
+
                 builder.setTitle("Payment Actions").
                     setItems(paymentOptions, new DialogInterface.OnClickListener() {
                         @Override public void onClick(DialogInterface dialog, int index) {
-                            ICloverConnector cloverConnector = cloverConnectorWeakReference.get();
+                            final ICloverConnector cloverConnector = cloverConnectorWeakReference.get();
                             if(cloverConnector != null) {
 
                                 switch(index) {
@@ -173,8 +201,36 @@ public class OrdersFragment extends Fragment {
                                     case 1: {
                                         RefundPaymentRequest rpr = new RefundPaymentRequest();
                                         rpr.setPaymentId(posPayment.getPaymentID());
-                                        rpr.setOrderId(posPayment.getOrderId());
+                                        rpr.setOrderId(posPayment.orderID);
                                         cloverConnector.refundPayment(rpr);
+                                        break;
+                                    }
+                                    case 2: {
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                                        final EditText input = new EditText(getActivity());
+                                        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+                                        builder.setView(input);
+
+                                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener(){
+                                            @Override public void onClick(DialogInterface dialog, int which) {
+                                                double val = Double.parseDouble(input.getText().toString());
+                                                long value = (long)val;
+
+                                                TipAdjustAuthRequest taar = new TipAdjustAuthRequest();
+                                                taar.setPaymentID(posPayment.getPaymentID());
+                                                taar.setOrderID(posPayment.getOrderId());
+                                                taar.setTipAmount(value);
+                                                cloverConnector.tipAdjustAuth(taar);
+                                                dialog.dismiss();
+                                            }
+                                        });
+                                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
+                                            @Override public void onClick(DialogInterface dialog, int which) {
+                                                dialog.cancel();
+                                            }
+                                        });
+
+                                        builder.show();
                                         break;
                                     }
 
