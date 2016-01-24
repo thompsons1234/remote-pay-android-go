@@ -19,5 +19,5 @@ package com.clover.remote.client.lib.example;
 import com.clover.remote.client.lib.example.model.POSItem;
 
 public interface AvailableItemListener {
-    public void onItemSelected(POSItem item);
+  public void onItemSelected(POSItem item);
 }

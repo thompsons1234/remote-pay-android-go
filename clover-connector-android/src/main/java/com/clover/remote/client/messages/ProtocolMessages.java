@@ -16,12 +16,6 @@
 
 package com.clover.remote.client.messages;
 
-import java.util.List;
-
-import com.clover.remote.protocol.message.Message;
-import com.clover.remote.protocol.message.Method;
-import com.google.gson.Gson;
-
 public class ProtocolMessages {
 
     /*

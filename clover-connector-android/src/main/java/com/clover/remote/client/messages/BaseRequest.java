@@ -19,32 +19,27 @@ package com.clover.remote.client.messages;
 import java.util.UUID;
 
 public class BaseRequest {
-    protected BaseRequest()
-    {
+  protected BaseRequest() {
+  }
+
+  private UUID _RequestMessageUUID;
+
+  /// <summary>
+  /// The UUID used to correlate a request and response message.
+  /// </summary>
+  public UUID getRequestMessageUUID() {
+    if (_RequestMessageUUID == null) {
+      _RequestMessageUUID = UUID.randomUUID();
     }
-    private UUID _RequestMessageUUID;
-    /// <summary>
-    /// The UUID used to correlate a request and response message.
-    /// </summary>
-    public UUID getRequestMessageUUID()
-    {
-        if (_RequestMessageUUID == null)
-        {
-            _RequestMessageUUID = UUID.randomUUID();
-        }
-        return _RequestMessageUUID;
+    return _RequestMessageUUID;
+  }
+
+  public void setRequestMessageUUID(UUID uuid) {
+    if (_RequestMessageUUID == null) {
+      _RequestMessageUUID = uuid;
+    } else {
+      throw new IllegalArgumentException("Request Message UUID is already set!");
     }
 
-    public void setRequestMessageUUID(UUID uuid)
-    {
-        if (_RequestMessageUUID == null)
-        {
-            _RequestMessageUUID = uuid;
-        }
-        else
-        {
-            throw new IllegalArgumentException("Request Message UUID is already set!");
-        }
-
-    }
+  }
 }

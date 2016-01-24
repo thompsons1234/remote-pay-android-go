@@ -25,7 +25,6 @@ import android.widget.TextView;
 import com.clover.common.util.CurrencyUtils;
 import com.clover.remote.client.lib.example.R;
 import com.clover.remote.client.lib.example.model.POSLineItem;
-import com.clover.remote.client.lib.example.model.POSOrder;
 
 import java.util.Currency;
 import java.util.List;
@@ -59,7 +58,7 @@ public class ItemsListViewAdapter extends ArrayAdapter<POSLineItem> {
       TextView descriptionColumn = (TextView) v.findViewById(R.id.ItemsRowDescriptionColumn);
       TextView priceColumn = (TextView) v.findViewById(R.id.ItemsRowPriceColumn);
 
-      quantityColumn.setText(""+posLI.getQuantity());
+      quantityColumn.setText("" + posLI.getQuantity());
       descriptionColumn.setText(posLI.getItem().getName());
       priceColumn.setText(CurrencyUtils.longToAmountString(Currency.getInstance(Locale.getDefault()), posLI.getItem().getPrice()));
     }

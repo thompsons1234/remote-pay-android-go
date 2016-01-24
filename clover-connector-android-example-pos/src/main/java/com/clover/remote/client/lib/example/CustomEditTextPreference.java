@@ -24,23 +24,24 @@ import android.util.AttributeSet;
 // created this subclass so I could programmatically open the dialog
 public class CustomEditTextPreference extends EditTextPreference {
 
-    public CustomEditTextPreference(Context ctx) {
-        super(ctx);
-    }
+  public CustomEditTextPreference(Context ctx) {
+    super(ctx);
+  }
 
-    public CustomEditTextPreference(Context ctx, AttributeSet attributeSet) {
-        super(ctx, attributeSet);
-    }
-    public CustomEditTextPreference(Context ctx, AttributeSet attributeSet, int defStyle) {
-        super(ctx, attributeSet, defStyle);
-    }
+  public CustomEditTextPreference(Context ctx, AttributeSet attributeSet) {
+    super(ctx, attributeSet);
+  }
 
-    public void show(Bundle state) {
-        super.showDialog(state);
-    }
+  public CustomEditTextPreference(Context ctx, AttributeSet attributeSet, int defStyle) {
+    super(ctx, attributeSet, defStyle);
+  }
 
-    @Override
-    protected void onDialogClosed(boolean positiveResult) {
-        super.onDialogClosed(positiveResult);
-    }
+  public void show(Bundle state) {
+    super.showDialog(state);
+  }
+
+  @Override
+  protected void onDialogClosed(boolean positiveResult) {
+    super.onDialogClosed(positiveResult);
+  }
 }

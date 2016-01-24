@@ -22,22 +22,22 @@ import com.clover.sdk.v3.payments.Payment;
 import java.io.Serializable;
 
 public class SignatureVerifyRequest implements Serializable {
-    private Signature2 signature;
-    private Payment payment;
+  private Signature2 signature;
+  private Payment payment;
 
-    public Signature2 getSignature() {
-        return signature;
-    }
+  public Signature2 getSignature() {
+    return signature;
+  }
 
-    public void setSignature(Signature2 signature) {
-        this.signature = signature;
-    }
+  public void setSignature(Signature2 signature) {
+    this.signature = signature;
+  }
 
-    public Payment getPayment() {
-        return payment;
-    }
+  public Payment getPayment() {
+    return payment;
+  }
 
-    public void setPayment(Payment payment) {
-        this.payment = payment;
-    }
+  public void setPayment(Payment payment) {
+    this.payment = payment;
+  }
 }

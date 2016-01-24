@@ -17,5 +17,5 @@
 package com.clover.remote.client.lib.example.model;
 
 public interface LineItemObserver {
-    public void lineItemChanged(POSLineItem lineItem);
+  public void lineItemChanged(POSLineItem lineItem);
 }

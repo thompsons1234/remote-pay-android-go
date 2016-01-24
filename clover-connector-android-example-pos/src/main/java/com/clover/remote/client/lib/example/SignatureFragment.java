@@ -21,12 +21,10 @@ import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.net.Uri;
 import android.os.Bundle;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import com.clover.common2.Signature2;
 import com.clover.remote.client.CloverConnector;
 import com.clover.remote.client.messages.SignatureVerifyRequest;
@@ -42,152 +40,151 @@ import com.clover.remote.client.messages.SignatureVerifyRequest;
 public class SignatureFragment extends Fragment {
 
 
-    private Signature2 signature;
-    Button rejectButton;
-    Button acceptButton;
-    SignatureView sigCanvas;
+  private Signature2 signature;
+  Button rejectButton;
+  Button acceptButton;
+  SignatureView sigCanvas;
 
-    private OnFragmentInteractionListener mListener;
-    private SignatureVerifyRequest signatureVerifyRequest;
-    private CloverConnector cloverConnector;
+  private OnFragmentInteractionListener mListener;
+  private SignatureVerifyRequest signatureVerifyRequest;
+  private CloverConnector cloverConnector;
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param signatureVerifyRequest Parameter 1.
-     * @param cloverConnector Parameter 2.
-     * @return A new instance of fragment SignatureFragment.
-     */
-    
-    public static SignatureFragment newInstance(SignatureVerifyRequest signatureVerifyRequest, CloverConnector cloverConnector) {
-        SignatureFragment fragment = new SignatureFragment();
-        fragment.setSignatureVerifyRequest(signatureVerifyRequest);
-        fragment.setCloverConnector(cloverConnector);
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
+  /**
+   * Use this factory method to create a new instance of
+   * this fragment using the provided parameters.
+   *
+   * @param signatureVerifyRequest Parameter 1.
+   * @param cloverConnector        Parameter 2.
+   * @return A new instance of fragment SignatureFragment.
+   */
 
-    public SignatureFragment() {
-        // Required empty public constructor
-    }
+  public static SignatureFragment newInstance(SignatureVerifyRequest signatureVerifyRequest, CloverConnector cloverConnector) {
+    SignatureFragment fragment = new SignatureFragment();
+    fragment.setSignatureVerifyRequest(signatureVerifyRequest);
+    fragment.setCloverConnector(cloverConnector);
+    Bundle args = new Bundle();
+    fragment.setArguments(args);
+    return fragment;
+  }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+  public SignatureFragment() {
+    // Required empty public constructor
+  }
 
-    }
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        final View view = inflater.inflate(R.layout.fragment_signature, container, false);
+  }
 
-        if(view != null) {
-            sigCanvas = (SignatureView)view.findViewById(R.id.SignatureView);
-            rejectButton = (Button)view.findViewById(R.id.RejectButton);
-            acceptButton = (Button)view.findViewById(R.id.AcceptButton);
+  @Override
+  public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                           Bundle savedInstanceState) {
+    // Inflate the layout for this fragment
+    final View view = inflater.inflate(R.layout.fragment_signature, container, false);
 
-            sigCanvas.setSignature(signatureVerifyRequest.getSignature());
+    if (view != null) {
+      sigCanvas = (SignatureView) view.findViewById(R.id.SignatureView);
+      rejectButton = (Button) view.findViewById(R.id.RejectButton);
+      acceptButton = (Button) view.findViewById(R.id.AcceptButton);
 
-            acceptButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    FragmentTransaction fragmentTransaction = getActivity().getFragmentManager().beginTransaction();
-                    fragmentTransaction.hide(SignatureFragment.this);
-                    fragmentTransaction.commit();
-                    cloverConnector.acceptSignature(signatureVerifyRequest);
-                    //((FrameLayout)view.getParent()).removeView(view);
-                }
-            });
-            rejectButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    FragmentTransaction fragmentTransaction = getActivity().getFragmentManager().beginTransaction();
-                    fragmentTransaction.hide(SignatureFragment.this);
-                    fragmentTransaction.commit();
-                    cloverConnector.rejectSignature(signatureVerifyRequest);
-                    //((FrameLayout)view.getParent()).removeView(view);
-                }
-            });
+      sigCanvas.setSignature(signatureVerifyRequest.getSignature());
+
+      acceptButton.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          FragmentTransaction fragmentTransaction = getActivity().getFragmentManager().beginTransaction();
+          fragmentTransaction.hide(SignatureFragment.this);
+          fragmentTransaction.commit();
+          cloverConnector.acceptSignature(signatureVerifyRequest);
+          //((FrameLayout)view.getParent()).removeView(view);
         }
-
-        return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (SignatureFragment.OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
+      });
+      rejectButton.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          FragmentTransaction fragmentTransaction = getActivity().getFragmentManager().beginTransaction();
+          fragmentTransaction.hide(SignatureFragment.this);
+          fragmentTransaction.commit();
+          cloverConnector.rejectSignature(signatureVerifyRequest);
+          //((FrameLayout)view.getParent()).removeView(view);
         }
+      });
     }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
+    return view;
+  }
+
+  @Override
+  public void onResume() {
+    super.onResume();
+
+  }
+
+  @Override
+  public void onAttach(Activity activity) {
+    super.onAttach(activity);
+    try {
+      mListener = (SignatureFragment.OnFragmentInteractionListener) activity;
+    } catch (ClassCastException e) {
+      throw new ClassCastException(activity.toString()
+          + " must implement OnFragmentInteractionListener");
     }
+  }
 
-    public void setSignatureVerifyRequest(SignatureVerifyRequest signatureVerifyRequest) {
-        this.signatureVerifyRequest = signatureVerifyRequest;
-        if(sigCanvas != null) {
-            sigCanvas.setSignature(signatureVerifyRequest.getSignature());
-        }
+  @Override
+  public void onDetach() {
+    super.onDetach();
+    mListener = null;
+  }
+
+  public void setSignatureVerifyRequest(SignatureVerifyRequest signatureVerifyRequest) {
+    this.signatureVerifyRequest = signatureVerifyRequest;
+    if (sigCanvas != null) {
+      sigCanvas.setSignature(signatureVerifyRequest.getSignature());
     }
+  }
 
-    public SignatureVerifyRequest getSignatureVerifyRequest() {
-        return signatureVerifyRequest;
-    }
+  public SignatureVerifyRequest getSignatureVerifyRequest() {
+    return signatureVerifyRequest;
+  }
 
-    public void setCloverConnector(CloverConnector cloverConnector) {
-        this.cloverConnector = cloverConnector;
-    }
+  public void setCloverConnector(CloverConnector cloverConnector) {
+    this.cloverConnector = cloverConnector;
+  }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        public void onFragmentInteraction(Uri uri);
-    }
-
-
-    public void setSignature(Signature2 signature) {
-        this.signature = signature;
-
-        int sigWidth = Math.abs(signature.getBounds().first.x-signature.getBounds().second.x);
-        int sigHeight = Math.abs(signature.getBounds().first.y-signature.getBounds().second.y);
-
-        float widthToHeight = sigHeight == 0 ? 2 : (1.0f * sigWidth / sigHeight);
-
-        int parentWidth = ((View)getView().getParent()).getWidth();
-        int parentHeight = ((View)getView().getParent()).getHeight();
+  /**
+   * This interface must be implemented by activities that contain this
+   * fragment to allow an interaction in this fragment to be communicated
+   * to the activity and potentially other fragments contained in that
+   * activity.
+   * <p>
+   * See the Android Training lesson <a href=
+   * "http://developer.android.com/training/basics/fragments/communicating.html"
+   * >Communicating with Other Fragments</a> for more information.
+   */
+  public interface OnFragmentInteractionListener {
+    public void onFragmentInteraction(Uri uri);
+  }
 
 
-        sigCanvas.setMinimumHeight(sigHeight);
-        sigCanvas.setMinimumWidth(sigWidth);
+  public void setSignature(Signature2 signature) {
+    this.signature = signature;
+
+    int sigWidth = Math.abs(signature.getBounds().first.x - signature.getBounds().second.x);
+    int sigHeight = Math.abs(signature.getBounds().first.y - signature.getBounds().second.y);
+
+    float widthToHeight = sigHeight == 0 ? 2 : (1.0f * sigWidth / sigHeight);
+
+    int parentWidth = ((View) getView().getParent()).getWidth();
+    int parentHeight = ((View) getView().getParent()).getHeight();
 
 
-    }
+    sigCanvas.setMinimumHeight(sigHeight);
+    sigCanvas.setMinimumWidth(sigWidth);
 
+
+  }
 
 
 }

@@ -17,6 +17,6 @@
 package com.clover.remote.client.lib.example.model;
 
 public interface StoreObserver {
-    public void newOrderCreated(POSOrder order);
+  public void newOrderCreated(POSOrder order);
 }
 

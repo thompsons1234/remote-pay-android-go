@@ -19,9 +19,13 @@ package com.clover.remote.client.lib.example.model;
 import java.util.Collection;
 
 public interface ObservableListListener<T> {
-    public void itemAdded(T item, int index);
-    public void itemRemoved(T item, int index);
-    public void itemsAdded(Collection<T> items);
-    public void itemsRemoved(Collection<T> items);
-    public void listCleared();
+  public void itemAdded(T item, int index);
+
+  public void itemRemoved(T item, int index);
+
+  public void itemsAdded(Collection<T> items);
+
+  public void itemsRemoved(Collection<T> items);
+
+  public void listCleared();
 }
