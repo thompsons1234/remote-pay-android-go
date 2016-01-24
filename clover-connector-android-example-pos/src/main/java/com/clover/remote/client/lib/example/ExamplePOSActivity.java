@@ -418,20 +418,24 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
                 @Override
                 public void onSaleResponse(final SaleResponse response) {
-                    POSPayment payment = new POSPayment(response.getPayment().getId(), response.getPayment().getOrder().getId(), "DFLTEMPLYEE", response.getPayment().getAmount());
-                    payment.setPaymentStatus(CardTransactionType.PREAUTH.equals(response.getPayment().getCardTransaction().getType()) ? POSPayment.Status.AUTHORIZED : POSPayment.Status.PAID);
-                    store.addPaymentToOrder(payment, store.getCurrentOrder());
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            store.createOrder();
-                            CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
-                            currentOrderFragment.setOrder(store.getCurrentOrder());
-                            cloverConnector.showWelcomeScreen();
+                    if (response != null && response.getPayment() != null) {
+                        POSPayment payment = new POSPayment(response.getPayment().getId(), response.getPayment().getOrder().getId(), "DFLTEMPLYEE", response.getPayment().getAmount());
+                        payment.setPaymentStatus(CardTransactionType.PREAUTH.equals(response.getPayment().getCardTransaction().getType()) ? POSPayment.Status.AUTHORIZED : POSPayment.Status.PAID);
+                        store.addPaymentToOrder(payment, store.getCurrentOrder());
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                store.createOrder();
+                                CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
+                                currentOrderFragment.setOrder(store.getCurrentOrder());
+                                cloverConnector.showWelcomeScreen();
 
-                            showRegister(null);
-                        }
-                    });
+                                showRegister(null);
+                            }
+                        });
+                    } else {
+                        // TODO: handle null payment response when payment is cancelled
+                    }
                 }
 
                 @Override

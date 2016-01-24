@@ -29,7 +29,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name="com.clover.common2.CommonApplication"
         android:icon="@mipmap/clover_logo"
         android:label="@string/app_name" >
         <activity
