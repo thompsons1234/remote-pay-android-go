@@ -22,8 +22,8 @@
         android:orderInCategory="100"
         android:showAsAction="never"/>
 
-      <item
-          android:id="@+id/preferences"
-          android:title="@string/preferences_title" />
+  <item
+      android:id="@+id/preferences"
+      android:title="@string/preferences_title"/>
 
 </menu>

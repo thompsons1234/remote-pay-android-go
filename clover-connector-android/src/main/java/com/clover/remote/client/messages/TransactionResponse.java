@@ -16,7 +16,6 @@
 
 package com.clover.remote.client.messages;
 
-public class TransactionResponse extends BaseResponse
-    {
+public class TransactionResponse extends BaseResponse {
 
-    }
+}

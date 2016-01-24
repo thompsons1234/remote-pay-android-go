@@ -17,9 +17,9 @@
 package com.clover.remote.client.messages;
 
 public class CaptureCardRequest extends BaseRequest {
-    int cardEntryMethods;
+  int cardEntryMethods;
 
-    public CaptureCardRequest(int cardEntryMethods) {
-        this.cardEntryMethods = cardEntryMethods;
-    }
+  public CaptureCardRequest(int cardEntryMethods) {
+    this.cardEntryMethods = cardEntryMethods;
+  }
 }

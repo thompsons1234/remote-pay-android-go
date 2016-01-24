@@ -17,8 +17,11 @@
 package com.clover.remote.client.lib.example;
 
 public interface CurrentOrderFragmentListener {
-    public void onSaleClicked();
-    public void onNewOrderClicked();
-    public void onAuthClicked();
-    public void onSelectLineItem();
+  public void onSaleClicked();
+
+  public void onNewOrderClicked();
+
+  public void onAuthClicked();
+
+  public void onSelectLineItem();
 }

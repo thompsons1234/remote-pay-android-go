@@ -16,12 +16,12 @@
   -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <com.clover.remote.client.lib.example.CustomEditTextPreference
-        android:key="clover_device_endpoint"
-        android:title="@string/pref_label_server"
-        android:selectAllOnFocus="true"
-        android:inputType="textWebEditText"
-        android:singleLine="true"
-        android:maxLines="1"
-        />
+  <com.clover.remote.client.lib.example.CustomEditTextPreference
+      android:key="clover_device_endpoint"
+      android:title="@string/pref_label_server"
+      android:selectAllOnFocus="true"
+      android:inputType="textWebEditText"
+      android:singleLine="true"
+      android:maxLines="1"
+  />
 </PreferenceScreen>
