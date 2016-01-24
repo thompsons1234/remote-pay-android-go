@@ -61,7 +61,7 @@ public class POSLineItem
 
         public void incrementQuantity(int quantity) {
             this.quantity += quantity;
-            this.quantity = Math.max(0, quantity);
+            this.quantity = Math.max(0, this.quantity);
             order.notifyObserverItemChanged(this);
         }
 

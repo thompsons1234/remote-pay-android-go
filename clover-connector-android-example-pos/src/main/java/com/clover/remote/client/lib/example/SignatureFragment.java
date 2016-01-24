@@ -2,6 +2,7 @@ package com.clover.remote.client.lib.example;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -78,15 +79,21 @@ public class SignatureFragment extends Fragment {
             acceptButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    FragmentTransaction fragmentTransaction = getActivity().getFragmentManager().beginTransaction();
+                    fragmentTransaction.hide(SignatureFragment.this);
+                    fragmentTransaction.commit();
                     cloverConnector.acceptSignature(signatureVerifyRequest);
-                    ((FrameLayout)view.getParent()).removeView(view);
+                    //((FrameLayout)view.getParent()).removeView(view);
                 }
             });
             rejectButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    FragmentTransaction fragmentTransaction = getActivity().getFragmentManager().beginTransaction();
+                    fragmentTransaction.hide(SignatureFragment.this);
+                    fragmentTransaction.commit();
                     cloverConnector.rejectSignature(signatureVerifyRequest);
-                    ((FrameLayout)view.getParent()).removeView(view);
+                    //((FrameLayout)view.getParent()).removeView(view);
                 }
             });
         }

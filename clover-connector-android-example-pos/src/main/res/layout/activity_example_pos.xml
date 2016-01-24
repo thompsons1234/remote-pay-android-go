@@ -37,19 +37,19 @@
                 android:id="@+id/RefundButton"
                 android:text="Refund"
                 android:layout_alignParentTop="true"
-                android:layout_toStartOf="@+id/CardsButton"/>
+                android:layout_toStartOf="@+id/CardsButton" android:visibility="invisible"/>
         <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/CardsButton"
                 android:text="Cards"
                 android:layout_alignParentTop="true"
-                android:layout_toStartOf="@+id/TestButton"/>
+                android:layout_toStartOf="@+id/TestButton" android:visibility="invisible"/>
         <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/TestButton"
                 android:text="Misc."
                 android:layout_alignParentTop="true"
-                android:layout_alignParentEnd="true"/>
+                android:layout_alignParentEnd="true" android:visibility="invisible"/>
     </RelativeLayout>
 
 

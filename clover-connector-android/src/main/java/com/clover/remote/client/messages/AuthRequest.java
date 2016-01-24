@@ -10,6 +10,9 @@ import org.apache.http.MethodNotSupportedException;
 public class AuthRequest extends SaleRequest {
     private boolean isPreAuth = false;
 
+    public AuthRequest() {
+        this(false);
+    }
     public AuthRequest(boolean preAuth){
         isPreAuth = preAuth;
     }
@@ -19,6 +22,6 @@ public class AuthRequest extends SaleRequest {
     }
 
     public PayIntent.TransactionType getType(){
-        return isPreAuth ? PayIntent.TransactionType.AUTH : PayIntent.TransactionType.PAYMENT;
+        return isPreAuth() ? PayIntent.TransactionType.AUTH : PayIntent.TransactionType.PAYMENT;
     }
 }

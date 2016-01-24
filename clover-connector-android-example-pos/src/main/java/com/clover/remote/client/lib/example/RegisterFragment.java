@@ -11,6 +11,7 @@ import android.widget.GridLayout;
 import com.clover.common.util.CurrencyUtils;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.lib.example.model.*;
+import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.SaleRequest;
 import com.clover.remote.order.DisplayDiscount;
 import com.clover.remote.order.DisplayLineItem;
@@ -172,7 +173,10 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
     @Override
     public void onAuthClicked() {
-
+        AuthRequest request = new AuthRequest();
+        request.setAmount(store.getCurrentOrder().getTotal());
+        request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
+        cloverConnector.sale(request);
     }
 
     @Override

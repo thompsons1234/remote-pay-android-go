@@ -2,6 +2,7 @@ package com.clover.remote.client;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import com.clover.common.analytics.ALog;
 import com.clover.common2.Signature2;
 import com.clover.common2.payments.PayIntent;
 import com.clover.remote.client.device.CloverDevice;
@@ -507,6 +508,9 @@ public class CloverConnector implements ICloverConnector {
 
 
     private class InnerDeviceObserver implements CloverDeviceObserver {
+
+        private RefundPaymentResponse lastPRR;
+
         class SVR extends SignatureVerifyRequest
 
         {
@@ -566,12 +570,15 @@ public class CloverConnector implements ICloverConnector {
         }
 
         public void onPaymentRefundResponse(String orderId, String paymentId, Refund refund, TxState code) {
+            // hold the response for finishOk for the refund. See comments in onFinishOk(Refund)
             RefundPaymentResponse prr = new RefundPaymentResponse();
             prr.setOrderId(orderId);
             prr.setPaymentId(paymentId);
             prr.setRefundObj(refund);
             prr.setCode(code.toString());
-            cloverConnector.broadcaster.notifyOnRefundPaymentResponse(prr);
+            lastPRR = prr; // set this so we have the appropriate information for when onFinish(Refund) is called
+            //cloverConnector.broadcaster.notifyOnRefundPaymentResponse(prr);
+
             //TODO: Implement in ExamplePOS
         }
 
@@ -629,11 +636,20 @@ public class CloverConnector implements ICloverConnector {
 
         public void onFinishOk(Refund refund) {
             try {
-                RefundPaymentResponse response = new RefundPaymentResponse();
-                response.setOrderId(refund.getOrderRef().getId());
-                response.setPaymentId(refund.getPayment().getId());
-                response.setRefundObj(refund);
-                cloverConnector.broadcaster.notifyOnRefundPaymentResponse(response);
+                // Since finishOk is the more appropriate/consistent location in the "flow" to
+                // publish the RefundResponse (like SaleResponse, AuthResponse, etc., rather
+                // than after the server call, which calls onPaymetRefund),
+                // we will hold on to the response from
+                // onRefundResponse (Which has more information than just the refund) and publish it here
+                if(lastPRR != null) {
+                    if(lastPRR.getRefundObj().getId().equals(refund.getId())) {
+                        cloverConnector.broadcaster.notifyOnRefundPaymentResponse(lastPRR);
+                    } else {
+                        ALog.e(this, "%s", "The last PaymentRefundResponse has a different refund than this refund in finishOk");
+                    }
+                } else {
+                    ALog.e(this, "%s", "Shouldn't get an onFinishOk with having gotten an onPaymentRefund!");
+                }
             } finally {
                 cloverConnector.device.doShowWelcomeScreen();
             }

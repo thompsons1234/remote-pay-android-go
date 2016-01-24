@@ -24,4 +24,8 @@ public class POSExchange
         public long getAmount() {
             return amount;
         }
+
+        public String getOrderId() {
+            return orderID;
+        }
     }

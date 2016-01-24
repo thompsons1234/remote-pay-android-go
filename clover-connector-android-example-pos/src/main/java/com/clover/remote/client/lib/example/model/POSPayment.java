@@ -31,9 +31,7 @@ public class POSPayment extends POSExchange {
     }
 
     public void setPaymentStatus(Status status) {
-        if (_status == Status.PAID) {
-            _status = status;
-        }
+        _status = status;
     }
 
     public boolean isVoided() {
@@ -52,16 +50,15 @@ public class POSPayment extends POSExchange {
         return cashBackAmount;
     }
 
-    public String getOrderId() {
-        return orderId;
-    }
-
     public POSOrder getOrder() {
         return order;
     }
 
     public void setOrder(POSOrder order) {
         this.order = order;
-        orderId = order.id;
+    }
+
+    public void setTipAmount(long tipAmount) {
+        this.tipAmount = tipAmount;
     }
 }

@@ -1,6 +1,7 @@
 package com.clover.remote.client.lib.example;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -14,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
+import com.clover.common.analytics.ALog;
 import com.clover.common.util.CurrencyUtils;
 import com.clover.common2.Signature2;
 import com.clover.remote.client.CloverConnector;
@@ -29,6 +31,8 @@ import com.clover.remote.protocol.CloverSdkSerializer;
 import com.clover.remote.protocol.message.TipAddedMessage;
 import com.clover.remote.terminal.InputOption;
 import com.clover.remote.terminal.TxState;
+import com.clover.sdk.v1.ResultStatus;
+import com.clover.sdk.v3.payments.CardTransactionType;
 import com.clover.sdk.v3.payments.Payment;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -157,7 +161,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     public void onClickThankYou(View view) {
         cloverConnector.showThankYouScreen();
     }
-    public void onSale(View view) {
+    /*public void onSale(View view) {
         SaleRequest saleRequest = new SaleRequest();
         saleRequest.setAmount(2250L);
 
@@ -168,7 +172,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         AuthRequest authRequest = new AuthRequest(false);
         authRequest.setAmount(5000L);
 
-        cloverConnector.sale(authRequest);
+        cloverConnector.auth(authRequest);
     }
 
     public void onPreAuth(View view) {
@@ -176,7 +180,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         authRequest.setAmount(5000L);
 
         cloverConnector.sale(authRequest);
-    }
+    }*/
 
     public void onClickStatus(View view) {
 
@@ -308,14 +312,44 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            store.addPaymentToOrder(new POSPayment(response.getPayment().getId(), response.getPayment().getOrder().getId(), "DFLTEMPLYEE", response.getPayment().getAmount()), store.getCurrentOrder());
+                            POSPayment payment = new POSPayment(response.getPayment().getId(), response.getPayment().getOrder().getId(), "DFLTEMPLYEE", response.getPayment().getAmount());
+                            payment.setPaymentStatus(CardTransactionType.PREAUTH.equals(response.getPayment().getCardTransaction().getType()) ? POSPayment.Status.AUTHORIZED : POSPayment.Status.PAID);
+                            store.addPaymentToOrder(payment, store.getCurrentOrder());
+
+                            store.createOrder();
+                            CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
+                            currentOrderFragment.setOrder(store.getCurrentOrder());
+                            cloverConnector.showWelcomeScreen();
+
+                            showRegister(null);
                         }
                     });
                 }
 
                 @Override
                 public void onAuthTipAdjustResponse(TipAdjustAuthResponse response) {
+                    if(response.isSuccess()) {
 
+                        boolean updatedTip = false;
+                        for(POSOrder order : store.getOrders()) {
+                            for(POSExchange exchange : order.getPayments()) {
+                                if(exchange instanceof POSPayment) {
+                                    POSPayment posPayment = (POSPayment)exchange;
+                                    if(exchange.getPaymentID().equals(response.getPaymentId())) {
+                                        posPayment.setTipAmount(response.getAmount());
+                                        // TODO: should the stats be updated?
+                                        updatedTip = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if(updatedTip) {
+                                break;
+                            }
+                        }
+                    } else {
+                        Toast.makeText(getBaseContext(), "Tip adjust failed", Toast.LENGTH_LONG);
+                    }
                 }
 
                 @Override
@@ -361,7 +395,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
                 @Override
                 public void onSaleResponse(final SaleResponse response) {
-                    store.addPaymentToOrder(new POSPayment(response.getPayment().getId(), response.getPayment().getOrder().getId(), "DFLTEMPLYEE", response.getPayment().getAmount()), store.getCurrentOrder());
+                    POSPayment payment = new POSPayment(response.getPayment().getId(), response.getPayment().getOrder().getId(), "DFLTEMPLYEE", response.getPayment().getAmount());
+                    payment.setPaymentStatus(CardTransactionType.PREAUTH.equals(response.getPayment().getCardTransaction().getType()) ? POSPayment.Status.AUTHORIZED : POSPayment.Status.PAID);
+                    store.addPaymentToOrder(payment, store.getCurrentOrder());
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -388,6 +424,31 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
                 @Override
                 public void onRefundPaymentResponse(RefundPaymentResponse response) {
+                    if(response.getCode() == "SUCCESS") {
+                        POSRefund refund = new POSRefund(response.getPaymentId(), response.getOrderId(), "DEFAULT", response.getRefundObj().getAmount());
+                        boolean done = false;
+                        for(POSOrder order : store.getOrders()) {
+                            for(POSExchange payment : order.getPayments()) {
+                                if(payment instanceof  POSPayment) {
+                                    if(payment.getPaymentID().equals(response.getRefundObj().getPayment().getId())) {
+                                        ((POSPayment) payment).setPaymentStatus(POSPayment.Status.REFUNDED);
+                                        store.addRefundToOrder(refund, order);
+                                        done = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if(done) {
+                                break;
+                            }
+                        }
+                    } else {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getBaseContext());
+                        builder.setTitle("Refund Error").
+                        setMessage("There was an error refunding the payment");
+                        builder.create().show();
+                        ALog.d(this, "%s", "Got refund response of " + response.getCode());
+                    }
                 }
 
                 @Override
@@ -397,12 +458,40 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
                 @Override
                 public void onVoidPaymentResponse(VoidPaymentResponse response) {
-
+                    if(response.getCode() == "SUCCESS") {
+                        boolean done = false;
+                        for(POSOrder order : store.getOrders()) {
+                            for(POSExchange payment : order.getPayments()) {
+                                if(payment instanceof  POSPayment) {
+                                    if(payment.getPaymentID().equals(response.getPaymentId())) {
+                                        ((POSPayment) payment).setPaymentStatus(POSPayment.Status.VOIDED);
+                                        done = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if(done) {
+                                break;
+                            }
+                        }
+                    } else {
+                        ALog.d(this, "%s", "Got refund response of " + response.getCode());
+                    }
                 }
 
                 @Override
                 public void onCaptureCardResponse(CaptureCardResponse response) {
+                    if("SUCCESS".equals(response.getCode())) {
+                        POSCard card = new POSCard();
+                        card.setFirst6(response.getCard().getFirst6());
+                        card.setLast4(response.getCard().getLast4());
+                        card.setName(response.getCard().getFirstName() + response.getCard().getLastName());
+                        card.setMonth(response.getCard().getExpirationDate().substring(0, 2));
+                        card.setYear(response.getCard().getExpirationDate().substring(2, 4));
+                        card.setToken(response.getCard().getToken());
 
+                        store.addCard(card);
+                    }
                 }
 
                 @Override

@@ -1,6 +1,8 @@
 package com.clover.remote.client.transport;
 
 import android.os.AsyncTask;
+import android.widget.Toast;
+import com.clover.common.analytics.ALog;
 import com.clover.remote.client.ICloverConnectorListener;
 import com.clover.remote.protocol.RemoteMessage;
 import com.clover.remote.protocol.message.*;
@@ -47,15 +49,18 @@ public class WebSocketCloverTransport extends CloverTransport {
 
         if(webSocket != null) {
             try {
-                new AsyncTask() {
+                ALog.d(this, "%s", "Sending message to WebSocket: " + message);
+                webSocket.send(message);
+                /*new AsyncTask() {
                     @Override
                     protected Object doInBackground(Object[] params) {
-                        webSocket.send(message);
+                        ALog.d(this, "%s", "Sending message");
                         return null;
                     }
-                }.execute();
+                }.execute();*/
             } catch(WebsocketNotConnectedException e) {
                 // maybe it closed, so let's try to re-open and then send...
+                /*webSocket = null;
                 tempObs = new CloverTransportObserver() {
                     @Override
                     public void onDeviceConnected(CloverTransport transport) {
@@ -78,7 +83,7 @@ public class WebSocketCloverTransport extends CloverTransport {
 
                     }
                 };
-                observers.add(tempObs);
+                observers.add(tempObs);*/
                 initialize(endpoint);
             }
 
@@ -92,12 +97,13 @@ public class WebSocketCloverTransport extends CloverTransport {
 
     public void initialize(URI deviceEndpoint) {
         onDeviceConnected();
-        webSocket = new WebSocketClient(deviceEndpoint) {
+        final WebSocketClient tempWebSocket = new WebSocketClient(deviceEndpoint) {
 
             @Override
             public void onOpen(ServerHandshake handshakedata) {
                 //Toast.makeText(CloverConnector.this, "Socket Open", Toast.LENGTH_SHORT).show();
                 status = "Connected";
+                webSocket = this;
                 // TODO: add PING/PONG timer thread...
                 for(CloverTransportObserver listener : observers) {
                     listener.onDeviceReady(WebSocketCloverTransport.this);
@@ -123,6 +129,7 @@ public class WebSocketCloverTransport extends CloverTransport {
             @Override
             public void onMessage(String message) {
                 for(CloverTransportObserver observer : observers) {
+                    ALog.d(this, "%s", "Got message: " + message);
                     observer.onMessage(message);
                 }
             }
@@ -130,6 +137,7 @@ public class WebSocketCloverTransport extends CloverTransport {
             @Override
             public void onClose(int code, String reason, boolean remote) {
                 //Toast.makeText(CloverConnector.this, "Socket Closed", Toast.LENGTH_SHORT).show();
+                ALog.d(this, "%s", reason);
                 status = "Disconnected";
                 for(CloverTransportObserver listener : observers) {
                     listener.onDeviceDisconnected(WebSocketCloverTransport.this);
@@ -140,14 +148,13 @@ public class WebSocketCloverTransport extends CloverTransport {
 
             @Override
             public void onError(Exception ex) {
-                //Toast.makeText(CloverConnector.this, "Error: " + ex.getMessage(), Toast.LENGTH_LONG).show();
                 for(CloverTransportObserver listener : observers){
                     //listener.onDevice
                 }
             }
         };
         //reconnect();
-        webSocket.connect();
+        tempWebSocket.connect();
     }
 
     public void dispose() {

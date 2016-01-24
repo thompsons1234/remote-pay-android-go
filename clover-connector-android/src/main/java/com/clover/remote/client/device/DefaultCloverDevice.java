@@ -29,6 +29,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     private static final String TAG = DefaultCloverDevice.class.getName();
     Gson gson = new Gson();
     private static int id = 0;
+    private RefundResponseMessage refRespMsg;
 
     public DefaultCloverDevice(CloverDeviceConfiguration configuration)
     {
@@ -83,8 +84,6 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
                             break;
                         case FINISH_OK:
                             FinishOkMessage fokmsg = (FinishOkMessage) Message.fromJsonString(rMessage.payload);
-                            //if (null!= fokmsg.payment) fokmsg.paymentObj = gson.fromJson(fokmsg.payment, Payment.class);
-                            //if (null != fokmsg.credit) fokmsg.creditObj = gson.fromJson(fokmsg.credit, Credit.class);
                             notifyObserversFinishOk(fokmsg);
                             break;
                         case KEY_PRESS:
@@ -121,9 +120,10 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
                             notifyObserversVerifySignature(vsigMsg);
                             break;
                         case REFUND_RESPONSE:
-                            // deprecated, handled with finish_ok message
-                            //RefundResponseMessage refRespMsg = (RefundResponseMessage) Message.fromJsonString(rMessage.payload);
-                            //notifyObserversPaymentRefundResponse(refRespMsg);
+                            // for now, deprecating and refund is handled in finish_ok
+                            // finish_ok also get this message after a receipt, but it doesn't have all the information
+                            refRespMsg = (RefundResponseMessage) Message.fromJsonString(rMessage.payload);
+                            notifyObserversPaymentRefundResponse(refRespMsg);
                             break;
                         case REFUND_REQUEST:
                             //Outbound no-op
