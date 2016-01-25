@@ -43,7 +43,7 @@ public class POSStore {
     availableItems = new LinkedHashMap<String, POSItem>();
     availableDiscounts = new ArrayList<POSDiscount>();
     orders = new ArrayList<POSOrder>();
-    //refunds = new ArrayList<POSRefund>();
+    cards = new ArrayList<POSCard>();
   }
 
   public void createOrder() {
@@ -106,10 +106,13 @@ public class POSStore {
 
   public void addCard(POSCard card) {
     cards.add(card);
+    for(StoreObserver so : storeObservers) {
+      so.cardAdded(card);
+    }
   }
 
-  public Collection<POSCard> getCards() {
-    return Collections.unmodifiableCollection(cards);
+  public List<POSCard> getCards() {
+    return Collections.unmodifiableList(cards);
   }
 
   public List<POSOrder> getOrders() {

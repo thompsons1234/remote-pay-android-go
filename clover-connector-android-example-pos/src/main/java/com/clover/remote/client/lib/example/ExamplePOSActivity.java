@@ -66,7 +66,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 
-public class ExamplePOSActivity extends Activity implements CurrentOrderFragment.OnFragmentInteractionListener, AvailableItem.OnFragmentInteractionListener, OrdersFragment.OnFragmentInteractionListener, RegisterFragment.OnFragmentInteractionListener, SignatureFragment.OnFragmentInteractionListener, ProcessingFragment.OnFragmentInteractionListener {
+public class ExamplePOSActivity extends Activity implements CurrentOrderFragment.OnFragmentInteractionListener,
+    AvailableItem.OnFragmentInteractionListener, OrdersFragment.OnFragmentInteractionListener,
+    RegisterFragment.OnFragmentInteractionListener, SignatureFragment.OnFragmentInteractionListener,
+    CardsFragment.OnFragmentInteractionListener, ManualRefundsFragment.OnFragmentInteractionListener, MiscellaneousFragment.OnFragmentInteractionListener,
+    ProcessingFragment.OnFragmentInteractionListener {
 
   private static final String TAG = "ExamplePOSActivity";
   public static final String EXAMPLE_POS_SERVER_KEY = "clover_device_endpoint";
@@ -381,17 +385,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         @Override
         public void onSignatureVerifyRequest(SignatureVerifyRequest request) {
 
-                    /*
-                    FragmentManager fragmentManager = getFragmentManager();
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-                    SignatureFragment signature = SignatureFragment.newInstance(request, cloverConnector);
-
-                    fragmentTransaction.replace(R.id.contentContainer, signature, "SIGNATURE");
-                    fragmentTransaction.commit();
-                    */
-
-
           FragmentManager fragmentManager = getFragmentManager();
           FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
@@ -516,6 +509,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
             card.setToken(response.getCard().getToken());
 
             store.addCard(card);
+          } else {
+            Toast.makeText(getBaseContext(), "Error capturing card: " + response.getCode(), Toast.LENGTH_LONG);
           }
         }
 
@@ -580,6 +575,56 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     fragmentTransaction.commit();
   }
 
+  public void showRefunds(View view) {
+    FragmentManager fragmentManager = getFragmentManager();
+    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+    hideFragments(fragmentManager, fragmentTransaction);
+
+    Fragment fragment = fragmentManager.findFragmentByTag("REFUNDS");
+    if(fragment == null) {
+      fragment = ManualRefundsFragment.newInstance(store, cloverConnector);
+      fragmentTransaction.add(R.id.contentContainer, fragment, "REFUNDS");
+    } else {
+      fragmentTransaction.show(fragment);
+    }
+
+    fragmentTransaction.commit();
+  }
+
+  public void showCards(View view) {
+    FragmentManager fragmentManager = getFragmentManager();
+    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+    hideFragments(fragmentManager, fragmentTransaction);
+
+    Fragment fragment = fragmentManager.findFragmentByTag("CARDS");
+    if(fragment == null) {
+      fragment = CardsFragment.newInstance(store, cloverConnector);
+        fragmentTransaction.add(R.id.contentContainer, fragment, "CARDS");
+    } else {
+      fragmentTransaction.show(fragment);
+    }
+    fragmentTransaction.commit();
+  }
+
+  public void showMisc(View view) {
+    FragmentManager fragmentManager = getFragmentManager();
+    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+    hideFragments(fragmentManager, fragmentTransaction);
+
+    Fragment fragment = fragmentManager.findFragmentByTag("MISC");
+    if(fragment == null) {
+      fragment = MiscellaneousFragment.newInstance(store, cloverConnector);
+      fragmentTransaction.add(R.id.contentContainer, fragment, "MISC");
+    } else {
+      fragmentTransaction.show(fragment);
+    }
+
+    fragmentTransaction.commit();
+  }
+
   private void hideFragments(FragmentManager fragmentManager, FragmentTransaction fragmentTransaction) {
     Fragment fragment = fragmentManager.findFragmentByTag("ORDERS");
     if (fragment != null) {
@@ -593,6 +638,21 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     if (fragment != null) {
       fragmentTransaction.hide(fragment);
     }
+    fragment = fragmentManager.findFragmentByTag("CARDS");
+    if(fragment != null) {
+      fragmentTransaction.hide(fragment);
+    }
+    fragment = fragmentManager.findFragmentByTag("MISC");
+    if(fragment != null) {
+      fragmentTransaction.hide(fragment);
+    }
+    fragment = fragmentManager.findFragmentByTag("REFUNDS");
+    if(fragment != null) {
+      fragmentTransaction.hide(fragment);
+    }
+  }
 
+  public void captureCardClick(View view) {
+    cloverConnector.captureCard(CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE | CloverConnector.CARD_ENTRY_METHOD_ICC_CONTACT | CloverConnector.CARD_ENTRY_METHOD_MANUAL);
   }
 }

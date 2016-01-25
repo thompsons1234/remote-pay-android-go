@@ -18,6 +18,7 @@ package com.clover.remote.client;
 
 import com.clover.common2.Signature2;
 import com.clover.remote.client.transport.CloverTransportObserver;
+import com.clover.remote.protocol.message.CaptureCardResponseMessage;
 import com.clover.remote.terminal.InputOption;
 import com.clover.remote.terminal.KeyPress;
 import com.clover.remote.terminal.TxState;
@@ -56,6 +57,8 @@ public interface CloverDeviceObserver extends CloverTransportObserver {
   void onKeyPressed(KeyPress keyPress);
 
   void onPaymentRefundResponse(String orderId, String paymentId, Refund refund, TxState code);
+
+  void onCaptureCardResponse(CaptureCardResponseMessage captureCardResponseMessage);
 
   void onCloseoutResponse();
 

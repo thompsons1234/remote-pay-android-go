@@ -122,4 +122,10 @@ public class CloverConnectorBroadcaster extends ArrayList<ICloverConnectorListen
       listener.onTransactionState(txState);
     }
   }
+
+    public void notifyOnCaptureCardRespose(CaptureCardResponse ccr) {
+        for(ICloverConnectorListener listener : this) {
+            listener.onCaptureCardResponse(ccr);
+        }
+    }
 }

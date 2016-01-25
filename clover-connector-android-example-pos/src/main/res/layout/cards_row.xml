@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <TextView android:text="Cardholder Name"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:textSize="@dimen/order_table_text_size"
+              android:textStyle="bold"
+              android:id="@+id/CardsNameColumn"
+              android:layout_weight="2"/>
+    <TextView android:text="234567xxxxxx8902"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:textSize="@dimen/order_table_text_size"
+              android:id="@+id/CardsFirst6Last4Column"
+              android:layout_weight="2"
+              android:layout_below="@+id/CardsNameColumn"
+              android:layout_alignParentStart="true"/>
+    <TextView android:text="12/22"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:textSize="@dimen/order_table_text_size"
+              android:id="@+id/CardsExpColumn"
+              android:layout_weight="2"
+              android:layout_alignTop="@+id/CardsFirst6Last4Column"
+              android:layout_toEndOf="@+id/CardsFirst6Last4Column"
+              android:layout_marginLeft="10dp"/>
+    <TextView android:text="XXXXXXXXXXXXXXXXX"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:textSize="@dimen/order_table_text_size"
+              android:id="@+id/CardsTokenColumn"
+              android:layout_weight="2"
+              android:layout_below="@+id/CardsFirst6Last4Column"
+              android:layout_alignParentStart="true"/>
+</RelativeLayout>

@@ -16,21 +16,22 @@
 
 package com.clover.remote.client.messages;
 
+import com.clover.sdk.v3.payments.VaultedCard;
 
-import com.clover.sdk.v3.customers.Card;
-
+/**
+ * Created by blakewilliams on 1/17/16.
+ */
 public class CaptureCardResponse extends BaseResponse {
-  private Card card;
+    private VaultedCard card;
+    public CaptureCardResponse(VaultedCard card) {
+        this.card = card;
+    }
 
-  public CaptureCardResponse(Card card) {
-    this.card = card;
-  }
+    public VaultedCard getCard() {
+        return card;
+    }
 
-  public Card getCard() {
-    return card;
-  }
-
-  public void setCard(Card card) {
-    this.card = card;
-  }
+    public void setCard(VaultedCard card) {
+        this.card = card;
+    }
 }

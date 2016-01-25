@@ -21,4 +21,7 @@
   <dimen name="text_size_status">12pt</dimen>
   <dimen name="text_size_list_item">14pt</dimen>
   <dimen name="order_table_text_size">12pt</dimen>
+  <dimen name="table_primary_text_size">12pt</dimen>
+  <dimen name="table_secondary_text_size">10pt</dimen>
+  <dimen name="table_tertiary_text_size">9pt</dimen>
 </resources>

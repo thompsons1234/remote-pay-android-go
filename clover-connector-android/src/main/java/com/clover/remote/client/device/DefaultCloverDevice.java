@@ -64,8 +64,6 @@ import com.google.gson.Gson;
 
 import java.util.List;
 
-//import com.clover.remote.client.messages.CaptureCardRequest;
-
 public class DefaultCloverDevice extends CloverDevice implements CloverTransportObserver {
   private static final String TAG = DefaultCloverDevice.class.getName();
   Gson gson = new Gson();
@@ -167,6 +165,10 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
             case TIP_ADJUST_RESPONSE:
               TipAdjustResponseMessage tipAdjustMsg = (TipAdjustResponseMessage) Message.fromJsonString(rMessage.payload);
               notifyObserversTipAdjusted(tipAdjustMsg);
+              break;
+            case CAPTURE_CARD_RESPONSE:
+              CaptureCardResponseMessage ccrm = (CaptureCardResponseMessage) Message.fromJsonString(rMessage.payload);
+              notifyObserverCaptureCardResponse(ccrm);
               break;
                 /**/
             case DISCOVERY_REQUEST:
@@ -359,6 +361,18 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   }
 
+  public void notifyObserverCaptureCardResponse(final CaptureCardResponseMessage captureCardResponseMessage) {
+    new AsyncTask() {
+      @Override
+      protected Object doInBackground(Object[] params) {
+        for (CloverDeviceObserver observer : deviceObservers) {
+          observer.onCaptureCardResponse(captureCardResponseMessage);
+        }
+        return null;
+      }
+    }.execute();
+  }
+
   public void notifyObserversPaymentVoided(final Payment payment, final VoidReason reason) {
     new AsyncTask() {
       @Override
@@ -519,7 +533,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   public void doCaptureCard(int cardEntryMethods) {
     // TODO: implement
-    //sendObjectMessage(new CaptureCardMessage(cardEntryMethods));
+    sendObjectMessage(new CaptureCardMessage(cardEntryMethods));
   }
 
   public void doDiscoveryRequest() {

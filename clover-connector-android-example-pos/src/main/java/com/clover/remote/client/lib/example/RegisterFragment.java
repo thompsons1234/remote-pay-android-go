@@ -247,6 +247,11 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
       }
     }
 
+    @Override 
+    public void cardAdded(POSCard card) {
+
+    }
+
     @Override
     public void lineItemAdded(POSOrder posOrder, POSLineItem lineItem) {
       DisplayLineItem dli = new DisplayLineItem();

@@ -37,6 +37,7 @@ import com.clover.remote.client.lib.example.adapter.ItemsListViewAdapter;
 import com.clover.remote.client.lib.example.adapter.OrdersListViewAdapter;
 import com.clover.remote.client.lib.example.adapter.PaymentsListViewAdapter;
 import com.clover.remote.client.lib.example.model.OrderObserver;
+import com.clover.remote.client.lib.example.model.POSCard;
 import com.clover.remote.client.lib.example.model.POSDiscount;
 import com.clover.remote.client.lib.example.model.POSExchange;
 import com.clover.remote.client.lib.example.model.POSLineItem;
@@ -45,13 +46,16 @@ import com.clover.remote.client.lib.example.model.POSPayment;
 import com.clover.remote.client.lib.example.model.POSRefund;
 import com.clover.remote.client.lib.example.model.POSStore;
 import com.clover.remote.client.lib.example.model.StoreObserver;
+import com.clover.remote.client.lib.example.adapter.OrdersListViewAdapter;
 import com.clover.remote.client.messages.RefundPaymentRequest;
 import com.clover.remote.client.messages.TipAdjustAuthRequest;
 import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.sdk.v3.order.VoidReason;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
