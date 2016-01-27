@@ -7,8 +7,8 @@ Current version: 0.1
 This SDK provides an API with which to allow your Android-based Point-of-Sale (POS) system to interface with a [Clover® Mini device] (https://www.clover.com/pos-hardware/mini). From the Mini, your merchant's can take payments using: credit, debit, EMV contact and contactless (including Apple Pay), EBT, and more. Learn more about integrations at [clover.com/integrations](https://www.clover.com/integrations).
 
 The Android project includes both a connector and example. To effectively work with the project you'll need:
-- [Gradle](https://gradle.org)(suggested version 2.10).
-- An [Android SDK](http://developer.android.com/sdk/index.html)(17+).
+- [Gradle](https://gradle.org) (suggested version 2.10).
+- An [Android SDK](http://developer.android.com/sdk/index.html) (17+).
 - An [IDE](http://developer.android.com/tools/studio/index.html), Android Studio works well .
 
 To complete a transaction end to end, we recommend getting a [Clover Mini Dev Kit](http://cloverdevkit.com/collections/devkits/products/clover-mini-dev-kit).
