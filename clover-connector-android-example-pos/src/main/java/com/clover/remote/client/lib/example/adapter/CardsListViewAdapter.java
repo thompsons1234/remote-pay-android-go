@@ -40,13 +40,15 @@ public class CardsListViewAdapter extends ArrayAdapter<POSCard>{
 
         if (posCard != null) {
             TextView nameColumn = (TextView) v.findViewById(R.id.CardsNameColumn);
-            TextView first6Column = (TextView) v.findViewById(R.id.CardsFirst6Last4Column);
+            TextView first6Column = (TextView) v.findViewById(R.id.CardsFirst6Column);
+            TextView last4Column = (TextView) v.findViewById(R.id.CardsLast4Column);
             TextView expColumn = (TextView) v.findViewById(R.id.CardsExpColumn);
             TextView tokenColumn = (TextView) v.findViewById(R.id.CardsTokenColumn);
 
 
             nameColumn.setText(posCard.getName());
-            first6Column.setText(posCard.getFirst6() + "xxxxxx" + posCard.getLast4());
+            first6Column.setText(posCard.getFirst6());
+            last4Column.setText(posCard.getLast4());
             expColumn.setText(posCard.getMonth() + "/" + posCard.getYear());
             tokenColumn.setText(posCard.getToken());
         }

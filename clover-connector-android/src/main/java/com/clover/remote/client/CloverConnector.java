@@ -26,6 +26,8 @@ import com.clover.remote.client.device.CloverDeviceConfiguration;
 import com.clover.remote.client.device.CloverDeviceFactory;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.AuthResponse;
+import com.clover.remote.client.messages.CaptureAuthRequest;
+import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.ManualRefundRequest;
@@ -44,16 +46,11 @@ import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.order.DisplayDiscount;
 import com.clover.remote.order.DisplayLineItem;
 import com.clover.remote.order.DisplayOrder;
-<<<<<<< Upstream, based on develop
 import com.clover.remote.order.operation.DiscountsAddedOperation;
 import com.clover.remote.order.operation.DiscountsDeletedOperation;
 import com.clover.remote.order.operation.LineItemsAddedOperation;
 import com.clover.remote.order.operation.LineItemsDeletedOperation;
 import com.clover.remote.order.operation.OrderDeletedOperation;
-=======
-import com.clover.remote.order.operation.*;
-import com.clover.remote.protocol.message.CaptureCardResponseMessage;
->>>>>>> e6d72e0 adding cards, refunds and misc fragments
 import com.clover.remote.terminal.InputOption;
 import com.clover.remote.terminal.KeyPress;
 import com.clover.remote.terminal.TxState;
@@ -63,11 +60,11 @@ import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.Payment;
 import com.clover.sdk.v3.payments.Refund;
+import com.clover.sdk.v3.payments.VaultedCard;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class CloverConnector implements ICloverConnector {
 
@@ -86,7 +83,6 @@ public class CloverConnector implements ICloverConnector {
 
   // manual is not enabled by default
   private int cardEntryMethods = CARD_ENTRY_METHOD_MAG_STRIPE | CARD_ENTRY_METHOD_ICC_CONTACT | CARD_ENTRY_METHOD_NFC_CONTACTLESS;// | CARD_ENTRY_METHOD_MANUAL;
-
 
   protected CloverDevice device;
   private CloverDeviceObserver deviceObserver;
@@ -122,7 +118,6 @@ public class CloverConnector implements ICloverConnector {
     initialize(config);
   }
 
-
   /**
    * @param config            - A CloverDeviceConfiguration object; TestDeviceConfiguration can be used for testing
    * @param connectorListener - Connector listener that will be added before the device is initialized
@@ -133,16 +128,13 @@ public class CloverConnector implements ICloverConnector {
     initialize(config);
   }
 
-
   public void addCloverConnectorListener(ICloverConnectorListener connectorListener) {
     broadcaster.add(connectorListener);
   }
 
-
   public void removeCloverConnectorListener(ICloverConnectorListener connectorListener) {
     broadcaster.remove(connectorListener);
   }
-
 
   /// <summary>
   /// Initialize the connector with a given configuration
@@ -158,8 +150,7 @@ public class CloverConnector implements ICloverConnector {
     disableTip = false;
 
     new AsyncTask() {
-      @Override
-      protected Object doInBackground(Object[] params) {
+      @Override protected Object doInBackground(Object[] params) {
         device = CloverDeviceFactory.get(config);
         //device.Subscribe(transportObserver);
         device.Subscribe(deviceObserver);
@@ -204,6 +195,9 @@ public class CloverConnector implements ICloverConnector {
         if (request.getTippableAmount() != null) {
           builder.tippableAmount(request.getTippableAmount());
         }
+        if (request.getVaultedCard() != null) {
+          builder.vaultedCard(request.getVaultedCard());
+        }
 
         //builder.cardNotPresent(request.isCardNotPresent());
 
@@ -246,11 +240,11 @@ public class CloverConnector implements ICloverConnector {
    * Capture a previous Auth. Note: Should only be called if request's PaymentID is from an AuthResponse
    * @param request
    */
-    /*
-    public void captureAuth(CaptureAuthRequest request) {
-        throw new RuntimeException("Not Implemented.");
-    }
-    */
+
+  public void captureAuth(CaptureAuthRequest request) {
+      device.doCaptureAuth(request.paymentID, request.amount, request.tipAmount);
+  }
+
 
   /**
    * Adjust the tip for a previous Auth. Note: Should only be called if request's PaymentID is from an AuthResponse
@@ -265,11 +259,11 @@ public class CloverConnector implements ICloverConnector {
     device.doTipAdjustAuth(request.getOrderID(), request.getPaymentID(), request.getTipAmount());
   }
 
-  public void captureCard(Integer cardEntryMethods) {
+  public void vaultCard(Integer cardEntryMethods) {
     if (device == null) {
       return;
     }
-    device.doCaptureCard(cardEntryMethods != null ? cardEntryMethods : (CARD_ENTRY_METHOD_MAG_STRIPE | CARD_ENTRY_METHOD_ICC_CONTACT | CARD_ENTRY_METHOD_MANUAL));
+    device.doVaultCard(cardEntryMethods != null ? cardEntryMethods : (CARD_ENTRY_METHOD_MAG_STRIPE | CARD_ENTRY_METHOD_ICC_CONTACT | CARD_ENTRY_METHOD_MANUAL));
   }
 
   /**
@@ -330,8 +324,8 @@ public class CloverConnector implements ICloverConnector {
     lastRequest = request;
     PayIntent.Builder builder = new PayIntent.Builder();
     builder.amount(-Math.abs(request.getAmount()))
-        .cardEntryMethods(15)
-        .transactionType(PayIntent.TransactionType.PAYMENT.CREDIT);
+    	.cardEntryMethods(15)
+    	.transactionType(PayIntent.TransactionType.PAYMENT.CREDIT);
 
     PayIntent payIntent = builder.build();
     device.doTxStart(payIntent, null);
@@ -393,7 +387,6 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-
   /**
    * Return the device to the Welcome Screen
    */
@@ -415,7 +408,7 @@ public class CloverConnector implements ICloverConnector {
   /**
    * Show the customer facing receipt option screen for the last order only.
    */
-  public void displayReceiptOptions() {
+  public void displayReceiptOptions(String orderId, String paymentId) {
     if (device != null) {
       device.doShowReceiptScreen();
     }
@@ -525,7 +518,6 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-
   /// <summary>
   /// return the Merchant object for the Merchant configured for the Clover Mini
   /// </summary>
@@ -552,14 +544,12 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-
   private class InnerDeviceObserver implements CloverDeviceObserver {
 
     private RefundPaymentResponse lastPRR;
+    CloverConnector cloverConnector;
 
-    class SVR extends SignatureVerifyRequest
-
-    {
+    class SVR extends SignatureVerifyRequest {
       CloverDevice _device;
 
       public SVR(CloverDevice device) {
@@ -575,235 +565,13 @@ public class CloverConnector implements ICloverConnector {
       }
     }
 
-    CloverConnector cloverConnector;
-
     public InnerDeviceObserver(CloverConnector cc) {
       this.cloverConnector = cc;
-
     }
 
-<<<<<<< Upstream, based on develop
     public void onTxState(TxState txState) {
       //Console.WriteLine("onTxTstate: " + txState.ToString());
       cloverConnector.broadcaster.notifyOnTxState(txState);
-=======
-
-
-    private class InnerDeviceObserver implements CloverDeviceObserver {
-
-        private RefundPaymentResponse lastPRR;
-
-        class SVR extends SignatureVerifyRequest
-
-        {
-            CloverDevice _device;
-
-            public SVR(CloverDevice device)
-            {
-                _device = device;
-            }
-
-            public void Accept() {
-                _device.doSignatureVerified(getPayment(), true);
-            }
-
-            public void Reject() {
-                _device.doSignatureVerified(getPayment(), false);
-            }
-        }
-
-        CloverConnector cloverConnector;
-
-        public InnerDeviceObserver(CloverConnector cc)
-        {
-            this.cloverConnector = cc;
-
-        }
-
-        public void onTxState(TxState txState) {
-            //Console.WriteLine("onTxTstate: " + txState.ToString());
-            cloverConnector.broadcaster.notifyOnTxState(txState);
-        }
-
-        public void onPartialAuth(long partialAmount) {
-            //TODO: Implement
-        }
-
-        public void onTipAdded(long tip) {
-            cloverConnector.broadcaster.notifyOnTipAdded(tip);
-        }
-
-        public void onAuthTipAdjusted(String paymentId, long amount, boolean success) {
-            TipAdjustAuthResponse response = new TipAdjustAuthResponse();
-            response.setPaymentId(paymentId);
-            response.setAmount(amount);
-            response.setSuccess(success);
-
-            cloverConnector.broadcaster.notifyOnTipAdjustAuthResponse(response);
-        }
-
-        public void onCashbackSelected(long cashbackAmount) {
-
-            //TODO: Implement
-        }
-
-        public void onKeyPressed(KeyPress keyPress) {
-            //TODO: Implement
-        }
-
-        public void onPaymentRefundResponse(String orderId, String paymentId, Refund refund, TxState code) {
-            // hold the response for finishOk for the refund. See comments in onFinishOk(Refund)
-            RefundPaymentResponse prr = new RefundPaymentResponse();
-            prr.setOrderId(orderId);
-            prr.setPaymentId(paymentId);
-            prr.setRefundObj(refund);
-            prr.setCode(code.toString());
-            lastPRR = prr; // set this so we have the appropriate information for when onFinish(Refund) is called
-            //cloverConnector.broadcaster.notifyOnRefundPaymentResponse(prr);
-
-            //TODO: Implement in ExamplePOS
-        }
-
-        public void onCloseoutResponse() {
-            cloverConnector.broadcaster.notifyCloseout(new CloseoutResponse());
-        }
-
-        public void onUiState(UiState uiState, String uiText, UiState.UiDirection uiDirection, InputOption[] inputOptions) {
-            //Console.WriteLine(uiText  + " inputOptions: " + inputOptions.Length);
-            CloverDeviceEvent deviceEvent = new CloverDeviceEvent();
-            deviceEvent.setInputOptions(inputOptions);
-            deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.valueOf(uiState.toString()));
-            deviceEvent.setMessage(uiText);
-            if (uiDirection == UiState.UiDirection.ENTER) {
-                cloverConnector.broadcaster.notifyOnDeviceActivityStart(deviceEvent);
-            } else if (uiDirection == UiState.UiDirection.EXIT) {
-                cloverConnector.broadcaster.notifyOnDeviceActivityEnd(deviceEvent);
-            }
-
-        }
-
-        public void onFinishOk(Payment payment, Signature2 signature2) {
-            try {
-
-                if (cloverConnector.lastRequest instanceof SaleRequest) {
-                    SaleResponse response = new SaleResponse();
-                    response.setCode(TransactionResponse.SUCCESS);
-                    response.setPayment(payment);
-                    response.setSignature(signature2);
-                    cloverConnector.broadcaster.notifyOnSaleResponse(response);
-                } else if (cloverConnector.lastRequest instanceof AuthRequest) {
-                    AuthResponse response = new AuthResponse();
-                    response.setCode(TransactionResponse.SUCCESS);
-                    response.setPayment(payment);
-                    response.setSignature(signature2);
-                    cloverConnector.broadcaster.notifyOnAuthResponse(response);
-                } else {
-                    throw new IllegalArgumentException("Failed to pair this response. " + payment);
-                }
-            } finally {
-                cloverConnector.device.doShowThankYouScreen();
-            }
-        }
-
-        public void onFinishOk(Credit credit) {
-            try {
-                ManualRefundResponse response = new ManualRefundResponse();
-                response.setCode(TransactionResponse.SUCCESS);
-                response.setCredit(credit);
-                cloverConnector.broadcaster.notifyOnManualRefundResponse(response);
-            } finally {
-                cloverConnector.device.doShowWelcomeScreen();
-            }
-        }
-
-        public void onFinishOk(Refund refund) {
-            try {
-                // Since finishOk is the more appropriate/consistent location in the "flow" to
-                // publish the RefundResponse (like SaleResponse, AuthResponse, etc., rather
-                // than after the server call, which calls onPaymetRefund),
-                // we will hold on to the response from
-                // onRefundResponse (Which has more information than just the refund) and publish it here
-                if(lastPRR != null) {
-                    if(lastPRR.getRefundObj().getId().equals(refund.getId())) {
-                        cloverConnector.broadcaster.notifyOnRefundPaymentResponse(lastPRR);
-                    } else {
-                        ALog.e(this, "%s", "The last PaymentRefundResponse has a different refund than this refund in finishOk");
-                    }
-                } else {
-                    ALog.e(this, "%s", "Shouldn't get an onFinishOk with having gotten an onPaymentRefund!");
-                }
-            } finally {
-                cloverConnector.device.doShowWelcomeScreen();
-            }
-        }
-
-        public void onFinishCancel() {
-            try {
-                if (cloverConnector.lastRequest instanceof SaleRequest) {
-                    SaleResponse saleResponse = new SaleResponse();
-                    saleResponse.setPayment(null);
-                    saleResponse.setCode(TransactionResponse.CANCEL);
-                    cloverConnector.broadcaster.notifyOnSaleResponse(saleResponse);
-                } else if (cloverConnector.lastRequest instanceof ManualRefundRequest) {
-                    ManualRefundResponse refundResponse = new ManualRefundResponse();
-                    refundResponse.setCode(TransactionResponse.CANCEL);
-                    cloverConnector.broadcaster.notifyOnManualRefundResponse(refundResponse);
-                }
-            } finally {
-                cloverConnector.device.doShowWelcomeScreen();
-            }
-
-        }
-
-        public void onVerifySignature(Payment payment, Signature2 signature) {
-            SVR request = new SVR(cloverConnector.device);
-            request.setSignature(signature);
-            request.setPayment(payment);
-            cloverConnector.broadcaster.notifyOnSignatureVerifyRequest(request);
-        }
-
-        public void onPaymentVoided(Payment payment, VoidReason reason) {
-                VoidPaymentResponse response = new VoidPaymentResponse();
-                response.setCode(TransactionResponse.SUCCESS);
-                response.setPaymentId(payment.getId());
-                response.setTransactionNumber((payment.getCardTransaction() != null) ? payment.getCardTransaction().getTransactionNo() : "");
-                //response.setResponseCode(""+payment.getResult()); //TODO: verify this value
-
-                cloverConnector.broadcaster.notifyOnVoidPaymentResponse(response);
-                cloverConnector.device.doShowWelcomeScreen();
-        }
-
-        public void onTxStartResponse(boolean success) {
-            //Console.WriteLine("Tx Started? " + success);
-            // TODO: when don't we get this? if a transaction has already begun and we try a 2nd?
-        }
-
-        public void onDeviceConnected(CloverTransport transport)
-        {
-            cloverConnector.broadcaster.notifyOnConnect();
-        }
-
-        public void onDeviceReady(CloverTransport transport)
-        {
-            cloverConnector.device.doShowWelcomeScreen();
-            cloverConnector.broadcaster.notifyOnReady();
-        }
-
-        public void onDeviceDisconnected(CloverTransport transport)
-        {
-            cloverConnector.broadcaster.notifyOnDisconnect();
-        }
-
-        public void onMessage(String message)
-        {
-        //Console.WriteLine("onMessage: " + message);
-        }
-
-        public void onCaptureCardResponse(CaptureCardResponseMessage captureCardResponseMessage) {
-            CaptureCardResponse ccr = new CaptureCardResponse(captureCardResponseMessage.card);
-            cloverConnector.broadcaster.notifyOnCaptureCardRespose(ccr);
-        }
->>>>>>> e6d72e0 adding cards, refunds and misc fragments
     }
 
     public void onPartialAuth(long partialAmount) {
@@ -824,7 +592,6 @@ public class CloverConnector implements ICloverConnector {
     }
 
     public void onCashbackSelected(long cashbackAmount) {
-
       //TODO: Implement
     }
 
@@ -841,8 +608,6 @@ public class CloverConnector implements ICloverConnector {
       prr.setCode(code.toString());
       lastPRR = prr; // set this so we have the appropriate information for when onFinish(Refund) is called
       //cloverConnector.broadcaster.notifyOnRefundPaymentResponse(prr);
-
-      //TODO: Implement in ExamplePOS
     }
 
     public void onCloseoutResponse() {
@@ -860,12 +625,10 @@ public class CloverConnector implements ICloverConnector {
       } else if (uiDirection == UiState.UiDirection.EXIT) {
         cloverConnector.broadcaster.notifyOnDeviceActivityEnd(deviceEvent);
       }
-
     }
 
     public void onFinishOk(Payment payment, Signature2 signature2) {
       try {
-
         if (cloverConnector.lastRequest instanceof SaleRequest) {
           SaleResponse response = new SaleResponse();
           response.setCode(TransactionResponse.SUCCESS);
@@ -904,14 +667,15 @@ public class CloverConnector implements ICloverConnector {
         // than after the server call, which calls onPaymetRefund),
         // we will hold on to the response from
         // onRefundResponse (Which has more information than just the refund) and publish it here
-        if (lastPRR != null) {
+        if (
+        != null) {
           if (lastPRR.getRefundObj().getId().equals(refund.getId())) {
             cloverConnector.broadcaster.notifyOnRefundPaymentResponse(lastPRR);
           } else {
-            Log.e(getClass().getName(), "The last PaymentRefundResponse has a different refund than this refund in finishOk");
+            Log.e(this.getClass().getName(), "The last PaymentRefundResponse has a different refund than this refund in finishOk");
           }
         } else {
-          Log.e(getClass().getName(), "Shouldn't get an onFinishOk with having gotten an onPaymentRefund!");
+          Log.e(this.getClass().getName(), "Shouldn't get an onFinishOk with having gotten an onPaymentRefund!");
         }
       } finally {
         cloverConnector.device.doShowWelcomeScreen();
@@ -933,7 +697,6 @@ public class CloverConnector implements ICloverConnector {
       } finally {
         cloverConnector.device.doShowWelcomeScreen();
       }
-
     }
 
     public void onVerifySignature(Payment payment, Signature2 signature) {
@@ -952,6 +715,11 @@ public class CloverConnector implements ICloverConnector {
 
       cloverConnector.broadcaster.notifyOnVoidPaymentResponse(response);
       cloverConnector.device.doShowWelcomeScreen();
+    }
+
+    public void onVaultCardResponse(VaultedCard vaultedCard, String code, String reason) {
+      VaultCardResponse ccr = new VaultCardResponse(vaultedCard, code, reason);
+      cloverConnector.broadcaster.notifyOnCaptureCardRespose(ccr);
     }
 
     public void onTxStartResponse(boolean success) {
@@ -977,4 +745,5 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 }
+
 

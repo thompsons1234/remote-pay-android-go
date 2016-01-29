@@ -27,10 +27,12 @@ import android.widget.GridLayout;
 import com.clover.common.util.CurrencyUtils;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.lib.example.model.OrderObserver;
+import com.clover.remote.client.lib.example.model.POSCard;
 import com.clover.remote.client.lib.example.model.POSDiscount;
 import com.clover.remote.client.lib.example.model.POSExchange;
 import com.clover.remote.client.lib.example.model.POSItem;
 import com.clover.remote.client.lib.example.model.POSLineItem;
+import com.clover.remote.client.lib.example.model.POSNakedRefund;
 import com.clover.remote.client.lib.example.model.POSOrder;
 import com.clover.remote.client.lib.example.model.POSPayment;
 import com.clover.remote.client.lib.example.model.POSRefund;
@@ -249,6 +251,10 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
     @Override 
     public void cardAdded(POSCard card) {
+
+    }
+
+    @Override public void refundAdded(POSNakedRefund refund) {
 
     }
 

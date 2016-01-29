@@ -16,10 +16,10 @@
 
 package com.clover.remote.client.messages;
 
-public class CaptureCardRequest extends BaseRequest {
+public class VaultCardRequest extends BaseRequest {
   int cardEntryMethods;
 
-  public CaptureCardRequest(int cardEntryMethods) {
+  public VaultCardRequest(int cardEntryMethods) {
     this.cardEntryMethods = cardEntryMethods;
   }
 }

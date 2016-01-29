@@ -70,6 +70,8 @@ public abstract class CloverDevice {
 
   public abstract void doVoidPayment(Payment payment, VoidReason reason);
 
+  public abstract void doCaptureAuth(String paymentID, long amount, long tipAmount);
+
   public abstract void doOrderUpdate(DisplayOrder order, Object orderOperation); //OrderDeletedOperation, LineItemsDeletedOperation, LineItemsAddedOperation, DiscountsDeletedOperation, DiscountsAddedOperation,
 
   public abstract void doSignatureVerified(Payment payment, boolean verified);
@@ -97,5 +99,7 @@ public abstract class CloverDevice {
 
   public abstract void doCloseout();
 
-  public abstract void doCaptureCard(int cardEntryMethods);
+  public abstract void doVaultCard(int cardEntryMethods);
+
+
 }

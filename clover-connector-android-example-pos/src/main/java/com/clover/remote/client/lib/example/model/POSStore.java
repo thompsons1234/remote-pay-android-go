@@ -31,6 +31,7 @@ public class POSStore {
   private List<POSDiscount> availableDiscounts;
   private List<POSOrder> orders;
   private List<POSCard> cards;
+  private List<POSNakedRefund> refunds;
   private POSOrder currentOrder;
 
   private transient Map<String, POSOrder> orderIdToOrder = new HashMap<String, POSOrder>();
@@ -44,6 +45,7 @@ public class POSStore {
     availableDiscounts = new ArrayList<POSDiscount>();
     orders = new ArrayList<POSOrder>();
     cards = new ArrayList<POSCard>();
+    refunds = new ArrayList<POSNakedRefund>();
   }
 
   public void createOrder() {
@@ -117,5 +119,15 @@ public class POSStore {
 
   public List<POSOrder> getOrders() {
     return orders;
+  }
+
+  public void addRefund(POSNakedRefund nakedRefund) {
+    refunds.add(nakedRefund);
+    for(StoreObserver so : storeObservers) {
+      so.refundAdded(nakedRefund);
+    }
+  }
+  public List<POSNakedRefund> getRefunds() {
+    return refunds;
   }
 }

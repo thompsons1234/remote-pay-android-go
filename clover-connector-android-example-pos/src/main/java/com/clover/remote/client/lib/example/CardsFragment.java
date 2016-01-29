@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.LayoutInflater;
@@ -26,6 +27,7 @@ import com.clover.remote.client.lib.example.model.POSCard;
 import com.clover.remote.client.lib.example.model.POSDiscount;
 import com.clover.remote.client.lib.example.model.POSExchange;
 import com.clover.remote.client.lib.example.model.POSLineItem;
+import com.clover.remote.client.lib.example.model.POSNakedRefund;
 import com.clover.remote.client.lib.example.model.POSOrder;
 import com.clover.remote.client.lib.example.model.POSPayment;
 import com.clover.remote.client.lib.example.model.POSRefund;
@@ -75,42 +77,6 @@ public class CardsFragment extends Fragment {
         Bundle args = new Bundle();
         fragment.setArguments(args);
 
-
-        store.addCurrentOrderObserver(new OrderObserver() {
-            @Override public void lineItemAdded(POSOrder posOrder, POSLineItem lineItem) {
-
-            }
-
-            @Override public void lineItemRemoved(POSOrder posOrder, POSLineItem lineItem) {
-
-            }
-
-            @Override public void lineItemChanged(POSOrder posOrder, POSLineItem lineItem) {
-
-            }
-
-            @Override public void paymentAdded(POSOrder posOrder, POSPayment payment) {
-
-            }
-
-            @Override public void refundAdded(POSOrder posOrder, POSRefund refund) {
-
-            }
-
-            @Override public void paymentChanged(POSOrder posOrder, POSExchange pay) {
-
-            }
-
-            @Override public void discountAdded(POSOrder posOrder, POSDiscount discount) {
-
-            }
-
-            @Override public void discountChanged(POSOrder posOrder, POSDiscount discount) {
-
-            }
-        });
-
-
         return fragment;
     }
 
@@ -138,7 +104,19 @@ public class CardsFragment extends Fragment {
 
             @Override public void cardAdded(POSCard card) {
                 final CardsListViewAdapter cardsListViewAdapter = new CardsListViewAdapter(view.getContext(), R.id.CardsListView, store.getCards());
-                cardsListView.setAdapter(cardsListViewAdapter);
+                new AsyncTask(){
+                    @Override protected Object doInBackground(Object[] params) {
+                        return null;
+                    }
+
+                    @Override protected void onPostExecute(Object o) {
+                        cardsListView.setAdapter(cardsListViewAdapter);
+                    }
+                }.execute();
+            }
+
+            @Override public void refundAdded(POSNakedRefund refund) {
+
             }
         });
 
@@ -170,7 +148,7 @@ public class CardsFragment extends Fragment {
                                 vaultedCard.setToken(posCard.getToken());
 
                                 switch(index) {
-                                case 0: {
+                                    case 0: {
                                         SaleRequest saleRequest = new SaleRequest();
                                         saleRequest.setAmount(store.getCurrentOrder().getTotal());
                                         saleRequest.setTippableAmount(store.getCurrentOrder().getTippableAmount());

@@ -41,6 +41,7 @@ import com.clover.remote.client.lib.example.model.POSCard;
 import com.clover.remote.client.lib.example.model.POSDiscount;
 import com.clover.remote.client.lib.example.model.POSExchange;
 import com.clover.remote.client.lib.example.model.POSLineItem;
+import com.clover.remote.client.lib.example.model.POSNakedRefund;
 import com.clover.remote.client.lib.example.model.POSOrder;
 import com.clover.remote.client.lib.example.model.POSPayment;
 import com.clover.remote.client.lib.example.model.POSRefund;
@@ -73,6 +74,9 @@ public class OrdersFragment extends Fragment {
   private OnFragmentInteractionListener mListener;
 
   private WeakReference<ICloverConnector> cloverConnectorWeakReference;
+  private ListView itemsListView;
+  private View view;
+  private ListView ordersListView;
 
   /**
    * Use this factory method to create a new instance of
@@ -88,55 +92,6 @@ public class OrdersFragment extends Fragment {
     fragment.setStore(store);
     Bundle args = new Bundle();
     fragment.setArguments(args);
-
-    store.addStoreObserver(new StoreObserver() {
-      @Override
-      public void newOrderCreated(POSOrder order) {
-
-      }
-    });
-    store.addCurrentOrderObserver(new OrderObserver() {
-      @Override
-      public void lineItemAdded(POSOrder posOrder, POSLineItem lineItem) {
-
-      }
-
-      @Override
-      public void lineItemRemoved(POSOrder posOrder, POSLineItem lineItem) {
-
-      }
-
-      @Override
-      public void lineItemChanged(POSOrder posOrder, POSLineItem lineItem) {
-
-      }
-
-      @Override
-      public void paymentAdded(POSOrder posOrder, POSPayment payment) {
-
-      }
-
-      @Override
-      public void refundAdded(POSOrder posOrder, POSRefund refund) {
-
-      }
-
-      @Override
-      public void paymentChanged(POSOrder posOrder, POSExchange pay) {
-
-      }
-
-      @Override
-      public void discountAdded(POSOrder posOrder, POSDiscount discount) {
-
-      }
-
-      @Override
-      public void discountChanged(POSOrder posOrder, POSDiscount discount) {
-
-      }
-    });
-
 
     return fragment;
   }
@@ -154,9 +109,9 @@ public class OrdersFragment extends Fragment {
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
                            Bundle savedInstanceState) {
     // Inflate the layout for this fragment
-    View view = inflater.inflate(R.layout.fragment_orders, container, false);
+    view = inflater.inflate(R.layout.fragment_orders, container, false);
 
-    final ListView itemsListView = (ListView) view.findViewById(R.id.ItemsGridView);
+    itemsListView = (ListView) view.findViewById(R.id.ItemsGridView);
     final ItemsListViewAdapter itemsListViewAdapter = new ItemsListViewAdapter(view.getContext(), R.id.ItemsGridView, Collections.EMPTY_LIST);
     itemsListView.setAdapter(itemsListViewAdapter);
 
@@ -164,7 +119,7 @@ public class OrdersFragment extends Fragment {
     final PaymentsListViewAdapter paymentsListViewAdapter = new PaymentsListViewAdapter(view.getContext(), R.id.PaymentsGridView, Collections.EMPTY_LIST);
     itemsListView.setAdapter(paymentsListViewAdapter);
 
-    final ListView ordersListView = (ListView) view.findViewById(R.id.OrdersListView);
+    ordersListView = (ListView) view.findViewById(R.id.OrdersListView);
     OrdersListViewAdapter ordersListViewAdapter = new OrdersListViewAdapter(view.getContext(), R.id.OrdersListView, store.getOrders());
     ordersListView.setAdapter(ordersListViewAdapter);
     ordersListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -287,8 +242,71 @@ public class OrdersFragment extends Fragment {
     mListener = null;
   }
 
-  public void setStore(POSStore store) {
+  public void setStore(final POSStore store) {
     this.store = store;
+
+    store.addStoreObserver(new StoreObserver() {
+      @Override
+      public void newOrderCreated(POSOrder order) {
+        List<POSOrder> orders = new ArrayList<POSOrder>(store.getOrders().size());
+        List<POSOrder> storeOrders = store.getOrders();
+        for(int i=storeOrders.size()-1; i>=0; i--) {
+          orders.add(storeOrders.get(i));
+        }
+        OrdersListViewAdapter listViewAdapter = new OrdersListViewAdapter(view.getContext(), R.id.ItemsGridView, orders);
+        ordersListView.setAdapter(listViewAdapter);
+      }
+
+      @Override public void cardAdded(POSCard card) {
+
+      }
+
+      @Override public void refundAdded(POSNakedRefund refund) {
+
+      }
+    });
+
+    store.addCurrentOrderObserver(new OrderObserver() {
+      @Override
+      public void lineItemAdded(POSOrder posOrder, POSLineItem lineItem) {
+
+      }
+
+      @Override
+      public void lineItemRemoved(POSOrder posOrder, POSLineItem lineItem) {
+
+      }
+
+      @Override
+      public void lineItemChanged(POSOrder posOrder, POSLineItem lineItem) {
+
+      }
+
+      @Override
+      public void paymentAdded(POSOrder posOrder, POSPayment payment) {
+
+      }
+
+      @Override
+      public void refundAdded(POSOrder posOrder, POSRefund refund) {
+
+      }
+
+      @Override
+      public void paymentChanged(POSOrder posOrder, POSExchange pay) {
+
+      }
+
+      @Override
+      public void discountAdded(POSOrder posOrder, POSDiscount discount) {
+
+      }
+
+      @Override
+      public void discountChanged(POSOrder posOrder, POSDiscount discount) {
+
+      }
+    });
   }
 
   /**

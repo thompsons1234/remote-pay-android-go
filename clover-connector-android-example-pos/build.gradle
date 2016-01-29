@@ -5,6 +5,7 @@ apply plugin: 'com.android.application'
 
 repositories {
   mavenLocal()
+  maven { url "http://artifactory.corp.clover.com:8081/artifactory/repo" }
   mavenCentral()
   flatDir {
     dirs '../lib'
@@ -19,10 +20,17 @@ android {
     minSdkVersion 17
     targetSdkVersion 17
   }
+
+  packagingOptions {
+    exclude 'META-INF/NOTICE'
+    exclude 'META-INF/LICENSE'
+  }
 }
 
 dependencies {
   compile project(':clover-connector-android')
+  compile 'com.clover.sdk:clover-android-sdk:116-SNAPSHOT'
+  //compile 'com.clover:android-common:160-SNAPSHOT'
   compile 'org.java-websocket:Java-WebSocket:1.3.0'
   compile 'com.android.support:support-v4:22.2.1'
 }

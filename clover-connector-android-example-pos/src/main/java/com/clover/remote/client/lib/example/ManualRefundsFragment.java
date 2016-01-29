@@ -20,14 +20,11 @@ import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.lib.example.adapter.ItemsListViewAdapter;
 import com.clover.remote.client.lib.example.adapter.OrdersListViewAdapter;
 import com.clover.remote.client.lib.example.adapter.PaymentsListViewAdapter;
-import com.clover.remote.client.lib.example.model.OrderObserver;
+import com.clover.remote.client.lib.example.adapter.RefundsListViewAdapter;
 import com.clover.remote.client.lib.example.model.POSCard;
-import com.clover.remote.client.lib.example.model.POSDiscount;
-import com.clover.remote.client.lib.example.model.POSExchange;
-import com.clover.remote.client.lib.example.model.POSLineItem;
+import com.clover.remote.client.lib.example.model.POSNakedRefund;
 import com.clover.remote.client.lib.example.model.POSOrder;
 import com.clover.remote.client.lib.example.model.POSPayment;
-import com.clover.remote.client.lib.example.model.POSRefund;
 import com.clover.remote.client.lib.example.model.POSStore;
 import com.clover.remote.client.lib.example.model.StoreObserver;
 import com.clover.remote.client.messages.RefundPaymentRequest;
@@ -69,50 +66,6 @@ public class ManualRefundsFragment extends Fragment {
         Bundle args = new Bundle();
         fragment.setArguments(args);
 
-        store.addStoreObserver(new StoreObserver() {
-            @Override public void newOrderCreated(POSOrder order) {
-
-            }
-
-            @Override public void cardAdded(POSCard card) {
-
-            }
-        });
-        store.addCurrentOrderObserver(new OrderObserver() {
-            @Override public void lineItemAdded(POSOrder posOrder, POSLineItem lineItem) {
-
-            }
-
-            @Override public void lineItemRemoved(POSOrder posOrder, POSLineItem lineItem) {
-
-            }
-
-            @Override public void lineItemChanged(POSOrder posOrder, POSLineItem lineItem) {
-
-            }
-
-            @Override public void paymentAdded(POSOrder posOrder, POSPayment payment) {
-
-            }
-
-            @Override public void refundAdded(POSOrder posOrder, POSRefund refund) {
-
-            }
-
-            @Override public void paymentChanged(POSOrder posOrder, POSExchange pay) {
-
-            }
-
-            @Override public void discountAdded(POSOrder posOrder, POSDiscount discount) {
-
-            }
-
-            @Override public void discountChanged(POSOrder posOrder, POSDiscount discount) {
-
-            }
-        });
-
-
         return fragment;
     }
 
@@ -129,108 +82,29 @@ public class ManualRefundsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_orders, container, false);
+        final View view = inflater.inflate(R.layout.fragment_refunds, container, false);
 
-        final ListView itemsListView = (ListView)view.findViewById(R.id.ItemsGridView);
-        final ItemsListViewAdapter itemsListViewAdapter = new ItemsListViewAdapter(view.getContext(), R.id.ItemsGridView, Collections.EMPTY_LIST);
-        itemsListView.setAdapter(itemsListViewAdapter);
 
-        final ListView paymentsListView = (ListView)view.findViewById(R.id.PaymentsGridView);
-        final PaymentsListViewAdapter paymentsListViewAdapter = new PaymentsListViewAdapter(view.getContext(), R.id.PaymentsGridView, Collections.EMPTY_LIST);
-        itemsListView.setAdapter(paymentsListViewAdapter);
 
-        final ListView ordersListView = (ListView)view.findViewById(R.id.OrdersListView);
-        OrdersListViewAdapter ordersListViewAdapter =  new OrdersListViewAdapter(view.getContext(), R.id.OrdersListView, store.getOrders());
-        ordersListView.setAdapter(ordersListViewAdapter);
-        ordersListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                POSOrder posOrder = (POSOrder) ordersListView.getItemAtPosition(position);
-                itemsListViewAdapter.clear();
-                ItemsListViewAdapter itemsListViewAdapter = new ItemsListViewAdapter(view.getContext(), R.id.ItemsGridView, posOrder.getItems());
-                itemsListView.setAdapter(itemsListViewAdapter);
-                PaymentsListViewAdapter paymentsListViewAdapter = new PaymentsListViewAdapter(view.getContext(), R.id.PaymentsGridView, posOrder.getPayments());
-                paymentsListView.setAdapter(paymentsListViewAdapter);
+        final ListView refundsListView = (ListView)view.findViewById(R.id.RefundsListView);
+        final RefundsListViewAdapter itemsListViewAdapter = new RefundsListViewAdapter(view.getContext(), R.id.RefundsListView, store.getRefunds());
+        refundsListView.setAdapter(itemsListViewAdapter);
+
+        store.addStoreObserver(new StoreObserver() {
+            @Override public void newOrderCreated(POSOrder order) {
+
+            }
+
+            @Override public void cardAdded(POSCard card) {
+
+            }
+
+            @Override public void refundAdded(POSNakedRefund refund) {
+                final RefundsListViewAdapter itemsListViewAdapter = new RefundsListViewAdapter(view.getContext(), R.id.RefundsListView, store.getRefunds());
+                refundsListView.setAdapter(itemsListViewAdapter);
             }
         });
 
-        paymentsListView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final POSPayment posPayment = (POSPayment) paymentsListView.getItemAtPosition(position);
-                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                String[] paymentOptions = null;
-
-                if(posPayment.getPaymentStatus() == POSPayment.Status.AUTHORIZED) {
-                    paymentOptions = new String[]{"Void Payment", "Refund Payment", "Tip Adjust Payment"};
-                } else if(posPayment.getPaymentStatus() == POSPayment.Status.PAID) {
-                    paymentOptions = new String[]{"Void Payment", "Refund Payment"};
-                } else {
-                    return;
-                }
-
-                builder.setTitle("Payment Actions").
-                    setItems(paymentOptions, new DialogInterface.OnClickListener() {
-                        @Override public void onClick(DialogInterface dialog, int index) {
-                            final ICloverConnector cloverConnector = cloverConnectorWeakReference.get();
-                            if(cloverConnector != null) {
-
-                                switch(index) {
-                                    case 0: {
-                                        VoidPaymentRequest vpr = new VoidPaymentRequest();
-                                        vpr.setPaymentId(posPayment.getPaymentID());
-                                        vpr.setOrderId(posPayment.getOrderId());
-                                        vpr.setVoidReason(VoidReason.USER_CANCEL.name());
-                                        cloverConnector.voidPayment(vpr);
-                                        //dlg.disiss();
-                                        break;
-                                    }
-                                    case 1: {
-                                        RefundPaymentRequest rpr = new RefundPaymentRequest();
-                                        rpr.setPaymentId(posPayment.getPaymentID());
-                                        rpr.setOrderId(posPayment.orderID);
-                                        cloverConnector.refundPayment(rpr);
-                                        break;
-                                    }
-                                    case 2: {
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                                        final EditText input = new EditText(getActivity());
-                                        input.setInputType(InputType.TYPE_CLASS_NUMBER);
-                                        builder.setView(input);
-
-                                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener(){
-                                            @Override public void onClick(DialogInterface dialog, int which) {
-                                                double val = Double.parseDouble(input.getText().toString());
-                                                long value = (long)val;
-
-                                                TipAdjustAuthRequest taar = new TipAdjustAuthRequest();
-                                                taar.setPaymentID(posPayment.getPaymentID());
-                                                taar.setOrderID(posPayment.getOrderId());
-                                                taar.setTipAmount(value);
-                                                cloverConnector.tipAdjustAuth(taar);
-                                                dialog.dismiss();
-                                            }
-                                        });
-                                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener(){
-                                            @Override public void onClick(DialogInterface dialog, int which) {
-                                                dialog.cancel();
-                                            }
-                                        });
-
-                                        builder.show();
-                                        break;
-                                    }
-
-                                }
-                            } else {
-                                Toast.makeText(getActivity().getBaseContext(), "Clover Connector is null", Toast.LENGTH_LONG);
-                            }
-                        }
-                    });
-                final Dialog dlg = builder.create();
-                dlg.show();
-            }
-        });
 
         return view;
     }

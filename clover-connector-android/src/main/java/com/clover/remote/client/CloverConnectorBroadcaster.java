@@ -17,6 +17,7 @@
 package com.clover.remote.client;
 
 import com.clover.remote.client.messages.AuthResponse;
+import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.ManualRefundResponse;
@@ -123,7 +124,7 @@ public class CloverConnectorBroadcaster extends ArrayList<ICloverConnectorListen
     }
   }
 
-    public void notifyOnCaptureCardRespose(CaptureCardResponse ccr) {
+    public void notifyOnCaptureCardRespose(VaultCardResponse ccr) {
         for(ICloverConnectorListener listener : this) {
             listener.onCaptureCardResponse(ccr);
         }

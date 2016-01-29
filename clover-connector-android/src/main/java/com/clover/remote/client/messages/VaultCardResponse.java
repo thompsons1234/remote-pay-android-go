@@ -21,17 +21,38 @@ import com.clover.sdk.v3.payments.VaultedCard;
 /**
  * Created by blakewilliams on 1/17/16.
  */
-public class CaptureCardResponse extends BaseResponse {
-    private VaultedCard card;
-    public CaptureCardResponse(VaultedCard card) {
-        this.card = card;
-    }
+public class VaultCardResponse extends BaseResponse {
+  private VaultedCard card;
+  private String code;
+  private String reason;
 
-    public VaultedCard getCard() {
-        return card;
-    }
+  public VaultCardResponse(VaultedCard card, String code, String reason) {
+    this.card = card;
+    this.code = code;
+    this.reason = code;
+  }
 
-    public void setCard(VaultedCard card) {
-        this.card = card;
-    }
+  public VaultedCard getCard() {
+    return card;
+  }
+
+  public void setCard(VaultedCard card) {
+    this.card = card;
+  }
+
+  @Override public String getCode() {
+    return code;
+  }
+
+  @Override public void setCode(String code) {
+    this.code = code;
+  }
+
+  public String getReason() {
+    return reason;
+  }
+
+  public void setReason(String reason) {
+    this.reason = reason;
+  }
 }

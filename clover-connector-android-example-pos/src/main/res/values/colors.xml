@@ -54,4 +54,5 @@
   <color name="progress">#333</color>
 
   <color name="clover_badge_color">#5656A0</color>
+  <color name="secondary_table_text_color">#808285</color>
 </resources>

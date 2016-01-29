@@ -30,6 +30,9 @@ import com.clover.remote.order.operation.LineItemsAddedOperation;
 import com.clover.remote.order.operation.LineItemsDeletedOperation;
 import com.clover.remote.order.operation.OrderDeletedOperation;
 import com.clover.remote.protocol.RemoteMessage;
+import com.clover.remote.protocol.message.CapturePreAuthMessage;
+import com.clover.remote.protocol.message.VaultCardMessage;
+import com.clover.remote.protocol.message.VaultCardResponseMessage;
 import com.clover.remote.protocol.message.CashbackSelectedMessage;
 import com.clover.remote.protocol.message.DiscoveryRequestMessage;
 import com.clover.remote.protocol.message.FinishOkMessage;
@@ -60,6 +63,7 @@ import com.clover.remote.terminal.KeyPress;
 import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Payment;
+import com.clover.sdk.v3.payments.VaultedCard;
 import com.google.gson.Gson;
 
 import java.util.List;
@@ -166,11 +170,10 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
               TipAdjustResponseMessage tipAdjustMsg = (TipAdjustResponseMessage) Message.fromJsonString(rMessage.payload);
               notifyObserversTipAdjusted(tipAdjustMsg);
               break;
-            case CAPTURE_CARD_RESPONSE:
-              CaptureCardResponseMessage ccrm = (CaptureCardResponseMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserverCaptureCardResponse(ccrm);
+            case VAULT_CARD_RESPONSE:
+              VaultCardResponseMessage vcrm = (VaultCardResponseMessage) Message.fromJsonString(rMessage.payload);
+              notifyObserverVaultCardResponse(vcrm);
               break;
-                /**/
             case DISCOVERY_REQUEST:
               //Outbound no-op
               break;
@@ -361,18 +364,6 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   }
 
-  public void notifyObserverCaptureCardResponse(final CaptureCardResponseMessage captureCardResponseMessage) {
-    new AsyncTask() {
-      @Override
-      protected Object doInBackground(Object[] params) {
-        for (CloverDeviceObserver observer : deviceObservers) {
-          observer.onCaptureCardResponse(captureCardResponseMessage);
-        }
-        return null;
-      }
-    }.execute();
-  }
-
   public void notifyObserversPaymentVoided(final Payment payment, final VoidReason reason) {
     new AsyncTask() {
       @Override
@@ -399,6 +390,17 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   }
 
+  public void notifyObserverVaultCardResponse(final VaultCardResponseMessage vaultCardResponseMessage) {
+    new AsyncTask() {
+      @Override
+      protected Object doInBackground(Object[] params) {
+        for (CloverDeviceObserver observer : deviceObservers) {
+          observer.onVaultCardResponse(vaultCardResponseMessage.card, vaultCardResponseMessage.status.toString(), vaultCardResponseMessage.reason);
+        }
+        return null;
+      }
+    }.execute();
+  }
 
   public void notifyObserversUiState(final UiStateMessage uiStateMsg) {
     new AsyncTask() {
@@ -484,8 +486,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   }
 
   public void doOpenCashDrawer(String reason) {
-    sendObjectMessage(new OpenCashDrawerMessage(reason) {
-    }); // TODO: fix OpenCashDrawerMessage ctor
+    sendObjectMessage(new OpenCashDrawerMessage(reason){}); // TODO: fix OpenCashDrawerMessage ctor
   }
 
   public void doCloseout() {
@@ -531,9 +532,12 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     sendObjectMessage(new RefundRequestMessage(orderId, paymentId, amount));
   }
 
-  public void doCaptureCard(int cardEntryMethods) {
-    // TODO: implement
-    sendObjectMessage(new CaptureCardMessage(cardEntryMethods));
+  public void doVaultCard(int cardEntryMethods) {
+    sendObjectMessage(new VaultCardMessage(cardEntryMethods));
+  }
+
+  public void doCaptureAuth(String paymentId, long amount, long tipAmount) {
+    sendObjectMessage(new CapturePreAuthMessage(null, paymentId, amount, tipAmount));
   }
 
   public void doDiscoveryRequest() {

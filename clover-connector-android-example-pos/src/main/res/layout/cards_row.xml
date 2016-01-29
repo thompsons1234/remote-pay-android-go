@@ -9,11 +9,11 @@
               android:textStyle="bold"
               android:id="@+id/CardsNameColumn"
               android:layout_weight="2"/>
-    <TextView android:text="234567xxxxxx8902"
+    <TextView android:text="234567"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:textSize="@dimen/order_table_text_size"
-              android:id="@+id/CardsFirst6Last4Column"
+              android:textSize="@dimen/table_primary_text_size"
+              android:id="@+id/CardsFirst6Column"
               android:layout_weight="2"
               android:layout_below="@+id/CardsNameColumn"
               android:layout_alignParentStart="true"/>
@@ -23,15 +23,34 @@
               android:textSize="@dimen/order_table_text_size"
               android:id="@+id/CardsExpColumn"
               android:layout_weight="2"
-              android:layout_alignTop="@+id/CardsFirst6Last4Column"
-              android:layout_toEndOf="@+id/CardsFirst6Last4Column"
-              android:layout_marginLeft="10dp"/>
+              android:layout_marginLeft="15dp" android:layout_alignParentEnd="true" android:layout_marginEnd="105dp"
+              android:layout_toEndOf="@+id/CardsLast4Column" android:layout_alignBaseline="@+id/CardsFirst6Column"/>
     <TextView android:text="XXXXXXXXXXXXXXXXX"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:textSize="@dimen/order_table_text_size"
+              android:textSize="@dimen/table_tertiary_text_size"
               android:id="@+id/CardsTokenColumn"
               android:layout_weight="2"
-              android:layout_below="@+id/CardsFirst6Last4Column"
-              android:layout_alignParentStart="true"/>
+              android:textColor="@color/secondary_table_text_color" android:layout_toEndOf="@+id/textView4"
+              android:layout_alignBaseline="@+id/textView4"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="4567"
+            android:id="@+id/CardsLast4Column"
+            android:layout_alignBottom="@+id/CardsFirst6Column"
+            android:textSize="@dimen/table_primary_text_size" android:layout_toEndOf="@+id/CardsXXXXColumn"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="xxxxxx"
+            android:id="@+id/CardsXXXXColumn" android:layout_toEndOf="@+id/CardsFirst6Column"
+            android:textSize="@dimen/table_secondary_text_size"
+            android:layout_alignBaseline="@+id/CardsFirst6Column" android:textColor="@color/secondary_table_text_color"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Token: "
+            android:id="@+id/textView4" android:layout_below="@+id/CardsFirst6Column" android:layout_alignParentStart="true"
+            android:textSize="@dimen/table_secondary_text_size" android:textColor="@color/secondary_table_text_color"/>
 </RelativeLayout>
