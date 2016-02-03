@@ -118,6 +118,14 @@ public class CardsFragment extends Fragment {
             @Override public void refundAdded(POSNakedRefund refund) {
 
             }
+
+            @Override public void preAuthAdded(POSPayment payment) {
+
+            }
+
+            @Override public void preAuthRemoved(POSPayment payment) {
+
+            }
         });
 
         cardsListView = (ListView)view.findViewById(R.id.CardsListView);
@@ -132,7 +140,7 @@ public class CardsFragment extends Fragment {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 String[] paymentOptions = null;
 
-                String[] payOptions = new String[]{"Sale", "Auth", "Pre-Auth"};
+                String[] payOptions = new String[]{"Sale for current order", "Auth for current order"/*, "Pre-Auth"*/};
 
                 builder.setTitle("Pay With Card").
                     setItems(payOptions, new DialogInterface.OnClickListener() {

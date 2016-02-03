@@ -32,6 +32,7 @@ public class POSStore {
   private List<POSOrder> orders;
   private List<POSCard> cards;
   private List<POSNakedRefund> refunds;
+  private List<POSPayment> preAuths;
   private POSOrder currentOrder;
 
   private transient Map<String, POSOrder> orderIdToOrder = new HashMap<String, POSOrder>();
@@ -46,6 +47,7 @@ public class POSStore {
     orders = new ArrayList<POSOrder>();
     cards = new ArrayList<POSCard>();
     refunds = new ArrayList<POSNakedRefund>();
+    preAuths = new ArrayList<POSPayment>();
   }
 
   public void createOrder() {
@@ -129,5 +131,24 @@ public class POSStore {
   }
   public List<POSNakedRefund> getRefunds() {
     return refunds;
+  }
+
+  public void addPreAuth(POSPayment payment) {
+    preAuths.add(payment);
+    for(StoreObserver so : storeObservers) {
+      so.preAuthAdded(payment);
+    }
+  }
+
+  public void removePreAuth(POSPayment payment) {
+    if(preAuths.remove(payment)) {
+      for(StoreObserver so : storeObservers) {
+        so.preAuthRemoved(payment);
+      }
+    }
+  }
+
+  public List<POSPayment> getPreAuths() {
+    return Collections.unmodifiableList(preAuths);
   }
 }

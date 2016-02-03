@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.CaptureAuthRequest;
 import com.clover.remote.client.messages.ManualRefundRequest;
+import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.RefundPaymentRequest;
 import com.clover.remote.client.messages.SaleRequest;
 import com.clover.remote.client.messages.SignatureVerifyRequest;
@@ -61,6 +62,13 @@ public interface ICloverConnector {
   /// <param name="request"></param>
   /// <returns></returns>
   void auth(AuthRequest request);
+
+  /// <summary>
+  /// PreAuth method to obtain a Pre-Auth for a card
+  /// </summary>
+  /// <param name="request"></param>
+  /// <returns></returns>
+  void preAuth(PreAuthRequest request);
 
   /// <summary>
   /// Capture a previous Auth. Note: Should only be called if request's PaymentID is from an AuthResponse

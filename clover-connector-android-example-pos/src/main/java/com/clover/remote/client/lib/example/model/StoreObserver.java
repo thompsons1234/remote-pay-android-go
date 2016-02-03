@@ -17,8 +17,11 @@
 package com.clover.remote.client.lib.example.model;
 
 public interface StoreObserver {
-  public void newOrderCreated(POSOrder order);
-  public void cardAdded(POSCard card);
-  public void refundAdded(POSNakedRefund refund);
+  public abstract void newOrderCreated(POSOrder order);
+  public abstract void cardAdded(POSCard card);
+  public abstract void refundAdded(POSNakedRefund refund);
+
+  public abstract void preAuthAdded(POSPayment payment);
+  public abstract void preAuthRemoved(POSPayment payment);
 }
 

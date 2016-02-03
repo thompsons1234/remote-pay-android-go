@@ -258,6 +258,15 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
     }
 
+
+    @Override public void preAuthAdded(POSPayment payment) {
+
+    }
+
+    @Override public void preAuthRemoved(POSPayment payment) {
+
+    }
+
     @Override
     public void lineItemAdded(POSOrder posOrder, POSLineItem lineItem) {
       DisplayLineItem dli = new DisplayLineItem();

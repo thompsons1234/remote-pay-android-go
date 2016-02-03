@@ -264,6 +264,14 @@ public class OrdersFragment extends Fragment {
       @Override public void refundAdded(POSNakedRefund refund) {
 
       }
+
+      @Override public void preAuthAdded(POSPayment payment) {
+
+      }
+
+      @Override public void preAuthRemoved(POSPayment payment) {
+
+      }
     });
 
     store.addCurrentOrderObserver(new OrderObserver() {

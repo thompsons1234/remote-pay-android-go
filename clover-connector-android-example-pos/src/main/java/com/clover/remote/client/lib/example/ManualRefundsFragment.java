@@ -103,6 +103,15 @@ public class ManualRefundsFragment extends Fragment {
                 final RefundsListViewAdapter itemsListViewAdapter = new RefundsListViewAdapter(view.getContext(), R.id.RefundsListView, store.getRefunds());
                 refundsListView.setAdapter(itemsListViewAdapter);
             }
+
+
+            @Override public void preAuthAdded(POSPayment payment) {
+
+            }
+
+            @Override public void preAuthRemoved(POSPayment payment) {
+
+            }
         });
 
 

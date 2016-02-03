@@ -17,6 +17,8 @@
 package com.clover.remote.client;
 
 import com.clover.remote.client.messages.AuthResponse;
+import com.clover.remote.client.messages.CaptureAuthResponse;
+import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceEvent;
@@ -124,9 +126,21 @@ public class CloverConnectorBroadcaster extends ArrayList<ICloverConnectorListen
     }
   }
 
-    public void notifyOnCaptureCardRespose(VaultCardResponse ccr) {
-        for(ICloverConnectorListener listener : this) {
-            listener.onCaptureCardResponse(ccr);
-        }
+  public void notifyOnCaptureCardRespose(VaultCardResponse ccr) {
+    for (ICloverConnectorListener listener : this) {
+      listener.onVaultCardResponse(ccr);
     }
+  }
+
+  public void notifyOnPreAuthResponse(PreAuthResponse response) {
+    for(ICloverConnectorListener listener : this) {
+      listener.onPreAuthResponse(response);
+    }
+  }
+
+  public void notifyOnCapturePreAuth(CaptureAuthResponse response) {
+    for(ICloverConnectorListener listener : this) {
+      listener.onPreAuthCaptureResponse(response);
+    }
+  }
 }

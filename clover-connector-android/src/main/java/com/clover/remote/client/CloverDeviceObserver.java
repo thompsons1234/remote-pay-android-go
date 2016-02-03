@@ -20,6 +20,7 @@ import com.clover.common2.Signature2;
 import com.clover.remote.client.transport.CloverTransportObserver;
 import com.clover.remote.terminal.InputOption;
 import com.clover.remote.terminal.KeyPress;
+import com.clover.remote.terminal.ResultStatus;
 import com.clover.remote.terminal.TxState;
 import com.clover.remote.terminal.UiState;
 import com.clover.sdk.v3.order.VoidReason;
@@ -59,6 +60,8 @@ public interface CloverDeviceObserver extends CloverTransportObserver {
   void onPaymentRefundResponse(String orderId, String paymentId, Refund refund, TxState code);
 
   void onVaultCardResponse(VaultedCard vaultedCard, String code, String reason);
+
+  void onCapturePreAuth(ResultStatus status, String reason, String paymentId, long amount, long tipAmount);
 
   void onCloseoutResponse();
 

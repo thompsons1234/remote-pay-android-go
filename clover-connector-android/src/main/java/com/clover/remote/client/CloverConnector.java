@@ -27,6 +27,9 @@ import com.clover.remote.client.device.CloverDeviceFactory;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CaptureAuthRequest;
+import com.clover.remote.client.messages.CaptureAuthResponse;
+import com.clover.remote.client.messages.PreAuthRequest;
+import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceEvent;
@@ -53,6 +56,7 @@ import com.clover.remote.order.operation.LineItemsDeletedOperation;
 import com.clover.remote.order.operation.OrderDeletedOperation;
 import com.clover.remote.terminal.InputOption;
 import com.clover.remote.terminal.KeyPress;
+import com.clover.remote.terminal.ResultStatus;
 import com.clover.remote.terminal.TxState;
 import com.clover.remote.terminal.UiState;
 import com.clover.sdk.v3.base.Reference;
@@ -69,9 +73,9 @@ import java.util.List;
 public class CloverConnector implements ICloverConnector {
 
   private static final int KIOSK_CARD_ENTRY_METHODS = 1 << 15;
-  public static final int CARD_ENTRY_METHOD_MAG_STRIPE = 0b0001 | 0b1_00000000 | KIOSK_CARD_ENTRY_METHODS;
-  public static final int CARD_ENTRY_METHOD_ICC_CONTACT = 0b0010 | 0b10_00000000 | KIOSK_CARD_ENTRY_METHODS;
-  public static final int CARD_ENTRY_METHOD_NFC_CONTACTLESS = 0b0100 | 0b100_00000000 | KIOSK_CARD_ENTRY_METHODS;
+  public static final int CARD_ENTRY_METHOD_MAG_STRIPE = 0b0001 | 0b0001_00000000 | KIOSK_CARD_ENTRY_METHODS;
+  public static final int CARD_ENTRY_METHOD_ICC_CONTACT = 0b0010 | 0b0010_00000000 | KIOSK_CARD_ENTRY_METHODS;
+  public static final int CARD_ENTRY_METHOD_NFC_CONTACTLESS = 0b0100 | 0b0100_00000000 | KIOSK_CARD_ENTRY_METHODS;
   public static final int CARD_ENTRY_METHOD_MANUAL = 0b1000 | 0b1000_00000000 | KIOSK_CARD_ENTRY_METHODS;
 
   public static final InputOption CANCEL_INPUT_OPTION = new InputOption(KeyPress.ESC, "Cancel");
@@ -236,6 +240,44 @@ public class CloverConnector implements ICloverConnector {
     saleAuth(request);
   }
 
+
+  public void preAuth(PreAuthRequest request) {
+    if (device != null) {
+      try {
+        lastRequest = request;
+        PayIntent.Builder builder = new PayIntent.Builder();
+
+        builder.transactionType(request.getType()); // difference between sale, auth and auth(preAuth)
+
+        builder.remotePrint(disablePrinting);
+        //builder.disableCashBack(DisableCashBack);
+        builder.cardEntryMethods(request.getCardEntryMethods() != null ? request.getCardEntryMethods() : cardEntryMethods);
+        builder.amount(request.getAmount());
+        // I don't think any of these have any place in a preAuth?
+        /*
+        if (request.getTipAmount() != null) {
+          builder.tipAmount(request.getTipAmount()); // can't just set to zero because zero has a specific meaning
+        }
+        if (request.getTaxAmount() != null) {
+          builder.taxAmount(request.getTaxAmount());
+        }
+        if (request.getTippableAmount() != null) {
+          builder.tippableAmount(request.getTippableAmount());
+        }
+        */
+        if (request.getVaultedCard() != null) {
+          builder.vaultedCard(request.getVaultedCard());
+        }
+
+        //builder.cardNotPresent(request.isCardNotPresent());
+
+        PayIntent payIntent = builder.build();
+        device.doTxStart(payIntent, null);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+  }
   /**
    * Capture a previous Auth. Note: Should only be called if request's PaymentID is from an AuthResponse
    * @param request
@@ -263,7 +305,7 @@ public class CloverConnector implements ICloverConnector {
     if (device == null) {
       return;
     }
-    device.doVaultCard(cardEntryMethods != null ? cardEntryMethods : (CARD_ENTRY_METHOD_MAG_STRIPE | CARD_ENTRY_METHOD_ICC_CONTACT | CARD_ENTRY_METHOD_MANUAL));
+    device.doVaultCard(cardEntryMethods != null ? cardEntryMethods : getCardEntryMethods());
   }
 
   /**
@@ -544,6 +586,14 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
+  public void setCardEntryMethods(int entryMethods) {
+    cardEntryMethods = entryMethods;
+  }
+
+  public int getCardEntryMethods() {
+    return cardEntryMethods;
+  }
+
   private class InnerDeviceObserver implements CloverDeviceObserver {
 
     private RefundPaymentResponse lastPRR;
@@ -629,7 +679,13 @@ public class CloverConnector implements ICloverConnector {
 
     public void onFinishOk(Payment payment, Signature2 signature2) {
       try {
-        if (cloverConnector.lastRequest instanceof SaleRequest) {
+        if (cloverConnector.lastRequest instanceof PreAuthRequest) {
+          PreAuthResponse response = new PreAuthResponse();
+          response.setCode(TransactionResponse.SUCCESS);
+          response.setPayment(payment);
+          response.setSignature(signature2);
+          cloverConnector.broadcaster.notifyOnPreAuthResponse(response);
+        } else if (cloverConnector.lastRequest instanceof SaleRequest) {
           SaleResponse response = new SaleResponse();
           response.setCode(TransactionResponse.SUCCESS);
           response.setPayment(payment);
@@ -667,8 +723,7 @@ public class CloverConnector implements ICloverConnector {
         // than after the server call, which calls onPaymetRefund),
         // we will hold on to the response from
         // onRefundResponse (Which has more information than just the refund) and publish it here
-        if (
-        != null) {
+        if (lastPRR != null) {
           if (lastPRR.getRefundObj().getId().equals(refund.getId())) {
             cloverConnector.broadcaster.notifyOnRefundPaymentResponse(lastPRR);
           } else {
@@ -684,7 +739,12 @@ public class CloverConnector implements ICloverConnector {
 
     public void onFinishCancel() {
       try {
-        if (cloverConnector.lastRequest instanceof SaleRequest) {
+        if (cloverConnector.lastRequest instanceof PreAuthRequest) {
+          PreAuthResponse preAuthResponse = new PreAuthResponse();
+          preAuthResponse.setPayment(null);
+          preAuthResponse.setCode(TransactionResponse.CANCEL);
+          cloverConnector.broadcaster.notifyOnPreAuthResponse(preAuthResponse);
+        } else if (cloverConnector.lastRequest instanceof SaleRequest) {
           SaleResponse saleResponse = new SaleResponse();
           saleResponse.setPayment(null);
           saleResponse.setCode(TransactionResponse.CANCEL);
@@ -715,6 +775,17 @@ public class CloverConnector implements ICloverConnector {
 
       cloverConnector.broadcaster.notifyOnVoidPaymentResponse(response);
       cloverConnector.device.doShowWelcomeScreen();
+    }
+
+    public void onCapturePreAuth(ResultStatus status, String reason, String paymentId, long amount, long tipAmount) {
+      CaptureAuthResponse response = new CaptureAuthResponse();
+      response.setCode(status.toString());
+      response.setReason(reason);
+      response.setPaymentID(paymentId);
+      response.setAmount(amount);
+      response.setTipAmount(tipAmount);
+
+      cloverConnector.broadcaster.notifyOnCapturePreAuth(response);
     }
 
     public void onVaultCardResponse(VaultedCard vaultedCard, String code, String reason) {

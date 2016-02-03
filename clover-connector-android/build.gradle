@@ -32,7 +32,7 @@ defaultTasks 'install'
 
 dependencies {
   compile 'com.clover.sdk:clover-android-sdk:133-SNAPSHOT'
-  compile 'com.clover:remote-protocol-lib:16-SNAPSHOT'
+  compile 'com.clover:remote-protocol-lib:17-SNAPSHOT'
   //compile(name: 'remote-pay-lib', ext: 'aar')
   //compile(name: 'clover-android-sdk', ext: 'aar')
   compile 'com.google.code.gson:gson:2.3.1'
