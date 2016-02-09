@@ -49,6 +49,7 @@ public class AvailableItemsAdapter extends ArrayAdapter<POSItem>
       @Override public void lineItemAdded(POSOrder posOrder, POSLineItem lineItem) {
         POSItem item = lineItem.getItem();
         itemToCount.put(item, lineItem.getQuantity());
+        notifyDataSetChanged();
       }
 
       @Override public void lineItemRemoved(POSOrder posOrder, POSLineItem lineItem) {
@@ -58,6 +59,7 @@ public class AvailableItemsAdapter extends ArrayAdapter<POSItem>
       @Override public void lineItemChanged(POSOrder posOrder, POSLineItem lineItem) {
         POSItem item = lineItem.getItem();
         itemToCount.put(item, lineItem.getQuantity());
+        notifyDataSetChanged();
       }
 
       @Override public void paymentAdded(POSOrder posOrder, POSPayment payment) {
@@ -130,9 +132,9 @@ public class AvailableItemsAdapter extends ArrayAdapter<POSItem>
       if(count != null && count > 0) {
         tv.setVisibility(View.VISIBLE);
         tv.setText(count.toString());
-        tv.invalidate();
       } else {
         tv.setVisibility(View.GONE);
+        notifyDataSetChanged();
       }
     }
 

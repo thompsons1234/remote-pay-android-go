@@ -296,6 +296,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               ((TextView) findViewById(R.id.DeviceStatus)).setText(deviceEvent.getMessage());
               //Toast.makeText(ExamplePOSActivity.this, deviceEvent.getMessage(), Toast.LENGTH_SHORT).show();
               LinearLayout ll = (LinearLayout) findViewById(R.id.DeviceOptionsPanel);
+              ll.removeAllViews();
+
               for (final InputOption io : deviceEvent.getInputOptions()) {
                 Button btn = new Button(ExamplePOSActivity.this);
                 btn.setText(io.description);
@@ -316,8 +318,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           runOnUiThread(new Runnable() {
             @Override
             public void run() {
-              ((TextView) findViewById(R.id.DeviceStatus)).setText(deviceEvent.getMessage());
-              //Toast.makeText(ExamplePOSActivity.this, deviceEvent.getMessage(), Toast.LENGTH_SHORT).show();
+              ((TextView) findViewById(R.id.DeviceStatus)).setText("");
               LinearLayout ll = (LinearLayout) findViewById(R.id.DeviceOptionsPanel);
               ll.removeAllViews();
             }
@@ -469,9 +470,13 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           runOnUiThread(new Runnable() {
             @Override
             public void run() {
-              Credit credit = response.getCredit();
-              POSNakedRefund nakedRefund = new POSNakedRefund(null, credit.getAmount());
-              store.addRefund(nakedRefund);
+              if("SUCCESS".equals(response.getCode())) {
+                Credit credit = response.getCredit();
+                POSNakedRefund nakedRefund = new POSNakedRefund(null, credit.getAmount());
+                store.addRefund(nakedRefund);
+              } else {
+                Toast.makeText(ExamplePOSActivity.this, "Manual Refund Failed", Toast.LENGTH_LONG).show();
+              }
             }
           });
         }
@@ -534,7 +539,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         }
 
         @Override
-        public void onVaultCardResponse(VaultCardResponse response) {
+        public void onVaultCardResponse(final VaultCardResponse response) {
           if ("SUCCESS".equals(response.getCode())) {
             POSCard card = new POSCard();
             card.setFirst6(response.getCard().getFirst6());
@@ -546,7 +551,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
             store.addCard(card);
           } else {
-            Toast.makeText(getBaseContext(), "Error capturing card: " + response.getCode(), Toast.LENGTH_LONG);
+            runOnUiThread(new Runnable(){
+              @Override public void run() {
+                Toast.makeText(getBaseContext(), "Error capturing card: " + response.getCode(), Toast.LENGTH_LONG);
+              }
+            });
           }
         }
 
