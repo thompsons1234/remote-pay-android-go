@@ -85,6 +85,9 @@ public class POSStore {
 
   public void addCurrentOrderObserver(OrderObserver observer) {
     this.orderObservers.add(observer);
+    if(currentOrder != null) {
+      currentOrder.addOrderObserver(observer);
+    }
   }
 
   public void addStoreObserver(StoreObserver storeObserver) {

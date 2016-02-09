@@ -685,18 +685,18 @@ public class CloverConnector implements ICloverConnector {
           response.setPayment(payment);
           response.setSignature(signature2);
           cloverConnector.broadcaster.notifyOnPreAuthResponse(response);
-        } else if (cloverConnector.lastRequest instanceof SaleRequest) {
-          SaleResponse response = new SaleResponse();
-          response.setCode(TransactionResponse.SUCCESS);
-          response.setPayment(payment);
-          response.setSignature(signature2);
-          cloverConnector.broadcaster.notifyOnSaleResponse(response);
         } else if (cloverConnector.lastRequest instanceof AuthRequest) {
           AuthResponse response = new AuthResponse();
           response.setCode(TransactionResponse.SUCCESS);
           response.setPayment(payment);
           response.setSignature(signature2);
           cloverConnector.broadcaster.notifyOnAuthResponse(response);
+        } else if (cloverConnector.lastRequest instanceof SaleRequest) {
+          SaleResponse response = new SaleResponse();
+          response.setCode(TransactionResponse.SUCCESS);
+          response.setPayment(payment);
+          response.setSignature(signature2);
+          cloverConnector.broadcaster.notifyOnSaleResponse(response);
         } else {
           throw new IllegalArgumentException("Failed to pair this response. " + payment);
         }
