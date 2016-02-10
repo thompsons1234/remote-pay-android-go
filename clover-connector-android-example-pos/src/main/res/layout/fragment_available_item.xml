@@ -64,11 +64,10 @@
               android:layout_alignParentEnd="true"
               android:layout_weight="2"
               android:gravity="center_vertical|center_horizontal" android:layout_above="@+id/ItemNamePrice" android:layout_alignParentTop="true"
-              android:textSize="@dimen/textML" android:textIsSelectable="false"/>
+              android:textSize="@dimen/availItemNameTextSize" android:textIsSelectable="false"/>
       <TextView
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
-              android:text="$0.00"
               android:layout_marginLeft="11dp"
               android:layout_marginRight="0dp"
               android:paddingRight="5dp"
@@ -78,8 +77,8 @@
               android:layout_alignParentBottom="true"
               android:layout_alignParentStart="true"
               android:layout_alignParentEnd="true"
-              android:background="@color/gray"
-              android:gravity="center_vertical|end"/>
+              android:background="@color/darkgrayishblue"
+              android:gravity="center_vertical|end" android:text="0"/>
       <TextView
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"

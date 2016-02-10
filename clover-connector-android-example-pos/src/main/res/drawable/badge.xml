@@ -23,7 +23,7 @@
 
       <stroke
               android:width="0dp"
-              android:color="@color/black_50"/>
+              android:color="@color/black_transparent_50"/>
 
       <corners android:radius="15dp"/>
       <padding android:bottom="1dp" android:top="0dp" android:left="0dp" android:right="1dp"/>
