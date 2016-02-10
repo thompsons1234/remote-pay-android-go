@@ -508,8 +508,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     //sendObjectMessage(new CloseoutMessage());
   }
 
-  public void doTxStart(PayIntent payIntent, Order order) {
-    sendObjectMessage(new TxStartRequestMessage(payIntent, order));
+  public void doTxStart(PayIntent payIntent, Order order, boolean suppressTipScreen) {
+    sendObjectMessage(new TxStartRequestMessage(payIntent, order, suppressTipScreen));
   }
 
   public void doTipAdjustAuth(String orderId, String paymentId, long amount) {

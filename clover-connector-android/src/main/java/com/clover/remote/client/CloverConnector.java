@@ -169,7 +169,7 @@ public class CloverConnector implements ICloverConnector {
    * @param request
    */
   public void sale(SaleRequest request) {
-    saleAuth(request);
+    saleAuth(request, false);
   }
 
   /**
@@ -177,7 +177,7 @@ public class CloverConnector implements ICloverConnector {
    *
    * @param request
    */
-  private void saleAuth(SaleRequest request) {
+  private void saleAuth(SaleRequest request, boolean suppressTipScreen) {
     //payment, finishOK(payment), finishCancel, onPaymentVoided
     if (device != null) {
       try {
@@ -206,7 +206,7 @@ public class CloverConnector implements ICloverConnector {
         //builder.cardNotPresent(request.isCardNotPresent());
 
         PayIntent payIntent = builder.build();
-        device.doTxStart(payIntent, null);
+        device.doTxStart(payIntent, null, suppressTipScreen); //
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -237,7 +237,7 @@ public class CloverConnector implements ICloverConnector {
    * @param request
    */
   public void auth(AuthRequest request) {
-    saleAuth(request);
+    saleAuth(request, true);
   }
 
 
@@ -272,7 +272,7 @@ public class CloverConnector implements ICloverConnector {
         //builder.cardNotPresent(request.isCardNotPresent());
 
         PayIntent payIntent = builder.build();
-        device.doTxStart(payIntent, null);
+        device.doTxStart(payIntent, null, true);
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -370,7 +370,7 @@ public class CloverConnector implements ICloverConnector {
     	.transactionType(PayIntent.TransactionType.PAYMENT.CREDIT);
 
     PayIntent payIntent = builder.build();
-    device.doTxStart(payIntent, null);
+    device.doTxStart(payIntent, null, true);
   }
 
   /**

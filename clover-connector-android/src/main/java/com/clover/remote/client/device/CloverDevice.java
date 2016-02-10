@@ -64,7 +64,7 @@ public abstract class CloverDevice {
   /// </summary>
   /// <param name="payIntent"></param>
   /// <param name="order">can be null.  If it is, an order will implicitly be created on the other end</param>
-  public abstract void doTxStart(PayIntent payIntent, Order order);
+  public abstract void doTxStart(PayIntent payIntent, Order order, boolean suppressTipScreen);
 
   public abstract void doKeyPress(KeyPress keyPress);
 
