@@ -169,6 +169,9 @@ public class CloverConnector implements ICloverConnector {
    * @param request
    */
   public void sale(SaleRequest request) {
+    if(request.getTipAmount() == null) {
+      request.setTipAmount(0L);
+    }
     saleAuth(request, false);
   }
 
