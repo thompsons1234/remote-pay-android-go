@@ -240,6 +240,7 @@ public class CloverConnector implements ICloverConnector {
    * @param request
    */
   public void auth(AuthRequest request) {
+    request.setTipAmount(null);
     saleAuth(request, true);
   }
 
