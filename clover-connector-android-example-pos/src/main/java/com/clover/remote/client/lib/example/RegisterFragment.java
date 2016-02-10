@@ -212,8 +212,9 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
   public void onAuthClicked() {
     AuthRequest request = new AuthRequest();
     request.setAmount(store.getCurrentOrder().getTotal());
-    request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
-    cloverConnector.sale(request);
+    request.setTipAmount(null);
+    //request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
+    cloverConnector.auth(request);
   }
 
   @Override
