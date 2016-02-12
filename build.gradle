@@ -2,7 +2,6 @@
 
 buildscript {
   repositories {
-    maven { url "http://artifactory.corp.clover.com:8081/artifactory/repo" }
     mavenLocal()
     mavenCentral()
     jcenter()
