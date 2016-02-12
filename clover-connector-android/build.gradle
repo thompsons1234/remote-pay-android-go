@@ -6,7 +6,9 @@ apply plugin: 'android-maven'
 
 repositories {
   mavenLocal()
+  maven { url "http://artifactory.corp.clover.com:8081/artifactory/repo" }
   mavenCentral()
+  jcenter()
   flatDir {
     dirs '../lib'
   }
@@ -27,6 +29,8 @@ android {
 defaultTasks 'install'
 
 dependencies {
+  //compile 'com.clover.sdk:clover-android-sdk:133-SNAPSHOT'
+  //compile 'com.clover:remote-protocol-lib:17-SNAPSHOT'
   compile(name: 'clover-android-sdk', ext: 'aar')
   compile(name: 'remote-pay-lib', ext: 'aar')
   compile 'com.google.code.gson:gson:2.3.1'
