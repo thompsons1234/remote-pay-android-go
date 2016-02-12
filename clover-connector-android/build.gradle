@@ -7,6 +7,7 @@ apply plugin: 'android-maven'
 repositories {
   mavenLocal()
   mavenCentral()
+  jcenter()
   flatDir {
     dirs '../lib'
   }

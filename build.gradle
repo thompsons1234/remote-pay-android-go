@@ -2,7 +2,10 @@
 
 buildscript {
   repositories {
+    maven { url "http://artifactory.corp.clover.com:8081/artifactory/repo" }
+    mavenLocal()
     mavenCentral()
+    jcenter()
   }
   def mavenPlugin = "com.github.dcendents:android-maven-plugin:1.2"
   def gradleVersion = gradle.gradleVersion
