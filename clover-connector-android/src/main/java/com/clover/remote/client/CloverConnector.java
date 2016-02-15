@@ -61,6 +61,7 @@ import com.clover.remote.terminal.TxState;
 import com.clover.remote.terminal.UiState;
 import com.clover.sdk.v3.base.Reference;
 import com.clover.sdk.v3.order.VoidReason;
+import com.clover.sdk.v3.payments.Batch;
 import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.Payment;
 import com.clover.sdk.v3.payments.Refund;
@@ -380,11 +381,10 @@ public class CloverConnector implements ICloverConnector {
   /**
    * Send a request to the server to closeout all orders.
    */
-    /*
-    public void closeout() {
-        device.doCloseout(); // TODO: pass in request UUID so it can be returned with CloseoutResponse
-    }
-    */
+  public void closeout(boolean allowOpenTabs, String batchID) {
+    device.doCloseout(allowOpenTabs, batchID);
+  }
+
 
   /**
    * Cancels the device from waiting for payment card
@@ -664,8 +664,12 @@ public class CloverConnector implements ICloverConnector {
       //cloverConnector.broadcaster.notifyOnRefundPaymentResponse(prr);
     }
 
-    public void onCloseoutResponse() {
-      cloverConnector.broadcaster.notifyCloseout(new CloseoutResponse());
+    public void onCloseoutResponse(ResultStatus status, String reason, Batch batch) {
+      CloseoutResponse cr = new CloseoutResponse();
+      cr.setCode(status.toString());
+      cr.setReason(reason);
+      cr.setBatch(batch);
+      cloverConnector.broadcaster.notifyCloseout(cr);
     }
 
     public void onUiState(UiState uiState, String uiText, UiState.UiDirection uiDirection, InputOption[] inputOptions) {

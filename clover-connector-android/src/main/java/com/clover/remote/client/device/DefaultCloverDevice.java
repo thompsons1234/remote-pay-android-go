@@ -32,6 +32,8 @@ import com.clover.remote.order.operation.OrderDeletedOperation;
 import com.clover.remote.protocol.RemoteMessage;
 import com.clover.remote.protocol.message.CapturePreAuthMessage;
 import com.clover.remote.protocol.message.CapturePreAuthResponseMessage;
+import com.clover.remote.protocol.message.CloseoutRequestMessage;
+import com.clover.remote.protocol.message.CloseoutResponseMessage;
 import com.clover.remote.protocol.message.VaultCardMessage;
 import com.clover.remote.protocol.message.VaultCardResponseMessage;
 import com.clover.remote.protocol.message.CashbackSelectedMessage;
@@ -179,6 +181,9 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
             case CAPTURE_PREAUTH_RESPONSE:
               CapturePreAuthResponseMessage cparm = (CapturePreAuthResponseMessage) Message.fromJsonString(rMessage.payload);
               notifyObserversCapturePreAuth(cparm);
+            case CLOSEOUT_RESPONSE:
+              CloseoutResponseMessage crm = (CloseoutResponseMessage) Message.fromJsonString(rMessage.payload);
+              notifyObserversCloseout(crm);
             case DISCOVERY_REQUEST:
               //Outbound no-op
               break;
@@ -430,6 +435,19 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     }.execute();
   }
 
+  public void notifyObserversCloseout(final CloseoutResponseMessage crm) {
+    new AsyncTask() {
+      @Override
+      protected Object doInBackground(Object[] params) {
+        for (CloverDeviceObserver observer : deviceObservers) {
+
+          observer.onCloseoutResponse(crm.status, crm.reason, crm.batch);
+        }
+        return null;
+      }
+    }.execute();
+  }
+
 
   public void notifyObserversTxState(final TxStateMessage txStateMsg) {
     new AsyncTask() {
@@ -504,8 +522,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     sendObjectMessage(new OpenCashDrawerMessage(reason){}); // TODO: fix OpenCashDrawerMessage ctor
   }
 
-  public void doCloseout() {
-    //sendObjectMessage(new CloseoutMessage());
+  public void doCloseout(boolean allowOpenTabs, String batchId) {
+    sendObjectMessage(new CloseoutRequestMessage(allowOpenTabs, batchId));
   }
 
   public void doTxStart(PayIntent payIntent, Order order, boolean suppressTipScreen) {
