@@ -441,13 +441,17 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
         @Override
         public void onCloseoutResponse(CloseoutResponse response) {
-          String msg;
+          final String msg;
           if(ResultStatus.SUCCESS.toString().equals(response.getCode())) {
             msg = "Closeout is scheduled.";
           } else {
             msg = "Error scheduling closeout. " + response.getReason();
           }
-          Toast.makeText(getBaseContext(), msg, Toast.LENGTH_SHORT);
+          runOnUiThread(new Runnable(){
+            @Override public void run() {
+              Toast.makeText(ExamplePOSActivity.this, msg, Toast.LENGTH_SHORT);
+            }
+          });
         }
 
         @Override
