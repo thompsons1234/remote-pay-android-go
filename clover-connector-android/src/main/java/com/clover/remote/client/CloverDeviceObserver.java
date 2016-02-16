@@ -24,6 +24,7 @@ import com.clover.remote.terminal.ResultStatus;
 import com.clover.remote.terminal.TxState;
 import com.clover.remote.terminal.UiState;
 import com.clover.sdk.v3.order.VoidReason;
+import com.clover.sdk.v3.payments.Batch;
 import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.Payment;
 import com.clover.sdk.v3.payments.Refund;
@@ -63,7 +64,7 @@ public interface CloverDeviceObserver extends CloverTransportObserver {
 
   void onCapturePreAuth(ResultStatus status, String reason, String paymentId, long amount, long tipAmount);
 
-  void onCloseoutResponse();
+  void onCloseoutResponse(ResultStatus status, String reason, Batch batch);
 
   //void onPrint(Payment payment, Order order);
   //void onPrint(Credit credit);

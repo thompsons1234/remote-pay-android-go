@@ -67,6 +67,7 @@ import com.clover.remote.client.messages.TipAdjustAuthResponse;
 import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.protocol.message.TipAddedMessage;
 import com.clover.remote.terminal.InputOption;
+import com.clover.remote.terminal.ResultStatus;
 import com.clover.remote.terminal.TxState;
 import com.clover.sdk.v3.payments.CardTransactionType;
 import com.clover.sdk.v3.payments.Credit;
@@ -440,7 +441,17 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
         @Override
         public void onCloseoutResponse(CloseoutResponse response) {
-
+          final String msg;
+          if(ResultStatus.SUCCESS.toString().equals(response.getCode())) {
+            msg = "Closeout is scheduled.";
+          } else {
+            msg = "Error scheduling closeout. " + response.getReason();
+          }
+          runOnUiThread(new Runnable(){
+            @Override public void run() {
+              Toast.makeText(ExamplePOSActivity.this, msg, Toast.LENGTH_SHORT);
+            }
+          });
         }
 
         @Override
@@ -470,7 +481,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           runOnUiThread(new Runnable() {
             @Override
             public void run() {
-              if("SUCCESS".equals(response.getCode())) {
+              if(ResultStatus.SUCCESS.toString().equals(response.getCode())) {
                 Credit credit = response.getCredit();
                 POSNakedRefund nakedRefund = new POSNakedRefund(null, credit.getAmount());
                 store.addRefund(nakedRefund);
@@ -483,7 +494,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
         @Override
         public void onRefundPaymentResponse(RefundPaymentResponse response) {
-          if (response.getCode() == "SUCCESS") {
+          if (ResultStatus.SUCCESS.toString().equals(response.getCode())) {
             POSRefund refund = new POSRefund(response.getPaymentId(), response.getOrderId(), "DEFAULT", response.getRefundObj().getAmount());
             boolean done = false;
             for (POSOrder order : store.getOrders()) {
@@ -517,7 +528,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
         @Override
         public void onVoidPaymentResponse(VoidPaymentResponse response) {
-          if (response.getCode() == "SUCCESS") {
+          if (ResultStatus.SUCCESS.toString().equals(response.getCode())) {
             boolean done = false;
             for (POSOrder order : store.getOrders()) {
               for (POSExchange payment : order.getPayments()) {
@@ -540,7 +551,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
         @Override
         public void onVaultCardResponse(final VaultCardResponse response) {
-          if ("SUCCESS".equals(response.getCode())) {
+          if (ResultStatus.SUCCESS.toString().equals(response.getCode())) {
             POSCard card = new POSCard();
             card.setFirst6(response.getCard().getFirst6());
             card.setLast4(response.getCard().getLast4());
@@ -563,6 +574,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         public void onTransactionState(TxState txState) {
 
         }
+
       });
       //cloverConnector.initialize(uri);
 
@@ -769,5 +781,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     request.setAmount(5000);
 
     cloverConnector.preAuth(request);
+  }
+
+  public void onClickCloseout(View view) {
+    cloverConnector.closeout(false, null);
   }
 }
