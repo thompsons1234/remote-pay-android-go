@@ -18,29 +18,90 @@ package com.clover.remote.client.transport;
 
 import android.os.AsyncTask;
 import android.util.Log;
+
+import com.clover.remote.client.transport.CloverTransport;
+import com.clover.remote.client.transport.CloverTransportObserver;
 import com.google.gson.Gson;
 import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.exceptions.InvalidFrameException;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import org.java_websocket.framing.Framedata;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.util.Timer;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class WebSocketCloverTransport extends CloverTransport {
+
+  private static final Framedata PING = new PingFramedata();
+  private static final long HEARTBEAT_INTERVAL = 1000000L;
+
+  /**
+   * <p>
+   *     task to perform disconnection that should be canceled in the case of a timely
+   *     pong message
+   * </p>
+   */
+  private ScheduledFuture<?> disconnectFuture;
+
+  /**
+   * <p>
+   *     In the case of a ping/pong timeout, notify the observers of the connection closing
+   *     before cleanup has happened so that observers can react in a timely manner.
+   * </p>
+   */
+  private volatile boolean notifyClose = true;
+
+  private final Runnable disconnector = new Runnable() {
+    @Override
+    public void run() {
+      if (webSocket == null) {
+        return;
+      }
+
+      Log.d(getClass().getName(), "No PONG, so closing...");
+
+      setNotifyClose(false);
+      if (observers != null) {
+        for (CloverTransportObserver observer : observers) {
+          observer.onDeviceDisconnected(WebSocketCloverTransport.this);
+        }
+      }
+
+      try {
+        webSocket.closeBlocking();  // <-- synchronous close keeps from opening multiple connections to the same device
+      } catch (InterruptedException ie) {
+        ie.printStackTrace();
+      }
+    }
+  };
+
+  private final Runnable pinger = new Runnable() {
+    @Override
+    public void run() {
+      if (webSocket == null) {
+        return;
+      }
+      Log.d(WebSocketCloverTransport.class.getName(), "pinging");
+      webSocket.getConnection().sendFrame(PING);
+      disconnectFuture = timerPool.schedule(disconnector, HEARTBEAT_INTERVAL, TimeUnit.MILLISECONDS);
+    }
+  };
+
   Gson gson = new Gson();
-  WebSocketClient webSocket;
-  String status = "Disconnected";
+  WebSocketClient webSocket;        // TODO: investigate whether the assignment in the onClose callback could cause problems
+  String status = "Disconnected";   // TODO: investigate whether the assignment in the onClose callback could cause problems
   boolean shutdown = false;
   URI endpoint;
   Timer pingTimer = new Timer();
   ScheduledThreadPoolExecutor timerPool = new ScheduledThreadPoolExecutor(1);
 
   CloverTransportObserver tempObs = null;
-
-  //List<CloverTransportObserver> listeners = new ArrayList<CloverTransportObserver>();
 
   public WebSocketCloverTransport(URI endpoint) {
     this.endpoint = endpoint;
@@ -55,40 +116,8 @@ public class WebSocketCloverTransport extends CloverTransport {
       try {
         Log.d(getClass().getName(), "Sending message to WebSocket: " + message);
         webSocket.send(message);
-                /*new AsyncTask() {
-                    @Override
-                    protected Object doInBackground(Object[] params) {
-                        ALog.d(this, "%s", "Sending message");
-                        return null;
-                    }
-                }.execute();*/
       } catch (WebsocketNotConnectedException e) {
-        // maybe it closed, so let's try to re-open and then send...
-                /*webSocket = null;
-                tempObs = new CloverTransportObserver() {
-                    @Override
-                    public void onDeviceConnected(CloverTransport transport) {
-
-                    }
-
-                    @Override
-                    public void onDeviceReady(CloverTransport transport) {
-                        webSocket.send(message);
-                        observers.remove(tempObs);
-                    }
-
-                    @Override
-                    public void onDeviceDisconnected(CloverTransport transport) {
-                        observers.remove(tempObs);
-                    }
-
-                    @Override
-                    public void onMessage(String message) {
-
-                    }
-                };
-                observers.add(tempObs);*/
-        initialize(endpoint);
+        //initialize(endpoint);
       }
 
       return 0;
@@ -99,16 +128,21 @@ public class WebSocketCloverTransport extends CloverTransport {
   }
 
 
-  public void initialize(URI deviceEndpoint) {
-    onDeviceConnected();
+  private void initialize(URI deviceEndpoint) {
+//    onDeviceConnected();
     final WebSocketClient tempWebSocket = new WebSocketClient(deviceEndpoint) {
 
       @Override
       public void onOpen(ServerHandshake handshakedata) {
-        //Toast.makeText(CloverConnector.this, "Socket Open", Toast.LENGTH_SHORT).show();
         status = "Connected";
+        if(webSocket != null) {
+          throw new RuntimeException("WebSocket is NOT Null");
+        }
         webSocket = this;
-        // TODO: add PING/PONG timer thread...
+        timerPool.schedule(pinger, HEARTBEAT_INTERVAL / 2L, TimeUnit.MILLISECONDS);
+        for (CloverTransportObserver listener : observers) {
+          listener.onDeviceConnected(WebSocketCloverTransport.this);
+        }
         for (CloverTransportObserver listener : observers) {
           listener.onDeviceReady(WebSocketCloverTransport.this);
         }
@@ -122,12 +156,15 @@ public class WebSocketCloverTransport extends CloverTransport {
       @Override
       public void onWebsocketPong(WebSocket conn, Framedata f) {
         super.onWebsocketPong(conn, f);
+        Log.d(WebSocketCloverTransport.class.getName(), "got PONG");
+        disconnectFuture.cancel(true);
+
+        timerPool.schedule(pinger, HEARTBEAT_INTERVAL / 2L, TimeUnit.MILLISECONDS);
       }
 
       @Override
       public void onWebsocketClosing(WebSocket conn, int code, String reason, boolean remote) {
         super.onWebsocketClosing(conn, code, reason, remote);
-        pingTimer.cancel();
       }
 
       @Override
@@ -140,11 +177,12 @@ public class WebSocketCloverTransport extends CloverTransport {
 
       @Override
       public void onClose(int code, String reason, boolean remote) {
-        //Toast.makeText(CloverConnector.this, "Socket Closed", Toast.LENGTH_SHORT).show();
         Log.d(getClass().getName(), reason);
         status = "Disconnected";
-        for (CloverTransportObserver listener : observers) {
-          listener.onDeviceDisconnected(WebSocketCloverTransport.this);
+        if (shouldNotifyClose()) {
+          for (CloverTransportObserver listener : observers) {
+            listener.onDeviceDisconnected(WebSocketCloverTransport.this);
+          }
         }
         webSocket = null;
         reconnect();
@@ -152,6 +190,7 @@ public class WebSocketCloverTransport extends CloverTransport {
 
       @Override
       public void onError(Exception ex) {
+        Log.e(getClass().getName(), "onError", ex);
         for (CloverTransportObserver listener : observers) {
           //listener.onDevice
         }
@@ -165,6 +204,7 @@ public class WebSocketCloverTransport extends CloverTransport {
     shutdown = true;
     clearListeners();
     if (webSocket != null) {
+      setNotifyClose(true);   // <-- need to notify because close was requested
       webSocket.close();
     }
   }
@@ -174,6 +214,7 @@ public class WebSocketCloverTransport extends CloverTransport {
     if (shutdown) {
       return;
     }
+    //      Log.i(WebSocketCloverTransport.class.getName(), "reconnecting");
     AsyncTask task = new AsyncTask() {
       @Override
       protected Object doInBackground(Object[] params) {
@@ -197,7 +238,6 @@ public class WebSocketCloverTransport extends CloverTransport {
           return;
         }
         try {
-          //webSocket.connect();
           initialize(endpoint);
 
         } catch (Exception e) {
@@ -211,5 +251,54 @@ public class WebSocketCloverTransport extends CloverTransport {
       }
     };
     task.execute();
+  }
+
+  private void setNotifyClose(boolean notifyClose) {
+    synchronized (this) {
+      this.notifyClose = notifyClose;
+    }
+  }
+
+  private boolean shouldNotifyClose() {
+    synchronized (this) {
+      return notifyClose;
+    }
+  }
+
+  /**
+   * <p>
+   *     PingFramedata is the minimal {@link Framedata} necessary to elicit a response of
+   *     {@link org.java_websocket.framing.Framedata.Opcode#PONG} from the other end of the
+   *     web socket connection.
+   * </p>
+   */
+  private static final class PingFramedata implements Framedata {
+
+    private final ByteBuffer buf = ByteBuffer.allocate(0);
+
+    @Override
+    public boolean isFin() {
+      return true;  // <-- data is less than 127 bytes, so this is the final message in the payload
+    }
+
+    @Override
+    public boolean getTransfereMasked() {
+      return true;  // <-- mask all frames being sent to server unless closing the connection
+    }
+
+    @Override
+    public Opcode getOpcode() {
+      return Opcode.PING;
+    }
+
+    @Override
+    public ByteBuffer getPayloadData() {
+      return buf; // <-- an empty buffer because this is just a heartbeat
+    }
+
+    @Override
+    public void append(Framedata nextframe) throws InvalidFrameException {
+      //do nothing
+    }
   }
 }

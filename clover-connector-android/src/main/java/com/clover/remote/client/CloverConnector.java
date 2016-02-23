@@ -30,6 +30,7 @@ import com.clover.remote.client.messages.CaptureAuthRequest;
 import com.clover.remote.client.messages.CaptureAuthResponse;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.PreAuthResponse;
+import com.clover.remote.client.messages.TxRequest;
 import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceEvent;
@@ -54,6 +55,7 @@ import com.clover.remote.order.operation.DiscountsDeletedOperation;
 import com.clover.remote.order.operation.LineItemsAddedOperation;
 import com.clover.remote.order.operation.LineItemsDeletedOperation;
 import com.clover.remote.order.operation.OrderDeletedOperation;
+import com.clover.remote.protocol.message.DiscoveryResponseMessage;
 import com.clover.remote.terminal.InputOption;
 import com.clover.remote.terminal.KeyPress;
 import com.clover.remote.terminal.ResultStatus;
@@ -66,6 +68,7 @@ import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.Payment;
 import com.clover.sdk.v3.payments.Refund;
 import com.clover.sdk.v3.payments.VaultedCard;
+import com.clover.sdk.Ids;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -113,14 +116,18 @@ public class CloverConnector implements ICloverConnector {
   /// otherwise it restarts the payment transaction
   /// </summary>
   private boolean disableRestartTransactionOnFail;
+  private MerchantInfo merchantInfo;
 
+  public CloverConnector() {
+
+  }
   /**
    * CloverConnector constructor
    *
    * @param config - A CloverDeviceConfiguration object; TestDeviceConfiguration can be used for testing
    */
   public CloverConnector(CloverDeviceConfiguration config) {
-    initialize(config);
+    this(config, null);
   }
 
   /**
@@ -129,7 +136,9 @@ public class CloverConnector implements ICloverConnector {
    */
 
   public CloverConnector(CloverDeviceConfiguration config, ICloverConnectorListener connectorListener) {
-    addCloverConnectorListener(connectorListener);
+    if(connectorListener != null) {
+      addCloverConnectorListener(connectorListener);
+    }
     initialize(config);
   }
 
@@ -145,7 +154,10 @@ public class CloverConnector implements ICloverConnector {
   /// Initialize the connector with a given configuration
   /// </summary>
   /// <param name="config">A CloverDeviceConfiguration object; TestDeviceConfiguration can be used for testing</param>
-  private void initialize(final CloverDeviceConfiguration config) {
+  public void initialize(final CloverDeviceConfiguration config) {
+    if(device != null) {
+      device.dispose();
+    }
     deviceObserver = new InnerDeviceObserver(this);
     //transportObserver = new InnerTransportObserver(this);
 
@@ -156,8 +168,7 @@ public class CloverConnector implements ICloverConnector {
 
     new AsyncTask() {
       @Override protected Object doInBackground(Object[] params) {
-        device = CloverDeviceFactory.get(config);
-        //device.Subscribe(transportObserver);
+        device = CloverDeviceFactory.get(config); // network access, so needs to be off UI thread
         device.Subscribe(deviceObserver);
         return null;
       }
@@ -169,11 +180,11 @@ public class CloverConnector implements ICloverConnector {
    *
    * @param request
    */
-  public void sale(SaleRequest request) {
+  public String sale(SaleRequest request) {
     if(request.getTipAmount() == null) {
       request.setTipAmount(0L);
     }
-    saleAuth(request, false);
+    return saleAuth(request, false);
   }
 
   /**
@@ -181,7 +192,7 @@ public class CloverConnector implements ICloverConnector {
    *
    * @param request
    */
-  private void saleAuth(SaleRequest request, boolean suppressTipScreen) {
+  private String saleAuth(TxRequest request, boolean suppressTipScreen) {
     //payment, finishOK(payment), finishCancel, onPaymentVoided
     if (device != null) {
       try {
@@ -194,27 +205,37 @@ public class CloverConnector implements ICloverConnector {
         //builder.disableCashBack(DisableCashBack);
         builder.cardEntryMethods(request.getCardEntryMethods() != null ? request.getCardEntryMethods() : cardEntryMethods);
         builder.amount(request.getAmount());
-        if (request.getTipAmount() != null) {
-          builder.tipAmount(request.getTipAmount()); // can't just set to zero because zero has a specific meaning
-        }
-        if (request.getTaxAmount() != null) {
-          builder.taxAmount(request.getTaxAmount());
-        }
-        if (request.getTippableAmount() != null) {
-          builder.tippableAmount(request.getTippableAmount());
-        }
-        if (request.getVaultedCard() != null) {
-          builder.vaultedCard(request.getVaultedCard());
+
+        if(request instanceof SaleRequest) {
+          if (request.getTipAmount() != null) {
+            builder.tipAmount(request.getTipAmount()); // can't just set to zero because zero has a specific meaning
+          }
+          SaleRequest sr = (SaleRequest)request;
+          if (sr.getTaxAmount() != null) {
+            builder.taxAmount(sr.getTaxAmount());
+          }
+          if (sr.getTippableAmount() != null) {
+            builder.tippableAmount(sr.getTippableAmount());
+          }
+          if (request.getVaultedCard() != null) {
+            builder.vaultedCard(request.getVaultedCard());
+          }
         }
 
+        // TODO: implement cardNotPresent
         //builder.cardNotPresent(request.isCardNotPresent());
+
+        String externalPaymentId = request.getExternalPaymentId() == null ? Ids.nextBase32Id() : request.getExternalPaymentId();
+        builder.externalPaymentId(externalPaymentId);
 
         PayIntent payIntent = builder.build();
         device.doTxStart(payIntent, null, suppressTipScreen); //
+        return payIntent.externalPaymentId;
       } catch (Exception e) {
         e.printStackTrace();
       }
     }
+    return null;
   }
 
   /**
@@ -240,48 +261,21 @@ public class CloverConnector implements ICloverConnector {
    *
    * @param request
    */
-  public void auth(AuthRequest request) {
+  public String auth(AuthRequest request) {
     request.setTipAmount(null);
-    saleAuth(request, true);
+    return saleAuth(request, true);
   }
 
 
-  public void preAuth(PreAuthRequest request) {
+  public String preAuth(PreAuthRequest request) {
     if (device != null) {
       try {
-        lastRequest = request;
-        PayIntent.Builder builder = new PayIntent.Builder();
-
-        builder.transactionType(request.getType()); // difference between sale, auth and auth(preAuth)
-
-        builder.remotePrint(disablePrinting);
-        //builder.disableCashBack(DisableCashBack);
-        builder.cardEntryMethods(request.getCardEntryMethods() != null ? request.getCardEntryMethods() : cardEntryMethods);
-        builder.amount(request.getAmount());
-        // I don't think any of these have any place in a preAuth?
-        /*
-        if (request.getTipAmount() != null) {
-          builder.tipAmount(request.getTipAmount()); // can't just set to zero because zero has a specific meaning
-        }
-        if (request.getTaxAmount() != null) {
-          builder.taxAmount(request.getTaxAmount());
-        }
-        if (request.getTippableAmount() != null) {
-          builder.tippableAmount(request.getTippableAmount());
-        }
-        */
-        if (request.getVaultedCard() != null) {
-          builder.vaultedCard(request.getVaultedCard());
-        }
-
-        //builder.cardNotPresent(request.isCardNotPresent());
-
-        PayIntent payIntent = builder.build();
-        device.doTxStart(payIntent, null, true);
+        return saleAuth(request, true);
       } catch (Exception e) {
         e.printStackTrace();
       }
     }
+    return null;
   }
   /**
    * Capture a previous Auth. Note: Should only be called if request's PaymentID is from an AuthResponse
@@ -598,6 +592,14 @@ public class CloverConnector implements ICloverConnector {
     return cardEntryMethods;
   }
 
+  /*public void setMerchantInfo(MerchantInfo merchantInfo) {
+    this.merchantInfo = merchantInfo;
+  }*/
+
+  public MerchantInfo getMerchantInfo() {
+    return merchantInfo;
+  }
+
   private class InnerDeviceObserver implements CloverDeviceObserver {
 
     private RefundPaymentResponse lastPRR;
@@ -806,16 +808,26 @@ public class CloverConnector implements ICloverConnector {
       // TODO: when don't we get this? if a transaction has already begun and we try a 2nd?
     }
 
-    public void onDeviceConnected(CloverTransport transport) {
+    public void onDeviceConnected(CloverDevice device) {
       cloverConnector.broadcaster.notifyOnConnect();
     }
 
-    public void onDeviceReady(CloverTransport transport) {
+    public void onDeviceReady(CloverDevice device, DiscoveryResponseMessage drm) {
       cloverConnector.device.doShowWelcomeScreen();
-      cloverConnector.broadcaster.notifyOnReady();
+      MerchantInfo merchantInfo = new MerchantInfo();
+
+      merchantInfo.merchantID = drm.merchantId;
+      merchantInfo.deviceInfo.name = drm.name;
+      merchantInfo.deviceInfo.model = drm.model;
+      merchantInfo.deviceInfo.serial = drm.serial;
+      cloverConnector.merchantInfo = merchantInfo;
+
+      if(drm.ready) { //TODO: is this a valid check?
+        cloverConnector.broadcaster.notifyOnReady();
+      }
     }
 
-    public void onDeviceDisconnected(CloverTransport transport) {
+    public void onDeviceDisconnected(CloverDevice device) {
       cloverConnector.broadcaster.notifyOnDisconnect();
     }
 

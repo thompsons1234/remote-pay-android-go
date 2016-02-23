@@ -71,6 +71,7 @@ import com.clover.remote.terminal.ResultStatus;
 import com.clover.remote.terminal.TxState;
 import com.clover.sdk.v3.payments.CardTransactionType;
 import com.clover.sdk.v3.payments.Credit;
+import com.clover.sdk.v3.payments.Payment;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -238,7 +239,10 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         cloverConnector.dispose();
       }
       uri = new URI(_checksURL);
-      cloverConnector = new CloverConnector(new WebSocketCloverDeviceConfiguration(uri));
+      if(cloverConnector == null) {
+        cloverConnector = new CloverConnector();
+      }
+      cloverConnector.initialize(new WebSocketCloverDeviceConfiguration(uri));
       cloverConnector.addCloverConnectorListener(new ICloverConnectorListener() {
         public void onDisconnected() {
           runOnUiThread(new Runnable() {
@@ -336,7 +340,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           runOnUiThread(new Runnable() {
             @Override
             public void run() {
-              POSPayment payment = new POSPayment(response.getPayment().getId(), response.getPayment().getOrder().getId(), "DFLTEMPLYEE", response.getPayment().getAmount());
+              Payment _payment = response.getPayment();
+              POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), "DFLTEMPLYEE", _payment.getAmount(), _payment.getTipAmount() != null ? _payment.getTipAmount() : 0, _payment.getCashbackAmount() != null ? _payment.getCashbackAmount() : 0);
               payment.setPaymentStatus(CardTransactionType.PREAUTH.equals(response.getPayment().getCardTransaction().getType()) ? POSPayment.Status.AUTHORIZED : POSPayment.Status.PAID);
               store.addPaymentToOrder(payment, store.getCurrentOrder());
 
@@ -355,14 +360,22 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           runOnUiThread(new Runnable(){
             @Override
             public void run() {
-              POSPayment payment = new POSPayment(response.getPayment().getId(), response.getPayment().getOrder().getId(), "DFLTEMPLYEE", response.getPayment().getAmount());
-              payment.setPaymentStatus(CardTransactionType.PREAUTH.equals(response.getPayment().getCardTransaction().getType()) ? POSPayment.Status.AUTHORIZED : POSPayment.Status.PAID);
+              if ("SUCCESS".equals(response.getCode())) {
+                Payment _payment = response.getPayment();
+                POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), "DFLTEMPLYEE", _payment.getAmount(), _payment.getTipAmount() != null ? _payment.getTipAmount() : 0,
+                    _payment.getCashbackAmount() != null ? _payment.getCashbackAmount() : 0);
+                payment.setPaymentStatus(CardTransactionType.PREAUTH.equals(response.getPayment().getCardTransaction().getType()) ?
+                    POSPayment.Status.AUTHORIZED :
+                    POSPayment.Status.PAID);
 
-              store.addPreAuth(payment);
+                store.addPreAuth(payment);
 
-              cloverConnector.showWelcomeScreen();
-              //showRegister(null);
-              showPreAuths(null);
+                cloverConnector.showWelcomeScreen();
+                //showRegister(null);
+                showPreAuths(null);
+              } else {
+                Toast.makeText(ExamplePOSActivity.this, "Pre Auth: " + response.getCode(), Toast.LENGTH_SHORT);
+              }
             }
           });
         }
@@ -457,7 +470,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         @Override
         public void onSaleResponse(final SaleResponse response) {
           if (response != null && response.getPayment() != null) {
-            POSPayment payment = new POSPayment(response.getPayment().getId(), response.getPayment().getOrder().getId(), "DFLTEMPLYEE", response.getPayment().getAmount());
+            Payment _payment = response.getPayment();
+            POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), "DFLTEMPLYEE", _payment.getAmount(), _payment.getTipAmount() != null ? _payment.getTipAmount() : 0, _payment.getCashbackAmount() != null ? _payment.getCashbackAmount() : 0);
             payment.setPaymentStatus(CardTransactionType.PREAUTH.equals(response.getPayment().getCardTransaction().getType()) ? POSPayment.Status.AUTHORIZED : POSPayment.Status.PAID);
             store.addPaymentToOrder(payment, store.getCurrentOrder());
             runOnUiThread(new Runnable() {
