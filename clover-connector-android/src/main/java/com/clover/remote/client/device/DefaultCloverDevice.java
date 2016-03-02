@@ -101,6 +101,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   public void onDeviceReady(CloverTransport transport) {
     // now that the device is ready, let's send it a discovery request. the discovery response should trigger
     // the callback for the device observer that it is connected and able to communicate
+    Log.d(getClass().getSimpleName(), "Sending Discovery Request");
     doDiscoveryRequest();
   }
 
@@ -123,6 +124,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
               notifyObserversCashbackSelected(cbsMessage);
               break;
             case DISCOVERY_RESPONSE:
+              Log.d(getClass().getSimpleName(), "Got a Discovery Response");
               DiscoveryResponseMessage drm = (DiscoveryResponseMessage) Message.fromJsonString(rMessage.payload);
               notifyObserversReady(transport, drm);
               break;
@@ -600,9 +602,9 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   }
 
   public void dispose() {
+    deviceObservers.clear();
+    refRespMsg = null;
     if (transport != null) {
-      deviceObservers.clear();
-      refRespMsg = null;
       transport.dispose();
       transport = null;
     }

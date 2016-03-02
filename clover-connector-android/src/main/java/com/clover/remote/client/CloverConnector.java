@@ -68,9 +68,9 @@ import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.Payment;
 import com.clover.sdk.v3.payments.Refund;
 import com.clover.sdk.v3.payments.VaultedCard;
-import com.clover.sdk.Ids;
 import com.google.gson.Gson;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -225,7 +225,7 @@ public class CloverConnector implements ICloverConnector {
         // TODO: implement cardNotPresent
         //builder.cardNotPresent(request.isCardNotPresent());
 
-        String externalPaymentId = request.getExternalPaymentId() == null ? Ids.nextBase32Id() : request.getExternalPaymentId();
+        String externalPaymentId = request.getExternalPaymentId() == null ? getNextId() : request.getExternalPaymentId();
         builder.externalPaymentId(externalPaymentId);
 
         PayIntent payIntent = builder.build();
@@ -824,6 +824,8 @@ public class CloverConnector implements ICloverConnector {
 
       if(drm.ready) { //TODO: is this a valid check?
         cloverConnector.broadcaster.notifyOnReady();
+      } else {
+        Log.e(CloverConnector.class.getName(), "DiscoveryResponseMessage, not ready...");
       }
     }
 
@@ -834,6 +836,19 @@ public class CloverConnector implements ICloverConnector {
     public void onMessage(String message) {
       //Console.WriteLine("onMessage: " + message);
     }
+  }
+
+  private static final SecureRandom random = new SecureRandom();
+  private static final char[] vals = new char[]{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','J','K','M','N','P','Q','R','S','T','V','W','X','Y','Z'}; // Crockford's base 32 chars
+
+  // providing a simplified version so we don't have a dependency on common's Ids
+  private String getNextId() {
+    StringBuilder sb = new StringBuilder();
+    for(int i=0; i<13; i++) {
+      int idx = random.nextInt(vals.length);
+      sb.append(vals[idx]);
+    }
+    return sb.toString();
   }
 }
 

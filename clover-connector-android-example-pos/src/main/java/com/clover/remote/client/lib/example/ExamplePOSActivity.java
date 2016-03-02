@@ -242,7 +242,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       if(cloverConnector == null) {
         cloverConnector = new CloverConnector();
       }
-      cloverConnector.initialize(new WebSocketCloverDeviceConfiguration(uri));
+      cloverConnector.initialize(new WebSocketCloverDeviceConfiguration(uri, 10000, 2000));
       cloverConnector.addCloverConnectorListener(new ICloverConnectorListener() {
         public void onDisconnected() {
           runOnUiThread(new Runnable() {
