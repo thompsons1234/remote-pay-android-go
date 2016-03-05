@@ -19,11 +19,13 @@ package com.clover.remote.client.transport.websocket;
 import android.util.Log;
 import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.exceptions.InvalidDataException;
 import org.java_websocket.framing.Framedata;
 import org.java_websocket.framing.FramedataImpl1;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
@@ -39,6 +41,12 @@ class CloverWebSocketClient extends WebSocketClient {
 
   static {
     PING.setFin(true);
+    PING.setTransferemasked(true);
+    try {
+      PING.setPayload(ByteBuffer.allocate(0));
+    } catch (InvalidDataException e) {
+      e.printStackTrace();
+    }
   }
   /**
      * A single thread/queue to send a ping and disconnect if no pong response
