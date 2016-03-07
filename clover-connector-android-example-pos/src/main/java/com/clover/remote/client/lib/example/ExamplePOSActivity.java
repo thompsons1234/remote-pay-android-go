@@ -23,6 +23,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -239,11 +240,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         cloverConnector.dispose();
       }
       uri = new URI(_checksURL);
-      if(cloverConnector == null) {
-        cloverConnector = new CloverConnector();
-      }
-      cloverConnector.initialize(new WebSocketCloverDeviceConfiguration(uri, 10000, 2000));
-      cloverConnector.addCloverConnectorListener(new ICloverConnectorListener() {
+//      if(cloverConnector == null) {
+
+//      }
+//      cloverConnector.addCloverConnectorListener(
+          ICloverConnectorListener ccListener = new ICloverConnectorListener() {
         public void onDisconnected() {
           runOnUiThread(new Runnable() {
             @Override
@@ -589,10 +590,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
         }
 
-      });
-      //cloverConnector.initialize(uri);
+      };
 
-      //Toast.makeText(ExamplePOSActivity.this, "Last Exception: " + cloverConnector.getLastException(), Toast.LENGTH_LONG).show();
+      cloverConnector = new CloverConnector(new WebSocketCloverDeviceConfiguration(uri, 10000, 2000), ccListener);
+
+      updateComponentsWithNewCloverConnector();
 
     } catch (URISyntaxException e) {
       e.printStackTrace();
@@ -611,6 +613,31 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     startActivityForResult(intent, WS_ENDPOINT_ACTIVITY);
   }
 
+  private void updateComponentsWithNewCloverConnector() {
+    FragmentManager fragmentManager = getFragmentManager();
+
+    RegisterFragment refFragment = (RegisterFragment)fragmentManager.findFragmentByTag("REGISTER");
+    if(refFragment != null) {
+      refFragment.setCloverConnector(cloverConnector);
+    }
+    OrdersFragment ordersFragment = (OrdersFragment)fragmentManager.findFragmentByTag("ORDERS");
+    if(ordersFragment != null) {
+      ordersFragment.setCloverConnector(cloverConnector);
+    }
+    ManualRefundsFragment manualRefundsFragment = (ManualRefundsFragment)fragmentManager.findFragmentByTag("REFUNDS");
+    if(manualRefundsFragment != null) {
+      manualRefundsFragment.setCloverConnector(cloverConnector);
+    }
+    CardsFragment cardsFragment = (CardsFragment)fragmentManager.findFragmentByTag("CARDS");
+    if(cardsFragment != null) {
+      cardsFragment.setCloverConnector(cloverConnector);
+    }
+    MiscellaneousFragment miscFragment = (MiscellaneousFragment)fragmentManager.findFragmentByTag("MISC");
+    if(miscFragment != null) {
+      miscFragment.setCloverConnector(cloverConnector);
+    }
+  }
+
   public void showOrders(View view) {
     FragmentManager fragmentManager = getFragmentManager();
     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -623,6 +650,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       ((OrdersFragment) fragment).setCloverConnector(cloverConnector);
       fragmentTransaction.add(R.id.contentContainer, fragment, "ORDERS");
     } else {
+      ((OrdersFragment)fragment).setCloverConnector(cloverConnector);
       fragmentTransaction.show(fragment);
     }
 
@@ -640,6 +668,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       fragment = RegisterFragment.newInstance(store, cloverConnector);
       fragmentTransaction.add(R.id.contentContainer, fragment, "REGISTER");
     } else {
+      ((RegisterFragment)fragment).setCloverConnector(cloverConnector);
       fragmentTransaction.show(fragment);
     }
 
@@ -657,6 +686,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       fragment = ManualRefundsFragment.newInstance(store, cloverConnector);
       fragmentTransaction.add(R.id.contentContainer, fragment, "REFUNDS");
     } else {
+      ((ManualRefundsFragment)fragment).setCloverConnector(cloverConnector);
       fragmentTransaction.show(fragment);
     }
 
@@ -675,6 +705,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       ((CardsFragment)fragment).setCloverConnector(cloverConnector);
       fragmentTransaction.add(R.id.contentContainer, fragment, "CARDS");
     } else {
+      ((CardsFragment)fragment).setCloverConnector(cloverConnector);
       fragmentTransaction.show(fragment);
     }
     fragmentTransaction.commit();
@@ -692,7 +723,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       fragment = MiscellaneousFragment.newInstance(store, cloverConnector);
       fragmentTransaction.add(R.id.contentContainer, fragment, "MISC");
     } else {
-
+      ((MiscellaneousFragment)fragment).setCloverConnector(cloverConnector);
       fragmentTransaction.show(fragment);
     }
 
@@ -712,7 +743,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       ((PreAuthFragment)fragment).setStore(store);
       fragmentTransaction.add(R.id.contentContainer, fragment, "PRE_AUTHS");
     } else {
-
+      ((PreAuthFragment)fragment).setCloverConnector(cloverConnector);
       fragmentTransaction.show(fragment);
     }
 

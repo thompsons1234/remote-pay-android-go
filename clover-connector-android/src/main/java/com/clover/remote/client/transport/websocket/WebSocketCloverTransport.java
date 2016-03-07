@@ -117,27 +117,29 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverW
 
     webSocket = new CloverWebSocketClient(deviceEndpoint, this, heartbeatInterval);
 
-    try {
+    webSocket.connect();
+    /*try {
       webSocket.connectBlocking();
     } catch (Throwable t) {
       clearWebsocket();
       reconnect();
-    }
+    }*/
     Log.d(getClass().getSimpleName(), "connection attempt done.");
   }
 
   public void dispose() {
     shutdown = true;
-    clearListeners();
     if (webSocket != null) {
       webSocket.setNotifyClose(true);   // <-- need to notify because close was requested
       webSocket.close();
     }
+    clearWebsocket();
   }
 
 
   public void reconnect() {
     if (shutdown) {
+      Log.d(getClass().getSimpleName(), "Not attempting to reconnect, shutdown...");
       return;
     }
     //      Log.i(WebSocketCloverTransport.class.getName(), "reconnecting");
@@ -204,7 +206,7 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverW
 
   @Override
   public void onMessage(WebSocketClient ws, String message) {
-    if(ws == webSocket) {
+    if(webSocket == ws) {
       for (CloverTransportObserver observer : observers) {
         Log.d(getClass().getName(), "Got message: " + message);
         observer.onMessage(message);

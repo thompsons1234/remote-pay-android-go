@@ -94,7 +94,9 @@ class CloverWebSocketClient extends WebSocketClient {
     public void onOpen(ServerHandshake handshakedata) {
       //status = "Connected";
 
-      listener.onOpen(this, handshakedata);
+      if(listener != null) {
+        listener.onOpen(this, handshakedata);
+      }
 
       timerPool.schedule(pinger, heartbeatInterval, TimeUnit.MILLISECONDS);
     }
@@ -124,17 +126,23 @@ class CloverWebSocketClient extends WebSocketClient {
     @Override
     public void onWebsocketClosing(WebSocket conn, int code, String reason, boolean remote) {
       super.onWebsocketClosing(conn, code, reason, remote);
-      listener.onClose(this, code, reason, remote);
+      if(listener != null) {
+        listener.onClose(this, code, reason, remote);
+      }
     }
 
     @Override
     public void onMessage(String message) {
-      listener.onMessage(this, message);
+      if(listener != null) {
+        listener.onMessage(this, message);
+      }
     }
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-      listener.onClose(this, code, reason, remote);
+      if(listener != null) {
+        listener.onClose(this, code, reason, remote);
+      }
     }
     
     private void dispose() {
@@ -236,11 +244,12 @@ class CloverWebSocketClient extends WebSocketClient {
 
         Log.d(WebSocketCloverTransport.class.getSimpleName(), "No ping response, so closing");
         cancelAllDisconnectHandlers(); // just to be safe...
-        try {
+        close();
+        /*try {
           closeBlocking();  // <-- synchronous close keeps from opening multiple connections to the same device
         } catch (Throwable ie) {
           ie.printStackTrace();
-        }
+        }*/
       }
     }
   }

@@ -569,6 +569,7 @@ public class CloverConnector implements ICloverConnector {
     */
 
   public void dispose() {
+    broadcaster.clear();
     if (device != null) {
       device.dispose();
     }
@@ -809,10 +810,12 @@ public class CloverConnector implements ICloverConnector {
     }
 
     public void onDeviceConnected(CloverDevice device) {
+      Log.d(getClass().getSimpleName(), "Connected");
       cloverConnector.broadcaster.notifyOnConnect();
     }
 
     public void onDeviceReady(CloverDevice device, DiscoveryResponseMessage drm) {
+      Log.d(getClass().getSimpleName(), "Ready");
       cloverConnector.device.doShowWelcomeScreen();
       MerchantInfo merchantInfo = new MerchantInfo();
 
@@ -830,6 +833,7 @@ public class CloverConnector implements ICloverConnector {
     }
 
     public void onDeviceDisconnected(CloverDevice device) {
+      Log.d(getClass().getSimpleName(), "Disconnected");
       cloverConnector.broadcaster.notifyOnDisconnect();
     }
 
