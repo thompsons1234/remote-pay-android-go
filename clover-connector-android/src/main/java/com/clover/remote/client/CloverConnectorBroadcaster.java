@@ -18,6 +18,7 @@ package com.clover.remote.client;
 
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CaptureAuthResponse;
+import com.clover.remote.client.messages.ConfigErrorResponse;
 import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.CloseoutResponse;
@@ -141,6 +142,12 @@ public class CloverConnectorBroadcaster extends ArrayList<ICloverConnectorListen
   public void notifyOnCapturePreAuth(CaptureAuthResponse response) {
     for(ICloverConnectorListener listener : this) {
       listener.onPreAuthCaptureResponse(response);
+    }
+  }
+
+  public void notifyOnConfigError(ConfigErrorResponse response) {
+    for(ICloverConnectorListener listener : this) {
+      listener.onConfigErrorResponse(response);
     }
   }
 }

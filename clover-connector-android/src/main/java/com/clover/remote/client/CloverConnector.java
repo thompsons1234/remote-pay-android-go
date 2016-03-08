@@ -26,8 +26,10 @@ import com.clover.remote.client.device.CloverDeviceConfiguration;
 import com.clover.remote.client.device.CloverDeviceFactory;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.AuthResponse;
+import com.clover.remote.client.messages.BaseResponse;
 import com.clover.remote.client.messages.CaptureAuthRequest;
 import com.clover.remote.client.messages.CaptureAuthResponse;
+import com.clover.remote.client.messages.ConfigErrorResponse;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.TxRequest;
@@ -822,9 +824,18 @@ public class CloverConnector implements ICloverConnector {
       MerchantInfo merchantInfo = new MerchantInfo();
 
       merchantInfo.merchantID = drm.merchantId;
+      merchantInfo.merchantMId = drm.merchantMId;
+      merchantInfo.merchantName = drm.merchantName;
       merchantInfo.deviceInfo.name = drm.name;
       merchantInfo.deviceInfo.model = drm.model;
       merchantInfo.deviceInfo.serial = drm.serial;
+      merchantInfo.supportsAuths = drm.supportsAuth;
+      merchantInfo.supportsPreAuths = drm.supportsAuth;
+      merchantInfo.supportsSales = true; //no current gateway flag to use
+      merchantInfo.supportsManualRefunds = drm.supportsManualRefund;
+      merchantInfo.supportsTipAdjust = drm.supportsTipAdjust;
+      merchantInfo.supportsVaultCards = drm.supportsManualRefund;
+      merchantInfo.supportsVoids = true; //no current gateway flag to use
       cloverConnector.merchantInfo = merchantInfo;
 
       if(drm.ready) { //TODO: is this a valid check?
@@ -832,6 +843,13 @@ public class CloverConnector implements ICloverConnector {
       } else {
         Log.e(CloverConnector.class.getName(), "DiscoveryResponseMessage, not ready...");
       }
+    }
+
+    public void onConfigError(String errorMessage)
+    {
+      ConfigErrorResponse ceResponse = new ConfigErrorResponse();
+      ceResponse.setMessage(errorMessage);
+      cloverConnector.broadcaster.notifyOnConfigError(ceResponse);
     }
 
     public void onDeviceDisconnected(CloverDevice device) {

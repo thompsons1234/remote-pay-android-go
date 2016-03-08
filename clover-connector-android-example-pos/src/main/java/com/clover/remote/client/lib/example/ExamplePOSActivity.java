@@ -53,6 +53,7 @@ import com.clover.remote.client.lib.example.model.POSStore;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CaptureAuthResponse;
+import com.clover.remote.client.messages.ConfigErrorResponse;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.PreAuthResponse;
@@ -280,6 +281,15 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
             @Override
             public void run() {
               Toast.makeText(ExamplePOSActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+          });
+        }
+
+        public void onConfigErrorResponse(final ConfigErrorResponse response) {
+          runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+              Toast.makeText(ExamplePOSActivity.this, "Merchant Configuration Error: " + response.getMessage(), Toast.LENGTH_LONG).show();
             }
           });
         }

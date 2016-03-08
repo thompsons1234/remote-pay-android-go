@@ -20,6 +20,8 @@ public class MerchantInfo {
   DeviceInfo deviceInfo = new DeviceInfo();
 
   String merchantID;
+  String merchantName;
+  String merchantMId;
 
   boolean supportsAuths;
   boolean supportsPreAuths;
@@ -27,6 +29,7 @@ public class MerchantInfo {
   boolean supportsVaultCards;
   boolean supportsManualRefunds;
   boolean supportsVoids;
+  boolean supportsTipAdjust;
 
   static class DeviceInfo {
     String name;
