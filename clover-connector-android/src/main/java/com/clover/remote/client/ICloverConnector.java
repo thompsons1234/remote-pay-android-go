@@ -40,7 +40,7 @@ public interface ICloverConnector {
    *
    * @param request - A SaleRequest object containing basic information needed for the transaction
    */
-  String sale(SaleRequest request);
+  int sale(SaleRequest request);
 
   /**
    * If signature is captured during a Sale, this method accepts the signature as entered
@@ -62,14 +62,14 @@ public interface ICloverConnector {
    *
    * @param request -
    **/
-  String auth(AuthRequest request);
+  int auth(AuthRequest request);
 
   /**
    * PreAuth method to obtain a Pre-Auth for a card
    *
    * @param request -
    **/
-  String preAuth(PreAuthRequest request);
+  int preAuth(PreAuthRequest request);
 
   /**
    * Capture a previous Auth. Note: Should only be called if request's PaymentID is from an AuthResponse

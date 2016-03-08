@@ -180,11 +180,12 @@ public class CloverConnector implements ICloverConnector {
    *
    * @param request
    */
-  public String sale(SaleRequest request) {
+  public int sale(SaleRequest request) {
     if(request.getTipAmount() == null) {
       request.setTipAmount(0L);
     }
-    return saleAuth(request, false);
+    saleAuth(request, false);
+    return 0;
   }
 
   /**
@@ -192,7 +193,7 @@ public class CloverConnector implements ICloverConnector {
    *
    * @param request
    */
-  private String saleAuth(TxRequest request, boolean suppressTipScreen) {
+  private void saleAuth(TxRequest request, boolean suppressTipScreen) {
     //payment, finishOK(payment), finishCancel, onPaymentVoided
     if (device != null) {
       try {
@@ -225,17 +226,17 @@ public class CloverConnector implements ICloverConnector {
         // TODO: implement cardNotPresent
         //builder.cardNotPresent(request.isCardNotPresent());
 
-        String externalPaymentId = request.getExternalPaymentId() == null ? getNextId() : request.getExternalPaymentId();
+        String externalPaymentId = request.getExternalPaymentId();// == null ? getNextId() : request.getExternalPaymentId();
         builder.externalPaymentId(externalPaymentId);
 
         PayIntent payIntent = builder.build();
         device.doTxStart(payIntent, null, suppressTipScreen); //
-        return payIntent.externalPaymentId;
+//        return payIntent.externalPaymentId;
       } catch (Exception e) {
         e.printStackTrace();
       }
     }
-    return null;
+//    return null;
   }
 
   /**
@@ -261,21 +262,22 @@ public class CloverConnector implements ICloverConnector {
    *
    * @param request
    */
-  public String auth(AuthRequest request) {
+  public int auth(AuthRequest request) {
     request.setTipAmount(null);
-    return saleAuth(request, true);
+    saleAuth(request, true);
+    return 0;
   }
 
 
-  public String preAuth(PreAuthRequest request) {
+  public int preAuth(PreAuthRequest request) {
     if (device != null) {
       try {
-        return saleAuth(request, true);
+        saleAuth(request, true);
       } catch (Exception e) {
         e.printStackTrace();
       }
     }
-    return null;
+    return 0;
   }
   /**
    * Capture a previous Auth. Note: Should only be called if request's PaymentID is from an AuthResponse
