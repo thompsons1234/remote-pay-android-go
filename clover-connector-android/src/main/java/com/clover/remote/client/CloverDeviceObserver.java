@@ -17,7 +17,9 @@
 package com.clover.remote.client;
 
 import com.clover.common2.Signature2;
+import com.clover.remote.client.device.CloverDevice;
 import com.clover.remote.client.transport.CloverTransportObserver;
+import com.clover.remote.protocol.message.DiscoveryResponseMessage;
 import com.clover.remote.terminal.InputOption;
 import com.clover.remote.terminal.KeyPress;
 import com.clover.remote.terminal.ResultStatus;
@@ -30,7 +32,7 @@ import com.clover.sdk.v3.payments.Payment;
 import com.clover.sdk.v3.payments.Refund;
 import com.clover.sdk.v3.payments.VaultedCard;
 
-public interface CloverDeviceObserver extends CloverTransportObserver {
+public interface CloverDeviceObserver {
 
   void onTxState(TxState txState);
 
@@ -76,4 +78,8 @@ public interface CloverDeviceObserver extends CloverTransportObserver {
   //void onModifyOrder(AddLineItemAction addLineItemAction);
   //void onModifyOrder(RemoveLineItemAction removeLineItemAction);
   void onTxStartResponse(boolean success);
+
+  void onDeviceDisconnected(CloverDevice device);
+  void onDeviceConnected(CloverDevice device);
+  void onDeviceReady(CloverDevice device, DiscoveryResponseMessage drm);
 }
