@@ -210,8 +210,8 @@ public class CloverConnector implements ICloverConnector {
         builder.amount(request.getAmount());
 
         if(request instanceof SaleRequest) {
-          if (request.getTipAmount() != null) {
-              builder.tipAmount(request.getTipAmount()); // can't just set to zero because zero has a specific meaning
+          if (((SaleRequest)request).getTipAmount() != null) {
+              builder.tipAmount(((SaleRequest)request).getTipAmount()); // can't just set to zero because zero has a specific meaning
           }
           SaleRequest sr = (SaleRequest)request;
           if (sr.getTaxAmount() != null) {
@@ -266,7 +266,7 @@ public class CloverConnector implements ICloverConnector {
   }
 
   /**
-   * Auth method to obtain an Auth or Pre-Auth, based on the AuthRequest IsPreAuth flag
+   * Auth method to obtain an Auth or Pre-Auth(deprecated - use preAuth()), based on the AuthRequest IsPreAuth flag
    *
    * @param request
    */
