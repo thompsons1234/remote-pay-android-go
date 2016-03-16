@@ -22,14 +22,12 @@ import com.clover.sdk.v3.payments.VaultedCard;
 public class SaleRequest extends TxRequest{
   private Long tippableAmount;
   private Long taxAmount;
-  private boolean cardNotPresent;
+  private Long tipAmount;
 
-    /*
-        public bool DisableCashback { get; set; } //
-        public bool DisableTip { get; set; } // if the merchant account is
-        public bool DisablePrinting { get; set; }
-        public bool DisableRestartTransactionOnFail { get; set; }
-     */
+  private boolean disableCashback;
+  private boolean disableTip;
+  private boolean disablePrinting;
+  private boolean disableRestartTransactionOnFail;
 
   public PayIntent.TransactionType getType() {
     return PayIntent.TransactionType.PAYMENT;
@@ -49,6 +47,30 @@ public class SaleRequest extends TxRequest{
 
   public void setTaxAmount(Long taxAmount) {
     this.taxAmount = taxAmount;
+  }
+
+  public boolean getDisableCashback() { return disableCashback; }
+
+  public void setDisableCashback(boolean disableCashback) { this.disableCashback = disableCashback; }
+
+  public boolean getDisableTip() { return disableTip; }
+
+  public void setDisableTip(boolean disableTip) { this.disableTip = disableTip; }
+
+  public boolean getDisablePrinting() { return disablePrinting; }
+
+  public void setDisablePrinting(boolean disablePrinting) { this.disablePrinting = disablePrinting; }
+
+  public boolean getDisableRestartTransactionOnFail() { return disableRestartTransactionOnFail; }
+
+  public void setDisableRestartTransactionOnFail(boolean disableRestartTransactionOnFail) { this.disableRestartTransactionOnFail = disableRestartTransactionOnFail; }
+
+  public Long getTipAmount() {
+    return tipAmount;
+  }
+
+  public void setTipAmount(Long tipAmount) {
+    this.tipAmount = tipAmount;
   }
 
 }
