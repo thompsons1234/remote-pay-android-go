@@ -230,9 +230,6 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
             case SHOW_ORDER_SCREEN:
               //Outbound no-op
               break;
-            case SHOW_RECEIPT_SCREEN:
-              //Outbound no-op
-              break;
             case SHOW_THANK_YOU_SCREEN:
               //Outbound no-op
               break;
@@ -249,6 +246,33 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
               //Outbound no-op
               break;
             case VOID_PAYMENT:
+              //Outbound no-op
+              break;
+            case CAPTURE_PREAUTH:
+              //Outbound no-op
+              break;
+            case LAST_MSG_REQUEST:
+              //Outbound no-op
+              break;
+            case LAST_MSG_RESPONSE:
+              //Outbound no-op
+              break;
+            case TIP_ADJUST:
+              //Outbound no-op
+              break;
+            case OPEN_CASH_DRAWER:
+              //Outbound no-op
+              break;
+            case SHOW_PAYMENT_RECEIPT_OPTIONS:
+              //Outbound no-op
+              break;
+            case REFUND_PRINT_PAYMENT:
+              //Outbound no-op
+              break;
+            case VAULT_CARD:
+              //Outbound no-op
+              break;
+            case CLOSEOUT_REQUEST:
               //Outbound no-op
               break;
           }
