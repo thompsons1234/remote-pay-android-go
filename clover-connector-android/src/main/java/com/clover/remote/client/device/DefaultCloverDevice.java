@@ -50,6 +50,8 @@ import com.clover.remote.protocol.message.PartialAuthMessage;
 import com.clover.remote.protocol.message.RefundRequestMessage;
 import com.clover.remote.protocol.message.RefundResponseMessage;
 import com.clover.remote.protocol.message.ShowPaymentReceiptOptionsMessage;
+import com.clover.remote.protocol.message.ShowRefundReceiptOptionsMessage;
+import com.clover.remote.protocol.message.ShowCreditReceiptOptionsMessage;
 import com.clover.remote.protocol.message.SignatureVerifiedMessage;
 import com.clover.remote.protocol.message.TerminalMessage;
 import com.clover.remote.protocol.message.TextPrintMessage;
@@ -525,8 +527,16 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   }
 
-  public void doShowReceiptScreen() {
-    sendObjectMessage(new ShowPaymentReceiptOptionsMessage(null, null));
+  public void doShowPaymentReceiptScreen(String orderId, String paymentId) {
+    sendObjectMessage(new ShowPaymentReceiptOptionsMessage(orderId, paymentId, 2));
+  }
+
+  public void doShowRefundReceiptScreen(String orderId, String refundId) {
+    sendObjectMessage(new ShowRefundReceiptOptionsMessage(orderId, refundId));
+  }
+
+  public void doShowCreditReceiptScreen(String orderId, String creditId) {
+    sendObjectMessage(new ShowCreditReceiptOptionsMessage(orderId, creditId));
   }
 
   public void doKeyPress(KeyPress keyPress) {

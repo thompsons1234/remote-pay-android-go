@@ -486,11 +486,29 @@ public class CloverConnector implements ICloverConnector {
   }
 
   /**
-   * Show the customer facing receipt option screen for the last order only.
+   * Show the customer facing receipt option screen for the specified order/payment.
    */
-  public void displayReceiptOptions(String orderId, String paymentId) {
+  public void displayPaymentReceiptOptions(String orderId, String paymentId) {
     if (device != null) {
-      device.doShowReceiptScreen();
+      device.doShowPaymentReceiptScreen(orderId, paymentId);
+    }
+  }
+
+  /**
+   * Show the customer facing receipt option screen for the specified order/refund.
+   */
+  public void displayRefundReceiptOptions(String orderId, String refundId) {
+    if (device != null) {
+      device.doShowRefundReceiptScreen(orderId, refundId);
+    }
+  }
+
+  /**
+   * Show the customer facing receipt option screen for the specified order/credit.
+   */
+  public void displayCreditReceiptOptions(String orderId, String creditId) {
+    if (device != null) {
+      device.doShowCreditReceiptScreen(orderId, creditId);
     }
   }
 
@@ -725,6 +743,9 @@ public class CloverConnector implements ICloverConnector {
         cloverConnector.broadcaster.notifyOnDeviceActivityStart(deviceEvent);
       } else if (uiDirection == UiState.UiDirection.EXIT) {
         cloverConnector.broadcaster.notifyOnDeviceActivityEnd(deviceEvent);
+        if (uiState.toString().equals(CloverDeviceEvent.DeviceEventState.RECEIPT_OPTIONS.toString())) {
+          cloverConnector.device.doShowWelcomeScreen();
+        }
       }
     }
 

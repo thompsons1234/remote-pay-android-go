@@ -54,6 +54,7 @@ import com.clover.remote.client.lib.example.model.POSRefund;
 import com.clover.remote.client.lib.example.model.POSStore;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.AuthResponse;
+import com.clover.remote.client.messages.BaseResponse;
 import com.clover.remote.client.messages.CaptureAuthResponse;
 import com.clover.remote.client.messages.ConfigErrorResponse;
 import com.clover.remote.client.messages.ManualRefundRequest;
@@ -387,26 +388,33 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         @Override
         public void onPreAuthCaptureResponse(CaptureAuthResponse response) {
 
-          for(final POSPayment payment : store.getPreAuths()) {
-            if(payment.getPaymentID().equals(response.getPaymentID())) {
-              runOnUiThread(new Runnable(){
-                @Override public void run() {
-                  store.removePreAuth(payment);
-                  store.addPaymentToOrder(payment, store.getCurrentOrder());
-                  payment.setPaymentStatus(POSPayment.Status.PAID);
-                  store.getCurrentOrder().status = POSOrder.OrderStatus.CLOSED;
+          if (response.getCode().equals(BaseResponse.SUCCESS)) {
+            for (final POSPayment payment : store.getPreAuths()) {
+              if (payment.getPaymentID().equals(response.getPaymentID())) {
+                final long paymentAmount = response.getAmount();
+                runOnUiThread(new Runnable() {
+                  @Override
+                  public void run() {
+                    store.removePreAuth(payment);
+                    store.addPaymentToOrder(payment, store.getCurrentOrder());
+                    payment.setPaymentStatus(POSPayment.Status.AUTHORIZED);
+                    payment.amount = paymentAmount;
+                    store.getCurrentOrder().status = POSOrder.OrderStatus.AUTHORIZED;
 
-                  //TODO: if order isn't fully paid, don't create a new order...
-                  store.createOrder();
-                  CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
-                  currentOrderFragment.setOrder(store.getCurrentOrder());
-                  showRegister(null);
-                }
-              });
-              break;
-            } else {
-              showMessage("PreAuth Capture: Payment received does not match any of the stored PreAuth records", Toast.LENGTH_LONG);
+                    //TODO: if order isn't fully paid, don't create a new order...
+                    store.createOrder();
+                    CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
+                    currentOrderFragment.setOrder(store.getCurrentOrder());
+                    showRegister(null);
+                  }
+                });
+                break;
+              } else {
+                showMessage("PreAuth Capture: Payment received does not match any of the stored PreAuth records", Toast.LENGTH_LONG);
+              }
             }
+          } else {
+            showMessage("PreAuth Capture Error: Payment failed with response code = " + response.getCode() + " and reason: " + response.getReason(), Toast.LENGTH_LONG);
           }
         }
 
@@ -490,7 +498,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         @Override
         public void onRefundPaymentResponse(RefundPaymentResponse response) {
           if (ResultStatus.SUCCESS.toString().equals(response.getCode())) {
-            POSRefund refund = new POSRefund(response.getPaymentId(), response.getOrderId(), "DEFAULT", response.getRefundObj().getAmount());
+            POSRefund refund = new POSRefund(response.getRefundObj().getId(), response.getPaymentId(), response.getOrderId(), "DEFAULT", response.getRefundObj().getAmount());
             boolean done = false;
             for (POSOrder order : store.getOrders()) {
               for (POSExchange payment : order.getPayments()) {

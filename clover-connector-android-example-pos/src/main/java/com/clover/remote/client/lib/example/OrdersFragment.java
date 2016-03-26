@@ -48,6 +48,7 @@ import com.clover.remote.client.lib.example.model.POSRefund;
 import com.clover.remote.client.lib.example.model.POSStore;
 import com.clover.remote.client.lib.example.model.StoreObserver;
 import com.clover.remote.client.lib.example.adapter.OrdersListViewAdapter;
+import com.clover.remote.client.messages.PaymentReceiptOptionsRequest;
 import com.clover.remote.client.messages.RefundPaymentRequest;
 import com.clover.remote.client.messages.TipAdjustAuthRequest;
 import com.clover.remote.client.messages.VoidPaymentRequest;
@@ -137,81 +138,112 @@ public class OrdersFragment extends Fragment {
     paymentsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override
       public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        final POSPayment posPayment = (POSPayment) paymentsListView.getItemAtPosition(position);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        String[] paymentOptions = null;
 
-        if (posPayment.getPaymentStatus() == POSPayment.Status.AUTHORIZED) {
-          paymentOptions = new String[]{"Void Payment", "Refund Payment", "Tip Adjust Payment"};
-        } else if (posPayment.getPaymentStatus() == POSPayment.Status.PAID) {
-          paymentOptions = new String[]{"Void Payment", "Refund Payment"};
-        } else {
-          return;
+        final POSExchange posExchange = (POSExchange) paymentsListView.getItemAtPosition(position);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        String[] options = null;
+
+        if (posExchange instanceof POSPayment) {
+          if (((POSPayment)posExchange).getPaymentStatus() == POSPayment.Status.AUTHORIZED) {
+            options = new String[]{"Void Payment", "Refund Payment", "Tip Adjust Payment", "Receipt Options"};
+          } else if (((POSPayment)posExchange).getPaymentStatus() == POSPayment.Status.PAID) {
+            options = new String[]{"Void Payment", "Refund Payment", "Receipt Options"};
+          } else {
+            return;
+          }
+          final String[] finalPaymentOptions = options;
+          builder.setTitle("Payment Actions").
+              setItems(finalPaymentOptions, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int index) {
+                  final ICloverConnector cloverConnector = cloverConnectorWeakReference.get();
+                  if (cloverConnector != null) {
+                    final String option = finalPaymentOptions[index];
+                    switch (option) {
+                      case "Void Payment": {
+                        VoidPaymentRequest vpr = new VoidPaymentRequest();
+                        vpr.setPaymentId(posExchange.getPaymentID());
+                        vpr.setOrderId(posExchange.getOrderId());
+                        vpr.setVoidReason(VoidReason.USER_CANCEL.name());
+                        cloverConnector.voidPayment(vpr);
+                        //dlg.disiss();
+                        break;
+                      }
+                      case "Refund Payment": {
+                        RefundPaymentRequest rpr = new RefundPaymentRequest();
+                        rpr.setPaymentId(posExchange.getPaymentID());
+                        rpr.setOrderId(posExchange.orderID);
+                        cloverConnector.refundPayment(rpr);
+                        break;
+                      }
+                      case "Tip Adjust Payment": {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        final EditText input = new EditText(getActivity());
+                        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+                        builder.setView(input);
+
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                          @Override
+                          public void onClick(DialogInterface dialog, int which) {
+                            double val = Double.parseDouble(input.getText().toString());
+                            long value = (long) val;
+
+                            TipAdjustAuthRequest taar = new TipAdjustAuthRequest();
+                            taar.setPaymentID(posExchange.getPaymentID());
+                            taar.setOrderID(posExchange.getOrderId());
+                            taar.setTipAmount(value);
+                            cloverConnector.tipAdjustAuth(taar);
+                            dialog.dismiss();
+                          }
+                        });
+                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                          @Override
+                          public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                          }
+                        });
+
+                        builder.show();
+                        break;
+                      }
+                      case "Receipt Options": {
+                        cloverConnector.displayPaymentReceiptOptions(posExchange.orderID, posExchange.getPaymentID());
+                        break;
+                      }
+
+                    }
+                  } else {
+                    Toast.makeText(getActivity().getBaseContext(), "Clover Connector is null", Toast.LENGTH_LONG).show();
+                  }
+                }
+              });
+          final Dialog dlg = builder.create();
+          dlg.show();
+        } else if (posExchange instanceof POSRefund) {
+          options = new String[]{"Receipt Options"};
+          final String[] finalRefundOptions = options;
+          builder.setTitle("Refund Actions").
+              setItems(finalRefundOptions, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int index) {
+                  final ICloverConnector cloverConnector = cloverConnectorWeakReference.get();
+                  if (cloverConnector != null) {
+                    final String option = finalRefundOptions[index];
+                    switch (option) {
+                      case "Receipt Options": {
+                        cloverConnector.displayRefundReceiptOptions(posExchange.orderID, ((POSRefund)posExchange).getRefundID());
+                        break;
+                      }
+                    }
+                  } else {
+                    Toast.makeText(getActivity().getBaseContext(), "Clover Connector is null", Toast.LENGTH_LONG).show();
+                  }
+                }
+              });
+          final Dialog dlg = builder.create();
+          dlg.show();
         }
 
-        builder.setTitle("Payment Actions").
-            setItems(paymentOptions, new DialogInterface.OnClickListener() {
-              @Override
-              public void onClick(DialogInterface dialog, int index) {
-                final ICloverConnector cloverConnector = cloverConnectorWeakReference.get();
-                if (cloverConnector != null) {
-
-                  switch (index) {
-                    case 0: {
-                      VoidPaymentRequest vpr = new VoidPaymentRequest();
-                      vpr.setPaymentId(posPayment.getPaymentID());
-                      vpr.setOrderId(posPayment.getOrderId());
-                      vpr.setVoidReason(VoidReason.USER_CANCEL.name());
-                      cloverConnector.voidPayment(vpr);
-                      //dlg.disiss();
-                      break;
-                    }
-                    case 1: {
-                      RefundPaymentRequest rpr = new RefundPaymentRequest();
-                      rpr.setPaymentId(posPayment.getPaymentID());
-                      rpr.setOrderId(posPayment.orderID);
-                      cloverConnector.refundPayment(rpr);
-                      break;
-                    }
-                    case 2: {
-                      AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                      final EditText input = new EditText(getActivity());
-                      input.setInputType(InputType.TYPE_CLASS_NUMBER);
-                      builder.setView(input);
-
-                      builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                          double val = Double.parseDouble(input.getText().toString());
-                          long value = (long) val;
-
-                          TipAdjustAuthRequest taar = new TipAdjustAuthRequest();
-                          taar.setPaymentID(posPayment.getPaymentID());
-                          taar.setOrderID(posPayment.getOrderId());
-                          taar.setTipAmount(value);
-                          cloverConnector.tipAdjustAuth(taar);
-                          dialog.dismiss();
-                        }
-                      });
-                      builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                          dialog.cancel();
-                        }
-                      });
-
-                      builder.show();
-                      break;
-                    }
-
-                  }
-                } else {
-                  Toast.makeText(getActivity().getBaseContext(), "Clover Connector is null", Toast.LENGTH_LONG);
-                }
-              }
-            });
-        final Dialog dlg = builder.create();
-        dlg.show();
       }
     });
 
@@ -302,7 +334,7 @@ public class OrdersFragment extends Fragment {
 
       @Override
       public void paymentChanged(POSOrder posOrder, POSExchange pay) {
-
+        int i = 1;
       }
 
       @Override

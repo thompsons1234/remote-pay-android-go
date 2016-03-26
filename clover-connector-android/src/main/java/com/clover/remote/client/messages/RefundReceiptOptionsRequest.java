@@ -14,15 +14,34 @@
  * limitations under the License.
  */
 
-package com.clover.remote.client.lib.example.model;
+package com.clover.remote.client.messages;
 
-public class POSRefund extends POSExchange {
-  public String refundID;
-  public POSRefund(String refundID, String paymentID, String orderID, String employeeID, long amount) {
-    super(paymentID, orderID, employeeID, amount);
-    this.refundID = refundID;
+public class RefundReceiptOptionsRequest extends BaseRequest {
+  private String refundId;
+  private int version = 1;
+  private String orderId;
+
+  public String getRefundId() {
+    return refundId;
   }
-  public String getRefundID() {
-    return refundID;
+
+  public void setRefundId(String refundId) {
+    this.refundId = refundId;
+  }
+
+  public int getVersion() {
+    return version;
+  }
+
+  public void setVersion(int version) {
+    this.version = version;
+  }
+
+  public String getOrderId() {
+    return orderId;
+  }
+
+  public void setOrderId(String orderId) {
+    this.orderId = orderId;
   }
 }
