@@ -1,5 +1,37 @@
-<manifest package="com.clover.remote.client.lib">
+<manifest package="com.clover.remote.client.lib" xmlns:android="http://schemas.android.com/apk/res/android">
 
-  <application/>
+    <uses-feature android:name="android.hardware.usb.host" android:required="true"/>
 
+    <application>
+        <service android:name="com.clover.remote.client.transport.usb.pos.PosUsbRemoteProtocolService"
+                 android:exported="true"
+                 android:label="CloverUSBService">
+            <intent-filter>
+                <action android:name="com.clover.remote.client.transport.usb.pos.PosUsbRemoteProtocolService"></action>
+            </intent-filter>
+        </service>
+
+        <receiver android:name="com.clover.remote.client.transport.usb.pos.PosUsbBroadcastReceiver">
+            <intent-filter>
+                <!--<action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"/>-->
+                <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED"/>
+            </intent-filter>
+            <meta-data android:resource="@xml/device_filter" android:name="android.hardware.usb.action.USB_DEVICE_DETACHED"/>
+        </receiver>
+
+        <activity android:name="com.clover.remote.client.transport.usb.pos.UsbActivity">
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"/>
+                <!--<action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED"/>-->
+            </intent-filter>
+            <meta-data android:resource="@xml/device_filter" android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"/>
+            <!--<meta-data android:resource="@xml/device_filter" android:name="android.hardware.usb.action.USB_DEVICE_DETACHED"/>-->
+        </activity>
+
+        <!--<activity android:name="com.clover.remote.client.transport.usb.activities.CloverMerchantDevice"
+                  android:label="@string/title_activity_clover_merchant_device"
+        >
+        </activity>-->
+    </application>
 </manifest>
+

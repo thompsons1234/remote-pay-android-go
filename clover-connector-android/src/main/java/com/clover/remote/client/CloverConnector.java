@@ -19,8 +19,8 @@ package com.clover.remote.client;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
-import com.clover.common2.Signature2;
-import com.clover.common2.payments.PayIntent;
+import com.clover.common.analytics.ALog;
+import com.clover.remote.InputOption;
 import com.clover.remote.client.device.CloverDevice;
 import com.clover.remote.client.device.CloverDeviceConfiguration;
 import com.clover.remote.client.device.CloverDeviceFactory;
@@ -28,14 +28,12 @@ import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CaptureAuthRequest;
 import com.clover.remote.client.messages.CaptureAuthResponse;
-import com.clover.remote.client.messages.PreAuthRequest;
-import com.clover.remote.client.messages.PreAuthResponse;
-import com.clover.remote.client.messages.TxRequest;
-import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.ManualRefundResponse;
+import com.clover.remote.client.messages.PreAuthRequest;
+import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.RefundPaymentRequest;
 import com.clover.remote.client.messages.RefundPaymentResponse;
 import com.clover.remote.client.messages.SaleRequest;
@@ -44,9 +42,10 @@ import com.clover.remote.client.messages.SignatureVerifyRequest;
 import com.clover.remote.client.messages.TipAdjustAuthRequest;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
 import com.clover.remote.client.messages.TransactionResponse;
+import com.clover.remote.client.messages.TxRequest;
+import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
-import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.order.DisplayDiscount;
 import com.clover.remote.order.DisplayLineItem;
 import com.clover.remote.order.DisplayOrder;
@@ -55,12 +54,14 @@ import com.clover.remote.order.operation.DiscountsDeletedOperation;
 import com.clover.remote.order.operation.LineItemsAddedOperation;
 import com.clover.remote.order.operation.LineItemsDeletedOperation;
 import com.clover.remote.order.operation.OrderDeletedOperation;
-import com.clover.remote.protocol.message.DiscoveryResponseMessage;
-import com.clover.remote.terminal.InputOption;
-import com.clover.remote.terminal.KeyPress;
-import com.clover.remote.terminal.ResultStatus;
-import com.clover.remote.terminal.TxState;
-import com.clover.remote.terminal.UiState;
+import com.clover.remote.message.DiscoveryResponseMessage;
+import com.clover.remote.InputOption;
+import com.clover.remote.KeyPress;
+import com.clover.remote.ResultStatus;
+import com.clover.remote.TxState;
+import com.clover.remote.UiState;
+import com.clover.sdk.internal.PayIntent;
+import com.clover.sdk.internal.Signature2;
 import com.clover.sdk.v3.base.Reference;
 import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Batch;
@@ -169,7 +170,9 @@ public class CloverConnector implements ICloverConnector {
     new AsyncTask() {
       @Override protected Object doInBackground(Object[] params) {
         device = CloverDeviceFactory.get(config); // network access, so needs to be off UI thread
-        device.Subscribe(deviceObserver);
+        if(device != null) {
+          device.Subscribe(deviceObserver);
+        }
         return null;
       }
     }.execute();
@@ -201,7 +204,6 @@ public class CloverConnector implements ICloverConnector {
         PayIntent.Builder builder = new PayIntent.Builder();
 
         builder.transactionType(request.getType()); // difference between sale, auth and auth(preAuth)
-
         builder.remotePrint(disablePrinting);
         //builder.disableCashBack(DisableCashBack);
         builder.cardEntryMethods(request.getCardEntryMethods() != null ? request.getCardEntryMethods() : cardEntryMethods);
@@ -711,7 +713,8 @@ public class CloverConnector implements ICloverConnector {
           response.setSignature(signature2);
           cloverConnector.broadcaster.notifyOnSaleResponse(response);
         } else {
-          throw new IllegalArgumentException("Failed to pair this response. " + payment);
+          ALog.e(this, "Failed to pair this response: %s", payment);
+//          throw new IllegalArgumentException("Failed to pair this response. " + payment);
         }
       } finally {
         cloverConnector.device.doShowThankYouScreen();
@@ -802,6 +805,7 @@ public class CloverConnector implements ICloverConnector {
     }
 
     public void onVaultCardResponse(VaultedCard vaultedCard, String code, String reason) {
+      device.doShowWelcomeScreen();
       VaultCardResponse ccr = new VaultCardResponse(vaultedCard, code, reason);
       cloverConnector.broadcaster.notifyOnCaptureCardRespose(ccr);
     }
@@ -828,7 +832,7 @@ public class CloverConnector implements ICloverConnector {
       cloverConnector.merchantInfo = merchantInfo;
 
       if(drm.ready) { //TODO: is this a valid check?
-        cloverConnector.broadcaster.notifyOnReady();
+        cloverConnector.broadcaster.notifyOnReady(merchantInfo);
       } else {
         Log.e(CloverConnector.class.getName(), "DiscoveryResponseMessage, not ready...");
       }

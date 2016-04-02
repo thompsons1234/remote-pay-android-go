@@ -33,4 +33,38 @@ public class MerchantInfo {
     String serial;
     String model;
   }
+
+
+  public DeviceInfo getDeviceInfo() {
+    return deviceInfo;
+  }
+
+  public String getMerchantID() {
+    return merchantID;
+  }
+
+  public boolean isSupportsAuths() {
+    return supportsAuths;
+  }
+
+  public boolean isSupportsPreAuths() {
+    return supportsPreAuths;
+  }
+
+  public boolean isSupportsSales() {
+    return supportsSales;
+  }
+
+  public boolean isSupportsVaultCards() {
+    return supportsVaultCards;
+  }
+
+  public boolean isSupportsManualRefunds() {
+    return supportsManualRefunds;
+  }
+
+  public boolean isSupportsVoids() {
+    return supportsVoids;
+  }
+
 }

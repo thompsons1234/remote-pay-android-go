@@ -47,7 +47,7 @@ try {
         cloverConnector.dispose();
     }
     uri = new URI(_checksURL);
-    cloverConnector = new CloverConnector(new WebSocketCloverDeviceConfiguration(uri));
+    cloverConnector = new CloverConnector(new WebSocketCloverDeviceConfiguration(uri, 2000, 3000));
     cloverConnector.addCloverConnectorListener(new ICloverConnectorListener() {
     ...
 

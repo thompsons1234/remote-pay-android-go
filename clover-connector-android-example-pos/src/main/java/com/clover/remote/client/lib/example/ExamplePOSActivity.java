@@ -38,8 +38,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.clover.common2.clover.Clover;
 import com.clover.common2.payments.CardEntryMethods;
+import com.clover.remote.InputOption;
+import com.clover.remote.ResultStatus;
+import com.clover.remote.TxState;
 import com.clover.remote.client.CloverConnector;
 import com.clover.remote.client.ICloverConnectorListener;
+import com.clover.remote.client.MerchantInfo;
+import com.clover.remote.client.device.USBCloverDeviceConfiguration;
 import com.clover.remote.client.device.WebSocketCloverDeviceConfiguration;
 import com.clover.remote.client.lib.example.model.POSCard;
 import com.clover.remote.client.lib.example.model.POSDiscount;
@@ -66,10 +71,7 @@ import com.clover.remote.client.messages.SaleResponse;
 import com.clover.remote.client.messages.SignatureVerifyRequest;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
 import com.clover.remote.client.messages.VoidPaymentResponse;
-import com.clover.remote.protocol.message.TipAddedMessage;
-import com.clover.remote.terminal.InputOption;
-import com.clover.remote.terminal.ResultStatus;
-import com.clover.remote.terminal.TxState;
+import com.clover.remote.message.TipAddedMessage;
 import com.clover.sdk.v3.payments.CardTransactionType;
 import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.Payment;
@@ -266,11 +268,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           });
         }
 
-        public void onReady() {
+        public void onReady(final MerchantInfo merchantInfo) {
           runOnUiThread(new Runnable() {
             public void run() {
               Toast.makeText(ExamplePOSActivity.this, "Ready!", Toast.LENGTH_SHORT).show();
-              ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Connected");
+              ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Connected: " + merchantInfo.getMerchantID());
             }
           });
         }
@@ -592,7 +594,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       };
 
-      cloverConnector = new CloverConnector(new WebSocketCloverDeviceConfiguration(uri, 10000, 2000), ccListener);
+      cloverConnector = new CloverConnector(new USBCloverDeviceConfiguration(this), ccListener);
+//      cloverConnector = new CloverConnector(new WebSocketCloverDeviceConfiguration(uri, 10000, 2000), ccListener);
 
       updateComponentsWithNewCloverConnector();
 
@@ -602,6 +605,12 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   }
 
+  @Override protected void onDestroy() {
+    super.onDestroy();
+    if(cloverConnector != null) {
+      cloverConnector.dispose();
+    }
+  }
 
   @Override
   public void onFragmentInteraction(Uri uri) {

@@ -16,13 +16,13 @@
 
 package com.clover.remote.client.messages;
 
-import com.clover.common2.payments.PayIntent;
-import com.clover.sdk.v3.payments.VaultedCard;
+import com.clover.sdk.internal.PayIntent;
 
 public class SaleRequest extends TxRequest{
   private Long tippableAmount;
   private Long taxAmount;
   private boolean cardNotPresent;
+  private boolean allowOfflinePayments = false;
 
     /*
         public bool DisableCashback { get; set; } //
