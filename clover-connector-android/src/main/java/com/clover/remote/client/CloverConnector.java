@@ -19,7 +19,6 @@ package com.clover.remote.client;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
-import com.clover.common.analytics.ALog;
 import com.clover.remote.InputOption;
 import com.clover.remote.client.device.CloverDevice;
 import com.clover.remote.client.device.CloverDeviceConfiguration;
@@ -55,7 +54,6 @@ import com.clover.remote.order.operation.LineItemsAddedOperation;
 import com.clover.remote.order.operation.LineItemsDeletedOperation;
 import com.clover.remote.order.operation.OrderDeletedOperation;
 import com.clover.remote.message.DiscoveryResponseMessage;
-import com.clover.remote.InputOption;
 import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
 import com.clover.remote.TxState;
@@ -201,6 +199,7 @@ public class CloverConnector implements ICloverConnector {
     if (device != null) {
       try {
         lastRequest = request;
+
         PayIntent.Builder builder = new PayIntent.Builder();
 
         builder.transactionType(request.getType()); // difference between sale, auth and auth(preAuth)
@@ -232,6 +231,12 @@ public class CloverConnector implements ICloverConnector {
         builder.externalPaymentId(externalPaymentId);
 
         PayIntent payIntent = builder.build();
+
+        if(request.allowOfflinePayments()) {
+
+        }
+
+
         device.doTxStart(payIntent, null, suppressTipScreen); //
 //        return payIntent.externalPaymentId;
       } catch (Exception e) {
@@ -713,8 +718,7 @@ public class CloverConnector implements ICloverConnector {
           response.setSignature(signature2);
           cloverConnector.broadcaster.notifyOnSaleResponse(response);
         } else {
-          ALog.e(this, "Failed to pair this response: %s", payment);
-//          throw new IllegalArgumentException("Failed to pair this response. " + payment);
+          Log.e(getClass().getSimpleName(), String.format("Failed to pair this response: %s", payment));
         }
       } finally {
         cloverConnector.device.doShowThankYouScreen();

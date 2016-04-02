@@ -11,21 +11,12 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.Log;
-import com.clover.common.util.CloverUsbManager;
-import com.clover.common2.payments.PaymentDevice;
 import com.clover.remote.client.transport.usb.USBCloverTransportService;
-import com.clover.remote.client.transport.usb.USBCloverTransportServiceListener;
-import com.clover.remote.message.DiscoveryRequestMessage;
-import com.clover.remote.message.Message;
+import com.clover.remote.client.transport.usb.UsbCloverManager;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-//import com.clover.remote.protocol.usb.PayDisplayUsbActivity;
-//import com.clover.remote.protocol.usb.R;
-//import com.clover.remote.protocol.usb.test.PacketFlood;
 
 
 /**
@@ -71,20 +62,6 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
     mBgHandlerThread = new HandlerThread(TAG+"-Bg-Thread");
     mBgHandlerThread.start();
     mBgHandler = new Handler(mBgHandlerThread.getLooper());
-
-    new Thread(){
-      @Override public void run() {
-        while(true) {
-          try {
-            Thread.sleep(5000);
-            Log.d(TAG, "Service is still alive...........");
-          } catch (InterruptedException ie) {
-
-          }
-        }
-      }
-
-    }.start();
   }
 
   private IntentFilter getIntentFilter() {
@@ -95,20 +72,15 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
   }
 
   private RemoteUsbManager mRemoteUsbManager;
-//  private AsyncRemoteMessageConduit mAsyncRemoteMessageConduit;
-//  private Counters mCounters;
 
   @Override
   public void onCreate() {
     super.onCreate();
-
-//    mCounters = Counters.instance(this);
   }
 
   @Override
   public void onDestroy() {
-//    ALog.d(this, "onDestroy");
-    Log.d(getClass().getSimpleName(), "onDestroy Clover USB Service!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    Log.d(getClass().getSimpleName(), "onDestroy Clover USB Service.");
 
     mBgHandler.removeCallbacks(mSetupUsbRunnable);
     mBgHandler.removeCallbacks(mConnectUsbRunnable);
@@ -131,16 +103,10 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
     }
   }
 
-//  private OrderReceiver mOrderReceiver;
-
   public class PosUsbClientServiceBinder extends ServiceBinder<PosUsbRemoteProtocolService> {
     @Override
     public PosUsbRemoteProtocolService getService() {
         return PosUsbRemoteProtocolService.this;
-      /*if(isConduitConnected()) {
-      } else {
-        return null;
-      }*/
     }
   }
 
@@ -158,7 +124,7 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
   @Override
   public int onStartCommand(Intent intent, int flags, int startId) {
     super.onStartCommand(intent, flags, startId);
-//    ALog.d(this, "onStartCommand, intent: %s, flags: %d, startId: %d", intent, flags, startId);
+    Log.d(TAG, String.format("onStartCommand, intent: %s, flags: %d, startId: %d", intent, flags, startId));
 
     if (intent != null) {
       final String action = intent.getAction();
@@ -209,16 +175,14 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
       return false;
     }
 
-//    ALog.d(this, "setupUsb");
+    Log.d(TAG, "setupUsb");
 
     try {
       UsbAccessorySetupUsbManager setupUsbManager = new UsbAccessorySetupUsbManager(getContext());
       setupUsbManager.startAccessoryMode();
       return true;
     } catch (Exception e) {
-//      mCounters.increment("pos.error.setupusb." + e.getClass().getSimpleName().toLowerCase());
-//      ALog.w(this, e, "Terminal setup failed");
-      Log.w(getClass().getSimpleName(), "Terminal setup failed", e);
+      Log.w(TAG, "Terminal setup failed", e);
     }
 
     return false;
@@ -226,12 +190,11 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
 
   private void connectUsb() {
     if (mRemoteUsbManager != null && mRemoteUsbManager.isConnected()) {
-      Log.d(TAG, "Already have a connection, just return!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+      Log.d(TAG, "Already have a connection, just return.");
       return; // ready!
     }
 
-//    ALog.d(this, "connectUsb");
-    Log.d(getClass().getSimpleName(), "connectUsb");
+    Log.d(TAG, "connectUsb");
 
     mRemoteUsbManager = new RemoteUsbManager(getContext());
 
@@ -251,37 +214,19 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
 //      connectionStatus = ConnectionStatus.READY;
       Log.d(TAG, "send ready message");
       getContext().sendBroadcast(new Intent(RemoteTerminalStatus.TERMINAL_CONNECTED_READY.name()));
-      /*for(USBCloverTransportServiceListener listener : listeners) {
-        listener.onDeviceReady();
-      }*/
 
-//      mRemoteStringConduit = new RemoteStringConduit();
-//      mAsyncRemoteMessageConduit = new AsyncRemoteMessageConduit(this, mBgHandler, this, mRemoteUsbManager, "pos");
-//      mAsyncRemoteMessageConduit.start();
-
-//      mRemoteStringConduit.start()
-
-      /*mOrderReceiver = new OrderReceiver() {
-        @Override
-        protected Class<? extends Service> getOrderListenerServiceClass() {
-          return UsbOrderStateService.class;
-        }
-      };
-      registerReceiver(mOrderReceiver, mOrderReceiver.getIntentFilter());*/
-
-      setRemoteProtocolUsbPaymentDevice(getContext());
+//      setRemoteProtocolUsbPaymentDevice(getContext());
 //      startForeground();
 
       /*if (PacketFlood.ENABLED) {
         new PacketFlood(mAsyncRemoteMessageConduit, getPackageName()).start();
       }*/
     } catch (Exception e) {
-      boolean quiet = e instanceof CloverUsbManager.UsbDeviceNotFoundException;
+      boolean quiet = e instanceof UsbCloverManager.UsbDeviceNotFoundException;
       if (quiet) {
-//        ALog.d(this, "USB connect failed, this is expected when the device is not attached");
+        Log.d(TAG, "USB connect failed, this is expected when the device is not attached");
       } else {
-//        mCounters.increment("pos.error.connectusb." + e.getClass().getSimpleName().toLowerCase());
-//        ALog.w(this, e, "USB connect failed");
+        Log.w(TAG, "USB connect failed", e);
       }
 
       disconnectUsb();
@@ -293,17 +238,7 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
       return;
     }
 
-//    ALog.d(this, "disconnectUsb");
-
-    /*if (mOrderReceiver != null) {
-      unregisterReceiver(mOrderReceiver);
-      mOrderReceiver = null;
-    }*/
-
-    /*if (mAsyncRemoteMessageConduit != null) {
-      mAsyncRemoteMessageConduit.stop();
-      mAsyncRemoteMessageConduit = null;
-    }*/
+    Log.d(TAG, "disconnectUsb");
 
     if (mRemoteUsbManager != null) {
       mRemoteUsbManager.disconnect();
@@ -312,36 +247,31 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
     currentStatus = RemoteTerminalStatus.TERMINAL_DISCONNECTED;
     Log.d(TAG, "send disconnect message");
     getContext().sendBroadcast(new Intent(RemoteTerminalStatus.TERMINAL_DISCONNECTED.name()));
-    /*for(USBCloverTransportServiceListener listener : listeners) {
-      listener.onDeviceDisconnected();
-    }*/
 
-
-    unsetRemoteProtocolUsbPaymentDevice(getContext());
+//    unsetRemoteProtocolUsbPaymentDevice(getContext()); // TODO: don't think I need this
 //    stopForeground(true);
     stopSelf();
   }
 
-  public static void setRemoteProtocolUsbPaymentDevice(Context context) {
-//    ALog.d(context, "Setting payment device to " + PaymentDevice.REMOTE_PROTOCOL_USB);
-    PaymentDevice.REMOTE_PROTOCOL_USB.setDefault(context);
+  /*public static void setRemoteProtocolUsbPaymentDevice(Context context) {
+    Log.d(TAG, String.format("Setting payment device to %s", PaymentDevice.REMOTE_PROTOCOL_USB));
+//    PaymentDevice.REMOTE_PROTOCOL_USB.setDefault(context);
   }
 
   public static void unsetRemoteProtocolUsbPaymentDevice(Context context) {
     if (PaymentDevice.getDefault(context) == PaymentDevice.REMOTE_PROTOCOL_USB) {
       for (PaymentDevice paymentDevice : PaymentDevice.getInstalled(context)) {
         if (paymentDevice.isBuiltIn()) {
-//          ALog.d(context, "Setting payment device to " + paymentDevice);
+          Log.d(TAG, String.format("Setting payment device to %s", paymentDevice));
           paymentDevice.setDefault(context);
           break;
         }
       }
     }
-  }
+  }*/
 
-  private void startForegroundNope() {
-//    ALog.d(this, "startForeground");
-    Log.d(getClass().getSimpleName(), "startForeground");
+  private void startForeground() {
+    Log.d(TAG, "startForeground");
 
     PendingIntent pendingIntent = PendingIntent.getActivity(getContext(), 1,
         new Intent().setClass(getContext(), UsbActivity.class),
@@ -361,20 +291,14 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
 
   @Override public void onConduitConnected() {
     super.onConduitConnected();
-//    sendMessage(new DiscoveryRequestMessage(isOrderModificationSupported()).toJsonString());
+//    sendMessage(new DiscoveryRequestMessage(isOrderModificationSupported()).toJsonString()); // this gets sent by the DefaultCloverDevice
     getContext().sendBroadcast(new Intent(RemoteTerminalStatus.TERMINAL_CONNECTED_NOT_READY.name()));
-    /*for(USBCloverTransportServiceListener listener : listeners) {
-      listener.onDeviceReady();
-    }*/
   }
 
   @Override
   public void onConduitDisconnected() {
     super.onConduitDisconnected();
     disconnectUsb();
-    for(USBCloverTransportServiceListener listener : listeners) {
-      listener.onDeviceDisconnected();
-    }
   }
 
   @Override
@@ -386,25 +310,13 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
     return this;
   }
 
-  List<USBCloverTransportServiceListener> listeners = new ArrayList<USBCloverTransportServiceListener>();
 
   public void sendMessage(String remoteMessageJSON) {
     sendQueue.send(remoteMessageJSON);
   }
 
-  @Override
-  public void addListener(USBCloverTransportServiceListener listener) {
-    listeners.add(listener);
-    broadcastStatus();
-  }
-
   private void broadcastStatus() {
     getContext().sendBroadcast(new Intent(currentStatus.name()));
-  }
-
-  @Override
-  public void removeListener(USBCloverTransportServiceListener listener) {
-    listeners.remove(listener);
   }
 
   private class SendQueue  {
@@ -458,9 +370,6 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
                 intent.putExtra(EXTRA_MESSAGE, message);
                 getContext().sendBroadcast(intent);
               }
-              /*for(USBCloverTransportServiceListener listener : listeners) {
-                listener.onMessage(message);
-              }*/
             } catch (IOException | InterruptedException ie) {
               //
             }

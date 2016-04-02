@@ -5,6 +5,4 @@ package com.clover.remote.client.transport.usb;
  */
 public interface USBCloverTransportService {
   void sendMessage(String message);
-  void addListener(USBCloverTransportServiceListener listener);
-  void removeListener(USBCloverTransportServiceListener listener);
 }

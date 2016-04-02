@@ -8,11 +8,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import com.clover.common.analytics.ALog;
-import com.clover.common.util.CloverUsbManager;
 import com.clover.remote.client.transport.usb.UsbCloverManager;
 
 /**
@@ -44,7 +41,7 @@ public class UsbActivity extends Activity {
         Runnable runnable = new Runnable(){
           @Override public void run() {
             serviceIntent.setAction(PosUsbRemoteProtocolService.ACTION_USB_SETUP);
-            //            ALog.d(this, "Starting service: %s", serviceIntent);
+            Log.d(TAG, String.format("Starting service: %s", serviceIntent));
             context.startService(serviceIntent);
           }
         };
@@ -63,7 +60,7 @@ public class UsbActivity extends Activity {
         Runnable runnable = new Runnable() {
           @Override public void run() {
             serviceIntent.setAction(PosUsbRemoteProtocolService.ACTION_USB_CONNECT);
-            //            ALog.d(this, "Starting service: %s", serviceIntent);
+            Log.d(TAG, String.format("Starting service: %s", serviceIntent));
             context.startService(serviceIntent);
           }
         };
@@ -77,7 +74,7 @@ public class UsbActivity extends Activity {
         Runnable runnable = new Runnable() {
           @Override public void run() {
             serviceIntent.setAction(PosUsbRemoteProtocolService.ACTION_USB_DISCONNECT);
-            //            ALog.d(this, "Starting service: %s", serviceIntent);
+            Log.d(TAG, String.format("Starting service: %s", serviceIntent));
             context.startService(serviceIntent);
           }
         };

@@ -22,7 +22,6 @@ public class SaleRequest extends TxRequest{
   private Long tippableAmount;
   private Long taxAmount;
   private boolean cardNotPresent;
-  private boolean allowOfflinePayments = false;
 
     /*
         public bool DisableCashback { get; set; } //

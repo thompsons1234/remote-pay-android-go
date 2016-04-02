@@ -24,11 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.GridLayout;
 import android.widget.GridView;
-import android.widget.LinearLayout;
-import android.widget.ListAdapter;
-import com.clover.common.util.CurrencyUtils;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.lib.example.adapter.AvailableItemsAdapter;
 import com.clover.remote.client.lib.example.model.OrderObserver;
@@ -43,6 +39,7 @@ import com.clover.remote.client.lib.example.model.POSPayment;
 import com.clover.remote.client.lib.example.model.POSRefund;
 import com.clover.remote.client.lib.example.model.POSStore;
 import com.clover.remote.client.lib.example.model.StoreObserver;
+import com.clover.remote.client.lib.example.utils.CurrencyUtils;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.SaleRequest;
 import com.clover.remote.order.DisplayDiscount;
@@ -272,12 +269,12 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     public void lineItemAdded(POSOrder posOrder, POSLineItem lineItem) {
       DisplayLineItem dli = new DisplayLineItem();
       dli.setName(lineItem.getItem().getName());
-      dli.setPrice(CurrencyUtils.longToAmountString(Currency.getInstance(Locale.getDefault()), lineItem.getPrice()));
+      dli.setPrice(CurrencyUtils.format(lineItem.getPrice(), Locale.getDefault()));
       List<DisplayDiscount> dDiscounts = new ArrayList<DisplayDiscount>();
       if (lineItem.getDiscount() != null && lineItem.getDiscount().getValue(lineItem.getPrice()) != lineItem.getPrice()) {
         DisplayDiscount dd = new DisplayDiscount();
         dd.setName(lineItem.getDiscount().name);
-        dd.setAmount(CurrencyUtils.longToAmountString(Currency.getInstance(Locale.getDefault()), lineItem.getDiscount().getValue(lineItem.getPrice())));
+        dd.setAmount(CurrencyUtils.format(lineItem.getDiscount().getValue(lineItem.getPrice()), Locale.getDefault()));
       }
       liToDli.put(lineItem, dli);
       List<DisplayLineItem> items = new ArrayList<DisplayLineItem>();
@@ -293,12 +290,12 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     public void lineItemRemoved(POSOrder posOrder, POSLineItem lineItem) {
       DisplayLineItem dli = liToDli.get(lineItem);
       //dli.setName(lineItem.getItem().getName());
-      //dli.setPrice(CurrencyUtils.longToAmountString(Currency.getInstance(Locale.getDefault()), lineItem.getPrice()));
+      //dli.setPrice(CurrencyUtils.format(lineItem.getPrice()));
       List<DisplayDiscount> dDiscounts = new ArrayList<DisplayDiscount>();
       if (lineItem.getDiscount() != null && lineItem.getDiscount().getValue(lineItem.getPrice()) != lineItem.getPrice()) {
         DisplayDiscount dd = new DisplayDiscount();
         dd.setName(lineItem.getDiscount().name);
-        dd.setAmount(CurrencyUtils.longToAmountString(Currency.getInstance(Locale.getDefault()), lineItem.getDiscount().getValue(lineItem.getPrice())));
+        dd.setAmount(CurrencyUtils.format(lineItem.getDiscount().getValue(lineItem.getPrice()), Locale.getDefault()));
       }
 
       liToDli.remove(lineItem);
@@ -319,13 +316,13 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
       DisplayLineItem dli = liToDli.get(lineItem);
       dli.setName(lineItem.getItem().getName());
       dli.setQuantity("" + lineItem.getQuantity());
-      dli.setPrice(CurrencyUtils.longToAmountString(Currency.getInstance(Locale.getDefault()), lineItem.getPrice()));
+      dli.setPrice(CurrencyUtils.format(lineItem.getPrice(), Locale.getDefault()));
       List<DisplayDiscount> dDiscounts = new ArrayList<DisplayDiscount>();
       //dli.getDiscounts().clear();
       if (lineItem.getDiscount() != null && lineItem.getDiscount().getValue(lineItem.getPrice()) != lineItem.getPrice()) {
         DisplayDiscount dd = new DisplayDiscount();
         dd.setName(lineItem.getDiscount().name);
-        dd.setAmount(CurrencyUtils.longToAmountString(Currency.getInstance(Locale.getDefault()), lineItem.getDiscount().getValue(lineItem.getPrice())));
+        dd.setAmount(CurrencyUtils.format(lineItem.getDiscount().getValue(lineItem.getPrice()), Locale.getDefault()));
       }
       dli.setDiscounts(dDiscounts);
       updateTotals(posOrder, displayOrder);
@@ -334,9 +331,9 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     }
 
     private void updateTotals(POSOrder order, DisplayOrder displayOrder) {
-      displayOrder.setTax(CurrencyUtils.longToAmountString(Currency.getInstance(Locale.getDefault()), order.getTaxAmount()));
-      displayOrder.setSubtotal(CurrencyUtils.longToAmountString(Currency.getInstance(Locale.getDefault()), order.getPreTaxSubTotal()));
-      displayOrder.setTotal(CurrencyUtils.longToAmountString(Currency.getInstance(Locale.getDefault()), order.getTotal()));
+      displayOrder.setTax(CurrencyUtils.format(order.getTaxAmount(), Locale.getDefault()));
+      displayOrder.setSubtotal(CurrencyUtils.format(order.getPreTaxSubTotal(), Locale.getDefault()));
+      displayOrder.setTotal(CurrencyUtils.format(order.getTotal(), Locale.getDefault()));
 
 
       POSDiscount discount = order.getDiscount();

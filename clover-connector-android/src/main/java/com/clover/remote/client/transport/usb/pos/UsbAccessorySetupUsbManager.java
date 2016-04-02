@@ -4,10 +4,9 @@ import android.content.Context;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbManager;
 import android.os.Build;
+import android.util.Log;
 import android.util.Pair;
 
-import com.clover.common.analytics.ALog;
-import com.clover.common.util.CloverUsbManager;
 import com.clover.remote.client.transport.usb.UsbCloverManager;
 
 import java.nio.ByteBuffer;
@@ -62,7 +61,7 @@ public class UsbAccessorySetupUsbManager extends UsbCloverManager<Void> {
 
   public void startAccessoryMode() throws UsbConnectException {
     if (isConnected()) {
-      ALog.w(this, "Unexpectedly already connected");
+      Log.w(TAG, "Unexpectedly already connected");
       disconnect();
     }
 
@@ -73,7 +72,7 @@ public class UsbAccessorySetupUsbManager extends UsbCloverManager<Void> {
         if (!sendAccessoryModeCommands()) {
           throw new UsbConnectException("Unable to start accessory mode, sending commands failed");
         } else {
-          ALog.d(this, "Successfully started accessory mode");
+          Log.d(TAG, "Successfully started accessory mode");
         }
       } else {
         throw new UsbConnectException("Unable to start accessory mode, open failed");
@@ -110,15 +109,13 @@ public class UsbAccessorySetupUsbManager extends UsbCloverManager<Void> {
         ACCESSORY_GET_PROTOCOL, 0, 0, data, data.length, 2000);
 
     if (result <= 0) {
-      ALog.w(this, "Get protocol failed: %d", result);
-//      mCounters.increment("pos.error.start.accmode.result." + result);
+      Log.w(TAG, String.format("Get protocol failed: %d", result));
       return false;
     }
 
     short protocol = dataBuf.getShort();
     if (protocol < 1) {
-      ALog.w(this, "Get protocol returned %d", protocol);
-//      mCounters.increment("pos.error.start.accmode.protocol." + protocol);
+      Log.w(TAG, String.format("Get protocol returned %d", protocol));
       return false;
     }
 
@@ -147,7 +144,7 @@ public class UsbAccessorySetupUsbManager extends UsbCloverManager<Void> {
         ACCESSORY_START, 0, 0, null, 0, 2000);
 
     if (result < 0) {
-      ALog.w(this, "Start accessory mode failed: %d", result);
+      Log.w(TAG, String.format("Start accessory mode failed: %d", result));
       return false;
     }
 
@@ -161,8 +158,7 @@ public class UsbAccessorySetupUsbManager extends UsbCloverManager<Void> {
     boolean success = result > 0;
 
     if (!success) {
-      ALog.w(this, "Send string failed: %s", value);
-//      mCounters.increment("pos.error.sendaccstring." + value);
+      Log.w(TAG, String.format("Send string failed: %s", value));
     }
 
     return success;

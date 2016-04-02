@@ -3,28 +3,21 @@ package com.clover.remote.client.transport.usb;
 import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
-import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
-import com.clover.common.util.CloverUsbManager;
 import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.client.transport.CloverTransportObserver;
-import com.clover.remote.client.transport.usb.pos.PosRemoteProtocolService;
 import com.clover.remote.client.transport.usb.pos.PosUsbRemoteProtocolService;
 import com.clover.remote.client.transport.usb.pos.RemoteTerminalStatus;
 import com.clover.remote.client.transport.usb.pos.RemoteUsbManager;
 import com.clover.remote.client.transport.usb.pos.UsbAccessorySetupUsbManager;
 
 import java.nio.channels.NotYetConnectedException;
-import java.util.HashMap;
-import java.util.Iterator;
 
 /**
  * Created by blakewilliams on 3/29/16.
@@ -101,114 +94,22 @@ public class USBCloverTransport extends CloverTransport {
   }
 
   private void findAndOpenDevice() {
-    Intent posUsbServiceIntent = new Intent()
-        .setClass(context, PosUsbRemoteProtocolService.class)
-        .setAction(PosUsbRemoteProtocolService.ACTION_USB_CONNECT);
-    context.startService(posUsbServiceIntent);
 
-    if (true) {
-      return;
+    if (RemoteUsbManager.isUsbDeviceAttached(context)) {
+      Log.d(TAG, "Start pos usb connect from USBTransport");
+
+      Intent posUsbServiceIntent = new Intent()
+          .setClass(context, PosUsbRemoteProtocolService.class)
+          .setAction(PosUsbRemoteProtocolService.ACTION_USB_CONNECT);
+      context.startService(posUsbServiceIntent);
+    } else if (UsbAccessorySetupUsbManager.isUsbDeviceAttached(context)) {
+      Log.d(TAG, "Start pos usb setup from USBTransport");
+
+      Intent posUsbServiceIntent = new Intent()
+          .setClass(context, PosUsbRemoteProtocolService.class)
+          .setAction(PosUsbRemoteProtocolService.ACTION_USB_SETUP);
+      context.startService(posUsbServiceIntent);
     }
-    PosUsbRemoteProtocolService usbService = new PosUsbRemoteProtocolService();
-//    Intent intent = new Intent(context, PosUsbRemoteProtocolService.class).setAction(PosUsbRemoteProtocolService.ACTION_USB_SETUP);
-//    usbService.onStartCommand(intent, 0, 1);
-    try {
-      final UsbAccessorySetupUsbManager setupUsbManager = new UsbAccessorySetupUsbManager(context);
-
-      final UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
-      UsbDevice device = setupUsbManager.findDevice(usbManager, UsbAccessorySetupUsbManager.VENDOR_PRODUCT_IDS);
-
-      Runnable runnable = new Runnable() {
-        @Override public void run() {
-          try {
-            setupUsbManager.startAccessoryMode();
-
-//            device = setupUsbManager.findDevice(usbManager, RemoteUsbManager.VENDOR_PRODUCT_IDS);
-//            if(device != null) {
-//
-//            }
-          } catch (UsbCloverManager.UsbConnectException e) {
-            e.printStackTrace();
-          }
-        }
-      };
-
-      if(device != null) {
-        if(!usbManager.hasPermission(device)) {
-          requestPermission(usbManager, device, runnable);
-        } else {
-          runnable.run();
-        }
-      }
-
-//      UsbAccessorySetupUsbManager.isUsbDeviceAttached(context);
-//      setupUsbManager.startAccessoryMode();
-//      return true;
-
-//      RemoteUsbManager usbManager = new RemoteUsbManager(context);
-//      usbManager.open();
-    } catch (Throwable e) {
-      Log.e(getClass().getSimpleName(), "Error flipping device...", e);
-    }
-
-    //Intent connectIntent = new Intent(context, PosUsbRemoteProtocolService.class).setAction(PosUsbRemoteProtocolService.ACTION_USB_CONNECT);
-    //usbService.onStartCommand(connectIntent, 0, 2);
-
-    if(true) {
-      return;
-    }
-//    String action = intent.getAction();
-//    Bundle extras = intent.getExtras();
-
-    final Intent serviceIntent = new Intent().setClass(context, PosUsbRemoteProtocolService.class);
-
-
-    mUsbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
-
-    HashMap<String, UsbDevice> deviceList = mUsbManager.getDeviceList();
-    Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
-    while(deviceIterator.hasNext()){
-      UsbDevice device = deviceIterator.next();
-
-
-      if (CloverUsbManager.isMatch(device, UsbAccessorySetupUsbManager.VENDOR_PRODUCT_IDS)) {
-        //if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
-        Runnable runnable = new Runnable() {
-          @Override public void run() {
-            serviceIntent.setAction(PosUsbRemoteProtocolService.ACTION_USB_SETUP);
-            context.startService(serviceIntent);
-          }
-        };
-
-        if(mUsbManager.hasPermission(device)) {
-          runnable.run();
-        } else {
-          requestPermission(mUsbManager, device, runnable);
-        }
-        return;
-        //}
-      }
-
-      if (CloverUsbManager.isMatch(device, RemoteUsbManager.VENDOR_PRODUCT_IDS)) {
-        Runnable runnable = new Runnable() {
-          @Override public void run() {
-            serviceIntent.setAction(PosUsbRemoteProtocolService.ACTION_USB_CONNECT);
-            context.startService(serviceIntent);
-//            bindToService();
-            //
-          }
-        };
-
-        if(mUsbManager.hasPermission(device)) {
-          runnable.run();
-        } else {
-          requestPermission(mUsbManager, device, runnable);
-        }
-
-          return;
-      }
-    }
-
 
   }
 

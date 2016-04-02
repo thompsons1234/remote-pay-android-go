@@ -26,9 +26,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.clover.common.util.CurrencyUtils;
 import com.clover.remote.client.lib.example.model.POSLineItem;
 import com.clover.remote.client.lib.example.model.POSOrder;
+import com.clover.remote.client.lib.example.utils.CurrencyUtils;
 
 import java.util.ArrayList;
 import java.util.Currency;
@@ -149,11 +149,11 @@ public class CurrentOrderFragment extends Fragment {
 
   private void updateTotals() {
     if (getView() != null) {
-      String subtotalFormatted = CurrencyUtils.longToAmountString(Currency.getInstance(Locale.getDefault()), order.getPreTaxSubTotal());
+      String subtotalFormatted = CurrencyUtils.format(order.getPreTaxSubTotal(), Locale.getDefault());
       ((TextView) getView().findViewById(R.id.SubtotalLabel)).setText(subtotalFormatted);
-      String taxFormatted = CurrencyUtils.longToAmountString(Currency.getInstance(Locale.getDefault()), order.getTaxAmount());
+      String taxFormatted = CurrencyUtils.format(order.getTaxAmount(), Locale.getDefault());
       ((TextView) getView().findViewById(R.id.TaxLabel)).setText(taxFormatted);
-      String totalFormatted = CurrencyUtils.longToAmountString(Currency.getInstance(Locale.getDefault()), order.getTotal());
+      String totalFormatted = CurrencyUtils.format(order.getTotal(), Locale.getDefault());
       ((TextView) getView().findViewById(R.id.TotalLabel)).setText(totalFormatted);
     }
   }

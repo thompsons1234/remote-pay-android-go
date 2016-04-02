@@ -17,28 +17,16 @@
 package com.clover.remote.client.lib.example;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.Fragment;
-import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.CompoundButton;
-import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Switch;
-import android.widget.Toast;
-import com.clover.common2.payments.CardEntryMethods;
 import com.clover.remote.client.CloverConnector;
 import com.clover.remote.client.ICloverConnector;
-import com.clover.remote.client.lib.example.adapter.ItemsListViewAdapter;
-import com.clover.remote.client.lib.example.adapter.OrdersListViewAdapter;
-import com.clover.remote.client.lib.example.adapter.PaymentsListViewAdapter;
 import com.clover.remote.client.lib.example.model.OrderObserver;
 import com.clover.remote.client.lib.example.model.POSDiscount;
 import com.clover.remote.client.lib.example.model.POSExchange;
@@ -47,14 +35,8 @@ import com.clover.remote.client.lib.example.model.POSOrder;
 import com.clover.remote.client.lib.example.model.POSPayment;
 import com.clover.remote.client.lib.example.model.POSRefund;
 import com.clover.remote.client.lib.example.model.POSStore;
-import com.clover.remote.client.lib.example.model.StoreObserver;
-import com.clover.remote.client.messages.RefundPaymentRequest;
-import com.clover.remote.client.messages.TipAdjustAuthRequest;
-import com.clover.remote.client.messages.VoidPaymentRequest;
-import com.clover.sdk.v3.order.VoidReason;
 
 import java.lang.ref.WeakReference;
-import java.util.Collections;
 
 /**
  * A simple {@link Fragment} subclass.

@@ -11,8 +11,6 @@ import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.util.Log;
 import com.clover.remote.client.transport.usb.UsbCloverManager;
-//import com.clover.common.analytics.ALog;
-//import com.clover.common.util.CloverUsbManager;
 
 
 public class PosUsbBroadcastReceiver extends BroadcastReceiver{
@@ -39,7 +37,7 @@ public class PosUsbBroadcastReceiver extends BroadcastReceiver{
         Runnable runnable = new Runnable(){
           @Override public void run() {
             serviceIntent.setAction(PosUsbRemoteProtocolService.ACTION_USB_SETUP);
-//            ALog.d(this, "Starting service: %s", serviceIntent);
+            Log.d(TAG, String.format("Starting service: %s", serviceIntent));
             context.startService(serviceIntent);
           }
         };
@@ -47,7 +45,7 @@ public class PosUsbBroadcastReceiver extends BroadcastReceiver{
         if(mUsbManager.hasPermission(device)) {
           runnable.run();
         } else {
-          requestPermission(device, runnable, context);
+          requestPermission(device, runnable, context); // this probably needs to be removed, as this will probably fail in a BroadcastReceiver
         }
         return;
       }
@@ -58,28 +56,28 @@ public class PosUsbBroadcastReceiver extends BroadcastReceiver{
         Runnable runnable = new Runnable() {
           @Override public void run() {
             serviceIntent.setAction(PosUsbRemoteProtocolService.ACTION_USB_CONNECT);
-//            ALog.d(this, "Starting service: %s", serviceIntent);
+            Log.d(TAG, String.format("Starting service: %s", serviceIntent));
             context.startService(serviceIntent);
           }
         };
         if(mUsbManager.hasPermission(device)) {
           runnable.run();
         } else {
-          requestPermission(device, runnable, context);
+          requestPermission(device, runnable, context); // this probably needs to be removed, as this will probably fail in a BroadcastReceiver
         }
         return;
       } else if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
         Runnable runnable = new Runnable() {
           @Override public void run() {
             serviceIntent.setAction(PosUsbRemoteProtocolService.ACTION_USB_DISCONNECT);
-//            ALog.d(this, "Starting service: %s", serviceIntent);
+            Log.d(TAG, String.format("Starting service: %s", serviceIntent));
             context.startService(serviceIntent);
           }
         };
         if(true || mUsbManager.hasPermission(device)) {
           runnable.run();
         } else {
-          requestPermission(device, runnable, context);
+          requestPermission(device, runnable, context); // this probably needs to be removed, as this will probably fail in a BroadcastReceiver
         }
         return;
 

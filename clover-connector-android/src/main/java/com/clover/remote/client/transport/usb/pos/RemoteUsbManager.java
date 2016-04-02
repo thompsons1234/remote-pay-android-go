@@ -3,10 +3,11 @@ package com.clover.remote.client.transport.usb.pos;
 import android.content.Context;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
-import com.clover.common.analytics.ALog;
+import android.util.Log;
 import android.util.Pair;
-import com.clover.remote.client.transport.RemoteStringConduit;
 import com.clover.remote.client.transport.usb.UsbCloverManager;
+//import com.clover.remote.client.transport.RemoteStringConduit;
+//import com.clover.remote.client.transport.usb.UsbCloverManager;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -17,7 +18,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 
-public class RemoteUsbManager extends UsbCloverManager<Void> implements RemoteStringConduit {
+public class RemoteUsbManager extends UsbCloverManager<Void> /*implements RemoteStringConduit*/ {
 
   private final String TAG = getClass().getSimpleName();
 
@@ -73,7 +74,7 @@ public class RemoteUsbManager extends UsbCloverManager<Void> implements RemoteSt
   @Override
   protected boolean isInterfaceMatch(UsbInterface usbInterface) {
     if (VERBOSE) {
-      ALog.d(this, "Checking interface match: %s", usbInterface);
+      Log.d(TAG, String.format("Checking interface match: %s", usbInterface));
     }
 
     // Specified to avoid using ADB interface
@@ -103,12 +104,12 @@ public class RemoteUsbManager extends UsbCloverManager<Void> implements RemoteSt
   protected byte[] unwrapReadPacket(ByteBuffer inDataBuffer) {
     short inputSize = inDataBuffer.getShort();
     if (inputSize <= 0) {
-      ALog.w(this, "Error, packet too small: %d bytes", inputSize);
+      Log.w(TAG, String.format("Error, packet too small: %d bytes", inputSize));
       return null;
     }
 
     if (VERBOSE) {
-      ALog.v(this, "Input packet size: %d bytes", inputSize);
+      Log.v(TAG, String.format("Input packet size: %d bytes", inputSize));
     }
 
     byte[] inputData = new byte[inputSize];
@@ -131,7 +132,7 @@ public class RemoteUsbManager extends UsbCloverManager<Void> implements RemoteSt
 
     byte[] processedOutput = baos.toByteArray();
     if (VERBOSE) {
-      ALog.v(this, "Processed output: %s bytes", processedOutput.length);
+      Log.v(TAG, String.format("Processed output: %s bytes", processedOutput.length));
     }
 
     return processedOutput;
@@ -184,8 +185,7 @@ public class RemoteUsbManager extends UsbCloverManager<Void> implements RemoteSt
         return InputResult.COMPLETE;
       }
     } catch (Exception e) {
-      ALog.w(this, e, "Unable to process USB input data");
-//      mCounters.increment("pos.error.processinputdata." + e.getClass().getSimpleName().toLowerCase());
+      Log.w(TAG, "Unable to process USB input data", e);
       mCurrentIncomingStringLength = 0;
       return InputResult.ERROR;
     }
@@ -193,7 +193,7 @@ public class RemoteUsbManager extends UsbCloverManager<Void> implements RemoteSt
 
   public void sendString(String string) throws IOException, InterruptedException {
     if (VERBOSE) {
-      ALog.v(this, "Sending: %s", string);
+      Log.v(TAG, String.format("Sending: %s", string));
     }
 
     byte[] stringBytes = string.getBytes(UTF_8);
@@ -222,7 +222,7 @@ public class RemoteUsbManager extends UsbCloverManager<Void> implements RemoteSt
 
     String string = new String(stringBytes, UTF_8);
     if (VERBOSE) {
-      ALog.v(this, "Received: %s", string);
+      Log.v(TAG, String.format("Received: %s", string));
     }
 
     return string;
