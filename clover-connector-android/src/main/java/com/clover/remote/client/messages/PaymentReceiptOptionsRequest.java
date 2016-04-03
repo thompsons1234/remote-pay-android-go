@@ -16,6 +16,32 @@
 
 package com.clover.remote.client.messages;
 
-public class AuthResponse extends SaleResponse {
-}
+public class PaymentReceiptOptionsRequest extends BaseRequest {
+  private String paymentId;
+  private int version = 2;
+  private String orderId;
 
+  public String getPaymentId() {
+    return paymentId;
+  }
+
+  public void setPaymentId(String paymentId) {
+    this.paymentId = paymentId;
+  }
+
+  public int getVersion() {
+    return version;
+  }
+
+  public void setVersion(int version) {
+    this.version = version;
+  }
+
+  public String getOrderId() {
+    return orderId;
+  }
+
+  public void setOrderId(String orderId) {
+    this.orderId = orderId;
+  }
+}

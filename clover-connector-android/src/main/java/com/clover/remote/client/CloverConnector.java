@@ -26,8 +26,10 @@ import com.clover.remote.client.device.CloverDeviceConfiguration;
 import com.clover.remote.client.device.CloverDeviceFactory;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.AuthResponse;
+import com.clover.remote.client.messages.BaseResponse;
 import com.clover.remote.client.messages.CaptureAuthRequest;
 import com.clover.remote.client.messages.CaptureAuthResponse;
+import com.clover.remote.client.messages.ConfigErrorResponse;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.TxRequest;
@@ -208,8 +210,8 @@ public class CloverConnector implements ICloverConnector {
         builder.amount(request.getAmount());
 
         if(request instanceof SaleRequest) {
-          if (request.getTipAmount() != null) {
-            builder.tipAmount(request.getTipAmount()); // can't just set to zero because zero has a specific meaning
+          if (((SaleRequest)request).getTipAmount() != null) {
+              builder.tipAmount(((SaleRequest)request).getTipAmount()); // can't just set to zero because zero has a specific meaning
           }
           SaleRequest sr = (SaleRequest)request;
           if (sr.getTaxAmount() != null) {
@@ -219,7 +221,13 @@ public class CloverConnector implements ICloverConnector {
             builder.tippableAmount(sr.getTippableAmount());
           }
           if (request.getVaultedCard() != null) {
-            builder.vaultedCard(request.getVaultedCard());
+            if (merchantInfo.supportsVaultCards) {
+              builder.vaultedCard(request.getVaultedCard());
+            } else {
+              ConfigErrorResponse ceResponse = new ConfigErrorResponse();
+              ceResponse.setMessage("In SaleAuth : " + request.getClass().getSimpleName() + " - The currently configured merchant gateway does not support payments using vaulted cards.");
+              broadcaster.notifyOnConfigError(ceResponse);
+            }
           }
         }
 
@@ -258,7 +266,7 @@ public class CloverConnector implements ICloverConnector {
   }
 
   /**
-   * Auth method to obtain an Auth or Pre-Auth, based on the AuthRequest IsPreAuth flag
+   * Auth method to obtain an Auth or Pre-Auth(deprecated - use preAuth()), based on the AuthRequest IsPreAuth flag
    *
    * @param request
    */
@@ -271,10 +279,16 @@ public class CloverConnector implements ICloverConnector {
 
   public int preAuth(PreAuthRequest request) {
     if (device != null) {
-      try {
-        saleAuth(request, true);
-      } catch (Exception e) {
-        e.printStackTrace();
+      if (!merchantInfo.supportsPreAuths) {
+        ConfigErrorResponse ceResponse = new ConfigErrorResponse();
+        ceResponse.setMessage("In preAuth : PreAuthRequest - The currently configured merchant gateway does not support PreAuth transactions.");
+        broadcaster.notifyOnConfigError(ceResponse);
+      } else {
+        try {
+          saleAuth(request, true);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
       }
     }
     return 0;
@@ -285,7 +299,13 @@ public class CloverConnector implements ICloverConnector {
    */
 
   public void captureAuth(CaptureAuthRequest request) {
-      device.doCaptureAuth(request.paymentID, request.amount, request.tipAmount);
+      if (request != null && request.tipAmount > 0 && !merchantInfo.supportsPreAuths) {
+        ConfigErrorResponse ceResponse = new ConfigErrorResponse();
+        ceResponse.setMessage("In captureAuth : CaptureAuthRequest - The currently configured merchant gateway does not support Capture Auth requests.");
+        broadcaster.notifyOnConfigError(ceResponse);
+      } else {
+        device.doCaptureAuth(request.paymentID, request.amount, request.tipAmount);
+      }
   }
 
 
@@ -298,15 +318,27 @@ public class CloverConnector implements ICloverConnector {
     if (device == null) {
       return;
     }
-    lastRequest = request;
-    device.doTipAdjustAuth(request.getOrderID(), request.getPaymentID(), request.getTipAmount());
+    if (request != null && !merchantInfo.supportsTipAdjust) {
+      ConfigErrorResponse ceResponse = new ConfigErrorResponse();
+      ceResponse.setMessage("In tipAdjustAuth : TipAdjustAuthRequest - The currently configured merchant gateway does not support Tip Adjust Auth requests.");
+      broadcaster.notifyOnConfigError(ceResponse);
+    } else {
+      lastRequest = request;
+      device.doTipAdjustAuth(request.getOrderID(), request.getPaymentID(), request.getTipAmount());
+    }
   }
 
   public void vaultCard(Integer cardEntryMethods) {
     if (device == null) {
       return;
     }
-    device.doVaultCard(cardEntryMethods != null ? cardEntryMethods : getCardEntryMethods());
+    if (!merchantInfo.supportsVaultCards) {
+      ConfigErrorResponse ceResponse = new ConfigErrorResponse();
+      ceResponse.setMessage("In vaultCard : The currently configured merchant gateway does not support Vault Card requests.");
+      broadcaster.notifyOnConfigError(ceResponse);
+    } else {
+      device.doVaultCard(cardEntryMethods != null ? cardEntryMethods : getCardEntryMethods());
+    }
   }
 
   /**
@@ -364,14 +396,20 @@ public class CloverConnector implements ICloverConnector {
     if (device == null) {
       return;
     }
-    lastRequest = request;
-    PayIntent.Builder builder = new PayIntent.Builder();
-    builder.amount(-Math.abs(request.getAmount()))
-    	.cardEntryMethods(15)
-    	.transactionType(PayIntent.TransactionType.PAYMENT.CREDIT);
+    if (request != null && !merchantInfo.supportsManualRefunds) {
+      ConfigErrorResponse ceResponse = new ConfigErrorResponse();
+      ceResponse.setMessage("In manualRefund : ManualRefundRequest - The currently configured merchant gateway does not support Manual Refund requests.");
+      broadcaster.notifyOnConfigError(ceResponse);
+    } else {
+      lastRequest = request;
+      PayIntent.Builder builder = new PayIntent.Builder();
+      builder.amount(-Math.abs(request.getAmount()))
+          .cardEntryMethods(15)
+          .transactionType(PayIntent.TransactionType.PAYMENT.CREDIT);
 
-    PayIntent payIntent = builder.build();
-    device.doTxStart(payIntent, null, true);
+      PayIntent payIntent = builder.build();
+      device.doTxStart(payIntent, null, true);
+    }
   }
 
   /**
@@ -448,11 +486,29 @@ public class CloverConnector implements ICloverConnector {
   }
 
   /**
-   * Show the customer facing receipt option screen for the last order only.
+   * Show the customer facing receipt option screen for the specified order/payment.
    */
-  public void displayReceiptOptions(String orderId, String paymentId) {
+  public void displayPaymentReceiptOptions(String orderId, String paymentId) {
     if (device != null) {
-      device.doShowReceiptScreen();
+      device.doShowPaymentReceiptScreen(orderId, paymentId);
+    }
+  }
+
+  /**
+   * Show the customer facing receipt option screen for the specified order/refund.
+   */
+  public void displayRefundReceiptOptions(String orderId, String refundId) {
+    if (device != null) {
+      device.doShowRefundReceiptScreen(orderId, refundId);
+    }
+  }
+
+  /**
+   * Show the customer facing receipt option screen for the specified order/credit.
+   */
+  public void displayCreditReceiptOptions(String orderId, String creditId) {
+    if (device != null) {
+      device.doShowCreditReceiptScreen(orderId, creditId);
     }
   }
 
@@ -687,6 +743,9 @@ public class CloverConnector implements ICloverConnector {
         cloverConnector.broadcaster.notifyOnDeviceActivityStart(deviceEvent);
       } else if (uiDirection == UiState.UiDirection.EXIT) {
         cloverConnector.broadcaster.notifyOnDeviceActivityEnd(deviceEvent);
+        if (uiState.toString().equals(CloverDeviceEvent.DeviceEventState.RECEIPT_OPTIONS.toString())) {
+          cloverConnector.device.doShowWelcomeScreen();
+        }
       }
     }
 
@@ -819,12 +878,7 @@ public class CloverConnector implements ICloverConnector {
     public void onDeviceReady(CloverDevice device, DiscoveryResponseMessage drm) {
       Log.d(getClass().getSimpleName(), "Ready");
       cloverConnector.device.doShowWelcomeScreen();
-      MerchantInfo merchantInfo = new MerchantInfo();
-
-      merchantInfo.merchantID = drm.merchantId;
-      merchantInfo.deviceInfo.name = drm.name;
-      merchantInfo.deviceInfo.model = drm.model;
-      merchantInfo.deviceInfo.serial = drm.serial;
+      MerchantInfo merchantInfo = new MerchantInfo(drm);
       cloverConnector.merchantInfo = merchantInfo;
 
       if(drm.ready) { //TODO: is this a valid check?
@@ -832,6 +886,13 @@ public class CloverConnector implements ICloverConnector {
       } else {
         Log.e(CloverConnector.class.getName(), "DiscoveryResponseMessage, not ready...");
       }
+    }
+
+    public void onConfigError(String errorMessage)
+    {
+      ConfigErrorResponse ceResponse = new ConfigErrorResponse();
+      ceResponse.setMessage(errorMessage);
+      cloverConnector.broadcaster.notifyOnConfigError(ceResponse);
     }
 
     public void onDeviceDisconnected(CloverDevice device) {
