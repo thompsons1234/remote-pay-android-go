@@ -142,7 +142,6 @@ public class SignatureFragment extends Fragment {
     this.signatureVerifyRequest = signatureVerifyRequest;
     if (sigCanvas != null) {
       sigCanvas.setSignature(signatureVerifyRequest.getSignature());
-      sigCanvas.postInvalidate();
     }
   }
 

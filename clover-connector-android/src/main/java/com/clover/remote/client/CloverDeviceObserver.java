@@ -18,7 +18,6 @@ package com.clover.remote.client;
 
 import com.clover.common2.Signature2;
 import com.clover.remote.client.device.CloverDevice;
-import com.clover.remote.client.messages.ConfigErrorResponse;
 import com.clover.remote.client.transport.CloverTransportObserver;
 import com.clover.remote.protocol.message.DiscoveryResponseMessage;
 import com.clover.remote.terminal.InputOption;
@@ -83,5 +82,4 @@ public interface CloverDeviceObserver {
   void onDeviceDisconnected(CloverDevice device);
   void onDeviceConnected(CloverDevice device);
   void onDeviceReady(CloverDevice device, DiscoveryResponseMessage drm);
-  void onConfigError(String message);
 }

@@ -50,8 +50,6 @@ import com.clover.remote.protocol.message.PartialAuthMessage;
 import com.clover.remote.protocol.message.RefundRequestMessage;
 import com.clover.remote.protocol.message.RefundResponseMessage;
 import com.clover.remote.protocol.message.ShowPaymentReceiptOptionsMessage;
-import com.clover.remote.protocol.message.ShowRefundReceiptOptionsMessage;
-import com.clover.remote.protocol.message.ShowCreditReceiptOptionsMessage;
 import com.clover.remote.protocol.message.SignatureVerifiedMessage;
 import com.clover.remote.protocol.message.TerminalMessage;
 import com.clover.remote.protocol.message.TextPrintMessage;
@@ -232,6 +230,9 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
             case SHOW_ORDER_SCREEN:
               //Outbound no-op
               break;
+            case SHOW_RECEIPT_SCREEN:
+              //Outbound no-op
+              break;
             case SHOW_THANK_YOU_SCREEN:
               //Outbound no-op
               break;
@@ -248,33 +249,6 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
               //Outbound no-op
               break;
             case VOID_PAYMENT:
-              //Outbound no-op
-              break;
-            case CAPTURE_PREAUTH:
-              //Outbound no-op
-              break;
-            case LAST_MSG_REQUEST:
-              //Outbound no-op
-              break;
-            case LAST_MSG_RESPONSE:
-              //Outbound no-op
-              break;
-            case TIP_ADJUST:
-              //Outbound no-op
-              break;
-            case OPEN_CASH_DRAWER:
-              //Outbound no-op
-              break;
-            case SHOW_PAYMENT_RECEIPT_OPTIONS:
-              //Outbound no-op
-              break;
-            case REFUND_PRINT_PAYMENT:
-              //Outbound no-op
-              break;
-            case VAULT_CARD:
-              //Outbound no-op
-              break;
-            case CLOSEOUT_REQUEST:
               //Outbound no-op
               break;
           }
@@ -527,16 +501,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   }
 
-  public void doShowPaymentReceiptScreen(String orderId, String paymentId) {
-    sendObjectMessage(new ShowPaymentReceiptOptionsMessage(orderId, paymentId, 2));
-  }
-
-  public void doShowRefundReceiptScreen(String orderId, String refundId) {
-    sendObjectMessage(new ShowRefundReceiptOptionsMessage(orderId, refundId));
-  }
-
-  public void doShowCreditReceiptScreen(String orderId, String creditId) {
-    sendObjectMessage(new ShowCreditReceiptOptionsMessage(orderId, creditId));
+  public void doShowReceiptScreen() {
+    sendObjectMessage(new ShowPaymentReceiptOptionsMessage(null, null));
   }
 
   public void doKeyPress(KeyPress keyPress) {
