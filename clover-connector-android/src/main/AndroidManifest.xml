@@ -28,10 +28,6 @@
             <!--<meta-data android:resource="@xml/device_filter" android:name="android.hardware.usb.action.USB_DEVICE_DETACHED"/>-->
         </activity>
 
-        <!--<activity android:name="com.clover.remote.client.transport.usb.activities.CloverMerchantDevice"
-                  android:label="@string/title_activity_clover_merchant_device"
-        >
-        </activity>-->
     </application>
 </manifest>
 
