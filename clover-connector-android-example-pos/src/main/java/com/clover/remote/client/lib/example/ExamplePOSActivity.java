@@ -269,7 +269,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           runOnUiThread(new Runnable() {
             public void run() {
               Toast.makeText(ExamplePOSActivity.this, "Ready!", Toast.LENGTH_SHORT).show();
-              ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Connected: " + merchantInfo.getMerchantID());
+              ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Connected: ");
             }
           });
         }
