@@ -34,9 +34,6 @@ android {
 defaultTasks 'install'
 
 dependencies {
-
-//  compile 'com.clover:google-analytics:3.02'
-//  compile(name: 'remote-pay-lib', ext: 'aar')
   compile 'com.clover.sdk:clover-android-sdk:136-SNAPSHOT'
   compile 'com.clover:clover-remote-interface:163-SNAPSHOT'
   compile 'com.google.code.gson:gson:2.3.1'

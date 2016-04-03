@@ -89,6 +89,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public static final int WS_ENDPOINT_ACTIVITY = 123;
   public static final int SVR_ACTIVITY = 456;
 
+  boolean usb = true;
+
 //  private int manualCardEntryMethod = 0;
 //  private int swipeCardEntryMethod = 0;
 //  private int chipCardEntryMethod = 0;
@@ -165,10 +167,10 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == WS_ENDPOINT_ACTIVITY) {
-
-      loadBaseURL();
-      initialize();
-
+      if (!usb) {
+        loadBaseURL();
+        initialize();
+      }
     }
   }
 
@@ -591,8 +593,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       };
 
-      cloverConnector = new CloverConnector(new USBCloverDeviceConfiguration(this), ccListener);
-//      cloverConnector = new CloverConnector(new WebSocketCloverDeviceConfiguration(uri, 10000, 2000), ccListener);
+      if(usb) {
+        cloverConnector = new CloverConnector(new USBCloverDeviceConfiguration(this), ccListener);
+      } else {
+        cloverConnector = new CloverConnector(new WebSocketCloverDeviceConfiguration(uri, 10000, 2000), ccListener);
+      }
 
       updateComponentsWithNewCloverConnector();
 
@@ -615,8 +620,10 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void showSettings(MenuItem item) {
-    Intent intent = new Intent(this, ExamplePOSSettingsActivity.class);
-    startActivityForResult(intent, WS_ENDPOINT_ACTIVITY);
+    if(!usb) {
+      Intent intent = new Intent(this, ExamplePOSSettingsActivity.class);
+      startActivityForResult(intent, WS_ENDPOINT_ACTIVITY);
+    }
   }
 
   private void updateComponentsWithNewCloverConnector() {
