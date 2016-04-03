@@ -830,15 +830,12 @@ public class CloverConnector implements ICloverConnector {
       MerchantInfo merchantInfo = new MerchantInfo();
 
       merchantInfo.merchantID = drm.merchantId;
-      merchantInfo.merchantMID = drm.merchantMId;
-      merchantInfo.merchantName = drm.merchantName;
-
       merchantInfo.deviceInfo.name = drm.name;
       merchantInfo.deviceInfo.model = drm.model;
       merchantInfo.deviceInfo.serial = drm.serial;
       cloverConnector.merchantInfo = merchantInfo;
 
-      if(drm.ready) {
+      if(drm.ready) { //TODO: is this a valid check?
         cloverConnector.broadcaster.notifyOnReady(merchantInfo);
       } else {
         Log.e(CloverConnector.class.getName(), "DiscoveryResponseMessage, not ready...");
