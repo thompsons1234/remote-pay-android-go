@@ -153,7 +153,7 @@ public class PreAuthFragment extends Fragment {
                   }
                   }
                 } else {
-                  Toast.makeText(getActivity().getBaseContext(), "Clover Connector is null", Toast.LENGTH_LONG).show();
+                  Toast.makeText(getActivity().getBaseContext(), "Clover Connector is null", Toast.LENGTH_LONG);
                 }
               }
             });

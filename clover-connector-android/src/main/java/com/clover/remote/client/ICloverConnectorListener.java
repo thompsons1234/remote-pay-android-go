@@ -18,7 +18,6 @@ package com.clover.remote.client;
 
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CaptureAuthResponse;
-import com.clover.remote.client.messages.ConfigErrorResponse;
 import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.CloseoutResponse;
@@ -75,6 +74,4 @@ public interface ICloverConnectorListener {
   public void onVaultCardResponse(VaultCardResponse response);
 
   public void onTransactionState(TxState txState);
-
-  public void onConfigErrorResponse(ConfigErrorResponse response);
 }

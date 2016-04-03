@@ -225,10 +225,10 @@ public class MiscellaneousFragment extends Fragment {
     if (manualSwitch != null) {
 
       updatingSwitches = true;
-      manualSwitch.setChecked((((CloverConnector)cloverConnectorWeakReference.get()).getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_MANUAL) == CloverConnector.CARD_ENTRY_METHOD_MANUAL);
-      contactlessSwitch.setChecked((((CloverConnector)cloverConnectorWeakReference.get()).getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_NFC_CONTACTLESS) == CloverConnector.CARD_ENTRY_METHOD_NFC_CONTACTLESS);
-      chipSwitch.setChecked((((CloverConnector)cloverConnectorWeakReference.get()).getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_ICC_CONTACT) == CloverConnector.CARD_ENTRY_METHOD_ICC_CONTACT);
-      swipeSwitch.setChecked((((CloverConnector)cloverConnectorWeakReference.get()).getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE) == CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE);
+      manualSwitch.setChecked((((CloverConnector)cloverConnectorWeakReference.get()).getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_MANUAL) != 0);
+      contactlessSwitch.setChecked((((CloverConnector)cloverConnectorWeakReference.get()).getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_NFC_CONTACTLESS) != 0);
+      chipSwitch.setChecked((((CloverConnector)cloverConnectorWeakReference.get()).getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_ICC_CONTACT) != 0);
+      swipeSwitch.setChecked((((CloverConnector)cloverConnectorWeakReference.get()).getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE) != 0);
       updatingSwitches = false;
     }
 
