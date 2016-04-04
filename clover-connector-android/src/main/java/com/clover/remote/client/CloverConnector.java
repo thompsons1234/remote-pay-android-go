@@ -18,6 +18,7 @@ package com.clover.remote.client;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.util.Base64;
 import android.util.Log;
 import com.clover.remote.InputOption;
 import com.clover.remote.client.device.CloverDevice;
@@ -69,6 +70,7 @@ import com.clover.sdk.v3.payments.Refund;
 import com.clover.sdk.v3.payments.VaultedCard;
 import com.google.gson.Gson;
 
+import java.io.ByteArrayOutputStream;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -414,15 +416,9 @@ public class CloverConnector implements ICloverConnector {
    */
   public void printImage(Bitmap bitmap) //Bitmap img
   {
-    //Bitmap bm = BitmapFactory.decodeFile("/path/to/image.jpg");
-        /*
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos); //bm is the bitmap object
-        byte[] b = baos.toByteArray();
-
-        String base64Image = Base64.encodeToString(b, Base64.DEFAULT);
-        */
-    device.doPrintImage(bitmap);
+    if (device != null) {
+      device.doPrintImage(bitmap);
+    }
   }
 
   /**
