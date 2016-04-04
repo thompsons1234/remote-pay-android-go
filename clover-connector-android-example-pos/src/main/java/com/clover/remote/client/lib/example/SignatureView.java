@@ -58,6 +58,11 @@ public class SignatureView extends View {
 
   public void setSignature(Signature2 signature) {
     this.signature = signature;
-    invalidate();
+
+    post(new Runnable(){
+      @Override public void run() {
+        invalidate();
+      }
+    });
   }
 }
