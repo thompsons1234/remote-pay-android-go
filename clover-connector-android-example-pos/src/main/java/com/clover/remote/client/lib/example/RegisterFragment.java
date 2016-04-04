@@ -222,8 +222,8 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
   @Override
   public void onItemSelected(POSItem item) {
     store.getCurrentOrder().addItem(item, 1);
-    CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
-    currentOrderFragment.updateCurrentOrder();
+//    CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
+//    currentOrderFragment.updateCurrentOrder();
   }
 
   class RegisterObserver implements StoreObserver, OrderObserver {
@@ -268,6 +268,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     @Override
     public void lineItemAdded(POSOrder posOrder, POSLineItem lineItem) {
       DisplayLineItem dli = new DisplayLineItem();
+      dli.setId(lineItem.getId());
       dli.setName(lineItem.getItem().getName());
       dli.setPrice(CurrencyUtils.format(lineItem.getPrice(), Locale.getDefault()));
       List<DisplayDiscount> dDiscounts = new ArrayList<DisplayDiscount>();
@@ -301,7 +302,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
       liToDli.remove(lineItem);
       List<DisplayLineItem> items = new ArrayList<DisplayLineItem>();
       for (DisplayLineItem dlItem : displayOrder.getLineItems()) {
-        if (dlItem != dli) {
+        if (!dlItem.getId().equals(dli.getId())) {
           items.add(dlItem);
         }
       }

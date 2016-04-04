@@ -125,8 +125,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
 
     // initialize store...
-    store.addAvailableItem(new POSItem("1", "Hamburger", 759, true, true));
-    store.addAvailableItem(new POSItem("2", "Cheeseburger", 699, true, true));
+    store.addAvailableItem(new POSItem("0", "Chicken Nuggets", 539, true, true));
+    store.addAvailableItem(new POSItem("1", "Hamburger", 699, true, true));
+    store.addAvailableItem(new POSItem("2", "Cheeseburger", 759, true, true));
     store.addAvailableItem(new POSItem("3", "Double Hamburger", 819, true, true));
     store.addAvailableItem(new POSItem("4", "Double Cheeseburger", 899, true, true));
     store.addAvailableItem(new POSItem("5", "Bacon Cheeseburger", 999, true, true));
@@ -139,8 +140,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     store.addAvailableItem(new POSItem("12", "Chocolate Milkshake", 449, true, true));
     store.addAvailableItem(new POSItem("13", "Vanilla Milkshake", 419, true, true));
     store.addAvailableItem(new POSItem("14", "Strawberry Milkshake", 439, true, true));
-    store.addAvailableItem(new POSItem("15", "$25 Gift Card", 2500, false, false));
-    store.addAvailableItem(new POSItem("16", "$50 Gift Card", 5000, false, false));
+    store.addAvailableItem(new POSItem("15", "Ice Cream Cone", 189, true, true));
+    store.addAvailableItem(new POSItem("16", "$25 Gift Card", 2500, false, false));
+    store.addAvailableItem(new POSItem("17", "$50 Gift Card", 5000, false, false));
 
     store.addAvailableDiscount(new POSDiscount("10% Off", 0.1f));
     store.addAvailableDiscount(new POSDiscount("$5 Off", 500));
@@ -274,7 +276,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           runOnUiThread(new Runnable() {
             public void run() {
               Toast.makeText(ExamplePOSActivity.this, "Ready!", Toast.LENGTH_SHORT).show();
-              ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Connected: " + merchantInfo.getMerchantID());
+              ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText(String.format("Connected: %s (%s)", merchantInfo.getDeviceInfo().getSerial(), merchantInfo.getMerchantName()));
             }
           });
         }

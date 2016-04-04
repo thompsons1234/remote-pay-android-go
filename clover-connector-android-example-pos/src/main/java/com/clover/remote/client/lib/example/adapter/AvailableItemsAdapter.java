@@ -68,7 +68,8 @@ public class AvailableItemsAdapter extends ArrayAdapter<POSItem>
       }
 
       @Override public void lineItemRemoved(POSOrder posOrder, POSLineItem lineItem) {
-
+        itemToCount.remove(lineItem.getItem());
+        notifyDataSetChanged();
       }
 
       @Override public void lineItemChanged(POSOrder posOrder, POSLineItem lineItem) {

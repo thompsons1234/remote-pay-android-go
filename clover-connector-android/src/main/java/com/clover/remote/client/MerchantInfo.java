@@ -30,10 +30,22 @@ public class MerchantInfo {
   boolean supportsManualRefunds;
   boolean supportsVoids;
 
-  static class DeviceInfo {
+  public static class DeviceInfo {
     String name;
     String serial;
     String model;
+
+    public String getName() {
+      return name;
+    }
+
+    public String getSerial() {
+      return serial;
+    }
+
+    public String getModel() {
+      return model;
+    }
   }
 
 
