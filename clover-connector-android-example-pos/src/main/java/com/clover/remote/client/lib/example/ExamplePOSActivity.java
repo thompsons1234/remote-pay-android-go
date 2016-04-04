@@ -107,7 +107,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_example_pos);
 
-    if (loadBaseURL()) {
+    if (usb || loadBaseURL()) {
 
       initialize();
 
@@ -150,6 +150,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   private boolean loadBaseURL() {
+    if(usb) {
+      return true;
+    }
     String _serverBaseURL = PreferenceManager.getDefaultSharedPreferences(this).getString(EXAMPLE_POS_SERVER_KEY, null);
 
     if (_serverBaseURL == null || "".equals(_serverBaseURL.trim())) {
@@ -240,7 +243,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       if (cloverConnector != null) {
         cloverConnector.dispose();
       }
-      uri = new URI(_checksURL);
+
 //      if(cloverConnector == null) {
 
 //      }
@@ -596,6 +599,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       if(usb) {
         cloverConnector = new CloverConnector(new USBCloverDeviceConfiguration(this), ccListener);
       } else {
+        uri = new URI(_checksURL);
         cloverConnector = new CloverConnector(new WebSocketCloverDeviceConfiguration(uri, 10000, 2000), ccListener);
       }
 
