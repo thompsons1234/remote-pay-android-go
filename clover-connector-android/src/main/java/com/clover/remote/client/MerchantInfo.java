@@ -20,6 +20,8 @@ public class MerchantInfo {
   DeviceInfo deviceInfo = new DeviceInfo();
 
   String merchantID;
+  String merchantMID;
+  String merchantName;
 
   boolean supportsAuths;
   boolean supportsPreAuths;
@@ -41,6 +43,14 @@ public class MerchantInfo {
 
   public String getMerchantID() {
     return merchantID;
+  }
+
+  public String getMerchantMID() {
+    return merchantMID;
+  }
+
+  public String getMerchantName() {
+    return merchantName;
   }
 
   public boolean isSupportsAuths() {
