@@ -138,6 +138,17 @@
                 android:layout_height="wrap_content"
                 android:text="Contactless"
                 android:id="@+id/ContactlessSwitch"/>
+        <Switch
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Allow Offline Payment"
+                android:id="@+id/AllowOfflineSwitch"/>
+        <Switch
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Approve Offline Without Prompt"
+                android:enabled="false"
+                android:id="@+id/ApproveOfflinePaymentsWithoutPromptSwitch"/>
         </LinearLayout>
 
 

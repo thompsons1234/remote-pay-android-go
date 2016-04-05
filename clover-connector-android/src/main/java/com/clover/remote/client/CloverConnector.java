@@ -119,6 +119,9 @@ public class CloverConnector implements ICloverConnector {
   private boolean disableRestartTransactionOnFail;
   private MerchantInfo merchantInfo;
 
+  private boolean allowOfflinePayment;
+  private boolean approveOfflinePaymentWithoutPrompt;
+
   public CloverConnector() {
 
   }
@@ -210,7 +213,7 @@ public class CloverConnector implements ICloverConnector {
         builder.cardEntryMethods(request.getCardEntryMethods() != null ? request.getCardEntryMethods() : cardEntryMethods);
         builder.amount(request.getAmount());
 
-        if(request instanceof SaleRequest) {
+        if(request instanceof SaleRequest) { // Sale or Auth because Auth extends SaleRequest
           if (request.getTipAmount() != null) {
             builder.tipAmount(request.getTipAmount()); // can't just set to zero because zero has a specific meaning
           }
@@ -224,23 +227,21 @@ public class CloverConnector implements ICloverConnector {
           if (request.getVaultedCard() != null) {
             builder.vaultedCard(request.getVaultedCard());
           }
+          builder.cardNotPresent(request.isCardNotPresent());
+          Boolean allowOffline = ((SaleRequest)request).getAllowOfflinePayment();
+          builder.allowOfflinePayment(allowOffline == null ? isAllowOfflinePayment() : allowOffline.booleanValue()); // use connector value if request doesn't define one
+          Boolean approveOfflinePaymentWithoutPrompt = ((SaleRequest) request).getApproveOfflinePaymentWithoutPrompt();
+          builder.approveOfflinePaymentWithoutPrompt(approveOfflinePaymentWithoutPrompt == null ? isApproveOfflinePaymentWithoutPrompt() : approveOfflinePaymentWithoutPrompt); // use connector value if request doesn't define one
         }
 
-        // TODO: implement cardNotPresent
-        //builder.cardNotPresent(request.isCardNotPresent());
-
         String externalPaymentId = request.getExternalPaymentId();// == null ? getNextId() : request.getExternalPaymentId();
-        builder.externalPaymentId(externalPaymentId);
+        if(externalPaymentId != null) {
+          builder.externalPaymentId(externalPaymentId);
+        }
 
         PayIntent payIntent = builder.build();
 
-        if(request.allowOfflinePayments()) {
-
-        }
-
-
         device.doTxStart(payIntent, null, suppressTipScreen); //
-//        return payIntent.externalPaymentId;
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -596,6 +597,22 @@ public class CloverConnector implements ICloverConnector {
 
   public int getCardEntryMethods() {
     return cardEntryMethods;
+  }
+
+  public boolean isAllowOfflinePayment() {
+    return allowOfflinePayment;
+  }
+
+  public void setAllowOfflinePayment(boolean allowOfflinePayment) {
+    this.allowOfflinePayment = allowOfflinePayment;
+  }
+
+  public boolean isApproveOfflinePaymentWithoutPrompt() {
+    return approveOfflinePaymentWithoutPrompt;
+  }
+
+  public void setApproveOfflinePaymentWithoutPrompt(boolean approveOfflinePaymentWithoutPrompt) {
+    this.approveOfflinePaymentWithoutPrompt = approveOfflinePaymentWithoutPrompt;
   }
 
   /*public void setMerchantInfo(MerchantInfo merchantInfo) {
