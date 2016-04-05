@@ -27,8 +27,8 @@ public class AuthRequest extends SaleRequest {
   }
 
   /**
-   * @deprecated - if passing in true, use preAuth with PreAuthRequest
    * @param preAuth
+   * @deprecated - if passing in true, use preAuth with PreAuthRequest
    */
   public AuthRequest(boolean preAuth) {
     isPreAuth = preAuth;

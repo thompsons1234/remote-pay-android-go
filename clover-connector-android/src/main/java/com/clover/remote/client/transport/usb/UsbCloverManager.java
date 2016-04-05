@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2016 Clover Network, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * You may obtain a copy of the License at
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.clover.remote.client.transport.usb;
 
 import android.content.Context;
@@ -10,14 +26,14 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.Pair;
-import com.clover.remote.client.transport.usb.pos.UsbActivity;
-//import com.clover.common.analytics.ALog;
-//import com.clover.common.metrics.Counters;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
+
+//import com.clover.common.analytics.ALog;
+//import com.clover.common.metrics.Counters;
 
 /**
  * This class is designed to be a reusable USB communication manager for devices that bulk transfer data.
@@ -168,7 +184,9 @@ public abstract class UsbCloverManager<T> {
 
   public static UsbDevice findDevice(android.hardware.usb.UsbManager usbManager, Pair<Integer, Integer>[] vendorProductIds) {
     HashMap<String, UsbDevice> devices = usbManager.getDeviceList();
-    if (devices == null) return null;
+    if (devices == null) {
+      return null;
+    }
 
     for (UsbDevice device : devices.values()) {
       if (isMatch(device, vendorProductIds)) {
@@ -452,7 +470,7 @@ public abstract class UsbCloverManager<T> {
     return outputData;
   }
 
-  protected enum InputResult { CONTINUE, COMPLETE, ERROR }
+  protected enum InputResult {CONTINUE, COMPLETE, ERROR}
 
   /**
    * Optionally override this method to perform data processing on the input data bytes before they are returned. The
@@ -460,9 +478,9 @@ public abstract class UsbCloverManager<T> {
    * {@link #processOutputData(byte[], T)} this function may be called multiple times in a single transfer depending on the
    * return value of this function
    *
-   * @param inputData buffer containing bytes read from the USB device
+   * @param inputData    buffer containing bytes read from the USB device
    * @param outputStream stream containing bytes that will be returned to the caller
-   * @param params additional parameters which may allow the implementation to modify the way the byte array is interpreted
+   * @param params       additional parameters which may allow the implementation to modify the way the byte array is interpreted
    * @return CONTINUE to request more USB device data, COMPLETE to return the received data or ERROR if something is wrong
    */
   protected InputResult processInputData(byte[] inputData, ByteArrayOutputStream outputStream, T params) {
@@ -511,7 +529,7 @@ public abstract class UsbCloverManager<T> {
       if (!success) {
         SystemClock.sleep(waitMs);
       }
-    } while (!success && (SystemClock.elapsedRealtime()-connectStartTime) < timeoutMs);
+    } while (!success && (SystemClock.elapsedRealtime() - connectStartTime) < timeoutMs);
 
     return pollee.getResult();
   }

@@ -16,7 +16,6 @@
 
 package com.clover.remote.client;
 
-import android.graphics.Bitmap;
 import com.clover.remote.InputOption;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.CaptureAuthRequest;
@@ -30,6 +29,8 @@ import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.remote.order.DisplayDiscount;
 import com.clover.remote.order.DisplayLineItem;
 import com.clover.remote.order.DisplayOrder;
+
+import android.graphics.Bitmap;
 
 import java.util.List;
 

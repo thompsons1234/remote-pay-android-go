@@ -1,4 +1,23 @@
+/*
+ * Copyright (C) 2016 Clover Network, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * You may obtain a copy of the License at
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.clover.remote.client.transport.usb.pos;
+
+import com.clover.remote.client.transport.usb.USBCloverTransportService;
+import com.clover.remote.client.transport.usb.UsbCloverManager;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -11,8 +30,6 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.Log;
-import com.clover.remote.client.transport.usb.USBCloverTransportService;
-import com.clover.remote.client.transport.usb.UsbCloverManager;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -44,8 +61,9 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
   RemoteTerminalStatus currentStatus = RemoteTerminalStatus.TERMINAL_DISCONNECTED;
 
   BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-    @Override public void onReceive(Context context, Intent intent) {
-      if(intent.getAction().equals(ACTION_USB_SEND_MESSAGE)) {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+      if (intent.getAction().equals(ACTION_USB_SEND_MESSAGE)) {
         String msg = intent.getStringExtra(EXTRA_MESSAGE);
         Log.d(getClass().getSimpleName(), "Sending: " + msg);
         sendMessage(msg);
@@ -59,7 +77,7 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
   private ReadQueue readQueue = new ReadQueue();
 
   {
-    mBgHandlerThread = new HandlerThread(TAG+"-Bg-Thread");
+    mBgHandlerThread = new HandlerThread(TAG + "-Bg-Thread");
     mBgHandlerThread.start();
     mBgHandler = new Handler(mBgHandlerThread.getLooper());
   }
@@ -106,7 +124,7 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
   public class PosUsbClientServiceBinder extends ServiceBinder<PosUsbRemoteProtocolService> {
     @Override
     public PosUsbRemoteProtocolService getService() {
-        return PosUsbRemoteProtocolService.this;
+      return PosUsbRemoteProtocolService.this;
     }
   }
 
@@ -117,7 +135,8 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
     return mBinder;
   }
 
-  @Override public void onTaskRemoved(Intent rootIntent) {
+  @Override
+  public void onTaskRemoved(Intent rootIntent) {
     super.onTaskRemoved(rootIntent);
   }
 
@@ -149,7 +168,7 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
   private final Runnable mSetupUsbRunnable = new Runnable() {
     @Override
     public void run() {
-      if(setupUsb()) {
+      if (setupUsb()) {
         // need to check the connect...
         currentStatus = RemoteTerminalStatus.TERMINAL_CONNECTED_NOT_READY;
       }
@@ -289,7 +308,8 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
     startForeground(NOTIFICATION_ID, notification);
   }
 
-  @Override public void onConduitConnected() {
+  @Override
+  public void onConduitConnected() {
     super.onConduitConnected();
 //    sendMessage(new DiscoveryRequestMessage(isOrderModificationSupported()).toJsonString()); // this gets sent by the DefaultCloverDevice
     getContext().sendBroadcast(new Intent(RemoteTerminalStatus.TERMINAL_CONNECTED_NOT_READY.name()));
@@ -319,18 +339,19 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
     getContext().sendBroadcast(new Intent(currentStatus.name()));
   }
 
-  private class SendQueue  {
+  private class SendQueue {
     ExecutorService svc;
 
     public synchronized void send(final String msg) {
-      if(svc == null) {
+      if (svc == null) {
         Log.e(TAG, "USB Device isn't ready, as the send queue hasn't been started.");
         return;
       }
       svc.submit(new Runnable() {
-        @Override public void run() {
+        @Override
+        public void run() {
           try {
-            if(mRemoteUsbManager != null) {
+            if (mRemoteUsbManager != null) {
               mRemoteUsbManager.sendString(msg);
             }
           } catch (IOException e) {
@@ -343,10 +364,11 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
     }
 
     public synchronized void start() {
-      if(svc == null || svc.isShutdown()) {
+      if (svc == null || svc.isShutdown()) {
         svc = Executors.newSingleThreadExecutor();
       }
     }
+
     public void stop() {
       svc.shutdown();
     }
@@ -360,10 +382,11 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
       shutdown = false;
       svc = Executors.newSingleThreadExecutor();
       svc.execute(new Runnable() {
-        @Override public void run() {
+        @Override
+        public void run() {
           do {
             try {
-              if(mRemoteUsbManager != null) {
+              if (mRemoteUsbManager != null) {
                 String message = mRemoteUsbManager.receiveString();
                 Log.d(TAG, String.format("Got message from device: %s", message));
                 Intent intent = new Intent(ACTION_USB_RECEIVE_MESSAGE);
@@ -373,7 +396,7 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
             } catch (IOException | InterruptedException ie) {
               //
             }
-          } while(!shutdown);
+          } while (!shutdown);
         }
       });
     }

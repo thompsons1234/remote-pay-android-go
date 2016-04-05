@@ -1,4 +1,22 @@
+/*
+ * Copyright (C) 2016 Clover Network, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * You may obtain a copy of the License at
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.clover.remote.client.transport.usb.pos;
+
+import com.clover.remote.client.transport.usb.UsbCloverManager;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -10,7 +28,6 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.util.Log;
-import com.clover.remote.client.transport.usb.UsbCloverManager;
 
 /**
  * Created by blakewilliams on 3/30/16.
@@ -21,7 +38,8 @@ public class UsbActivity extends Activity {
   private static final String TAG = PosUsbBroadcastReceiver.class.getSimpleName();
   private UsbManager mUsbManager;
 
-  @Override protected void onCreate(Bundle savedInstanceState) {
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
     final Intent intent = getIntent();
@@ -32,21 +50,22 @@ public class UsbActivity extends Activity {
 
     final Intent serviceIntent = new Intent().setClass(context, PosUsbRemoteProtocolService.class).putExtras(extras);
     UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-    mUsbManager = (UsbManager)context.getSystemService(Context.USB_SERVICE);
+    mUsbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
 
 
     if (UsbCloverManager.isMatch(device, UsbAccessorySetupUsbManager.VENDOR_PRODUCT_IDS)) {
       if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
 
-        Runnable runnable = new Runnable(){
-          @Override public void run() {
+        Runnable runnable = new Runnable() {
+          @Override
+          public void run() {
             serviceIntent.setAction(PosUsbRemoteProtocolService.ACTION_USB_SETUP);
             Log.d(TAG, String.format("Starting service: %s", serviceIntent));
             context.startService(serviceIntent);
           }
         };
 
-        if(mUsbManager.hasPermission(device)) {
+        if (mUsbManager.hasPermission(device)) {
           runnable.run();
         } else {
           requestPermission(device, runnable, context);
@@ -58,13 +77,14 @@ public class UsbActivity extends Activity {
     if (UsbCloverManager.isMatch(device, RemoteUsbManager.VENDOR_PRODUCT_IDS)) {
       if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
         Runnable runnable = new Runnable() {
-          @Override public void run() {
+          @Override
+          public void run() {
             serviceIntent.setAction(PosUsbRemoteProtocolService.ACTION_USB_CONNECT);
             Log.d(TAG, String.format("Starting service: %s", serviceIntent));
             context.startService(serviceIntent);
           }
         };
-        if(mUsbManager.hasPermission(device)) {
+        if (mUsbManager.hasPermission(device)) {
           runnable.run();
         } else {
           requestPermission(device, runnable, context);
@@ -72,13 +92,14 @@ public class UsbActivity extends Activity {
         return;
       } else if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
         Runnable runnable = new Runnable() {
-          @Override public void run() {
+          @Override
+          public void run() {
             serviceIntent.setAction(PosUsbRemoteProtocolService.ACTION_USB_DISCONNECT);
             Log.d(TAG, String.format("Starting service: %s", serviceIntent));
             context.startService(serviceIntent);
           }
         };
-        if(mUsbManager.hasPermission(device)) {
+        if (mUsbManager.hasPermission(device)) {
           runnable.run();
         } else {
           requestPermission(device, runnable, context);
@@ -89,23 +110,24 @@ public class UsbActivity extends Activity {
     }
   }
 
-  @Override protected void onPostCreate(Bundle savedInstanceState) {
+  @Override
+  protected void onPostCreate(Bundle savedInstanceState) {
     super.onPostCreate(savedInstanceState);
     finish();
   }
 
   private void requestPermission(UsbDevice device, final Runnable runnable, Context context) {
     BroadcastReceiver usbReceiver = new BroadcastReceiver() {
-      @Override public void onReceive(Context context, Intent intent) {
+      @Override
+      public void onReceive(Context context, Intent intent) {
         synchronized (this) {
-          UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+          UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 
           if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-            if(device != null){
+            if (device != null) {
               runnable.run();
             }
-          }
-          else {
+          } else {
             Log.d(TAG, "permission denied for device " + device);
           }
         }

@@ -1,4 +1,22 @@
+/*
+ * Copyright (C) 2016 Clover Network, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ *
+ * You may obtain a copy of the License at
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.clover.remote.client.transport.usb.pos;
+
+import com.clover.remote.client.transport.usb.UsbCloverManager;
 
 import android.content.Context;
 import android.hardware.usb.UsbConstants;
@@ -7,15 +25,13 @@ import android.os.Build;
 import android.util.Log;
 import android.util.Pair;
 
-import com.clover.remote.client.transport.usb.UsbCloverManager;
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 
 /**
  * The purpose of this class is to put the attached USB Android device into "Accessory Mode".
- *
+ * <p>
  * See https://source.android.com/accessories/aoa.html#determine-accessory-mode-support
  */
 public class UsbAccessorySetupUsbManager extends UsbCloverManager<Void> {
@@ -44,7 +60,7 @@ public class UsbAccessorySetupUsbManager extends UsbCloverManager<Void> {
   }
 
   // See init.maplecutter.usb.rc in platform for more info
-  public static final Pair<Integer, Integer>[] VENDOR_PRODUCT_IDS = new Pair[] {
+  public static final Pair<Integer, Integer>[] VENDOR_PRODUCT_IDS = new Pair[]{
       Pair.create(0x28f3, 0x2000), // leafcutter adb device
       Pair.create(0x28f3, 0x2001), // leafcutter rndis,adb device
       Pair.create(0x28f3, 0x2003), // leafcutter cloverusb device
@@ -88,16 +104,16 @@ public class UsbAccessorySetupUsbManager extends UsbCloverManager<Void> {
     return false;
   }
 
-  private static final int ACCESSORY_STRING_MANUFACTURER   = 0;
-  private static final int ACCESSORY_STRING_MODEL          = 1;
-  private static final int ACCESSORY_STRING_DESCRIPTION    = 2;
-  private static final int ACCESSORY_STRING_VERSION        = 3;
-  private static final int ACCESSORY_STRING_URI            = 4;
-  private static final int ACCESSORY_STRING_SERIAL         = 5;
+  private static final int ACCESSORY_STRING_MANUFACTURER = 0;
+  private static final int ACCESSORY_STRING_MODEL = 1;
+  private static final int ACCESSORY_STRING_DESCRIPTION = 2;
+  private static final int ACCESSORY_STRING_VERSION = 3;
+  private static final int ACCESSORY_STRING_URI = 4;
+  private static final int ACCESSORY_STRING_SERIAL = 5;
 
-  private static final int ACCESSORY_GET_PROTOCOL          = 51;
-  private static final int ACCESSORY_SEND_STRING           = 52;
-  private static final int ACCESSORY_START                 = 53;
+  private static final int ACCESSORY_GET_PROTOCOL = 51;
+  private static final int ACCESSORY_SEND_STRING = 52;
+  private static final int ACCESSORY_START = 53;
 
   private boolean sendAccessoryModeCommands() {
     ByteBuffer dataBuf = ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN);

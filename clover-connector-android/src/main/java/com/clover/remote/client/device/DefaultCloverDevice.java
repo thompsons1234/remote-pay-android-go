@@ -16,9 +16,6 @@
 
 package com.clover.remote.client.device;
 
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
-import android.util.Log;
 import com.clover.remote.KeyPress;
 import com.clover.remote.client.CloverDeviceObserver;
 import com.clover.remote.client.transport.CloverTransport;
@@ -67,9 +64,12 @@ import com.clover.sdk.internal.PayIntent;
 import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Payment;
+
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
+import android.util.Log;
 import com.google.gson.Gson;
 
-import java.nio.channels.NotYetConnectedException;
 import java.util.List;
 
 public class DefaultCloverDevice extends CloverDevice implements CloverTransportObserver {
@@ -418,7 +418,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   public void notifyObserversUiState(final UiStateMessage uiStateMsg) {
     new AsyncTask() {
-      @Override protected Object doInBackground(Object[] params) {
+      @Override
+      protected Object doInBackground(Object[] params) {
         for (CloverDeviceObserver observer : deviceObservers) {
           observer.onUiState(uiStateMsg.uiState, uiStateMsg.uiText, uiStateMsg.uiDirection, uiStateMsg.inputOptions);
         }
@@ -523,7 +524,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   }
 
   public void doOpenCashDrawer(String reason) {
-    sendObjectMessage(new OpenCashDrawerMessage(reason){}); // TODO: fix OpenCashDrawerMessage ctor
+    sendObjectMessage(new OpenCashDrawerMessage(reason) {
+    }); // TODO: fix OpenCashDrawerMessage ctor
   }
 
   public void doCloseout(boolean allowOpenTabs, String batchId) {

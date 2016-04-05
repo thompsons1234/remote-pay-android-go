@@ -16,13 +16,13 @@
 
 package com.clover.remote.client;
 
-import com.clover.remote.client.device.CloverDevice;
-import com.clover.remote.message.DiscoveryResponseMessage;
 import com.clover.remote.InputOption;
 import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
 import com.clover.remote.TxState;
 import com.clover.remote.UiState;
+import com.clover.remote.client.device.CloverDevice;
+import com.clover.remote.message.DiscoveryResponseMessage;
 import com.clover.sdk.internal.Signature2;
 import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Batch;
@@ -79,6 +79,8 @@ public interface CloverDeviceObserver {
   void onTxStartResponse(boolean success);
 
   void onDeviceDisconnected(CloverDevice device);
+
   void onDeviceConnected(CloverDevice device);
+
   void onDeviceReady(CloverDevice device, DiscoveryResponseMessage drm);
 }
