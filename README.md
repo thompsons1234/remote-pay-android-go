@@ -1,6 +1,6 @@
 # Clover SDK for Android PoS Integration
 
-Current version: 0.3
+Current version: 0.4
 
 ## Overview
 
@@ -14,6 +14,10 @@ The Android project includes both a connector and example. To effectively work w
 To complete a transaction end to end, we recommend getting a [Clover Mini Dev Kit](http://cloverdevkit.com/collections/devkits/products/clover-mini-dev-kit).
 
 ## Release Notes
+
+# Version 0.4
+* Add support for USB (USBCloverDeviceConfiguration)
+* Add support for offline payments
 
 # Version 0.3
 * Updated support for externalPaymentId in SaleRequest, AuthRequest and PreAuthRequest

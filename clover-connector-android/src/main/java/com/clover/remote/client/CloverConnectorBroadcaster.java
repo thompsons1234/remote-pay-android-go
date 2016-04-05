@@ -19,15 +19,15 @@ package com.clover.remote.client;
 import com.clover.remote.TxState;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CaptureAuthResponse;
-import com.clover.remote.client.messages.PreAuthResponse;
-import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.ManualRefundResponse;
+import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.RefundPaymentResponse;
 import com.clover.remote.client.messages.SaleResponse;
 import com.clover.remote.client.messages.SignatureVerifyRequest;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
+import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.message.TipAddedMessage;
 
@@ -133,13 +133,13 @@ public class CloverConnectorBroadcaster extends ArrayList<ICloverConnectorListen
   }
 
   public void notifyOnPreAuthResponse(PreAuthResponse response) {
-    for(ICloverConnectorListener listener : this) {
+    for (ICloverConnectorListener listener : this) {
       listener.onPreAuthResponse(response);
     }
   }
 
   public void notifyOnCapturePreAuth(CaptureAuthResponse response) {
-    for(ICloverConnectorListener listener : this) {
+    for (ICloverConnectorListener listener : this) {
       listener.onPreAuthCaptureResponse(response);
     }
   }

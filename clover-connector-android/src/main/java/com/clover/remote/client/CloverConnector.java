@@ -16,11 +16,11 @@
 
 package com.clover.remote.client;
 
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
-import android.util.Base64;
-import android.util.Log;
 import com.clover.remote.InputOption;
+import com.clover.remote.KeyPress;
+import com.clover.remote.ResultStatus;
+import com.clover.remote.TxState;
+import com.clover.remote.UiState;
 import com.clover.remote.client.device.CloverDevice;
 import com.clover.remote.client.device.CloverDeviceConfiguration;
 import com.clover.remote.client.device.CloverDeviceFactory;
@@ -46,6 +46,7 @@ import com.clover.remote.client.messages.TxRequest;
 import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
+import com.clover.remote.message.DiscoveryResponseMessage;
 import com.clover.remote.order.DisplayDiscount;
 import com.clover.remote.order.DisplayLineItem;
 import com.clover.remote.order.DisplayOrder;
@@ -54,11 +55,6 @@ import com.clover.remote.order.operation.DiscountsDeletedOperation;
 import com.clover.remote.order.operation.LineItemsAddedOperation;
 import com.clover.remote.order.operation.LineItemsDeletedOperation;
 import com.clover.remote.order.operation.OrderDeletedOperation;
-import com.clover.remote.message.DiscoveryResponseMessage;
-import com.clover.remote.KeyPress;
-import com.clover.remote.ResultStatus;
-import com.clover.remote.TxState;
-import com.clover.remote.UiState;
 import com.clover.sdk.internal.PayIntent;
 import com.clover.sdk.internal.Signature2;
 import com.clover.sdk.v3.base.Reference;
@@ -68,9 +64,12 @@ import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.Payment;
 import com.clover.sdk.v3.payments.Refund;
 import com.clover.sdk.v3.payments.VaultedCard;
+
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
+import android.util.Log;
 import com.google.gson.Gson;
 
-import java.io.ByteArrayOutputStream;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -125,6 +124,7 @@ public class CloverConnector implements ICloverConnector {
   public CloverConnector() {
 
   }
+
   /**
    * CloverConnector constructor
    *
@@ -140,7 +140,7 @@ public class CloverConnector implements ICloverConnector {
    */
 
   public CloverConnector(CloverDeviceConfiguration config, ICloverConnectorListener connectorListener) {
-    if(connectorListener != null) {
+    if (connectorListener != null) {
       addCloverConnectorListener(connectorListener);
     }
     initialize(config);
@@ -159,7 +159,7 @@ public class CloverConnector implements ICloverConnector {
   /// </summary>
   /// <param name="config">A CloverDeviceConfiguration object; TestDeviceConfiguration can be used for testing</param>
   public void initialize(final CloverDeviceConfiguration config) {
-    if(device != null) {
+    if (device != null) {
       device.dispose();
     }
     deviceObserver = new InnerDeviceObserver(this);
@@ -171,9 +171,10 @@ public class CloverConnector implements ICloverConnector {
     disableTip = false;
 
     new AsyncTask() {
-      @Override protected Object doInBackground(Object[] params) {
+      @Override
+      protected Object doInBackground(Object[] params) {
         device = CloverDeviceFactory.get(config); // network access, so needs to be off UI thread
-        if(device != null) {
+        if (device != null) {
           device.Subscribe(deviceObserver);
         }
         return null;
@@ -187,7 +188,7 @@ public class CloverConnector implements ICloverConnector {
    * @param request
    */
   public int sale(SaleRequest request) {
-    if(request.getTipAmount() == null) {
+    if (request.getTipAmount() == null) {
       request.setTipAmount(0L);
     }
     saleAuth(request, false);
@@ -213,11 +214,11 @@ public class CloverConnector implements ICloverConnector {
         builder.cardEntryMethods(request.getCardEntryMethods() != null ? request.getCardEntryMethods() : cardEntryMethods);
         builder.amount(request.getAmount());
 
-        if(request instanceof SaleRequest) { // Sale or Auth because Auth extends SaleRequest
+        if (request instanceof SaleRequest) { // Sale or Auth because Auth extends SaleRequest
           if (request.getTipAmount() != null) {
             builder.tipAmount(request.getTipAmount()); // can't just set to zero because zero has a specific meaning
           }
-          SaleRequest sr = (SaleRequest)request;
+          SaleRequest sr = (SaleRequest) request;
           if (sr.getTaxAmount() != null) {
             builder.taxAmount(sr.getTaxAmount());
           }
@@ -228,14 +229,14 @@ public class CloverConnector implements ICloverConnector {
             builder.vaultedCard(request.getVaultedCard());
           }
           builder.cardNotPresent(request.isCardNotPresent());
-          Boolean allowOffline = ((SaleRequest)request).getAllowOfflinePayment();
+          Boolean allowOffline = ((SaleRequest) request).getAllowOfflinePayment();
           builder.allowOfflinePayment(allowOffline == null ? isAllowOfflinePayment() : allowOffline.booleanValue()); // use connector value if request doesn't define one
           Boolean approveOfflinePaymentWithoutPrompt = ((SaleRequest) request).getApproveOfflinePaymentWithoutPrompt();
           builder.approveOfflinePaymentWithoutPrompt(approveOfflinePaymentWithoutPrompt == null ? isApproveOfflinePaymentWithoutPrompt() : approveOfflinePaymentWithoutPrompt); // use connector value if request doesn't define one
         }
 
         String externalPaymentId = request.getExternalPaymentId();// == null ? getNextId() : request.getExternalPaymentId();
-        if(externalPaymentId != null) {
+        if (externalPaymentId != null) {
           builder.externalPaymentId(externalPaymentId);
         }
 
@@ -289,13 +290,15 @@ public class CloverConnector implements ICloverConnector {
     }
     return 0;
   }
+
   /**
    * Capture a previous Auth. Note: Should only be called if request's PaymentID is from an AuthResponse
+   *
    * @param request
    */
 
   public void captureAuth(CaptureAuthRequest request) {
-      device.doCaptureAuth(request.paymentID, request.amount, request.tipAmount);
+    device.doCaptureAuth(request.paymentID, request.amount, request.tipAmount);
   }
 
 
@@ -377,8 +380,8 @@ public class CloverConnector implements ICloverConnector {
     lastRequest = request;
     PayIntent.Builder builder = new PayIntent.Builder();
     builder.amount(-Math.abs(request.getAmount()))
-    	.cardEntryMethods(15)
-    	.transactionType(PayIntent.TransactionType.PAYMENT.CREDIT);
+        .cardEntryMethods(15)
+        .transactionType(PayIntent.TransactionType.PAYMENT.CREDIT);
 
     PayIntent payIntent = builder.build();
     device.doTxStart(payIntent, null, true);
@@ -851,7 +854,7 @@ public class CloverConnector implements ICloverConnector {
       merchantInfo.deviceInfo.serial = drm.serial;
       cloverConnector.merchantInfo = merchantInfo;
 
-      if(drm.ready) { //TODO: is this a valid check?
+      if (drm.ready) { //TODO: is this a valid check?
         cloverConnector.broadcaster.notifyOnReady(merchantInfo);
       } else {
         Log.e(CloverConnector.class.getName(), "DiscoveryResponseMessage, not ready...");
@@ -869,12 +872,12 @@ public class CloverConnector implements ICloverConnector {
   }
 
   private static final SecureRandom random = new SecureRandom();
-  private static final char[] vals = new char[]{'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','J','K','M','N','P','Q','R','S','T','V','W','X','Y','Z'}; // Crockford's base 32 chars
+  private static final char[] vals = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'}; // Crockford's base 32 chars
 
   // providing a simplified version so we don't have a dependency on common's Ids
   private String getNextId() {
     StringBuilder sb = new StringBuilder();
-    for(int i=0; i<13; i++) {
+    for (int i = 0; i < 13; i++) {
       int idx = random.nextInt(vals.length);
       sb.append(vals[idx]);
     }

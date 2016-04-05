@@ -18,7 +18,7 @@ package com.clover.remote.client.messages;
 
 import com.clover.sdk.internal.PayIntent;
 
-public class SaleRequest extends TxRequest{
+public class SaleRequest extends TxRequest {
   private Long tippableAmount;
   private Long taxAmount;
   private Boolean allowOfflinePayment;
