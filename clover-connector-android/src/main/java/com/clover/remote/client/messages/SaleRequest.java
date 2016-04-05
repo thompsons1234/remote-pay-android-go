@@ -21,7 +21,8 @@ import com.clover.sdk.internal.PayIntent;
 public class SaleRequest extends TxRequest{
   private Long tippableAmount;
   private Long taxAmount;
-  private boolean cardNotPresent;
+  private Boolean allowOfflinePayment;
+  private Boolean approveOfflinePaymentWithoutPrompt;
 
     /*
         public bool DisableCashback { get; set; } //
@@ -29,6 +30,22 @@ public class SaleRequest extends TxRequest{
         public bool DisablePrinting { get; set; }
         public bool DisableRestartTransactionOnFail { get; set; }
      */
+
+  public Boolean getAllowOfflinePayment() {
+    return allowOfflinePayment;
+  }
+
+  public void setAllowOfflinePayment(Boolean allowOfflinePayment) {
+    this.allowOfflinePayment = allowOfflinePayment;
+  }
+
+  public Boolean getApproveOfflinePaymentWithoutPrompt() {
+    return approveOfflinePaymentWithoutPrompt;
+  }
+
+  public void setApproveOfflinePaymentWithoutPrompt(Boolean approveOfflinePaymentWithoutPrompt) {
+    this.approveOfflinePaymentWithoutPrompt = approveOfflinePaymentWithoutPrompt;
+  }
 
   public PayIntent.TransactionType getType() {
     return PayIntent.TransactionType.PAYMENT;

@@ -27,8 +27,6 @@ public abstract class TxRequest {
   private VaultedCard vaultedCard;
   private String externalPaymentId;
 
-  private boolean allowOfflinePayments = false;
-  private boolean promptForOfflinePaymentApproval = false;
 
   public abstract PayIntent.TransactionType getType();
 
@@ -80,19 +78,4 @@ public abstract class TxRequest {
     this.externalPaymentId = externalPaymentId;
   }
 
-  public boolean allowOfflinePayments() {
-    return allowOfflinePayments;
-  }
-
-  public void setAllowOfflinePayments(boolean allowOfflinePayments) {
-    this.allowOfflinePayments = allowOfflinePayments;
-  }
-
-  public boolean promptForOfflinePaymentApproval() {
-    return promptForOfflinePaymentApproval;
-  }
-
-  public void setPromptForOfflinePaymentApproval(boolean promptForOfflinePaymentApproval) {
-    this.promptForOfflinePaymentApproval = promptForOfflinePaymentApproval;
-  }
 }
