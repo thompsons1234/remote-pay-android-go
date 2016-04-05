@@ -16,6 +16,7 @@
 
 package com.clover.remote.client;
 
+import com.clover.remote.TxState;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CaptureAuthResponse;
 import com.clover.remote.client.messages.PreAuthResponse;
@@ -28,8 +29,7 @@ import com.clover.remote.client.messages.SaleResponse;
 import com.clover.remote.client.messages.SignatureVerifyRequest;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
 import com.clover.remote.client.messages.VoidPaymentResponse;
-import com.clover.remote.protocol.message.TipAddedMessage;
-import com.clover.remote.terminal.TxState;
+import com.clover.remote.message.TipAddedMessage;
 
 import java.util.ArrayList;
 
@@ -108,9 +108,9 @@ public class CloverConnectorBroadcaster extends ArrayList<ICloverConnectorListen
     }
   }
 
-  public void notifyOnReady() {
+  public void notifyOnReady(MerchantInfo merchantInfo) {
     for (ICloverConnectorListener listener : this) {
-      listener.onReady();
+      listener.onReady(merchantInfo);
     }
   }
 

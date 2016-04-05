@@ -16,7 +16,7 @@
 
 package com.clover.remote.client.messages;
 
-import com.clover.common2.payments.PayIntent;
+import com.clover.sdk.internal.PayIntent;
 
 public class AuthRequest extends SaleRequest {
 
