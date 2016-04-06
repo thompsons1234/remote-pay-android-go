@@ -20,6 +20,7 @@ import com.clover.remote.KeyPress;
 import com.clover.remote.client.CloverDeviceObserver;
 import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.client.transport.CloverTransportObserver;
+import com.clover.remote.message.BreakMessage;
 import com.clover.remote.message.CapturePreAuthMessage;
 import com.clover.remote.message.CapturePreAuthResponseMessage;
 import com.clover.remote.message.CashbackSelectedMessage;
@@ -598,6 +599,11 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     }
 
     sendObjectMessage(updateMessage);
+  }
+
+  @Override
+  public void doResetDevice() {
+    sendObjectMessage(new BreakMessage());
   }
 
   public void dispose() {

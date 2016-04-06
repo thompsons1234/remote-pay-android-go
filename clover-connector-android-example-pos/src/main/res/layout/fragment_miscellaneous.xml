@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView android:layout_height="fill_parent" android:layout_width="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android">
+<ScrollView android:layout_height="fill_parent" android:layout_width="fill_parent" xmlns:android="http://schemas.android.com/apk/res/android"
+            android:fillViewport="false" android:id="@+id/MiscParentScrollView">
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
@@ -36,31 +37,6 @@
             android:layout_below="@+id/ShowMessageText"
             android:layout_alignEnd="@+id/ShowMessageButton"
             android:layout_toEndOf="@+id/ShowMessageText"/>
-        <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:id="@+id/CloseoutBox"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/CancelCashBox"
-                android:layout_toStartOf="@+id/button2" android:layout_alignEnd="@+id/WelcomeThankYouBox">
-            <Button
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:text="Closeout Orders"
-                    android:layout_weight=".5"
-                    android:onClick="onClickCloseout"
-                    android:id="@+id/CloseoutButton"
-                    android:layout_below="@+id/button4"
-                    android:layout_alignParentStart="true"
-                    android:layout_alignEnd="@+id/button3"/>
-            <Button android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight=".5"
-                    android:text="Print Image"
-                    android:onClick="printImageClick"
-                    android:id="@+id/PrintImageButton"
-            />
-        </LinearLayout>
         <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="fill_parent"
@@ -111,12 +87,65 @@
         </LinearLayout>
 
         <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:id="@+id/CloseoutBox"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/CancelCashBox"
+                android:layout_toStartOf="@+id/button2" android:layout_alignEnd="@+id/WelcomeThankYouBox">
+            <Button
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text="Closeout Orders"
+                    android:layout_weight=".5"
+                    android:onClick="onClickCloseout"
+                    android:id="@+id/CloseoutButton"
+                    android:layout_below="@+id/button4"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignEnd="@+id/button3"/>
+            <Button android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".5"
+                    android:text="Print Image"
+                    android:onClick="printImageClick"
+                    android:id="@+id/PrintImageButton"
+            />
+        </LinearLayout>
+
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:id="@+id/ResetBox"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/CloseoutBox"
+                android:layout_toStartOf="@+id/button2" android:layout_alignEnd="@+id/WelcomeThankYouBox">
+            <Button
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text="Reset Device"
+                    android:layout_weight=".5"
+                    android:onClick="onResetDeviceClick"
+                    android:id="@+id/ResetButton"
+                    android:layout_below="@+id/button4"
+                    android:layout_alignParentStart="true"
+                    android:background="@color/warning_red"
+                    android:layout_alignEnd="@+id/button3"/>
+            <Button android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".5"
+                    android:text="Hidden"
+
+                    android:id="@+id/HiddenButton"
+                    android:visibility="invisible"
+            />
+        </LinearLayout>
+        <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignEnd="@+id/CancelCashBox"
-            android:layout_below="@+id/CloseoutBox"
+            android:layout_below="@+id/ResetBox"
             android:id="@+id/linearLayout2">
         <Switch
                 android:layout_width="match_parent"

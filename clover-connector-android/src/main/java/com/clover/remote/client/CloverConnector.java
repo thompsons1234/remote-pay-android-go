@@ -594,6 +594,13 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
+  @Override
+  public void resetDevice() {
+    if(device != null) {
+      device.doResetDevice();
+    }
+  }
+
   public void setCardEntryMethods(int entryMethods) {
     cardEntryMethods = entryMethods;
   }
@@ -618,13 +625,6 @@ public class CloverConnector implements ICloverConnector {
     this.approveOfflinePaymentWithoutPrompt = approveOfflinePaymentWithoutPrompt;
   }
 
-  /*public void setMerchantInfo(MerchantInfo merchantInfo) {
-    this.merchantInfo = merchantInfo;
-  }*/
-
-  public MerchantInfo getMerchantInfo() {
-    return merchantInfo;
-  }
 
   private class InnerDeviceObserver implements CloverDeviceObserver {
 
