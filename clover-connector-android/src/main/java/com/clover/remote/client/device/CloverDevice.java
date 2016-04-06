@@ -102,5 +102,5 @@ public abstract class CloverDevice {
 
   public abstract void doVaultCard(int cardEntryMethods);
 
-
+  public abstract void doResetDevice();
 }

@@ -21,6 +21,7 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -860,5 +861,18 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public void printImageClick(View view) {
     Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.clover_horizontal);
     cloverConnector.printImage(bitmap);
+  }
+
+  public void onResetDeviceClick(View view) {
+    new AlertDialog.Builder(this)
+        .setTitle("Reset Device")
+        .setMessage(String.format("Are you sure you want to reset the device? Warning: You may lose any pending transaction information."))
+        .setPositiveButton("Yes", new DialogInterface.OnClickListener(){
+          @Override public void onClick(DialogInterface dialog, int which) {
+            cloverConnector.resetDevice();
+          }
+        })
+        .setNegativeButton("No", null)
+        .show();
   }
 }
