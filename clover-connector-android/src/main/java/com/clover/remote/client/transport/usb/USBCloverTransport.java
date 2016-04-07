@@ -19,7 +19,6 @@ package com.clover.remote.client.transport.usb;
 import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.client.transport.CloverTransportObserver;
 import com.clover.remote.client.transport.usb.pos.PosUsbRemoteProtocolService;
-import com.clover.remote.client.transport.usb.pos.RemoteTerminalStatus;
 import com.clover.remote.client.transport.usb.pos.RemoteUsbManager;
 import com.clover.remote.client.transport.usb.pos.UsbAccessorySetupUsbManager;
 
@@ -55,17 +54,16 @@ public class USBCloverTransport extends CloverTransport {
       String action = intent.getAction();
 
       try {
-        RemoteTerminalStatus status = RemoteTerminalStatus.valueOf(action);
-        switch (status) {
-          case TERMINAL_DISCONNECTED: {
+        switch (action) {
+          case DEVICE_DISCONNECTED: {
             onDeviceDisconnected();
             break;
           }
-          case TERMINAL_CONNECTED_NOT_READY: {
+          case DEVICE_CONNECTED: {
             onDeviceConnected();
             break;
           }
-          case TERMINAL_CONNECTED_READY: {
+          case DEVICE_READY: {
             onDeviceReady();
             break;
           }
@@ -101,9 +99,9 @@ public class USBCloverTransport extends CloverTransport {
 
   protected IntentFilter getConnectionIntentFilter() {
     IntentFilter filter = new IntentFilter();
-    filter.addAction(RemoteTerminalStatus.TERMINAL_DISCONNECTED.name());
-    filter.addAction(RemoteTerminalStatus.TERMINAL_CONNECTED_READY.name());
-    filter.addAction(RemoteTerminalStatus.TERMINAL_CONNECTED_NOT_READY.name());
+    filter.addAction(CloverTransport.DEVICE_DISCONNECTED);
+    filter.addAction(CloverTransport.DEVICE_READY);
+    filter.addAction(CloverTransport.DEVICE_CONNECTED);
     return filter;
   }
 
