@@ -261,6 +261,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           runOnUiThread(new Runnable() {
             @Override
             public void run() {
+              Toast.makeText(getBaseContext(), "Disconnected", Toast.LENGTH_SHORT).show();
+              Log.d(TAG, "disconnected");
               ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Disconnected");
             }
           });
