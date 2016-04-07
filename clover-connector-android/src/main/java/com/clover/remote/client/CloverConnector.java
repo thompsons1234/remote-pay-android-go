@@ -118,8 +118,8 @@ public class CloverConnector implements ICloverConnector {
   private boolean disableRestartTransactionOnFail;
   private MerchantInfo merchantInfo;
 
-  private boolean allowOfflinePayment;
-  private boolean approveOfflinePaymentWithoutPrompt;
+  private Boolean allowOfflinePayment;
+  private Boolean approveOfflinePaymentWithoutPrompt;
 
   public CloverConnector() {
 
@@ -229,10 +229,21 @@ public class CloverConnector implements ICloverConnector {
             builder.vaultedCard(request.getVaultedCard());
           }
           builder.cardNotPresent(request.isCardNotPresent());
+
           Boolean allowOffline = ((SaleRequest) request).getAllowOfflinePayment();
-          builder.allowOfflinePayment(allowOffline == null ? isAllowOfflinePayment() : allowOffline.booleanValue()); // use connector value if request doesn't define one
+          if(allowOffline == null && getAllowOfflinePayment() != null) {
+            allowOffline = getAllowOfflinePayment();
+          }
+          if(allowOffline != null) {
+            builder.allowOfflinePayment(allowOffline); // use connector value if request doesn't define one
+          }
           Boolean approveOfflinePaymentWithoutPrompt = ((SaleRequest) request).getApproveOfflinePaymentWithoutPrompt();
-          builder.approveOfflinePaymentWithoutPrompt(approveOfflinePaymentWithoutPrompt == null ? isApproveOfflinePaymentWithoutPrompt() : approveOfflinePaymentWithoutPrompt); // use connector value if request doesn't define one
+          if(approveOfflinePaymentWithoutPrompt == null && getApproveOfflinePaymentWithoutPrompt() != null) {
+            approveOfflinePaymentWithoutPrompt = getApproveOfflinePaymentWithoutPrompt();
+          }
+          if(approveOfflinePaymentWithoutPrompt != null) {
+            builder.approveOfflinePaymentWithoutPrompt(approveOfflinePaymentWithoutPrompt);
+          }
         }
 
         String externalPaymentId = request.getExternalPaymentId();// == null ? getNextId() : request.getExternalPaymentId();
@@ -609,19 +620,19 @@ public class CloverConnector implements ICloverConnector {
     return cardEntryMethods;
   }
 
-  public boolean isAllowOfflinePayment() {
+  public Boolean getAllowOfflinePayment() {
     return allowOfflinePayment;
   }
 
-  public void setAllowOfflinePayment(boolean allowOfflinePayment) {
+  public void setAllowOfflinePayment(Boolean allowOfflinePayment) {
     this.allowOfflinePayment = allowOfflinePayment;
   }
 
-  public boolean isApproveOfflinePaymentWithoutPrompt() {
+  public Boolean getApproveOfflinePaymentWithoutPrompt() {
     return approveOfflinePaymentWithoutPrompt;
   }
 
-  public void setApproveOfflinePaymentWithoutPrompt(boolean approveOfflinePaymentWithoutPrompt) {
+  public void setApproveOfflinePaymentWithoutPrompt(Boolean approveOfflinePaymentWithoutPrompt) {
     this.approveOfflinePaymentWithoutPrompt = approveOfflinePaymentWithoutPrompt;
   }
 
