@@ -259,7 +259,7 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
     if(sendQueue != null) {
       sendQueue.stop();
     }
-    if(sendQueue != null) {
+    if(readQueue != null) {
       readQueue.stop();
     }
     if (mRemoteUsbManager == null) {
