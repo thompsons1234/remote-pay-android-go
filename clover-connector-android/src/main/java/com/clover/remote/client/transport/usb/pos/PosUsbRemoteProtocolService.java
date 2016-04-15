@@ -111,6 +111,13 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
       }
     });
 
+    if(sendQueue != null) {
+      sendQueue.stop();
+    }
+    if(readQueue != null) {
+      readQueue.stop();
+    }
+
     super.onDestroy();
 
     try {
@@ -249,6 +256,12 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
   }
 
   private void disconnectUsb() {
+    if(sendQueue != null) {
+      sendQueue.stop();
+    }
+    if(sendQueue != null) {
+      readQueue.stop();
+    }
     if (mRemoteUsbManager == null) {
       return;
     }
@@ -259,6 +272,7 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
       mRemoteUsbManager.disconnect();
       mRemoteUsbManager = null;
     }
+
     currentStatus = RemoteTerminalStatus.TERMINAL_DISCONNECTED;
     Log.d(TAG, "send disconnect message");
     getContext().sendBroadcast(new Intent(CloverTransport.DEVICE_DISCONNECTED));
