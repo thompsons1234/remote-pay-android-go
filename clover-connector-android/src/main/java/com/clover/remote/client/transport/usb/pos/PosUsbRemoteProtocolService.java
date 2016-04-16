@@ -308,7 +308,22 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
   }
 
   private void broadcastStatus() {
-    getContext().sendBroadcast(new Intent(currentStatus.name()));
+    String msg = CloverTransport.DEVICE_DISCONNECTED;
+    switch(currentStatus) {
+      case TERMINAL_DISCONNECTED: {
+        msg = CloverTransport.DEVICE_DISCONNECTED;
+        break;
+      }
+      case TERMINAL_CONNECTED_NOT_READY: {
+        msg = CloverTransport.DEVICE_CONNECTED;
+        break;
+      }
+      case TERMINAL_CONNECTED_READY: {
+        msg = CloverTransport.DEVICE_READY;
+        break;
+      }
+    }
+    getContext().sendBroadcast(new Intent(msg));
   }
 
   private class SendQueue {
@@ -342,7 +357,10 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
     }
 
     public void stop() {
-      svc.shutdown();
+      ExecutorService temp = svc;
+      if(temp != null) {
+        temp.shutdown();
+      }
     }
   }
 
