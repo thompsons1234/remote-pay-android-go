@@ -323,7 +323,7 @@ public class CloverConnector implements ICloverConnector {
    */
 
   public void captureAuth(CaptureAuthRequest request) {
-      if (request != null && request.tipAmount > 0 && !merchantInfo.supportsPreAuths) {
+      if (request != null && !merchantInfo.supportsPreAuths) {
         ConfigErrorResponse ceResponse = new ConfigErrorResponse();
         ceResponse.setMessage("In captureAuth : CaptureAuthRequest - The currently configured merchant gateway does not support Capture Auth requests.");
         broadcaster.notifyOnConfigError(ceResponse);

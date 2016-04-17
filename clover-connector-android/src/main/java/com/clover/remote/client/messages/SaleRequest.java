@@ -65,21 +65,21 @@ public class SaleRequest extends TxRequest {
     this.taxAmount = taxAmount;
   }
 
-  public boolean getDisableCashback() { return disableCashback; }
+  protected boolean getDisableCashback() { return disableCashback; }
 
-  public void setDisableCashback(boolean disableCashback) { this.disableCashback = disableCashback; }
+  protected void setDisableCashback(boolean disableCashback) { this.disableCashback = disableCashback; }
 
-  public boolean getDisableTip() { return disableTip; }
+  protected boolean getDisableTip() { return disableTip; }
 
-  public void setDisableTip(boolean disableTip) { this.disableTip = disableTip; }
+  protected void setDisableTip(boolean disableTip) { this.disableTip = disableTip; }
 
-  public boolean getDisablePrinting() { return disablePrinting; }
+  protected boolean getDisablePrinting() { return disablePrinting; }
 
-  public void setDisablePrinting(boolean disablePrinting) { this.disablePrinting = disablePrinting; }
+  protected void setDisablePrinting(boolean disablePrinting) { this.disablePrinting = disablePrinting; }
 
-  public boolean getDisableRestartTransactionOnFail() { return disableRestartTransactionOnFail; }
+  protected boolean getDisableRestartTransactionOnFail() { return disableRestartTransactionOnFail; }
 
-  public void setDisableRestartTransactionOnFail(boolean disableRestartTransactionOnFail) { this.disableRestartTransactionOnFail = disableRestartTransactionOnFail; }
+  protected void setDisableRestartTransactionOnFail(boolean disableRestartTransactionOnFail) { this.disableRestartTransactionOnFail = disableRestartTransactionOnFail; }
 
   public Long getTipAmount() {
     return tipAmount;
