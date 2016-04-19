@@ -194,7 +194,7 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
     }
   };
 
-  private boolean setupUsb() {
+  private synchronized boolean setupUsb() {
     if (mRemoteUsbManager != null && mRemoteUsbManager.isConnected()) {
       return false;
     }
@@ -216,7 +216,7 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
     return false;
   }
 
-  private void connectUsb() {
+  private synchronized void connectUsb() {
     if (mRemoteUsbManager != null && mRemoteUsbManager.isConnected()) {
       Log.d(TAG, "Already have a connection, just return.");
       return; // ready!
@@ -255,7 +255,7 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
     }
   }
 
-  private void disconnectUsb() {
+  private synchronized void disconnectUsb() {
     if(sendQueue != null) {
       sendQueue.stop();
     }
@@ -358,6 +358,7 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
 
     public void stop() {
       ExecutorService temp = svc;
+      svc = null;
       if(temp != null) {
         temp.shutdown();
       }
@@ -393,6 +394,7 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
 
     public void stop() {
       shutdown = true;
+      svc = null;
     }
   }
 }
