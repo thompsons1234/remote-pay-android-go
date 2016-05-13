@@ -162,9 +162,6 @@ public class USBCloverTransport extends CloverTransport {
   public void dispose() {
     context.unregisterReceiver(connectionBroadcastReceiver);
     context.unregisterReceiver(messageBroadcastReceiver);
-    /*if(svcConnection != null) {
-      context.unbindService(svcConnection);
-    }*/
   }
 
   @Override
@@ -173,38 +170,10 @@ public class USBCloverTransport extends CloverTransport {
     sendIntent.putExtra(PosUsbRemoteProtocolService.EXTRA_MESSAGE, message);
     context.sendBroadcast(sendIntent);
 
-    /*if(usbService == null) {
-      bindToService();
-    }
-    if(usbService != null) {
-      usbService.sendMessage(message);
-    }*/
     return 0;
   }
 
-  /*private void bindToService() {
-    if(usbService == null) {
-      final Intent serviceIntent = new Intent().setClass(context, PosUsbRemoteProtocolService.class);
-      svcConnection = new ServiceConnection() {
-        @Override public void onServiceConnected(ComponentName name, IBinder service) {
-          usbService = (PosUsbRemoteProtocolService) ((PosUsbRemoteProtocolService.PosUsbClientServiceBinder)service).getService();
-          if(usbService != null) {
-            usbService.addListener(USBCloverTransport.this);
-          }
-        }
 
-        @Override public void onServiceDisconnected(ComponentName name) {
-          usbService.removeListener(USBCloverTransport.this);
-          usbService = null;
-        }
-      };
-      if(context.bindService(serviceIntent, svcConnection, Context.BIND_AUTO_CREATE)) {
-        Toast.makeText(context, "bound!", Toast.LENGTH_SHORT).show();
-      } else {
-        Toast.makeText(context, "not bound!", Toast.LENGTH_SHORT).show();
-      }
-    }
-  }*/
 
   @Override
   public void onMessage(String message) {
@@ -214,7 +183,6 @@ public class USBCloverTransport extends CloverTransport {
   }
 
   public void onDeviceReady() {
-//    bindToService();
     notifyDeviceReady();
   }
 
