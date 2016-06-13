@@ -196,8 +196,8 @@ public class OrdersFragment extends Fragment implements OrderObserver {
                             long value = (long) val;
 
                             TipAdjustAuthRequest taar = new TipAdjustAuthRequest();
-                            taar.setPaymentID(posExchange.getPaymentID());
-                            taar.setOrderID(posExchange.getOrderId());
+                            taar.setPaymentId(posExchange.getPaymentID());
+                            taar.setOrderId(posExchange.getOrderId());
                             taar.setTipAmount(value);
                             cloverConnector.tipAdjustAuth(taar);
                             dialog.dismiss();

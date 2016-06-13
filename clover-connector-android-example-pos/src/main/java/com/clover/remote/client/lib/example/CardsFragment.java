@@ -173,8 +173,7 @@ public class CardsFragment extends Fragment {
 
                                 switch(index) {
                                     case 0: {
-                                        SaleRequest saleRequest = new SaleRequest();
-                                        saleRequest.setAmount(store.getCurrentOrder().getTotal());
+                                        SaleRequest saleRequest = new SaleRequest(store.getCurrentOrder().getTotal(), ExamplePOSActivity.getNextId());
                                         saleRequest.setTippableAmount(store.getCurrentOrder().getTippableAmount());
                                         saleRequest.setVaultedCard(vaultedCard);
                                         cloverConnector.sale(saleRequest);
@@ -182,23 +181,12 @@ public class CardsFragment extends Fragment {
                                         break;
                                     }
                                     case 1: {
-                                        AuthRequest authRequest = new AuthRequest(false);
-                                        authRequest.setAmount(store.getCurrentOrder().getTotal());
-                                        authRequest.setTippableAmount(store.getCurrentOrder().getTippableAmount());
+                                        AuthRequest authRequest = new AuthRequest(store.getCurrentOrder().getTotal(), ExamplePOSActivity.getNextId());
                                         authRequest.setVaultedCard(vaultedCard);
-                                        cloverConnector.sale(authRequest);
+                                        cloverConnector.auth(authRequest);
                                         dialog.dismiss();
                                         break;
                                     }
-                                    /*case 2: {
-                                        AuthRequest authRequest = new AuthRequest(true);
-                                        authRequest.setAmount(store.getCurrentOrder().getTotal());
-                                        authRequest.setTippableAmount(store.getCurrentOrder().getTippableAmount());
-                                        authRequest.setVaultedCard(vaultedCard);
-                                        cloverConnector.sale(authRequest);
-                                        dialog.dismiss();
-                                        break;
-                                    }*/
                                 }
                             } else {
                                 Toast.makeText(getActivity().getBaseContext(), "Clover Connector is null", Toast.LENGTH_LONG).show();

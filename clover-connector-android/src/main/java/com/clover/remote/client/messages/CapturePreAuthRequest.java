@@ -16,6 +16,35 @@
 
 package com.clover.remote.client.messages;
 
-public class TransactionResponse extends BaseResponse {
+/// <summary>
+///
+/// </summary>
+public class CapturePreAuthRequest extends BaseRequest {
+  public String paymentID;
+  public long amount;
+  public long tipAmount;
 
+  public String getPaymentID() {
+    return paymentID;
+  }
+
+  public void setPaymentID(String paymentID) {
+    this.paymentID = paymentID;
+  }
+
+  public long getAmount() {
+    return amount;
+  }
+
+  public void setAmount(long amount) {
+    this.amount = amount;
+  }
+
+  public long getTipAmount() {
+    return tipAmount;
+  }
+
+  public void setTipAmount(long tipAmount) {
+    this.tipAmount = tipAmount;
+  }
 }

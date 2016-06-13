@@ -83,22 +83,19 @@ public abstract class CloverDevice {
 
   public abstract void doTipAdjustAuth(String orderId, String paymentId, long amount);
 
-  //void doBreak();
   public abstract void doPrintText(List<String> textLines);
 
   public abstract void doShowWelcomeScreen();
 
   public abstract void doShowPaymentReceiptScreen(String orderId, String paymentId);
 
-//  public abstract void doShowRefundReceiptScreen(String orderId, String refundId);
-
-//  public abstract void doShowManualRefundReceiptScreen(String orderId, String creditId);
-
   public abstract void doShowThankYouScreen();
 
   public abstract void doOpenCashDrawer(String reason);
 
   public abstract void doPrintImage(Bitmap bitmap);
+
+  public abstract void doPrintImage(String url);
 
   public abstract void dispose();
 

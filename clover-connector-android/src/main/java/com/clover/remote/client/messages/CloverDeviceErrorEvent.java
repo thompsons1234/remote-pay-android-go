@@ -17,6 +17,15 @@
 package com.clover.remote.client.messages;
 
 public class CloverDeviceErrorEvent {
+
+  public enum CloverDeviceErrorType
+
+  { COMMUNICATION_ERROR,
+    VALIDATION_ERROR,
+    EXCEPTION
+  }
+
+  private CloverDeviceErrorType errorType;
   private int code;
   private String message;
 
@@ -24,7 +33,8 @@ public class CloverDeviceErrorEvent {
 
   }
 
-  public CloverDeviceErrorEvent(int devCode, String msg) {
+  public CloverDeviceErrorEvent(CloverDeviceErrorType errorType, int devCode, String msg) {
+    this.errorType = errorType;
     code = devCode;
     message = msg;
   }
@@ -35,5 +45,9 @@ public class CloverDeviceErrorEvent {
 
   public String getMessage() {
     return message;
+  }
+
+  public CloverDeviceErrorType getErrorType() {
+    return errorType;
   }
 }

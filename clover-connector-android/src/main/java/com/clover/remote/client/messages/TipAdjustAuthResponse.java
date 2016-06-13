@@ -18,9 +18,12 @@ package com.clover.remote.client.messages;
 
 public class TipAdjustAuthResponse extends BaseResponse {
   private String paymentId;
-  private long amount;
+  private long tipAmount;
   private boolean success;
 
+  public TipAdjustAuthResponse(boolean success, ResultCode result) {
+    super(success, result);
+  }
 
   public String getPaymentId() {
     return paymentId;
@@ -30,12 +33,12 @@ public class TipAdjustAuthResponse extends BaseResponse {
     this.paymentId = paymentId;
   }
 
-  public long getAmount() {
-    return amount;
+  public long getTipAmount() {
+    return tipAmount;
   }
 
-  public void setAmount(long amount) {
-    this.amount = amount;
+  public void setTipAmount(long tipAmount) {
+    this.tipAmount = tipAmount;
   }
 
   public boolean isSuccess() {

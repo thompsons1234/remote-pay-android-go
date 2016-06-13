@@ -21,7 +21,7 @@ import com.clover.sdk.v3.payments.Payment;
 
 import java.io.Serializable;
 
-public class SignatureVerifyRequest implements Serializable {
+public class VerifySignatureRequest implements Serializable {
   private Signature2 signature;
   private Payment payment;
 

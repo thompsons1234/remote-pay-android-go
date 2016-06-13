@@ -40,10 +40,7 @@ import com.clover.remote.client.lib.example.model.POSOrder;
 import com.clover.remote.client.lib.example.model.POSPayment;
 import com.clover.remote.client.lib.example.model.POSStore;
 import com.clover.remote.client.lib.example.model.StoreObserver;
-import com.clover.remote.client.messages.AuthRequest;
-import com.clover.remote.client.messages.CaptureAuthRequest;
-import com.clover.remote.client.messages.SaleRequest;
-import com.clover.sdk.v3.payments.VaultedCard;
+import com.clover.remote.client.messages.CapturePreAuthRequest;
 
 import java.lang.ref.WeakReference;
 
@@ -159,11 +156,11 @@ public class PreAuthFragment extends Fragment {
 
                   switch (index) {
                     case 0: {
-                    CaptureAuthRequest car = new CaptureAuthRequest();
+                    CapturePreAuthRequest car = new CapturePreAuthRequest();
                     car.paymentID = posPayment.getPaymentID();
                     car.amount = store.getCurrentOrder().getTotal();
                     car.tipAmount = store.getCurrentOrder().getTips();
-                    cloverConnector.captureAuth(car);
+                    cloverConnector.capturePreAuth(car);
                     dialog.dismiss();
                     break;
                   }

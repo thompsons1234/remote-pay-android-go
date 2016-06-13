@@ -19,9 +19,13 @@ package com.clover.remote.client.messages;
 import com.clover.sdk.internal.Signature2;
 import com.clover.sdk.v3.payments.Payment;
 
-public class SaleResponse extends TransactionResponse {
+public class SaleResponse extends PaymentResponse {
   private Payment payment;
   private Signature2 signature; // optional
+
+  public SaleResponse(boolean success, ResultCode result) {
+    super(success, result);
+  }
 
   public Payment getPayment() {
     return payment;

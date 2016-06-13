@@ -41,6 +41,11 @@ public class POSStore {
   private transient List<OrderObserver> orderObservers = new ArrayList<OrderObserver>();
   private transient List<StoreObserver> storeObservers = new ArrayList<StoreObserver>();
 
+
+  private int cardEntryMethods;
+  private Boolean approveOfflinePaymentWithoutPrompt;
+  private Boolean allowOfflinePayment;
+
   public POSStore() {
     availableItems = new LinkedHashMap<String, POSItem>();
     availableDiscounts = new ArrayList<POSDiscount>();
@@ -153,5 +158,27 @@ public class POSStore {
 
   public List<POSPayment> getPreAuths() {
     return Collections.unmodifiableList(preAuths);
+  }
+
+  public void setAllowOfflinePayment(Boolean allowOfflinePayment) {
+    this.allowOfflinePayment = allowOfflinePayment;
+  }
+  public Boolean getAllowOfflinePayment() {
+    return this.allowOfflinePayment;
+  }
+
+  public void setApproveOfflinePaymentWithoutPrompt(Boolean approveOfflinePaymentWithoutPrompt) {
+    this.approveOfflinePaymentWithoutPrompt = approveOfflinePaymentWithoutPrompt;
+  }
+  public Boolean getApproveOfflinePaymentWithoutPrompt() {
+    return this.approveOfflinePaymentWithoutPrompt;
+  }
+
+  public void setCardEntryMethods(int cardEntryMethods) {
+    this.cardEntryMethods = cardEntryMethods;
+  }
+
+  public int getCardEntryMethods() {
+    return cardEntryMethods;
   }
 }

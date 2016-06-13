@@ -17,24 +17,24 @@
 package com.clover.remote.client.messages;
 
 public class TipAdjustAuthRequest extends BaseRequest {
-  private String paymentID;
-  private String orderID;
+  private String paymentId;
+  private String orderId;
   private long tipAmount;
 
-  public String getOrderID() {
-    return orderID;
+  public String getOrderId() {
+    return orderId;
   }
 
-  public void setOrderID(String orderID) {
-    this.orderID = orderID;
+  public void setOrderId(String orderId) {
+    this.orderId = orderId;
   }
 
-  public String getPaymentID() {
-    return paymentID;
+  public String getPaymentId() {
+    return paymentId;
   }
 
-  public void setPaymentID(String paymentID) {
-    this.paymentID = paymentID;
+  public void setPaymentId(String paymentId) {
+    this.paymentId = paymentId;
   }
 
   public long getTipAmount() {

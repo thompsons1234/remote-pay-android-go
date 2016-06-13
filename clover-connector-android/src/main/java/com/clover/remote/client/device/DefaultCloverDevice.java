@@ -594,6 +594,11 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     sendObjectMessage(ipm);
   }
 
+  public void doPrintImage(String url) {
+    ImagePrintMessage ipm = new ImagePrintMessage(url);
+    sendObjectMessage(ipm);
+  }
+
 
   public void doVoidPayment(final Payment payment, final VoidReason reason) {
     sendObjectMessage(new VoidPaymentMessage(payment, reason));

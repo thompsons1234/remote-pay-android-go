@@ -18,12 +18,13 @@ package com.clover.remote.client;
 
 import com.clover.remote.InputOption;
 import com.clover.remote.client.messages.AuthRequest;
-import com.clover.remote.client.messages.CaptureAuthRequest;
+import com.clover.remote.client.messages.CapturePreAuthRequest;
+import com.clover.remote.client.messages.CloseoutRequest;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.RefundPaymentRequest;
 import com.clover.remote.client.messages.SaleRequest;
-import com.clover.remote.client.messages.SignatureVerifyRequest;
+import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.TipAdjustAuthRequest;
 import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.remote.order.DisplayDiscount;
@@ -37,25 +38,30 @@ import java.util.List;
 public interface ICloverConnector {
 
   /**
+   * Initialize the CloverConnector's connection. Must be called before calling any other method other than to add or remove listeners
+   */
+  void initializeConnection();
+
+  /**
    * Sale method, aka "purchase"
    *
    * @param request - A SaleRequest object containing basic information needed for the transaction
    */
-  int sale(SaleRequest request);
+  void sale(SaleRequest request);
 
   /**
    * If signature is captured during a Sale, this method accepts the signature as entered
    *
    * @param request -
    **/
-  void acceptSignature(SignatureVerifyRequest request);
+  void acceptSignature(VerifySignatureRequest request);
 
   /**
    * If signature is captured during a Sale, this method rejects the signature as entered
    *
    * @param request -
    **/
-  void rejectSignature(SignatureVerifyRequest request);
+  void rejectSignature(VerifySignatureRequest request);
 
   /**
    * Auth method to obtain an Auth payment that can be used as the payment
@@ -63,21 +69,21 @@ public interface ICloverConnector {
    *
    * @param request -
    **/
-  int auth(AuthRequest request);
+  void auth(AuthRequest request);
 
   /**
    * PreAuth method to obtain a Pre-Auth for a card
    *
    * @param request -
    **/
-  int preAuth(PreAuthRequest request);
+  void preAuth(PreAuthRequest request);
 
   /**
    * Capture a previous Auth. Note: Should only be called if request's PaymentID is from an AuthResponse
    *
    * @param request -
    **/
-  void captureAuth(CaptureAuthRequest request);
+  void capturePreAuth(CapturePreAuthRequest request);
 
   /**
    * Adjust the tip for a previous Auth. Note: Should only be called if request's PaymentID is from an AuthResponse
@@ -129,10 +135,9 @@ public interface ICloverConnector {
   /**
    * Request a closeout of all orders.
    *
-   * @param allowOpenTabs
-   * @param batchId
+   * @param request -
    */
-  void closeout(boolean allowOpenTabs, String batchId);
+  void closeout(CloseoutRequest request);
 
   /**
    * Print simple lines of text to the Clover Mini printer
@@ -147,6 +152,12 @@ public interface ICloverConnector {
    * @param image -
    **/
   void printImage(Bitmap image);
+
+  /**
+   * Print an image on the Clover Mini printer
+   * @param url
+   */
+  void printImageFromURL(String url);
 
   /**
    * Show a message on the Clover Mini screen
@@ -199,54 +210,53 @@ public interface ICloverConnector {
    *
    * @param order -
    **/
-  void displayOrder(DisplayOrder order);
+  void showDisplayOrder(DisplayOrder order);
 
   /**
    * Notify the device of a DisplayLineItem being added to a DisplayOrder
    *
-   * @param order    -
    * @param lineItem -
+   * @param order    -
    **/
-  void displayOrderLineItemAdded(DisplayOrder order, DisplayLineItem lineItem);
+  void lineItemAddedToDisplayOrder(DisplayLineItem lineItem, DisplayOrder order);
 
   /**
    * Notify the device of a DisplayLineItem being removed from a DisplayOrder
    *
-   * @param order    -
    * @param lineItem -
+   * @param order    -
    **/
 
-  void displayOrderLineItemRemoved(DisplayOrder order, DisplayLineItem lineItem);
+  void lineItemRemovedFromDisplayOrder(DisplayLineItem lineItem, DisplayOrder order);
 
   /**
    * Notify device of a discount being added to the order.
    * Note: This is independent of a discount being added to a display line item.
    *
-   * @param order    -
    * @param discount -
+   * @param order    -
    **/
-  void displayOrderDiscountAdded(DisplayOrder order, DisplayDiscount discount);
+  void discountAddedToDisplayOrder(DisplayDiscount discount, DisplayOrder order);
 
   /**
    * Notify the device that a discount was removed from the order.
    * Note: This is independent of a discount being removed from a display line item.
    *
-   * @param order    -
    * @param discount -
+   * @param order    -
    **/
-  void displayOrderDiscountRemoved(DisplayOrder order, DisplayDiscount discount);
+  void discountRemovedFromDisplayOrder(DisplayDiscount discount, DisplayOrder order);
 
   /**
    * Remove the DisplayOrder from the device.
    *
    * @param order -
    **/
-  void displayOrderDelete(DisplayOrder order);
+  void removeDisplayOrder(DisplayOrder order);
 
   /**
    *  return the Merchant object for the Merchant configured for the Clover Mini
    **/
-  //void getMerchantInfo();
 
   /**
    *

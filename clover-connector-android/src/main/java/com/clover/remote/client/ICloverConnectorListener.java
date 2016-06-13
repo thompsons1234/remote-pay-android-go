@@ -18,7 +18,7 @@ package com.clover.remote.client;
 
 import com.clover.remote.TxState;
 import com.clover.remote.client.messages.AuthResponse;
-import com.clover.remote.client.messages.CaptureAuthResponse;
+import com.clover.remote.client.messages.CapturePreAuthResponse;
 import com.clover.remote.client.messages.ConfigErrorResponse;
 import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.VaultCardResponse;
@@ -28,7 +28,7 @@ import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.ManualRefundResponse;
 import com.clover.remote.client.messages.RefundPaymentResponse;
 import com.clover.remote.client.messages.SaleResponse;
-import com.clover.remote.client.messages.SignatureVerifyRequest;
+import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
 import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.message.TipAddedMessage;
@@ -54,9 +54,9 @@ public interface ICloverConnectorListener {
 
   public void onAuthTipAdjustResponse(TipAdjustAuthResponse response);
 
-  public void onPreAuthCaptureResponse(CaptureAuthResponse response);
+  public void onPreAuthCaptureResponse(CapturePreAuthResponse response);
 
-  public void onSignatureVerifyRequest(SignatureVerifyRequest request);
+  public void onSignatureVerifyRequest(VerifySignatureRequest request);
 
   public void onCloseoutResponse(CloseoutResponse response);
 

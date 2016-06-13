@@ -26,7 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import com.clover.remote.client.CloverConnector;
-import com.clover.remote.client.messages.SignatureVerifyRequest;
+import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.sdk.internal.Signature2;
 
 /**
@@ -46,21 +46,21 @@ public class SignatureFragment extends Fragment {
   SignatureView sigCanvas;
 
   private OnFragmentInteractionListener mListener;
-  private SignatureVerifyRequest signatureVerifyRequest;
+  private VerifySignatureRequest verifySignatureRequest;
   private CloverConnector cloverConnector;
 
   /**
    * Use this factory method to create a new instance of
    * this fragment using the provided parameters.
    *
-   * @param signatureVerifyRequest Parameter 1.
+   * @param verifySignatureRequest Parameter 1.
    * @param cloverConnector        Parameter 2.
    * @return A new instance of fragment SignatureFragment.
    */
 
-  public static SignatureFragment newInstance(SignatureVerifyRequest signatureVerifyRequest, CloverConnector cloverConnector) {
+  public static SignatureFragment newInstance(VerifySignatureRequest verifySignatureRequest, CloverConnector cloverConnector) {
     SignatureFragment fragment = new SignatureFragment();
-    fragment.setSignatureVerifyRequest(signatureVerifyRequest);
+    fragment.setVerifySignatureRequest(verifySignatureRequest);
     fragment.setCloverConnector(cloverConnector);
     Bundle args = new Bundle();
     fragment.setArguments(args);
@@ -88,7 +88,7 @@ public class SignatureFragment extends Fragment {
       rejectButton = (Button) view.findViewById(R.id.RejectButton);
       acceptButton = (Button) view.findViewById(R.id.AcceptButton);
 
-      sigCanvas.setSignature(signatureVerifyRequest.getSignature());
+      sigCanvas.setSignature(verifySignatureRequest.getSignature());
 
       acceptButton.setOnClickListener(new View.OnClickListener() {
         @Override
@@ -96,7 +96,7 @@ public class SignatureFragment extends Fragment {
           FragmentTransaction fragmentTransaction = getActivity().getFragmentManager().beginTransaction();
           fragmentTransaction.hide(SignatureFragment.this);
           fragmentTransaction.commit();
-          cloverConnector.acceptSignature(signatureVerifyRequest);
+          cloverConnector.acceptSignature(verifySignatureRequest);
           //((FrameLayout)view.getParent()).removeView(view);
         }
       });
@@ -106,7 +106,7 @@ public class SignatureFragment extends Fragment {
           FragmentTransaction fragmentTransaction = getActivity().getFragmentManager().beginTransaction();
           fragmentTransaction.hide(SignatureFragment.this);
           fragmentTransaction.commit();
-          cloverConnector.rejectSignature(signatureVerifyRequest);
+          cloverConnector.rejectSignature(verifySignatureRequest);
           //((FrameLayout)view.getParent()).removeView(view);
         }
       });
@@ -138,16 +138,16 @@ public class SignatureFragment extends Fragment {
     mListener = null;
   }
 
-  public void setSignatureVerifyRequest(SignatureVerifyRequest signatureVerifyRequest) {
-    this.signatureVerifyRequest = signatureVerifyRequest;
+  public void setVerifySignatureRequest(VerifySignatureRequest verifySignatureRequest) {
+    this.verifySignatureRequest = verifySignatureRequest;
     if (sigCanvas != null) {
-      sigCanvas.setSignature(signatureVerifyRequest.getSignature());
+      sigCanvas.setSignature(verifySignatureRequest.getSignature());
       sigCanvas.postInvalidate();
     }
   }
 
-  public SignatureVerifyRequest getSignatureVerifyRequest() {
-    return signatureVerifyRequest;
+  public VerifySignatureRequest getVerifySignatureRequest() {
+    return verifySignatureRequest;
   }
 
   public void setCloverConnector(CloverConnector cloverConnector) {

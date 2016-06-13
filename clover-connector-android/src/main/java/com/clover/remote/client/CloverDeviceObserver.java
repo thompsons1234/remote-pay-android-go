@@ -22,6 +22,7 @@ import com.clover.remote.ResultStatus;
 import com.clover.remote.TxState;
 import com.clover.remote.UiState;
 import com.clover.remote.client.device.CloverDevice;
+import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.message.DiscoveryResponseMessage;
 import com.clover.sdk.internal.Signature2;
 import com.clover.sdk.v3.order.VoidReason;
@@ -76,12 +77,13 @@ public interface CloverDeviceObserver {
   //void onModifyOrder(RemoveDiscountAction removeDiscountAction);
   //void onModifyOrder(AddLineItemAction addLineItemAction);
   //void onModifyOrder(RemoveLineItemAction removeLineItemAction);
-  void onTxStartResponse(boolean success);
+  //void onTxStartResponse(boolean success);
 
   void onDeviceDisconnected(CloverDevice device);
 
   void onDeviceConnected(CloverDevice device);
 
   void onDeviceReady(CloverDevice device, DiscoveryResponseMessage drm);
-  void onConfigError(String message);
+
+  void onDeviceError(CloverDeviceErrorEvent errorEvent);
 }
