@@ -35,10 +35,12 @@ public abstract class CloverDevice {
 
   protected CloverTransport transport;
   protected String packageName;
+  private final String applicationId;
 
-  public CloverDevice(String packageName, CloverTransport transport) {
+  public CloverDevice(String packageName, CloverTransport transport, String applicationId) {
     this.transport = transport;
     this.packageName = packageName;
+    this.applicationId = applicationId;
   }
 
   /// <summary>

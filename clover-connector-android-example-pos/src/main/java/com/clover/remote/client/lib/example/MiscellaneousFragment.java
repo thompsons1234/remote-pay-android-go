@@ -79,7 +79,7 @@ public class MiscellaneousFragment extends Fragment {
    * @return A new instance of fragment OrdersFragment.
    */
   // TODO: Rename and change types and number of parameters
-  public static MiscellaneousFragment newInstance(POSStore store, CloverConnector cloverConnector) {
+  public static MiscellaneousFragment newInstance(POSStore store, ICloverConnector cloverConnector) {
     MiscellaneousFragment fragment = new MiscellaneousFragment();
     fragment.setStore(store);
     Bundle args = new Bundle();

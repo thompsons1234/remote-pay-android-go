@@ -115,19 +115,7 @@ public class CloverConnector implements ICloverConnector {
    * @param config - A CloverDeviceConfiguration object; TestDeviceConfiguration can be used for testing
    */
   public CloverConnector(CloverDeviceConfiguration config) {
-    this(config, null);
-  }
-
-  /**
-   * @param config            - A CloverDeviceConfiguration object; TestDeviceConfiguration can be used for testing
-   * @param connectorListener - Connector listener that will be added before the device is initialized
-   */
-
-  public CloverConnector(CloverDeviceConfiguration config, ICloverConnectorListener connectorListener) {
-    if (connectorListener != null) {
-      addCloverConnectorListener(connectorListener);
-    }
-    initialize(config);
+    this.configuration = config;
   }
 
   public void addCloverConnectorListener(ICloverConnectorListener connectorListener) {
@@ -591,10 +579,13 @@ public class CloverConnector implements ICloverConnector {
         .cardEntryMethods(request.getCardEntryMethods() != null ? request.getCardEntryMethods() : cardEntryMethods)
         .transactionType(PayIntent.TransactionType.PAYMENT.CREDIT)
         .vaultedCard(request.getVaultedCard())
-        .remotePrint(request.getDisablePrinting())
         .externalPaymentId(request.getExternalId());
 
-    if(request.getDisableRestartTransactionOnFail()) {
+    if(request.getDisablePrinting() != null) {
+      builder.remotePrint(request.getDisablePrinting());
+    }
+
+    if(request.getDisableRestartTransactionOnFail() != null) {
       builder.disableRestartTransactionWhenFailed(request.getDisableRestartTransactionOnFail());
     }
 
@@ -956,12 +947,11 @@ public class CloverConnector implements ICloverConnector {
     }
 
     public void onTxState(TxState txState) {
-      //Console.WriteLine("onTxTstate: " + txState.ToString());
-      cloverConnector.broadcaster.notifyOnTxState(txState);
+      //TODO: For future use
     }
 
     public void onPartialAuth(long partialAmount) {
-      //TODO: Implement
+      //TODO: For future use
     }
 
     public void onTipAdded(long tip) {
@@ -1095,38 +1085,40 @@ public class CloverConnector implements ICloverConnector {
 
     private void onFinishCancel(ResultCode result, String reason, String message) {
       try {
-        Object lastReq = cloverConnector.lastRequest;
-        cloverConnector.lastRequest = null;
+        Object lastReq = lastRequest;
+        lastRequest = null;
         if (lastReq instanceof PreAuthRequest) {
           PreAuthResponse preAuthResponse = new PreAuthResponse(false, ResultCode.CANCEL);
           preAuthResponse.setReason(reason != null ? reason : "Request Canceled");
           preAuthResponse.setMessage(message != null ? message : "PreAuth Request canceled by user.");
           preAuthResponse.setPayment(null);
-          cloverConnector.broadcaster.notifyOnPreAuthResponse(preAuthResponse);
+          broadcaster.notifyOnPreAuthResponse(preAuthResponse);
         } else if (lastReq instanceof SaleRequest) {
           SaleResponse saleResponse = new SaleResponse(false, ResultCode.CANCEL);
           saleResponse.setReason(reason != null ? reason : "Request Canceled");
           saleResponse.setMessage(message != null ? message : "SaleRequest canceled by user.");
           saleResponse.setPayment(null);
-          cloverConnector.broadcaster.notifyOnSaleResponse(saleResponse);
+          broadcaster.notifyOnSaleResponse(saleResponse);
         } else if (lastReq instanceof AuthRequest) {
           AuthResponse authResponse = new AuthResponse(false, ResultCode.CANCEL);
           authResponse.setReason(reason != null ? reason : "Request Canceled");
           authResponse.setMessage(message != null ? message : "AuthRequest canceled by user.");
           authResponse.setPayment(null);
-          cloverConnector.broadcaster.notifyOnAuthResponse(authResponse);
+          broadcaster.notifyOnAuthResponse(authResponse);
         } else if (lastReq instanceof ManualRefundRequest) {
           ManualRefundResponse refundResponse = new ManualRefundResponse(false, ResultCode.CANCEL);
           refundResponse.setReason(reason != null ? reason : "Request Canceled");
           refundResponse.setMessage(message != null ? message : "ManualRefundRequest canceled by user.");
           refundResponse.setCredit(null);
-          cloverConnector.broadcaster.notifyOnManualRefundResponse(refundResponse);
+          broadcaster.notifyOnManualRefundResponse(refundResponse);
         } else if (lastPRR instanceof RefundPaymentResponse) {
-          cloverConnector.broadcaster.notifyOnRefundPaymentResponse(lastPRR);
+          broadcaster.notifyOnRefundPaymentResponse(lastPRR);
           lastPRR = null;
         }
       } finally {
-        cloverConnector.device.doShowWelcomeScreen();
+        if(device != null) {
+          device.doShowWelcomeScreen();
+        }
       }
     }
     public void onFinishCancel() {
@@ -1137,7 +1129,7 @@ public class CloverConnector implements ICloverConnector {
       SVR request = new SVR(cloverConnector.device);
       request.setSignature(signature);
       request.setPayment(payment);
-      cloverConnector.broadcaster.notifyOnSignatureVerifyRequest(request);
+      broadcaster.notifyOnSignatureVerifyRequest(request);
     }
 
     public void onPaymentVoided(ResultCode code, String reason, String message) {

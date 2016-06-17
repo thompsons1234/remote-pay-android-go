@@ -21,14 +21,22 @@ import com.clover.remote.client.transport.usb.USBCloverTransport;
 
 import android.content.Context;
 
+import java.io.Serializable;
+
 /**
  * Created by blakewilliams on 3/30/16.
  */
-public class USBCloverDeviceConfiguration implements CloverDeviceConfiguration {
+public class USBCloverDeviceConfiguration implements CloverDeviceConfiguration, Serializable {
   Context context;
+  String appId;
 
-  public USBCloverDeviceConfiguration(Context ctx) {
+  public USBCloverDeviceConfiguration(Context ctx, String appId) {
     context = ctx;
+    this.appId = appId;
+  }
+
+  public void setContext(Context context) {
+    this.context = context;
   }
 
   @Override
@@ -49,5 +57,9 @@ public class USBCloverDeviceConfiguration implements CloverDeviceConfiguration {
   @Override
   public CloverTransport getCloverTransport() {
     return new USBCloverTransport(context);
+  }
+
+  @Override public String getApplicationId() {
+    return this.appId;
   }
 }

@@ -87,7 +87,7 @@ public class OrdersFragment extends Fragment implements OrderObserver {
    * @return A new instance of fragment OrdersFragment.
    */
   // TODO: Rename and change types and number of parameters
-  public static OrdersFragment newInstance(POSStore store, CloverConnector cloverConnector) {
+  public static OrdersFragment newInstance(POSStore store, ICloverConnector cloverConnector) {
     OrdersFragment fragment = new OrdersFragment();
     fragment.setStore(store);
     Bundle args = new Bundle();

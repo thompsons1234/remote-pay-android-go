@@ -16,6 +16,7 @@
 
 package com.clover.remote.client;
 
+import android.os.Parcelable;
 import com.clover.remote.InputOption;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.CapturePreAuthRequest;
@@ -33,14 +34,27 @@ import com.clover.remote.order.DisplayOrder;
 
 import android.graphics.Bitmap;
 
+import java.io.Serializable;
 import java.util.List;
 
-public interface ICloverConnector {
+public interface ICloverConnector extends Serializable {
 
   /**
    * Initialize the CloverConnector's connection. Must be called before calling any other method other than to add or remove listeners
    */
   void initializeConnection();
+
+  /**
+   * add an ICloverConnectorListener to receive callbacks
+   * @param listener
+   */
+  public void addCloverConnectorListener(ICloverConnectorListener listener);
+
+  /**
+   * remove an ICloverConnectorListener from receiving callbacks
+   * @param listener
+   */
+  public void removeCloverConnectorListener(ICloverConnectorListener listener);
 
   /**
    * Sale method, aka "purchase"
@@ -98,12 +112,6 @@ public interface ICloverConnector {
    * @param request - A VoidRequest object containing basic information needed to void the transaction
    **/
   void voidPayment(VoidPaymentRequest request);
-
-  /*
-   * called when requesting a payment be voided when only the request UUID is available
-   * @param request -
-   */
-  //void voidTransaction(VoidTransactionRequest request);
 
   /**
    * Refund a specific payment
@@ -185,22 +193,6 @@ public interface ICloverConnector {
   void displayPaymentReceiptOptions(String orderId, String paymentId);
 
   /**
-   * display the refund receipt screen for the orderId/refundId combination.
-   *
-   * @param refundId
-   * @param orderId
-
-  void displayRefundReceiptOptions(String orderId, String refundId);
-
-  /**
-   * display the credit receipt screen for the orderId/creditId combination.
-   *
-   * @param creditId
-   * @param orderId
-
-  void displayManualRefundReceiptOptions(String orderId, String creditId);
-*/
-  /**
    * Will trigger cash drawer to open that is connected to Clover Mini
    **/
   void openCashDrawer(String reason);
@@ -259,7 +251,7 @@ public interface ICloverConnector {
    **/
 
   /**
-   *
+   * will dispose of the underlying connection to the device
    */
   void dispose();
 

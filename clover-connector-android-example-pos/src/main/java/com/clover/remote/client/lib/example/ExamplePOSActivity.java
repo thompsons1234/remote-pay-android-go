@@ -41,10 +41,11 @@ import android.widget.Toast;
 import com.clover.remote.InputOption;
 import com.clover.remote.TxState;
 import com.clover.remote.client.CloverConnector;
+import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.ICloverConnectorListener;
 import com.clover.remote.client.MerchantInfo;
+import com.clover.remote.client.device.CloverDeviceConfiguration;
 import com.clover.remote.client.device.USBCloverDeviceConfiguration;
-import com.clover.remote.client.device.WebSocketCloverDeviceConfiguration;
 import com.clover.remote.client.lib.example.model.POSCard;
 import com.clover.remote.client.lib.example.model.POSDiscount;
 import com.clover.remote.client.lib.example.model.POSExchange;
@@ -78,8 +79,6 @@ import com.clover.sdk.v3.payments.CardTransactionType;
 import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.Payment;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
@@ -95,12 +94,13 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public static final String EXAMPLE_POS_SERVER_KEY = "clover_device_endpoint";
   public static final int WS_ENDPOINT_ACTIVITY = 123;
   public static final int SVR_ACTIVITY = 456;
+  public static final String EXTRA_CLOVER_CONNECTOR_CONFIG = "EXTRA_CLOVER_CONNECTOR";
 
   boolean usb = true;
 
   String _checksURL = null;
 
-  CloverConnector cloverConnector;
+  ICloverConnector cloverConnector;
 
   POSStore store = new POSStore();
 
@@ -109,11 +109,13 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_example_pos);
 
-    if (usb || loadBaseURL()) {
-
-      initialize();
-
+    CloverDeviceConfiguration config = (CloverDeviceConfiguration) getIntent().getSerializableExtra(EXTRA_CLOVER_CONNECTOR_CONFIG);
+    if(config instanceof USBCloverDeviceConfiguration) {
+      ((USBCloverDeviceConfiguration)config).setContext(this);
     }
+    cloverConnector = new CloverConnector(config);
+
+    initialize();
 
     FrameLayout frameLayout = (FrameLayout) findViewById(R.id.contentContainer);
 
@@ -151,31 +153,14 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     store.addAvailableDiscount(new POSDiscount("None", 0));
 
     store.createOrder();
-  }
 
-  private boolean loadBaseURL() {
-    if(usb) {
-      return true;
-    }
-    String _serverBaseURL = PreferenceManager.getDefaultSharedPreferences(this).getString(EXAMPLE_POS_SERVER_KEY, null);
-
-    if (_serverBaseURL == null || "".equals(_serverBaseURL.trim())) {
-      Intent intent = new Intent(this, ExamplePOSSettingsActivity.class);
-      startActivityForResult(intent, WS_ENDPOINT_ACTIVITY);
-      return false;
-    }
-
-    _checksURL = _serverBaseURL;
-
-    Log.d(TAG, _serverBaseURL);
-    return true;
   }
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == WS_ENDPOINT_ACTIVITY) {
       if (!usb) {
-        loadBaseURL();
+        //loadBaseURL();
         initialize();
       }
     }
@@ -238,18 +223,17 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
 
   public void initialize() {
-    URI uri = null;
-    try {
+
       if (cloverConnector != null) {
         cloverConnector.dispose();
       }
 
         ICloverConnectorListener ccListener = new ICloverConnectorListener() {
-        public void onDisconnected() {
+        public void onDeviceDisconnected() {
           runOnUiThread(new Runnable() {
             @Override
             public void run() {
-              Toast.makeText(getBaseContext(), "Disconnected", Toast.LENGTH_SHORT).show();
+              Toast.makeText(ExamplePOSActivity.this, "Disconnected", Toast.LENGTH_SHORT).show();
               Log.d(TAG, "disconnected");
               ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Disconnected");
             }
@@ -257,7 +241,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
         }
 
-        public void onConnected() {
+        public void onDeviceConnected() {
 
           runOnUiThread(new Runnable() {
             @Override
@@ -268,7 +252,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           });
         }
 
-        public void onReady(final MerchantInfo merchantInfo) {
+        public void onDeviceReady(final MerchantInfo merchantInfo) {
           runOnUiThread(new Runnable() {
             public void run() {
               showMessage("Ready!", Toast.LENGTH_SHORT);
@@ -400,7 +384,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         }
 
         @Override
-        public void onAuthTipAdjustResponse(TipAdjustAuthResponse response) {
+        public void onTipAdjustAuthResponse(TipAdjustAuthResponse response) {
           if (response.isSuccess()) {
 
             boolean updatedTip = false;
@@ -427,7 +411,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         }
 
         @Override
-        public void onPreAuthCaptureResponse(CapturePreAuthResponse response) {
+        public void onCapturePreAuthResponse(CapturePreAuthResponse response) {
 
           if (response.isSuccess()) {
             for (final POSPayment payment : store.getPreAuths()) {
@@ -461,7 +445,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         }
 
         @Override
-        public void onSignatureVerifyRequest(VerifySignatureRequest request) {
+        public void onVerifySignatureRequest(VerifySignatureRequest request) {
 
           FragmentManager fragmentManager = getFragmentManager();
           FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -561,9 +545,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               }
             }
           } else {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getBaseContext());
-            builder.setTitle("Refund Error").
-                setMessage("There was an error refunding the payment");
+            AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
+            builder.setTitle("Refund Error").setMessage("There was an error refunding the payment");
             builder.create().show();
             Log.d(getClass().getName(), "Got refund response of " + response.getReason());
           }
@@ -625,25 +608,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           }
         }
 
-        @Override
-        public void onTransactionState(TxState txState) {
-
-        }
-
       };
 
-      if(usb) {
-        cloverConnector = new CloverConnector(new USBCloverDeviceConfiguration(this), ccListener);
-      } else {
-        uri = new URI(_checksURL);
-        cloverConnector = new CloverConnector(new WebSocketCloverDeviceConfiguration(uri, 10000, 2000), ccListener);
-      }
-
+      cloverConnector.addCloverConnectorListener(ccListener);
+      cloverConnector.initializeConnection();
       updateComponentsWithNewCloverConnector();
-
-    } catch (URISyntaxException e) {
-      e.printStackTrace();
-    }
 
   }
 

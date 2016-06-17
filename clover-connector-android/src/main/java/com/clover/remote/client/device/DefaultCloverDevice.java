@@ -80,14 +80,17 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   Gson gson = new Gson();
   private static int id = 0;
   private RefundResponseMessage refRespMsg;
+  private static final String REMOTE_SDK = "com.clover.android.sdk:1.0";
 
+  private String applicationId;
 
   public DefaultCloverDevice(CloverDeviceConfiguration configuration) {
-    this(configuration.getMessagePackageName(), configuration.getCloverTransport());
+    this(configuration.getMessagePackageName(), configuration.getCloverTransport(), configuration.getApplicationId());
   }
 
-  public DefaultCloverDevice(String packageName, CloverTransport transport) {
-    super(packageName, transport);
+  public DefaultCloverDevice(String packageName, CloverTransport transport, String applicationId) {
+    super(packageName, transport, applicationId);
+    this.applicationId = applicationId;
     transport.Subscribe(this);
   }
 
@@ -108,6 +111,9 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     doDiscoveryRequest();
   }
 
+  public String getApplicationId() {
+    return applicationId;
+  }
 
   public void onMessage(String message) {
     try {
@@ -673,8 +679,11 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
       Log.e(getClass().getName(), "Invalid message", new IllegalArgumentException("Invalid message: " + message.toString()));
       return;
     }
-    RemoteMessage remoteMessage = new RemoteMessage("" + id++, RemoteMessage.Type.COMMAND, this.packageName, message.method.toString(), message.toJsonString());
-
+    if (applicationId == null) {
+      Log.e(getClass().getName(), "Invalid applicationId: " + applicationId);
+      throw new IllegalArgumentException("Invalid applicationId");
+    }
+    RemoteMessage remoteMessage = new RemoteMessage("" + id++, RemoteMessage.Type.COMMAND, this.packageName, message.method.toString(), message.toJsonString(), REMOTE_SDK, applicationId);
     String msg = gson.toJson(remoteMessage);
     transport.sendMessage(msg);
   }

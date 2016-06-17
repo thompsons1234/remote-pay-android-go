@@ -87,7 +87,7 @@ public class CardsFragment extends Fragment {
      * @return A new instance of fragment OrdersFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static CardsFragment newInstance(POSStore store, CloverConnector cloverConnector) {
+    public static CardsFragment newInstance(POSStore store, ICloverConnector cloverConnector) {
         CardsFragment fragment = new CardsFragment();
         fragment.setStore(store);
         Bundle args = new Bundle();

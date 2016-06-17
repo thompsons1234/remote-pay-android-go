@@ -19,7 +19,6 @@ package com.clover.remote.client;
 import com.clover.remote.TxState;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
-import com.clover.remote.client.messages.ConfigErrorResponse;
 import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.CloseoutResponse;
@@ -34,47 +33,111 @@ import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.message.TipAddedMessage;
 
 public interface ICloverConnectorListener {
-  public void onDisconnected();
 
-  public void onConnected();
-
-  public void onReady(MerchantInfo merchantInfo);
-
-  public void onError(Exception e);
-
-  public void onDebug(String s);
-
+  /**
+   * Called when a Clover device activity starts.
+   * @param deviceEvent
+   */
   public void onDeviceActivityStart(CloverDeviceEvent deviceEvent);
 
+  /**
+   * Called when a Clover device activity ends.
+   * @param deviceEvent
+   */
   public void onDeviceActivityEnd(CloverDeviceEvent deviceEvent);
 
+  /**
+   * Called when a Clover device error event is encountered
+   * @param deviceErrorEvent
+   */
   public void onDeviceError(CloverDeviceErrorEvent deviceErrorEvent);
 
-  public void onAuthResponse(AuthResponse response);
-
-  public void onAuthTipAdjustResponse(TipAdjustAuthResponse response);
-
-  public void onPreAuthCaptureResponse(CapturePreAuthResponse response);
-
-  public void onSignatureVerifyRequest(VerifySignatureRequest request);
-
-  public void onCloseoutResponse(CloseoutResponse response);
-
-  public void onSaleResponse(SaleResponse response);
-
+  /**
+   * Called in response to a pre auth request
+   * @param response
+   */
   public void onPreAuthResponse(PreAuthResponse response);
 
+  /**
+   * Called in response to an auth request
+   * @param response
+   */
+  public void onAuthResponse(AuthResponse response);
+
+  /**
+   * Called in response to a tip adjust of an auth payment
+   * @param response
+   */
+  public void onTipAdjustAuthResponse(TipAdjustAuthResponse response);
+
+  /**
+   * Called in response to a capture of a pre auth payment
+   * @param response
+   */
+  public void onCapturePreAuthResponse(CapturePreAuthResponse response);
+
+  /**
+   * Called when the Clover device requires a signature to be verified
+   * @param request
+   */
+  public void onVerifySignatureRequest(VerifySignatureRequest request);
+
+  /**
+   * Called in response to a closeout being processed
+   * @param response
+   */
+  public void onCloseoutResponse(CloseoutResponse response);
+
+  /**
+   * Called in response to a sale request
+   * @param response
+   */
+  public void onSaleResponse(SaleResponse response);
+
+  /**
+   * Called in response to a manual refund request
+   * @param response
+   */
   public void onManualRefundResponse(ManualRefundResponse response);
 
+  /**
+   * Called in response to a refund payment request
+   * @param response
+   */
   public void onRefundPaymentResponse(RefundPaymentResponse response);
 
+  /**
+   * Called when a customer selects a tip amount on the Clover device screen
+   * @param message
+   */
   public void onTipAdded(TipAddedMessage message);
 
+  /**
+   * Called in response to a void payment request
+   * @param response
+   */
   public void onVoidPaymentResponse(VoidPaymentResponse response);
 
+  /**
+   * Called when the Clover device is disconnected
+   */
+  public void onDeviceDisconnected();
+
+  /**
+   * Called when the Clover device is connected, but not ready to communicate
+   */
+  public void onDeviceConnected();
+
+  /**
+   * Called when the Clover device is ready to communicate
+   * @param merchantInfo
+   */
+  public void onDeviceReady(MerchantInfo merchantInfo);
+
+  /**
+   * Called in response to a vault card request
+   * @param response
+   */
   public void onVaultCardResponse(VaultCardResponse response);
 
-  public void onTransactionState(TxState txState);
-
-  public void onConfigErrorResponse(ConfigErrorResponse response);
 }

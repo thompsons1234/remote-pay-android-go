@@ -76,7 +76,7 @@ public class ManualRefundsFragment extends Fragment {
      * @return A new instance of fragment OrdersFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ManualRefundsFragment newInstance(POSStore store, CloverConnector cloverConnector) {
+    public static ManualRefundsFragment newInstance(POSStore store, ICloverConnector cloverConnector) {
         ManualRefundsFragment fragment = new ManualRefundsFragment();
         fragment.setStore(store);
         Bundle args = new Bundle();

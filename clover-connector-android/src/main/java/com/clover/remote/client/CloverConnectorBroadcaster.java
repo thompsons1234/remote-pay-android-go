@@ -32,9 +32,9 @@ import com.clover.remote.client.messages.TipAdjustAuthResponse;
 import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.message.TipAddedMessage;
 
-import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-public class CloverConnectorBroadcaster extends ArrayList<ICloverConnectorListener> {
+public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConnectorListener> {
 
   public void notifyOnTipAdded(long tip) {
     for (ICloverConnectorListener listener : this) {
@@ -87,7 +87,7 @@ public class CloverConnectorBroadcaster extends ArrayList<ICloverConnectorListen
 
   public void notifyOnSignatureVerifyRequest(VerifySignatureRequest request) {
     for (ICloverConnectorListener listener : this) {
-      listener.onSignatureVerifyRequest(request);
+      listener.onVerifySignatureRequest(request);
     }
   }
 
@@ -99,31 +99,25 @@ public class CloverConnectorBroadcaster extends ArrayList<ICloverConnectorListen
 
   public void notifyOnConnect() {
     for (ICloverConnectorListener listener : this) {
-      listener.onConnected();
+      listener.onDeviceConnected();
     }
   }
 
   public void notifyOnDisconnect() {
     for (ICloverConnectorListener listener : this) {
-      listener.onDisconnected();
+      listener.onDeviceDisconnected();
     }
   }
 
   public void notifyOnReady(MerchantInfo merchantInfo) {
     for (ICloverConnectorListener listener : this) {
-      listener.onReady(merchantInfo);
+      listener.onDeviceReady(merchantInfo);
     }
   }
 
   public void notifyOnTipAdjustAuthResponse(TipAdjustAuthResponse response) {
     for (ICloverConnectorListener listener : this) {
-      listener.onAuthTipAdjustResponse(response);
-    }
-  }
-
-  public void notifyOnTxState(TxState txState) {
-    for (ICloverConnectorListener listener : this) {
-      listener.onTransactionState(txState);
+      listener.onTipAdjustAuthResponse(response);
     }
   }
 
@@ -141,7 +135,7 @@ public class CloverConnectorBroadcaster extends ArrayList<ICloverConnectorListen
 
   public void notifyOnCapturePreAuth(CapturePreAuthResponse response) {
     for (ICloverConnectorListener listener : this) {
-      listener.onPreAuthCaptureResponse(response);
+      listener.onCapturePreAuthResponse(response);
     }
   }
 

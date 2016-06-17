@@ -57,6 +57,9 @@
 
   <string name="title_activity_orders">OrdersActivity</string>
   <string name="title_activity_miscellaneous">MiscellaneousActivity</string>
+    <string name="title_activity_startup">StartupActivity</string>
+
+    <string name="hello_world">Hello world!</string>
 
 
 </resources>

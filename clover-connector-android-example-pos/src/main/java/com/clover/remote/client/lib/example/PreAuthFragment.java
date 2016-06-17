@@ -71,7 +71,7 @@ public class PreAuthFragment extends Fragment {
    * @return A new instance of fragment OrdersFragment.
    */
   // TODO: Rename and change types and number of parameters
-  public static PreAuthFragment newInstance(POSStore store, CloverConnector cloverConnector) {
+  public static PreAuthFragment newInstance(POSStore store, ICloverConnector cloverConnector) {
     PreAuthFragment fragment = new PreAuthFragment();
     fragment.setStore(store);
     Bundle args = new Bundle();

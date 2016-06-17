@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import com.clover.remote.client.CloverConnector;
+import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.sdk.internal.Signature2;
 
@@ -47,7 +48,7 @@ public class SignatureFragment extends Fragment {
 
   private OnFragmentInteractionListener mListener;
   private VerifySignatureRequest verifySignatureRequest;
-  private CloverConnector cloverConnector;
+  private ICloverConnector cloverConnector;
 
   /**
    * Use this factory method to create a new instance of
@@ -58,7 +59,7 @@ public class SignatureFragment extends Fragment {
    * @return A new instance of fragment SignatureFragment.
    */
 
-  public static SignatureFragment newInstance(VerifySignatureRequest verifySignatureRequest, CloverConnector cloverConnector) {
+  public static SignatureFragment newInstance(VerifySignatureRequest verifySignatureRequest, ICloverConnector cloverConnector) {
     SignatureFragment fragment = new SignatureFragment();
     fragment.setVerifySignatureRequest(verifySignatureRequest);
     fragment.setCloverConnector(cloverConnector);
@@ -150,7 +151,7 @@ public class SignatureFragment extends Fragment {
     return verifySignatureRequest;
   }
 
-  public void setCloverConnector(CloverConnector cloverConnector) {
+  public void setCloverConnector(ICloverConnector cloverConnector) {
     this.cloverConnector = cloverConnector;
   }
 
