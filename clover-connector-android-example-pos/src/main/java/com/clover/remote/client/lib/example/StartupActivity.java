@@ -52,7 +52,7 @@ public class StartupActivity extends Activity {
 
     // initialize...
     TextView textView = (TextView) findViewById(R.id.lanPayDisplayAddress);
-    String url = this.getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).getString(LAN_PAY_DISPLAY_URL,  "http://192.168.1.101:14285");
+    String url = this.getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).getString(LAN_PAY_DISPLAY_URL,  "ws://192.168.1.101:14285");
 
     textView.setText(url);
     textView.setEnabled(((RadioGroup)findViewById(R.id.radioGroup)).getCheckedRadioButtonId() == R.id.lanRadioButton);
@@ -65,7 +65,7 @@ public class StartupActivity extends Activity {
 
   private boolean loadBaseURL() {
 
-    String _serverBaseURL = PreferenceManager.getDefaultSharedPreferences(this).getString(ExamplePOSActivity.EXAMPLE_POS_SERVER_KEY, "http://10.0.0.101:14285");
+    String _serverBaseURL = PreferenceManager.getDefaultSharedPreferences(this).getString(ExamplePOSActivity.EXAMPLE_POS_SERVER_KEY, "ws://10.0.0.101:14285");
 
     TextView tv = (TextView)findViewById(R.id.lanPayDisplayAddress);
     tv.setText(_serverBaseURL);
