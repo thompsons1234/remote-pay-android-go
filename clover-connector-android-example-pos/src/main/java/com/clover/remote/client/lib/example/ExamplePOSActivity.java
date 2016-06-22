@@ -98,7 +98,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public static final String EXAMPLE_POS_SERVER_KEY = "clover_device_endpoint";
   public static final int WS_ENDPOINT_ACTIVITY = 123;
   public static final int SVR_ACTIVITY = 456;
-  public static final String EXTRA_CLOVER_CONNECTOR_CONFIG = "EXTRA_CLOVER_CONNECTOR";
+  public static final String EXTRA_CLOVER_CONNECTOR_CONFIG = "EXTRA_CLOVER_CONNECTOR_CONFIG";
 
   boolean usb = true;
 

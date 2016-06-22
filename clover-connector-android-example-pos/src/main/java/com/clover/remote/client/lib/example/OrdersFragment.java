@@ -180,6 +180,7 @@ public class OrdersFragment extends Fragment implements OrderObserver {
                         RefundPaymentRequest rpr = new RefundPaymentRequest();
                         rpr.setPaymentId(posExchange.getPaymentID());
                         rpr.setOrderId(posExchange.orderID);
+                        rpr.setFullRefund(true);
                         cloverConnector.refundPayment(rpr);
                         break;
                       }

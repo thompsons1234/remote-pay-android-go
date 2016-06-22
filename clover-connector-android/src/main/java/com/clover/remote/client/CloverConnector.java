@@ -287,9 +287,8 @@ public class CloverConnector implements ICloverConnector {
    */
   public void acceptSignature(VerifySignatureRequest request) {
     if(device == null || !isReady) {
-
-    }
-    else if(request == null) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In acceptSignature : Device is not connected."));
+    } else if(request == null) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In acceptSignature : VerifySignatureRequest cannot be null."));
     } else if(request.getPayment() == null || request.getPayment().getId() == null) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In acceptSignature : VerifySignatureRequest.Payment must have an Id."));
@@ -305,9 +304,8 @@ public class CloverConnector implements ICloverConnector {
    */
   public void rejectSignature(VerifySignatureRequest request) {
     if(device == null || !isReady) {
-
-    }
-    else if(request == null) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In acceptSignature : Device is not connected."));
+    } else if(request == null) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In rejectSignature : VerifySignatureRequest cannot be null."));
     } else if(request.getPayment() == null || request.getPayment().getId() == null) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In rejectSignature : VerifySignatureRequest.Payment must have an Id."));
@@ -433,9 +431,9 @@ public class CloverConnector implements ICloverConnector {
 
   public void vaultCard(Integer cardEntryMethods) {
     if(device == null || !isReady) {
-      deviceObserver.onAuthTipAdjusted(ResultCode.ERROR, "Device connection Error", "In vaultCard : Integer - The Clover device is not connected.");
+      deviceObserver.onVaultCardResponse(false, ResultCode.ERROR, "Device connection Error", "In vaultCard : The Clover device is not connected.", null);
     } else if (!merchantInfo.supportsVaultCards) {
-      deviceObserver.onAuthTipAdjusted(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In vaultCard : Integer - Vaulting Cards is not enabled for the payment gateway.");
+      deviceObserver.onVaultCardResponse(false, ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In vaultCard : Vaulting Cards is not enabled for the payment gateway.", null);
     } else {
       device.doVaultCard(cardEntryMethods != null ? cardEntryMethods : getCardEntryMethods());
     }
@@ -1008,10 +1006,17 @@ public class CloverConnector implements ICloverConnector {
       cloverConnector.broadcaster.notifyOnCapturePreAuth(response);
     }
 
-    public void onVaultCardResponse(VaultedCard vaultedCard, String code, String reason) {
+    private void onVaultCardResponse(boolean success, ResultCode code, String reason, String message, VaultedCard vaultedCard) {
       device.doShowWelcomeScreen();
-      VaultCardResponse ccr = new VaultCardResponse(code == "SUCCESS", code == "SUCCESS" ? ResultCode.SUCCESS : ResultCode.FAIL, vaultedCard);
+      VaultCardResponse ccr = new VaultCardResponse(success, code, vaultedCard);
+      ccr.setReason(reason);
+      ccr.setMessage(message);
       cloverConnector.broadcaster.notifyOnVaultCardRespose(ccr);
+    }
+
+    public void onVaultCardResponse(VaultedCard vaultedCard, String code, String reason) {
+      boolean success = "SUCCESS".equals(code);
+      onVaultCardResponse(success, success ? ResultCode.SUCCESS : ResultCode.FAIL, null, null, vaultedCard);
     }
 
     public void onTxStartResponse(boolean success) {
