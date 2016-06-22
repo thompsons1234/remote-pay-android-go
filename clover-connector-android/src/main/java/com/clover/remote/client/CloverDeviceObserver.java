@@ -25,6 +25,7 @@ import com.clover.remote.client.device.CloverDevice;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.message.DiscoveryResponseMessage;
 import com.clover.sdk.internal.Signature2;
+import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Batch;
 import com.clover.sdk.v3.payments.Credit;
@@ -86,4 +87,11 @@ public interface CloverDeviceObserver {
   void onDeviceReady(CloverDevice device, DiscoveryResponseMessage drm);
 
   void onDeviceError(CloverDeviceErrorEvent errorEvent);
+
+  void onPrintRefundPayment(Payment payment, Order order, Refund refund);
+  void onPrintMerchantReceipt(Payment payment);
+  void onPrintPaymentDecline(Payment payment, String reason);
+  void onPrintPayment(Payment payment, Order order);
+  void onPrintCredit(Credit credit);
+  void onPrintCreditDecline(Credit credit, String reason);
 }

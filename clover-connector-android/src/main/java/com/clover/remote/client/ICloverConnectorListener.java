@@ -16,10 +16,15 @@
 
 package com.clover.remote.client;
 
-import com.clover.remote.TxState;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
 import com.clover.remote.client.messages.PreAuthResponse;
+import com.clover.remote.client.messages.PrintManualRefundDeclineReceiptMessage;
+import com.clover.remote.client.messages.PrintManualRefundReceiptMessage;
+import com.clover.remote.client.messages.PrintPaymentDeclineReceiptMessage;
+import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
+import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
+import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
 import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
@@ -139,5 +144,47 @@ public interface ICloverConnectorListener {
    * @param response
    */
   public void onVaultCardResponse(VaultCardResponse response);
+
+  /**
+   * Will only be called if disablePrinting = true on the Sale, Auth, PreAuth or ManualRefund Request
+   * Called when a user requests to print a receipt for a ManualRefund
+   * @param printManualRefundReceiptMessage
+   */
+  public void onPrintManualRefundReceipt(PrintManualRefundReceiptMessage printManualRefundReceiptMessage);
+  /**
+   * Will only be called if disablePrinting = true on the Sale, Auth, PreAuth or ManualRefund Request
+   * Called when a user requests to print a receipt for a declined ManualRefund
+   * @param printManualRefundDeclineReceiptMessage
+   */
+  public void onPrintManualRefundDeclineReceipt(PrintManualRefundDeclineReceiptMessage printManualRefundDeclineReceiptMessage);
+
+  /**
+   * Will only be called if disablePrinting = true on the Sale, Auth, PreAuth or ManualRefund Request
+   * Called when a user requests to print a receipt for a payment
+   * @param printPaymentReceiptMessage
+   */
+  public void onPrintPaymentReceipt(PrintPaymentReceiptMessage printPaymentReceiptMessage);
+
+  /**
+   * Will only be called if disablePrinting = true on the Sale, Auth, PreAuth or ManualRefund Request
+   * Called when a user requests to print a receipt for a declined payment
+   * @param printPaymentDeclineReceiptMessage
+   */
+  public void onPrintPaymentDeclineReceipt(PrintPaymentDeclineReceiptMessage printPaymentDeclineReceiptMessage);
+
+  /**
+   * Will only be called if disablePrinting = true on the Sale, Auth, PreAuth or ManualRefund Request
+   * Called when a user requests to print a merchant copy of a payment receipt
+   * @param printPaymentMerchantCopyReceiptMessage
+   */
+  public void onPrintPaymentMerchantCopyReceipt(PrintPaymentMerchantCopyReceiptMessage printPaymentMerchantCopyReceiptMessage);
+
+  /**
+   * Will only be called if disablePrinting = true on the Sale, Auth, PreAuth or ManualRefund Request
+   * Called when a user requests to print a receipt for a payment refund
+   * @param printRefundPaymentReceiptMessage
+   */
+  public void onPrintRefundPaymentReceipt(PrintRefundPaymentReceiptMessage printRefundPaymentReceiptMessage);
+
 
 }

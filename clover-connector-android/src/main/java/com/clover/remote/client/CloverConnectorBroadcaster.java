@@ -16,11 +16,16 @@
 
 package com.clover.remote.client;
 
-import com.clover.remote.TxState;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.PreAuthResponse;
+import com.clover.remote.client.messages.PrintManualRefundDeclineReceiptMessage;
+import com.clover.remote.client.messages.PrintManualRefundReceiptMessage;
+import com.clover.remote.client.messages.PrintPaymentDeclineReceiptMessage;
+import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
+import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
+import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
 import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceEvent;
@@ -145,4 +150,39 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
+  public void notifyOnPrintRefundPaymentReceipt(PrintRefundPaymentReceiptMessage printRefundPaymentReceiptMessage) {
+    for (ICloverConnectorListener listener : this) {
+      listener.onPrintRefundPaymentReceipt(printRefundPaymentReceiptMessage);
+    }
+  }
+
+  public void notifyOnPrintPaymentMerchantCopyReceipt(PrintPaymentMerchantCopyReceiptMessage printPaymentMerchantCopyReceiptMessage) {
+    for (ICloverConnectorListener listener : this) {
+      listener.onPrintPaymentMerchantCopyReceipt(printPaymentMerchantCopyReceiptMessage);
+    }
+  }
+
+  public void notifyOnPrintPaymentDeclineReceipt(PrintPaymentDeclineReceiptMessage printPaymentDeclineReceiptMessage) {
+    for (ICloverConnectorListener listener : this) {
+      listener.onPrintPaymentDeclineReceipt(printPaymentDeclineReceiptMessage);
+    }
+  }
+
+  public void notifyOnPrintPaymentReceipt(PrintPaymentReceiptMessage printPaymentReceiptMessage) {
+    for (ICloverConnectorListener listener : this) {
+      listener.onPrintPaymentReceipt(printPaymentReceiptMessage);
+    }
+  }
+
+  public void notifyOnPrintCreditReceipt(PrintManualRefundReceiptMessage printManualRefundReceiptMessage) {
+    for (ICloverConnectorListener listener : this) {
+      listener.onPrintManualRefundReceipt(printManualRefundReceiptMessage);
+    }
+  }
+
+  public void notifyOnPrintCreditDeclineReceipt(PrintManualRefundDeclineReceiptMessage printManualRefundDeclineReceiptMessage) {
+    for (ICloverConnectorListener listener : this) {
+      listener.onPrintManualRefundDeclineReceipt(printManualRefundDeclineReceiptMessage);
+    }
+  }
 }

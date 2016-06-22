@@ -16,6 +16,8 @@
 
 package com.clover.remote.client.lib.example.model;
 
+import com.clover.remote.client.CloverConnector;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,9 +44,10 @@ public class POSStore {
   private transient List<StoreObserver> storeObservers = new ArrayList<StoreObserver>();
 
 
-  private int cardEntryMethods;
+  private int cardEntryMethods = CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE | CloverConnector.CARD_ENTRY_METHOD_NFC_CONTACTLESS | CloverConnector.CARD_ENTRY_METHOD_ICC_CONTACT;
   private Boolean approveOfflinePaymentWithoutPrompt;
   private Boolean allowOfflinePayment;
+  private Boolean disablePrinting;
 
   public POSStore() {
     availableItems = new LinkedHashMap<String, POSItem>();
@@ -180,5 +183,13 @@ public class POSStore {
 
   public int getCardEntryMethods() {
     return cardEntryMethods;
+  }
+
+  public Boolean getDisablePrinting() {
+    return disablePrinting;
+  }
+
+  public void setDisablePrinting(Boolean disablePrinting) {
+    this.disablePrinting = disablePrinting;
   }
 }

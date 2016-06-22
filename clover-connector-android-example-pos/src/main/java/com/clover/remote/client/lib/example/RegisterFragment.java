@@ -191,7 +191,12 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
   @Override
   public void onSaleClicked() {
     SaleRequest request = new SaleRequest(store.getCurrentOrder().getTotal(), ExamplePOSActivity.getNextId());
+    request.setCardEntryMethods(store.getCardEntryMethods());
+    request.setAllowOfflinePayment(store.getAllowOfflinePayment());
+    request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
     request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
+    request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
+    request.setDisablePrinting(store.getDisablePrinting());
     cloverConnector.sale(request);
   }
 
@@ -206,6 +211,12 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
   @Override
   public void onAuthClicked() {
     AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), ExamplePOSActivity.getNextId());
+    request.setCardEntryMethods(store.getCardEntryMethods());
+    request.setAllowOfflinePayment(store.getAllowOfflinePayment());
+    request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
+    request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
+    request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
+    request.setDisablePrinting(store.getDisablePrinting());
     cloverConnector.auth(request);
   }
 
@@ -276,7 +287,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
       items.add(dli);
       displayOrder.setLineItems(items);
       updateTotals(posOrder, displayOrder);
-      cloverConnector.lineItemAddedToDisplayOrder(dli, displayOrder);
+      cloverConnector.showDisplayOrder(displayOrder);
 
     }
 
@@ -302,7 +313,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
       displayOrder.setLineItems(items);
       updateTotals(posOrder, displayOrder);
-      cloverConnector.lineItemRemovedFromDisplayOrder(dli, displayOrder);
+      cloverConnector.showDisplayOrder(displayOrder);
     }
 
     @Override

@@ -28,7 +28,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,7 +38,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.clover.remote.InputOption;
-import com.clover.remote.TxState;
 import com.clover.remote.client.CloverConnector;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.ICloverConnectorListener;
@@ -63,6 +61,12 @@ import com.clover.remote.client.messages.ConfigErrorResponse;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.PreAuthResponse;
+import com.clover.remote.client.messages.PrintManualRefundDeclineReceiptMessage;
+import com.clover.remote.client.messages.PrintManualRefundReceiptMessage;
+import com.clover.remote.client.messages.PrintPaymentDeclineReceiptMessage;
+import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
+import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
+import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
 import com.clover.remote.client.messages.ResultCode;
 import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.CloseoutResponse;
@@ -608,7 +612,30 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           }
         }
 
-      };
+          @Override public void onPrintManualRefundReceipt(PrintManualRefundReceiptMessage pcm) {
+            showMessage("Print Request for ManualRefund", Toast.LENGTH_SHORT);
+          }
+          @Override public void onPrintManualRefundDeclineReceipt(PrintManualRefundDeclineReceiptMessage pcdrm) {
+            showMessage("Print Request for Declined ManualRefund", Toast.LENGTH_SHORT);
+          }
+
+          @Override public void onPrintPaymentReceipt(PrintPaymentReceiptMessage pprm) {
+            showMessage("Print Request for Payment Receipt", Toast.LENGTH_SHORT);
+          }
+
+          @Override public void onPrintPaymentDeclineReceipt(PrintPaymentDeclineReceiptMessage ppdrm) {
+            showMessage("Print Request for DeclinedPayment Receipt", Toast.LENGTH_SHORT);
+          }
+
+          @Override public void onPrintPaymentMerchantCopyReceipt(PrintPaymentMerchantCopyReceiptMessage ppmcrm) {
+            showMessage("Print Request for MerchantCopy of a Payment Receipt", Toast.LENGTH_SHORT);
+          }
+
+          @Override public void onPrintRefundPaymentReceipt(PrintRefundPaymentReceiptMessage pprrm) {
+            showMessage("Print Request for RefundPayment Receipt", Toast.LENGTH_SHORT);
+          }
+
+        };
 
       cloverConnector.addCloverConnectorListener(ccListener);
       cloverConnector.initializeConnection();
@@ -811,7 +838,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void captureCardClick(View view) {
-    cloverConnector.vaultCard(CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE | CloverConnector.CARD_ENTRY_METHOD_ICC_CONTACT | CloverConnector.CARD_ENTRY_METHOD_MANUAL);
+    cloverConnector.vaultCard(store.getCardEntryMethods());
   }
 
   public void onManualRefundClick(View view) {
@@ -820,6 +847,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       long refundAmount = Long.parseLong(val.toString());
       ManualRefundRequest request = new ManualRefundRequest(refundAmount, getNextId());
       request.setAmount(refundAmount);
+      request.setCardEntryMethods(store.getCardEntryMethods());
+      request.setDisablePrinting(store.getDisablePrinting());
       cloverConnector.manualRefund(request);
     } catch(NumberFormatException nfe) {
       showMessage("Invalid value. Must be an integer.", Toast.LENGTH_LONG);
@@ -852,7 +881,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   public void preauthCardClick(View view) {
     PreAuthRequest request = new PreAuthRequest(5000L, getNextId());
-
+    request.setCardEntryMethods(store.getCardEntryMethods());
+    request.setDisablePrinting(store.getDisablePrinting());
     cloverConnector.preAuth(request);
   }
 

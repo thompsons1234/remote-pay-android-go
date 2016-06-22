@@ -67,6 +67,7 @@ public class MiscellaneousFragment extends Fragment {
   private Switch contactlessSwitch;
   private RadioGroup allowOfflineRG;
   private RadioGroup approveOfflineNoPromptRG;
+  private Switch printingSwitch;
   //private Switch allowOffline;
   //private Switch approveOfflineNoPrompt;
 
@@ -141,6 +142,7 @@ public class MiscellaneousFragment extends Fragment {
     contactlessSwitch = ((Switch)view.findViewById(R.id.ContactlessSwitch));
     allowOfflineRG = (RadioGroup) view.findViewById(R.id.AcceptOfflinePaymentRG);
     approveOfflineNoPromptRG = (RadioGroup) view.findViewById(R.id.ApproveOfflineWithoutPromptRG);
+    printingSwitch = ((Switch) view.findViewById(R.id.PrintingSwitch));
 
     manualSwitch.setTag(CloverConnector.CARD_ENTRY_METHOD_MANUAL);
     swipeSwitch.setTag(CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE);
@@ -195,6 +197,13 @@ public class MiscellaneousFragment extends Fragment {
     allowOfflineRG.setOnCheckedChangeListener(radioGroupChangeListener);
     approveOfflineNoPromptRG.setOnCheckedChangeListener(radioGroupChangeListener);
 
+    printingSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+      @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if(!updatingSwitches) {
+          store.setDisablePrinting(isChecked);
+        }
+      }
+    });
     return view;
   }
 
@@ -270,10 +279,12 @@ public class MiscellaneousFragment extends Fragment {
         Log.e(getClass().getSimpleName(), "Clover Connector Weak Reference is null");
         return;
       }
-      manualSwitch.setChecked((store.getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_MANUAL) != 0);
-      contactlessSwitch.setChecked((store.getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_NFC_CONTACTLESS) != 0);
-      chipSwitch.setChecked((store.getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_ICC_CONTACT) != 0);
-      swipeSwitch.setChecked((store.getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE) != 0);
+      manualSwitch.setChecked((store.getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_MANUAL) == CloverConnector.CARD_ENTRY_METHOD_MANUAL);
+      contactlessSwitch.setChecked((store.getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_NFC_CONTACTLESS) == CloverConnector.CARD_ENTRY_METHOD_NFC_CONTACTLESS);
+      chipSwitch.setChecked((store.getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_ICC_CONTACT) == CloverConnector.CARD_ENTRY_METHOD_ICC_CONTACT);
+      swipeSwitch.setChecked((store.getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE) == CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE);
+
+      printingSwitch.setChecked(store.getDisablePrinting() != null ? store.getDisablePrinting() : false);
 
       Boolean allowOfflinePayment = store.getAllowOfflinePayment();
       ((RadioButton) view.findViewById(R.id.acceptOfflineDefault)).setChecked(allowOfflinePayment == null);

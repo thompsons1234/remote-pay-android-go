@@ -205,41 +205,6 @@ public interface ICloverConnector extends Serializable {
   void showDisplayOrder(DisplayOrder order);
 
   /**
-   * Notify the device of a DisplayLineItem being added to a DisplayOrder
-   *
-   * @param lineItem -
-   * @param order    -
-   **/
-  void lineItemAddedToDisplayOrder(DisplayLineItem lineItem, DisplayOrder order);
-
-  /**
-   * Notify the device of a DisplayLineItem being removed from a DisplayOrder
-   *
-   * @param lineItem -
-   * @param order    -
-   **/
-
-  void lineItemRemovedFromDisplayOrder(DisplayLineItem lineItem, DisplayOrder order);
-
-  /**
-   * Notify device of a discount being added to the order.
-   * Note: This is independent of a discount being added to a display line item.
-   *
-   * @param discount -
-   * @param order    -
-   **/
-  void discountAddedToDisplayOrder(DisplayDiscount discount, DisplayOrder order);
-
-  /**
-   * Notify the device that a discount was removed from the order.
-   * Note: This is independent of a discount being removed from a display line item.
-   *
-   * @param discount -
-   * @param order    -
-   **/
-  void discountRemovedFromDisplayOrder(DisplayDiscount discount, DisplayOrder order);
-
-  /**
    * Remove the DisplayOrder from the device.
    *
    * @param order -

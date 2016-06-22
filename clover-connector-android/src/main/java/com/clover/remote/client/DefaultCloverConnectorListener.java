@@ -1,14 +1,18 @@
 package com.clover.remote.client;
 
-import com.clover.remote.TxState;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
 import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.CloverDeviceEvent;
-import com.clover.remote.client.messages.ConfigErrorResponse;
 import com.clover.remote.client.messages.ManualRefundResponse;
 import com.clover.remote.client.messages.PreAuthResponse;
+import com.clover.remote.client.messages.PrintManualRefundDeclineReceiptMessage;
+import com.clover.remote.client.messages.PrintManualRefundReceiptMessage;
+import com.clover.remote.client.messages.PrintPaymentDeclineReceiptMessage;
+import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
+import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
+import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
 import com.clover.remote.client.messages.RefundPaymentResponse;
 import com.clover.remote.client.messages.SaleResponse;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
@@ -98,6 +102,30 @@ public class DefaultCloverConnectorListener implements ICloverConnectorListener 
   }
 
   @Override public void onVaultCardResponse(VaultCardResponse response) {
+
+  }
+
+  @Override public void onPrintManualRefundReceipt(PrintManualRefundReceiptMessage pcm) {
+
+  }
+
+  @Override public void onPrintManualRefundDeclineReceipt(PrintManualRefundDeclineReceiptMessage pcdrm) {
+
+  }
+
+  @Override public void onPrintPaymentReceipt(PrintPaymentReceiptMessage pprm) {
+
+  }
+
+  @Override public void onPrintPaymentDeclineReceipt(PrintPaymentDeclineReceiptMessage ppdrm) {
+
+  }
+
+  @Override public void onPrintPaymentMerchantCopyReceipt(PrintPaymentMerchantCopyReceiptMessage ppmcrm) {
+
+  }
+
+  @Override public void onPrintRefundPaymentReceipt(PrintRefundPaymentReceiptMessage pprrm) {
 
   }
 

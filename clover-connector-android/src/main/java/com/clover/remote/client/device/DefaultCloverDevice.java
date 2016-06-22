@@ -18,6 +18,8 @@ package com.clover.remote.client.device;
 
 import com.clover.remote.KeyPress;
 import com.clover.remote.client.CloverDeviceObserver;
+import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
+import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
 import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.client.transport.CloverTransportObserver;
 import com.clover.remote.message.BreakMessage;
@@ -26,6 +28,9 @@ import com.clover.remote.message.CapturePreAuthResponseMessage;
 import com.clover.remote.message.CashbackSelectedMessage;
 import com.clover.remote.message.CloseoutRequestMessage;
 import com.clover.remote.message.CloseoutResponseMessage;
+import com.clover.remote.message.CreditPrintMessage;
+import com.clover.remote.message.DeclineCreditPrintMessage;
+import com.clover.remote.message.DeclinePaymentPrintMessage;
 import com.clover.remote.message.DiscoveryRequestMessage;
 import com.clover.remote.message.DiscoveryResponseMessage;
 import com.clover.remote.message.FinishOkMessage;
@@ -36,6 +41,9 @@ import com.clover.remote.message.Method;
 import com.clover.remote.message.OpenCashDrawerMessage;
 import com.clover.remote.message.OrderUpdateMessage;
 import com.clover.remote.message.PartialAuthMessage;
+import com.clover.remote.message.PaymentPrintMerchantCopyMessage;
+import com.clover.remote.message.PaymentPrintMessage;
+import com.clover.remote.message.RefundPaymentPrintMessage;
 import com.clover.remote.message.RefundRequestMessage;
 import com.clover.remote.message.RefundResponseMessage;
 import com.clover.remote.message.RemoteMessage;
@@ -81,6 +89,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   private static int id = 0;
   private RefundResponseMessage refRespMsg;
   private static final String REMOTE_SDK = "com.clover.android.sdk:1.0";
+  private boolean supportsACKs = false;
 
   private String applicationId;
 
@@ -215,26 +224,35 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
             case ORDER_ACTION_REMOVE_DISCOUNT:
               //Outbound no-op
               break;
-            case PRINT_CREDIT:
-              //Outbound no-op
-              break;
-            case PRINT_CREDIT_DECLINE:
-              //Outbound no-op
-              break;
             case PRINT_IMAGE:
-              //Outbound no-op
-              break;
-            case PRINT_PAYMENT:
-              //Outbound no-op
-              break;
-            case PRINT_PAYMENT_DECLINE:
-              //Outbound no-op
-              break;
-            case PRINT_PAYMENT_MERCHANT_COPY:
               //Outbound no-op
               break;
             case PRINT_TEXT:
               //Outbound no-op
+              break;
+            case PRINT_CREDIT:
+              CreditPrintMessage cpm = (CreditPrintMessage)Message.fromJsonString(rMessage.payload);
+              notifyObserversPrintCredit(cpm);
+              break;
+            case PRINT_CREDIT_DECLINE:
+              DeclineCreditPrintMessage dcpm = (DeclineCreditPrintMessage)Message.fromJsonString(rMessage.payload);
+              notifyObserversPrintCreditDecline(dcpm);
+              break;
+            case PRINT_PAYMENT:
+              PaymentPrintMessage ppm = (PaymentPrintMessage)Message.fromJsonString(rMessage.payload);
+              notifyObserversPrintPayment(ppm);
+              break;
+            case PRINT_PAYMENT_DECLINE:
+              DeclinePaymentPrintMessage dppm = (DeclinePaymentPrintMessage) Message.fromJsonString(rMessage.payload);
+              notifyObserversPrintPaymentDecline(dppm);
+              break;
+            case PRINT_PAYMENT_MERCHANT_COPY:
+              PaymentPrintMerchantCopyMessage ppmcm = (PaymentPrintMerchantCopyMessage) Message.fromJsonString(rMessage.payload);
+              notifyObserversPrintMerchantCopy(ppmcm);
+              break;
+            case REFUND_PRINT_PAYMENT:
+              RefundPaymentPrintMessage rppm = (RefundPaymentPrintMessage) Message.fromJsonString(rMessage.payload);
+              notifyObserversPrintMessage(rppm);
               break;
             case SHOW_ORDER_SCREEN:
               //Outbound no-op
@@ -281,9 +299,6 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 //            case SHOW_MANUAL_REFUND_RECEIPT_OPTIONS:
 //              //Outbound no-op
 //              break;
-            case REFUND_PRINT_PAYMENT:
-              //Outbound no-op
-              break;
             case VAULT_CARD:
               //Outbound no-op
               break;
@@ -301,6 +316,72 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
       e.printStackTrace();
       //onError(e);
     }
+  }
+
+  private void notifyObserversPrintMessage(final RefundPaymentPrintMessage rppm) {
+    new AsyncTask() {
+      @Override protected Object doInBackground(Object[] params) {
+        for (final CloverDeviceObserver observer : deviceObservers) {
+          observer.onPrintRefundPayment(rppm.payment, rppm.order, rppm.refund);
+        }
+        return null;
+      }
+    }.execute();
+  }
+
+  private void notifyObserversPrintMerchantCopy(final PaymentPrintMerchantCopyMessage ppmcm) {
+    new AsyncTask() {
+      @Override protected Object doInBackground(Object[] params) {
+        for (final CloverDeviceObserver observer : deviceObservers) {
+          observer.onPrintMerchantReceipt(ppmcm.payment);
+        }
+        return null;
+      }
+    }.execute();
+  }
+
+  private void notifyObserversPrintPaymentDecline(final DeclinePaymentPrintMessage dppm) {
+    new AsyncTask() {
+      @Override protected Object doInBackground(Object[] params) {
+        for (final CloverDeviceObserver observer : deviceObservers) {
+          observer.onPrintPaymentDecline(dppm.payment, dppm.reason);
+        }
+        return null;
+      }
+    }.execute();
+  }
+
+  private void notifyObserversPrintPayment(final PaymentPrintMessage ppm) {
+    new AsyncTask() {
+      @Override protected Object doInBackground(Object[] params) {
+        for (final CloverDeviceObserver observer : deviceObservers) {
+          observer.onPrintPayment(ppm.payment, ppm.order);
+        }
+        return null;
+      }
+    }.execute();
+  }
+
+  private void notifyObserversPrintCredit(final CreditPrintMessage cpm) {
+    new AsyncTask() {
+      @Override protected Object doInBackground(Object[] params) {
+        for (final CloverDeviceObserver observer : deviceObservers) {
+          observer.onPrintCredit(cpm.credit);
+        }
+        return null;
+      }
+    }.execute();
+  }
+
+  private void notifyObserversPrintCreditDecline(final DeclineCreditPrintMessage dcpm) {
+    new AsyncTask() {
+      @Override protected Object doInBackground(Object[] params) {
+        for (final CloverDeviceObserver observer : deviceObservers) {
+          observer.onPrintCreditDecline(dcpm.credit, dcpm.reason);
+        }
+        return null;
+      }
+    }.execute();
   }
 
 
@@ -619,8 +700,26 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     }.execute();
   }
 
-  public void doPaymentRefund(String orderId, String paymentId, long amount) {
-    sendObjectMessage(new RefundRequestMessage(orderId, paymentId, amount, false));
+  public void doPaymentRefund(String orderId, String paymentId, long amount, boolean fullAmount) {
+    /*
+     * Need this to get a V2 of refund request
+     */
+    class RefundRequestMessageV2 extends Message {
+      public final String orderId;
+      public final String paymentId;
+      public final long amount;
+      public final boolean fullRefund;
+
+      public RefundRequestMessageV2(String orderId, String paymentID, long amount, boolean fullRefund) {
+        super(Method.REFUND_REQUEST, 2);
+        this.orderId = orderId;
+        this.paymentId = paymentID;
+        this.amount = amount;
+        this.fullRefund = fullRefund;
+      }
+    }
+    RefundRequestMessageV2 refundRequestMessage = new RefundRequestMessageV2(orderId, paymentId, amount, fullAmount);
+    sendObjectMessage(refundRequestMessage, 2);
   }
 
   public void doVaultCard(int cardEntryMethods) {
@@ -670,6 +769,9 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   }
 
   private void sendObjectMessage(Message message) {
+    sendObjectMessage(message, 1);
+  }
+  private void sendObjectMessage(Message message, int version) {
     if (message == null) {
       Log.d(getClass().getName(), "Message is null");
       return;
@@ -683,6 +785,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
       Log.e(getClass().getName(), "Invalid applicationId: " + applicationId);
       throw new IllegalArgumentException("Invalid applicationId");
     }
+
     RemoteMessage remoteMessage = new RemoteMessage("" + id++, RemoteMessage.Type.COMMAND, this.packageName, message.method.toString(), message.toJsonString(), REMOTE_SDK, applicationId);
     String msg = gson.toJson(remoteMessage);
     transport.sendMessage(msg);

@@ -32,6 +32,12 @@ import com.clover.remote.client.messages.CloseoutRequest;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.PreAuthResponse;
+import com.clover.remote.client.messages.PrintManualRefundDeclineReceiptMessage;
+import com.clover.remote.client.messages.PrintManualRefundReceiptMessage;
+import com.clover.remote.client.messages.PrintPaymentDeclineReceiptMessage;
+import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
+import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
+import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
 import com.clover.remote.client.messages.ResultCode;
 import com.clover.remote.client.messages.TransactionRequest;
 import com.clover.remote.client.messages.VaultCardResponse;
@@ -49,17 +55,12 @@ import com.clover.remote.client.messages.TipAdjustAuthResponse;
 import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.message.DiscoveryResponseMessage;
-import com.clover.remote.order.DisplayDiscount;
-import com.clover.remote.order.DisplayLineItem;
 import com.clover.remote.order.DisplayOrder;
-import com.clover.remote.order.operation.DiscountsAddedOperation;
-import com.clover.remote.order.operation.DiscountsDeletedOperation;
-import com.clover.remote.order.operation.LineItemsAddedOperation;
-import com.clover.remote.order.operation.LineItemsDeletedOperation;
 import com.clover.remote.order.operation.OrderDeletedOperation;
 import com.clover.sdk.internal.PayIntent;
 import com.clover.sdk.internal.Signature2;
 import com.clover.sdk.v3.base.Reference;
+import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Batch;
 import com.clover.sdk.v3.payments.Credit;
@@ -75,7 +76,6 @@ import com.google.gson.Gson;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.List;
 
 public class CloverConnector implements ICloverConnector {
@@ -88,7 +88,6 @@ public class CloverConnector implements ICloverConnector {
 
   public static final InputOption CANCEL_INPUT_OPTION = new InputOption(KeyPress.ESC, "Cancel");
 
-  //List<ICloverConnectorListener> listeners = new ArrayList<>();
   Gson gson = new Gson();
   private Exception lastException = null;
   private Object lastRequest;
@@ -104,6 +103,8 @@ public class CloverConnector implements ICloverConnector {
   private MerchantInfo merchantInfo;
 
   private CloverDeviceConfiguration configuration;
+
+  boolean isReady = false;
 
   public CloverConnector() {
 
@@ -162,36 +163,31 @@ public class CloverConnector implements ICloverConnector {
    */
   public void sale(SaleRequest request) {
     lastRequest = request;
-    if(device == null) {
+    if(device == null || !isReady) {
       deviceObserver.onFinishCancel(ResultCode.ERROR, "Device connection Error", "In Sale : SaleRequest - The Clover device is not connected.");
-      return;
     } else if(request == null) {
       deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid argument.", "In Sale : SaleRequest - The request that was passed in for processing is null.");
-      return;
     } else if(request.getAmount() <= 0) {
       deviceObserver.onFinishCancel(ResultCode.FAIL, "Request validation error", "In Sale: SaleRequest - the request amount cannot be zero. Original Request = " + request);
-      return;
     } else if (request.getExternalId() == null || request.getExternalId().trim().length() == 0 || request.getExternalId().trim().length() > 32){
       deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid argument.", "In Sale : SaleRequest - The externalId is invalid. It is required and the max length is 32. Original Request = " + request);
-      return;
     } else if (request.getVaultedCard() != null && !merchantInfo.supportsVaultCards) {
       deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In Sale : SaleRequest - Vault Card support is not enabled for the payment gateway. Original Request = " + request);
-      return;
-    }
+    } else {
 
+      if (request.getTipAmount() == null) {
+        request.setTipAmount(0L);
+      }
+      try {
+        saleAuth(request, false);
+      } catch (Exception e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        deviceObserver.onFinishCancel(ResultCode.ERROR, e.getMessage(), sw.toString());
+      }
 
-    if (request.getTipAmount() == null) {
-      request.setTipAmount(0L);
     }
-    try {
-      saleAuth(request, false);
-    } catch (Exception e) {
-      StringWriter sw = new StringWriter();
-      PrintWriter pw = new PrintWriter(sw);
-      e.printStackTrace(pw);
-      deviceObserver.onFinishCancel(ResultCode.ERROR, e.getMessage(), sw.toString());
-    }
-
   }
 
   /**
@@ -200,8 +196,7 @@ public class CloverConnector implements ICloverConnector {
    * @param request
    */
   private void saleAuth(TransactionRequest request, boolean suppressTipScreen) throws Exception {
-    //payment, finishOK(payment), finishCancel, onPaymentVoided
-    if (device != null) {
+    if (device != null || !isReady) {
         lastRequest = request;
 
         PayIntent.Builder builder = new PayIntent.Builder();
@@ -229,6 +224,9 @@ public class CloverConnector implements ICloverConnector {
         else if (request instanceof AuthRequest) {
 
           AuthRequest req = (AuthRequest)request;
+          if(req.getTippableAmount() != null) {
+            builder.tippableAmount(req.getTippableAmount());
+          }
           if(req.getAllowOfflinePayment() != null) {
             builder.allowOfflinePayment(req.getAllowOfflinePayment());
           }
@@ -288,13 +286,16 @@ public class CloverConnector implements ICloverConnector {
    * @param request
    */
   public void acceptSignature(VerifySignatureRequest request) {
-    if(request == null) {
+    if(device == null || !isReady) {
+
+    }
+    else if(request == null) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In acceptSignature : VerifySignatureRequest cannot be null."));
-    }
-    if(request.getPayment() == null || request.getPayment().getId() == null) {
+    } else if(request.getPayment() == null || request.getPayment().getId() == null) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In acceptSignature : VerifySignatureRequest.Payment must have an Id."));
+    } else {
+      device.doSignatureVerified(request.getPayment(), true);
     }
-    device.doSignatureVerified(request.getPayment(), true);
   }
 
   /**
@@ -303,13 +304,16 @@ public class CloverConnector implements ICloverConnector {
    * @param request
    */
   public void rejectSignature(VerifySignatureRequest request) {
-    if(request == null) {
-      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In acceptSignature : VerifySignatureRequest cannot be null."));
+    if(device == null || !isReady) {
+
     }
-    if(request.getPayment() == null || request.getPayment().getId() == null) {
-      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In acceptSignature : VerifySignatureRequest.Payment must have an Id."));
+    else if(request == null) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In rejectSignature : VerifySignatureRequest cannot be null."));
+    } else if(request.getPayment() == null || request.getPayment().getId() == null) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In rejectSignature : VerifySignatureRequest.Payment must have an Id."));
+    } else {
+      device.doSignatureVerified(request.getPayment(), false);
     }
-    device.doSignatureVerified(request.getPayment(), false);
   }
 
   /**
@@ -319,70 +323,60 @@ public class CloverConnector implements ICloverConnector {
    */
   public void auth(AuthRequest request) {
     lastRequest = request;
-    if(device == null) {
+    if(device == null || !isReady) {
       deviceObserver.onFinishCancel(ResultCode.ERROR, "Device connection Error", "In Auth : Auth Request - The Clover device is not connected.");
-      return;
-    } else if(request == null) {
-      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid argument.", "In Auth : AuthRequest - The request that was passed in for processing is null.");
-      return;
-    } else if(request.getAmount() <= 0) {
-      deviceObserver.onFinishCancel(ResultCode.FAIL, "Request validation error", "In Auth: AuthRequest - the request amount cannot be zero. Original Request = " + request);
-      return;
-    } else if (request.getExternalId() == null || request.getExternalId().trim().length() == 0 || request.getExternalId().trim().length() > 32){
-      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid argument.", "In Auth : AuthRequest - The externalId is invalid. It is required and the max length is 32. Original Request = " + request);
-      return;
-    } else if (request.getVaultedCard() != null && !merchantInfo.supportsVaultCards) {
-      deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In Auth : AuthRequest - Vault Card support is not enabled for the payment gateway. Original Request = " + request);
-      return;
     } else if (!merchantInfo.supportsAuths) {
       deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In Auth : AuthRequest - Auth's are not enabled for the payment gateway. Original Request = " + request);
-      return;
-    }
+    } else if(request == null) {
+      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid argument.", "In Auth : AuthRequest - The request that was passed in for processing is null.");
+    } else if(request.getAmount() <= 0) {
+      deviceObserver.onFinishCancel(ResultCode.FAIL, "Request validation error", "In Auth: AuthRequest - the request amount cannot be zero. Original Request = " + request);
+    } else if (request.getExternalId() == null || request.getExternalId().trim().length() == 0 || request.getExternalId().trim().length() > 32){
+      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid argument.", "In Auth : AuthRequest - The externalId is invalid. It is required and the max length is 32. Original Request = " + request);
+    } else if (request.getVaultedCard() != null && !merchantInfo.supportsVaultCards) {
+      deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In Auth : AuthRequest - Vault Card support is not enabled for the payment gateway. Original Request = " + request);
+    } else {
 
-    try {
-      saleAuth(request, true);
-    } catch (Exception e) {
-      StringWriter sw = new StringWriter();
-      PrintWriter pw = new PrintWriter(sw);
-      e.printStackTrace(pw);
-      deviceObserver.onFinishCancel(ResultCode.ERROR, e.getMessage(), sw.toString());
-    }
+      try {
+        saleAuth(request, true);
+      } catch (Exception e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        deviceObserver.onFinishCancel(ResultCode.ERROR, e.getMessage(), sw.toString());
+      }
 
+    }
   }
 
 
   public void preAuth(PreAuthRequest request) {
     lastRequest = request;
-    if(device == null) {
-      deviceObserver.onFinishCancel(ResultCode.ERROR, "Device connection Error", "In Auth : Auth Request - The Clover device is not connected.");
-      return;
-    } else if(request == null) {
-      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid argument.", "In Auth : AuthRequest - The request that was passed in for processing is null.");
-      return;
-    } else if(request.getAmount() <= 0) {
-      deviceObserver.onFinishCancel(ResultCode.FAIL, "Request validation error", "In Auth: AuthRequest - the request amount cannot be zero. Original Request = " + request);
-      return;
-    } else if (request.getExternalId() == null || request.getExternalId().trim().length() == 0 || request.getExternalId().trim().length() > 32){
-      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid argument.", "In Auth : AuthRequest - The externalId is invalid. It is required and the max length is 32. Original Request = " + request);
-      return;
-    } else if (request.getVaultedCard() != null && !merchantInfo.supportsVaultCards) {
-      deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In Auth : AuthRequest - Vault Card support is not enabled for the payment gateway. Original Request = " + request);
-      return;
+    if(device == null || !isReady) {
+      deviceObserver.onFinishCancel(ResultCode.ERROR, "Device connection Error", "In PreAuth : PreAuthRequest - The Clover device is not connected.");
     } else if (!merchantInfo.supportsPreAuths) {
-      deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In Auth : AuthRequest - PreAuth's are not enabled for the payment gateway. Original Request = " + request);
-      return;
-    }
+      deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In PreAuth : PreAuthRequest - PreAuth's are not enabled for the payment gateway. Original Request = " + request);
+    } else if(request == null) {
+      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid argument.", "In PreAuth : PreAuthRequest - The request that was passed in for processing is null.");
+    } else if(request.getAmount() <= 0) {
+      deviceObserver.onFinishCancel(ResultCode.FAIL, "Request validation error", "In PreAuth: PreAuthRequest - the request amount cannot be zero. Original Request = " + request);
+    } else if (request.getExternalId() == null || request.getExternalId().trim().length() == 0 || request.getExternalId().trim().length() > 32){
+      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid argument.", "In PreAuth : PreAuthRequest - The externalId is invalid. It is required and the max length is 32. Original Request = " + request);
+    } else if (request.getVaultedCard() != null && !merchantInfo.supportsVaultCards) {
+      deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In PreAuth : PreAuthRequest - Vault Card support is not enabled for the payment gateway. Original Request = " + request);
+    } else {
 
-    try {
-      saleAuth(request, true);
-    } catch (Exception e) {
-      lastRequest = null;
-      StringWriter sw = new StringWriter();
-      PrintWriter pw = new PrintWriter(sw);
-      e.printStackTrace(pw);
-      deviceObserver.onFinishCancel(ResultCode.ERROR, e.getMessage(), sw.toString());
-    }
+      try {
+        saleAuth(request, true);
+      } catch (Exception e) {
+        lastRequest = null;
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        deviceObserver.onFinishCancel(ResultCode.ERROR, e.getMessage(), sw.toString());
+      }
 
+    }
   }
 
   /**
@@ -392,28 +386,25 @@ public class CloverConnector implements ICloverConnector {
    */
 
   public void capturePreAuth(CapturePreAuthRequest request) {
-    if(device == null) {
+    if(device == null || !isReady) {
       deviceObserver.onCapturePreAuth(ResultCode.ERROR, "Device connection Error", "In capturePreAuth : CapturePreAuth - The Clover device is not connected.", null, null);
-      return;
-    } else if(request == null) {
-      deviceObserver.onCapturePreAuth(ResultCode.FAIL, "Invalid argument.", "In capturePreAuth : CapturePreAuth - The request that was passed in for processing is null.", null, null);
-      return;
-    } else if(request.getAmount() < 0 || request.getTipAmount() < 0) {
-      deviceObserver.onCapturePreAuth(ResultCode.FAIL, "Request validation error", "In capturePreAuth: CapturePreAuth - the request amount must be greater than zero and the tip must be greater than or equal to zero. Original Request = " + request, null, null);
-      return;
     } else if (!merchantInfo.supportsPreAuths) {
       deviceObserver.onCapturePreAuth(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In capturePreAuth : CapturePreAuth - Tip Adjustments are not enabled for the payment gateway. Original Request = " + request, null, null);
-      return;
-    }
-
-      if (request != null && !merchantInfo.supportsPreAuths) {
+    } else if(request == null) {
+      deviceObserver.onCapturePreAuth(ResultCode.FAIL, "Invalid argument.", "In capturePreAuth : CapturePreAuth - The request that was passed in for processing is null.", null, null);
+    } else if(request.getAmount() < 0 || request.getTipAmount() < 0) {
+      deviceObserver.onCapturePreAuth(ResultCode.FAIL, "Request validation error", "In capturePreAuth: CapturePreAuth - the request amount must be greater than zero and the tip must be greater than or equal to zero. Original Request = " + request, null, null);
+    } else {
+      try {
+        device.doCaptureAuth(request.paymentID, request.amount, request.tipAmount);
+      } catch(Exception e) {
         CapturePreAuthResponse response = new CapturePreAuthResponse(false, ResultCode.UNSUPPORTED);
         response.setReason("Pre Auths unsupported");
         response.setMessage("The currently configured merchant gateway does not support Capture Auth requests.");
         broadcaster.notifyOnCapturePreAuth(response);
-      } else {
-        device.doCaptureAuth(request.paymentID, request.amount, request.tipAmount);
       }
+    }
+
   }
 
 
@@ -423,41 +414,32 @@ public class CloverConnector implements ICloverConnector {
    * @param request
    */
   public void tipAdjustAuth(TipAdjustAuthRequest request) {
-    if(device == null) {
+    if(device == null || !isReady) {
       deviceObserver.onAuthTipAdjusted(ResultCode.ERROR, "Device connection Error", "In tipAdjustAuth : TipAdjustAuthRequest - The Clover device is not connected.");
-      return;
-    } else if(request == null) {
-      deviceObserver.onAuthTipAdjusted(ResultCode.FAIL, "Invalid argument.",
-          "In tipAdjustAuth : TipAdjustAuthRequest - The request that was passed in for processing is null.");
-      return;
-    } else if(request.getPaymentId() == null) {
-      deviceObserver.onAuthTipAdjusted(ResultCode.FAIL, "Invalid argument.",
-          "In tipAdjustAuth : TipAdjustAuthRequest - The paymentId is required.");
-      return;
-    } else if(request.getTipAmount() < 0) {
-      deviceObserver.onAuthTipAdjusted(ResultCode.FAIL, "Request validation error", "In tipAdjustAuth: TipAdjustAuthRequest - the request amount cannot be less than zero. Original Request = " + request);
-      return;
     } else if (!merchantInfo.supportsTipAdjust) {
       deviceObserver.onAuthTipAdjusted(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In tipAdjustAuth : TipAdjustAuthRequest - Tip Adjustments are not enabled for the payment gateway. Original Request = " + request);
-      return;
+    } else if(request == null) {
+      deviceObserver.onAuthTipAdjusted(ResultCode.FAIL, "Invalid argument.",
+      "In tipAdjustAuth : TipAdjustAuthRequest - The request that was passed in for processing is null.");
+    } else if(request.getPaymentId() == null) {
+      deviceObserver.onAuthTipAdjusted(ResultCode.FAIL, "Invalid argument.",
+      "In tipAdjustAuth : TipAdjustAuthRequest - The paymentId is required.");
+    } else if(request.getTipAmount() < 0) {
+      deviceObserver.onAuthTipAdjusted(ResultCode.FAIL, "Request validation error", "In tipAdjustAuth: TipAdjustAuthRequest - the request amount cannot be less than zero. Original Request = " + request);
+    } else {
+      device.doTipAdjustAuth(request.getOrderId(), request.getPaymentId(), request.getTipAmount());
     }
-
-    TipAdjustAuthResponse response = new TipAdjustAuthResponse(false, ResultCode.UNSUPPORTED);
-    response.setReason("Tip Adjust aren't supported");
-    response.setMessage("The currently configured merchant gateway does not support Tip Adjust Auth requests.");
-    broadcaster.notifyOnTipAdjustAuthResponse(response);
   }
 
   public void vaultCard(Integer cardEntryMethods) {
-    if(device == null) {
+    if(device == null || !isReady) {
       deviceObserver.onAuthTipAdjusted(ResultCode.ERROR, "Device connection Error", "In vaultCard : Integer - The Clover device is not connected.");
-      return;
-    } else if (!merchantInfo.supportsTipAdjust) {
+    } else if (!merchantInfo.supportsVaultCards) {
       deviceObserver.onAuthTipAdjusted(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In vaultCard : Integer - Vaulting Cards is not enabled for the payment gateway.");
-      return;
+    } else {
+      device.doVaultCard(cardEntryMethods != null ? cardEntryMethods : getCardEntryMethods());
     }
 
-    device.doVaultCard(cardEntryMethods != null ? cardEntryMethods : getCardEntryMethods());
   }
 
   /**
@@ -469,25 +451,23 @@ public class CloverConnector implements ICloverConnector {
   public void voidPayment(VoidPaymentRequest request) // SaleResponse is a Transaction? or create a Transaction from a SaleResponse
   {
 
-    if(device == null) {
-      deviceObserver.onPaymentVoided(ResultCode.ERROR, "Device connection Error", "In tipAdjustAuth : TipAdjustAuthRequest - The Clover device is not connected.");
-      return;
+    if(device == null || !isReady) {
+      deviceObserver.onPaymentVoided(ResultCode.ERROR, "Device connection Error", "In voidPayment : VoidPaymentRequest - The Clover device is not connected.");
     } else if(request == null) {
-      deviceObserver.onPaymentVoided(ResultCode.FAIL, "Invalid argument.", "In tipAdjustAuth : TipAdjustAuthRequest - The request that was passed in for processing is null.");
-      return;
+      deviceObserver.onPaymentVoided(ResultCode.FAIL, "Invalid argument.", "In voidPayment : VoidPaymentRequest - The request that was passed in for processing is null.");
     } else if(request.getPaymentId() == null) {
-      deviceObserver.onPaymentVoided(ResultCode.FAIL, "Invalid argument.", "In tipAdjustAuth : TipAdjustAuthRequest - The paymentId is required.");
-      return;
+      deviceObserver.onPaymentVoided(ResultCode.FAIL, "Invalid argument.", "In voidPayment : VoidPaymentRequest - The paymentId is required.");
+    } else {
+      Payment payment = new Payment();
+      payment.setId(request.getPaymentId());
+      payment.setOrder(new Reference());
+      payment.getOrder().setId(request.getOrderId());
+      payment.setEmployee(new Reference());
+      payment.getEmployee().setId(request.getEmployeeId());
+      VoidReason reason = VoidReason.valueOf(request.getVoidReason());
+      device.doVoidPayment(payment, reason);
     }
 
-    Payment payment = new Payment();
-    payment.setId(request.getPaymentId());
-    payment.setOrder(new Reference());
-    payment.getOrder().setId(request.getOrderId());
-    payment.setEmployee(new Reference());
-    payment.getEmployee().setId(request.getEmployeeId());
-    VoidReason reason = VoidReason.valueOf(request.getVoidReason());
-    device.doVoidPayment(payment, reason);
   }
 
   /**
@@ -504,7 +484,7 @@ public class CloverConnector implements ICloverConnector {
    * @param request
    */
   public void refundPayment(RefundPaymentRequest request) {
-    if (device == null)
+    if (device == null || !isReady)
     {
       RefundPaymentResponse prr = new RefundPaymentResponse(false, ResultCode.ERROR);
       prr.setRefund(null);
@@ -512,39 +492,30 @@ public class CloverConnector implements ICloverConnector {
       prr.setMessage("In RefundPayment : RefundPaymentRequest - The Clover device is not connected.");
       deviceObserver.lastPRR = prr;
       deviceObserver.onFinishCancel();
-      return;
-    }
-    if (request == null)
-    {
+    } else if(request == null) {
       RefundPaymentResponse prr = new RefundPaymentResponse(false, ResultCode.FAIL);
       prr.setRefund(null);
       prr.setReason("Request Validation Error");
       prr.setMessage("In RefundPayment : RefundPaymentRequest - The request that was passed in for processing is empty.");
       deviceObserver.lastPRR = prr;
       deviceObserver.onFinishCancel();
-      return;
-    }
-    if (request.getPaymentId() == null)
-    {
+    } else if(request.getPaymentId() == null) {
       RefundPaymentResponse prr = new RefundPaymentResponse(false, ResultCode.FAIL);
       prr.setRefund(null);
       prr.setReason("Request Validation Error");
       prr.setMessage("In RefundPayment : RefundPaymentRequest PaymentID cannot be empty. " + request);
       deviceObserver.lastPRR = prr;
       deviceObserver.onFinishCancel();
-      return;
-    }
-    if (request.getAmount() <= 0 && !request.isFullRefund())
-    {
+    } else if(request.getAmount() <= 0 && !request.isFullRefund()) {
       RefundPaymentResponse prr = new RefundPaymentResponse(false, ResultCode.FAIL);
       prr.setRefund(null);
       prr.setReason("Request Validation Error");
       prr.setMessage("In RefundPayment : RefundPaymentRequest Amount must be greater than zero when FullRefund is set to false. " + request);
       deviceObserver.lastPRR = prr;
       deviceObserver.onFinishCancel();
-      return;
+    } else {
+      device.doPaymentRefund(request.getOrderId(), request.getPaymentId(), request.getAmount(), request.isFullRefund());
     }
-    device.doPaymentRefund(request.getOrderId(), request.getPaymentId(), request.getAmount());
   }
 
   /**
@@ -555,49 +526,47 @@ public class CloverConnector implements ICloverConnector {
   public void manualRefund(ManualRefundRequest request) // NakedRefund is a Transaction, with just negative amount
   {
     lastRequest = request;
-    if(device == null) {
+    if(device == null || !isReady) {
       deviceObserver.onFinishCancel(ResultCode.ERROR, "Device connection Error", "In ManualRefund : ManualRefundRequest - The Clover device is not connected.");
-      return;
+    } else if(!merchantInfo.supportsManualRefunds) {
+      deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In ManualRefund : ManualRefundRequest - Manual Refunds are not enabled for the payment gateway. Original Request = " + request);
     } else if(request == null) {
       deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid argument.", "In ManualRefund : ManualRefundRequest - The request that was passed in for processing is null.");
-      return;
     } else if(request.getAmount() <= 0) {
       deviceObserver.onFinishCancel(ResultCode.FAIL, "Request validation error", "In ManualRefund: ManualRefundRequest - the request amount cannot be zero. Original Request = " + request);
-      return;
     } else if (request.getExternalId() == null || request.getExternalId().trim().length() == 0 || request.getExternalId().trim().length() > 32){
       deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid argument.", "In ManualRefund : ManualRefundRequest - The externalId is invalid. It is required and the max length is 32. Original Request = " + request);
-      return;
     } else if (request.getVaultedCard() != null && !merchantInfo.supportsVaultCards) {
       deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In ManualRefund : ManualRefundRequest - Vault Card support is not enabled for the payment gateway. Original Request = " + request);
-      return;
-    } else if(!merchantInfo.isSupportsManualRefunds()) {
-      deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In ManualRefund : ManualRefundRequest - Manual Refunds are not enabled for the payment gateway. Original Request = " + request);
+    } else {
+      PayIntent.Builder builder = new PayIntent.Builder();
+      builder.amount(-Math.abs(request.getAmount()))
+          .cardEntryMethods(request.getCardEntryMethods() != null ? request.getCardEntryMethods() : cardEntryMethods)
+          .transactionType(PayIntent.TransactionType.PAYMENT.CREDIT)
+          .vaultedCard(request.getVaultedCard())
+          .externalPaymentId(request.getExternalId());
+
+      if(request.getDisablePrinting() != null) {
+        builder.remotePrint(request.getDisablePrinting());
+      }
+
+      if(request.getDisableRestartTransactionOnFail() != null) {
+        builder.disableRestartTransactionWhenFailed(request.getDisableRestartTransactionOnFail());
+      }
+
+      PayIntent payIntent = builder.build();
+      device.doTxStart(payIntent, null, true);
     }
 
-    PayIntent.Builder builder = new PayIntent.Builder();
-    builder.amount(-Math.abs(request.getAmount()))
-        .cardEntryMethods(request.getCardEntryMethods() != null ? request.getCardEntryMethods() : cardEntryMethods)
-        .transactionType(PayIntent.TransactionType.PAYMENT.CREDIT)
-        .vaultedCard(request.getVaultedCard())
-        .externalPaymentId(request.getExternalId());
-
-    if(request.getDisablePrinting() != null) {
-      builder.remotePrint(request.getDisablePrinting());
-    }
-
-    if(request.getDisableRestartTransactionOnFail() != null) {
-      builder.disableRestartTransactionWhenFailed(request.getDisableRestartTransactionOnFail());
-    }
-
-    PayIntent payIntent = builder.build();
-    device.doTxStart(payIntent, null, true);
   }
 
   /**
    * Send a request to the server to closeout all orders.
    */
   public void closeout(CloseoutRequest request) {
-    if(device != null) {
+    if(device == null || !isReady) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "closeout: The Clover device is not connected."));
+    } else {
       device.doCloseout(request.isAllowOpenTabs(), request.getBatchId());
     }
   }
@@ -607,7 +576,11 @@ public class CloverConnector implements ICloverConnector {
    * Cancels the device from waiting for payment card
    */
   public void cancel() {
-    invokeInputOption(CANCEL_INPUT_OPTION);
+    if(device == null || !isReady) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "cancel: The Clover device is not connected."));
+    } else {
+      invokeInputOption(CANCEL_INPUT_OPTION);
+    }
   }
 
   /**
@@ -616,15 +589,11 @@ public class CloverConnector implements ICloverConnector {
    * @param messages - list of messages that will be printed, one per line
    */
   public void printText(List<String> messages) {
-    if(device == null) {
+    if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "printText: The Clover device is not connected."));
-      return;
-    }
-    if(messages == null) {
+    } else if(messages == null) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "printText: Invalid argument, null not allowed."));
-      return;
-    }
-    if (device != null) {
+    } else {
       device.doPrintText(messages);
     }
   }
@@ -636,29 +605,21 @@ public class CloverConnector implements ICloverConnector {
    */
   public void printImage(Bitmap bitmap) //Bitmap img
   {
-    if(device == null) {
+    if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "printImage: The Clover device is not connected."));
-      return;
-    }
-    if(bitmap == null) {
+    } else if(bitmap == null) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "printImage: Invalid argument, null not allowed."));
-      return;
-    }
-    if (device != null) {
+    } else {
       device.doPrintImage(bitmap);
     }
   }
 
   public void printImageFromURL(String url) {
-    if(device == null) {
+    if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "printImageFromURL: The Clover device is not connected."));
-      return;
-    }
-    if(url == null) {
+    } else if(url == null) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "printImageFromURL: Invalid argument, null not allowed."));
-      return;
-    }
-    if (device != null) {
+    } else {
       device.doPrintImage(url);
     }
   }
@@ -669,15 +630,11 @@ public class CloverConnector implements ICloverConnector {
    * @param message
    */
   public void showMessage(String message) {
-    if(device == null) {
+    if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "showMessage : The Clover device is not connected."));
-      return;
-    }
-    if(message == null) {
+    } else if(message == null) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "showMessage: Invalid argument, null not allowed."));
-      return;
-    }
-    if (device != null) {
+    } else {
       device.doTerminalMessage(message);
     }
   }
@@ -686,41 +643,37 @@ public class CloverConnector implements ICloverConnector {
    * Return the device to the Welcome Screen
    */
   public void showWelcomeScreen() {
-    if(device == null) {
+    if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "showWelcomeScreen : The Clover device is not connected."));
-      return;
+    } else {
+      device.doShowWelcomeScreen();
     }
-    device.doShowWelcomeScreen();
   }
 
   /**
    * Show the thank you screen on the device
    */
   public void showThankYouScreen() {
-    if(device == null) {
+    if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "showThankYouScreen : The Clover device is not connected."));
-      return;
+    } else {
+      device.doShowThankYouScreen();
     }
-    device.doShowThankYouScreen();
   }
 
   /**
    * Show the customer facing receipt option screen for the specified order/payment.
    */
   public void displayPaymentReceiptOptions(String orderId, String paymentId) {
-    if(device == null) {
+    if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "displayPaymentReceiptOptions : The Clover device is not connected."));
-      return;
-    }
-    if(orderId == null) {
+    } else if(orderId == null) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "displayPaymentReceiptOptions: Invalid argument, orderId can't be null."));
-      return;
-    }
-    if(paymentId == null) {
+    } else if(paymentId == null) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "displayPaymentReceiptOptions: Invalid argument, paymentId can't be null."));
-      return;
+    } else {
+      device.doShowPaymentReceiptScreen(orderId, paymentId);
     }
-    device.doShowPaymentReceiptScreen(orderId, paymentId);
   }
 
   /**
@@ -730,7 +683,9 @@ public class CloverConnector implements ICloverConnector {
    */
 
   public void openCashDrawer(String reason) {
-    if (device != null) {
+    if(device == null || !isReady) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "displayPaymentReceiptOptions : The Clover device is not connected."));
+    } else {
       device.doOpenCashDrawer(reason);
     }
   }
@@ -740,130 +695,13 @@ public class CloverConnector implements ICloverConnector {
   /// </summary>
   /// <param name="order"></param>
   public void showDisplayOrder(DisplayOrder order) {
-    if(device == null) {
+    if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "showDisplayOrder : The Clover device is not connected."));
-      return;
-    }
-    if(order == null) {
+    } else if(order == null) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "showDisplayOrder: Invalid argument, order can't be null."));
-      return;
+    } else {
+      device.doOrderUpdate(order, null);
     }
-
-    device.doOrderUpdate(order, null);
-  }
-
-  /// <summary>
-  /// Notify the device of a DisplayLineItem being added to a DisplayOrder
-  /// </summary>
-  /// <param name="order"></param>
-  /// <param name="lineItem"></param>
-  public void lineItemAddedToDisplayOrder(final DisplayLineItem lineItem, DisplayOrder order) {
-    if(device == null) {
-      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "lineItemAddedToDisplayOrder : The Clover device is not connected."));
-      return;
-    }
-    if(order == null) {
-      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "lineItemAddedToDisplayOrder: Invalid argument, order can't be null."));
-      return;
-    }
-    if(lineItem == null) {
-      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "lineItemAddedToDisplayOrder: Invalid argument, lineItem can't be null."));
-      return;
-    }
-
-    LineItemsAddedOperation liao = new LineItemsAddedOperation();
-    liao.setOrderId(order.getId());
-    List<String> lineItemIds = new ArrayList<String>();
-    lineItemIds.add(lineItem.getId());
-    liao.setIds(lineItemIds);
-
-    device.doOrderUpdate(order, liao);
-  }
-
-  /// <summary>
-  /// Notify the device of a DisplayLineItem being removed from a DisplayOrder
-  /// </summary>
-  /// <param name="order"></param>
-  /// <param name="lineItem"></param>
-  public void lineItemRemovedFromDisplayOrder(DisplayLineItem lineItem, DisplayOrder order) {
-    if(device == null) {
-      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "lineItemRemovedFromDisplayOrder : The Clover device is not connected."));
-      return;
-    }
-    if(order == null) {
-      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "lineItemRemovedFromDisplayOrder: Invalid argument, order can't be null."));
-      return;
-    }
-    if(lineItem == null) {
-      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "lineItemRemovedFromDisplayOrder: Invalid argument, lineItem can't be null."));
-      return;
-    }
-
-    LineItemsDeletedOperation lido = new LineItemsDeletedOperation();
-    lido.setOrderId(order.getId());
-    List<String> lineItemIds = new ArrayList<String>();
-    lineItemIds.add(lineItem.getId());
-    lido.setIds(lineItemIds);
-
-    device.doOrderUpdate(order, lido);
-  }
-
-  /// <summary>
-  /// Notify device of a discount being added to the order.
-  /// Note: This is independent of a discount being added to a display line item.
-  /// </summary>
-  /// <param name="order"></param>
-  /// <param name="discount"></param>
-  public void discountAddedToDisplayOrder(DisplayDiscount discount, DisplayOrder order) {
-    if(device == null) {
-      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "discountAddedToDisplayOrder : The Clover device is not connected."));
-      return;
-    }
-    if(order == null) {
-      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "discountAddedToDisplayOrder: Invalid argument, order can't be null."));
-      return;
-    }
-    if(discount == null) {
-      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "discountAddedToDisplayOrder: Invalid argument, discount can't be null."));
-      return;
-    }
-
-    DiscountsAddedOperation dao = new DiscountsAddedOperation();
-    dao.setOrderId(order.getId());
-    List<String> discountIds = new ArrayList<String>();
-    discountIds.add(discount.getId());
-    dao.setIds(discountIds);
-
-    device.doOrderUpdate(order, dao);
-  }
-
-  /// <summary>
-  /// Notify the device that a discount was removed from the order.
-  /// Note: This is independent of a discount being removed from a display line item.
-  /// </summary>
-  /// <param name="order"></param>
-  /// <param name="discount"></param>
-  public void discountRemovedFromDisplayOrder(DisplayDiscount discount, DisplayOrder order) {
-    if(device == null) {
-      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "discountRemovedFromDisplayOrder : The Clover device is not connected."));
-      return;
-    }
-    if(order == null) {
-      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "discountRemovedFromDisplayOrder: Invalid argument, order can't be null."));
-      return;
-    }
-    if(discount == null) {
-      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "discountRemovedFromDisplayOrder: Invalid argument, discount can't be null."));
-      return;
-    }
-
-    DiscountsDeletedOperation dao = new DiscountsDeletedOperation();
-    dao.setOrderId(order.getId());
-    List<String> discountIds = new ArrayList<String>();
-    discountIds.add(discount.getId());
-    dao.setIds(discountIds);
-
-    device.doOrderUpdate(order, dao);
   }
 
   /// <summary>
@@ -871,18 +709,16 @@ public class CloverConnector implements ICloverConnector {
   /// </summary>
   /// <param name="order"></param>
   public void removeDisplayOrder(DisplayOrder order) {
-    if(device == null) {
+    if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "removeDisplayOrder : The Clover device is not connected."));
-      return;
-    }
-    if(order == null) {
+    } else if(order == null) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "removeDisplayOrder: Invalid argument, order can't be null."));
-      return;
+    } else {
+      OrderDeletedOperation dao = new OrderDeletedOperation();
+      dao.setId(order.getId());
+      device.doOrderUpdate(order, dao);
     }
 
-    OrderDeletedOperation dao = new OrderDeletedOperation();
-    dao.setId(order.getId());
-    device.doOrderUpdate(order, dao);
   }
 
   /**
@@ -900,20 +736,20 @@ public class CloverConnector implements ICloverConnector {
   /// </summary>
   /// <param name="io"></param>
   public void invokeInputOption(InputOption io) {
-    if(device == null) {
+    if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "invokeInputOption : The Clover device is not connected."));
-      return;
+    } else {
+      device.doKeyPress(io.keyPress);
     }
-    device.doKeyPress(io.keyPress);
   }
 
   @Override
   public void resetDevice() {
-    if(device == null) {
+    if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "resetDevice : The Clover device is not connected."));
-      return;
+    } else {
+      device.doResetDevice();
     }
-    device.doResetDevice();
   }
 
   private int getCardEntryMethods() {
@@ -1185,11 +1021,13 @@ public class CloverConnector implements ICloverConnector {
 
     public void onDeviceConnected(CloverDevice device) {
       Log.d(getClass().getSimpleName(), "Connected");
+      cloverConnector.isReady = false;
       cloverConnector.broadcaster.notifyOnConnect();
     }
 
     public void onDeviceReady(CloverDevice device, DiscoveryResponseMessage drm) {
       Log.d(getClass().getSimpleName(), "Ready");
+      cloverConnector.isReady = true;
       cloverConnector.device.doShowWelcomeScreen();
       MerchantInfo merchantInfo = new MerchantInfo(drm);
       cloverConnector.merchantInfo = merchantInfo;
@@ -1205,14 +1043,40 @@ public class CloverConnector implements ICloverConnector {
       cloverConnector.broadcaster.notifyOnDeviceError(errorEvent);
     }
 
+    @Override public void onPrintRefundPayment(Payment payment, Order order, Refund refund) {
+      cloverConnector.broadcaster.notifyOnPrintRefundPaymentReceipt(new PrintRefundPaymentReceiptMessage(payment, order, refund));
+    }
+
+    @Override public void onPrintMerchantReceipt(Payment payment) {
+      cloverConnector.broadcaster.notifyOnPrintPaymentMerchantCopyReceipt(new PrintPaymentMerchantCopyReceiptMessage(payment));
+    }
+
+    @Override public void onPrintPaymentDecline(Payment payment, String reason) {
+      cloverConnector.broadcaster.notifyOnPrintPaymentDeclineReceipt(new PrintPaymentDeclineReceiptMessage(payment, reason));
+    }
+
+    @Override public void onPrintPayment(Payment payment, Order order) {
+      cloverConnector.broadcaster.notifyOnPrintPaymentReceipt(new PrintPaymentReceiptMessage(payment, order));
+    }
+
+    @Override public void onPrintCredit(Credit credit) {
+      cloverConnector.broadcaster.notifyOnPrintCreditReceipt(new PrintManualRefundReceiptMessage(credit));
+    }
+
+    @Override public void onPrintCreditDecline(Credit credit, String reason) {
+      cloverConnector.broadcaster.notifyOnPrintCreditDeclineReceipt(new PrintManualRefundDeclineReceiptMessage(credit, reason));
+    }
+
     public void onDeviceDisconnected(CloverDevice device) {
       Log.d(getClass().getSimpleName(), "Disconnected");
+      cloverConnector.isReady = false;
       cloverConnector.broadcaster.notifyOnDisconnect();
     }
 
     public void onMessage(String message) {
       //Console.WriteLine("onMessage: " + message);
     }
+
 
   }
 

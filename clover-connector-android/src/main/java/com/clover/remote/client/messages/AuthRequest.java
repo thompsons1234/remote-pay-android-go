@@ -14,6 +14,7 @@ public class AuthRequest extends TransactionRequest {
 
   private Boolean disableCashback = null;
   private Long taxAmount = null;
+  private Long tippableAmount = null;
   private Boolean allowOfflinePayment = null;
   private Boolean approveOfflinePaymentWithoutPrompt = null;
 
@@ -87,5 +88,13 @@ public class AuthRequest extends TransactionRequest {
 
   @Override public PayIntent.TransactionType getType() {
     return PayIntent.TransactionType.PAYMENT;
+  }
+
+  public Long getTippableAmount() {
+    return tippableAmount;
+  }
+
+  public void setTippableAmount(Long tippableAmount) {
+    this.tippableAmount = tippableAmount;
   }
 }

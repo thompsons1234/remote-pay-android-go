@@ -38,13 +38,13 @@ public class MerchantInfo {
   String merchantMID;
   String merchantName;
 
-  boolean supportsAuths;
-  boolean supportsPreAuths;
-  boolean supportsSales;
-  boolean supportsVaultCards;
-  boolean supportsManualRefunds;
-  boolean supportsVoids;
-  boolean supportsTipAdjust;
+  boolean supportsAuths = true;
+  boolean supportsPreAuths = true;
+  boolean supportsSales = true;
+  boolean supportsVaultCards = true;
+  boolean supportsManualRefunds = true;
+  boolean supportsVoids = true;
+  boolean supportsTipAdjust = true;
 
   public static class DeviceInfo {
     String name;
