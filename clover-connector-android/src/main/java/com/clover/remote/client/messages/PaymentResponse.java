@@ -6,7 +6,7 @@
 
 package com.clover.remote.client.messages;
 
-import com.clover.sdk.internal.Signature2;
+import com.clover.common2.Signature2;
 
 @SuppressWarnings(value="unused")
 public class PaymentResponse extends BaseResponse {

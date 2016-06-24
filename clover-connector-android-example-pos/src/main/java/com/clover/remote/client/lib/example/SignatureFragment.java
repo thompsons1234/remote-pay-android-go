@@ -25,10 +25,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import com.clover.common2.Signature2;
 import com.clover.remote.client.CloverConnector;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.messages.VerifySignatureRequest;
-import com.clover.sdk.internal.Signature2;
 
 /**
  * A fragment with a Google +1 button.

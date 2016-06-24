@@ -6,7 +6,7 @@
 
 package com.clover.remote.client.messages;
 
-import com.clover.sdk.internal.PayIntent;
+import com.clover.common2.payments.PayIntent;
 
 @SuppressWarnings(value="unused")
 public class PreAuthRequest extends TransactionRequest {

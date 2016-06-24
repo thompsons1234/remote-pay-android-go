@@ -16,6 +16,7 @@
 
 package com.clover.remote.client.device;
 
+import com.clover.common2.payments.PayIntent;
 import com.clover.remote.KeyPress;
 import com.clover.remote.client.CloverDeviceObserver;
 import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
@@ -48,8 +49,6 @@ import com.clover.remote.message.RefundRequestMessage;
 import com.clover.remote.message.RefundResponseMessage;
 import com.clover.remote.message.RemoteMessage;
 import com.clover.remote.message.ShowPaymentReceiptOptionsMessage;
-//import com.clover.remote.message.ShowRefundReceiptOptionsMessage;
-//import com.clover.remote.message.ShowManualRefundReceiptOptionsMessage;
 import com.clover.remote.message.SignatureVerifiedMessage;
 import com.clover.remote.message.TerminalMessage;
 import com.clover.remote.message.TextPrintMessage;
@@ -71,7 +70,6 @@ import com.clover.remote.order.operation.DiscountsDeletedOperation;
 import com.clover.remote.order.operation.LineItemsAddedOperation;
 import com.clover.remote.order.operation.LineItemsDeletedOperation;
 import com.clover.remote.order.operation.OrderDeletedOperation;
-import com.clover.sdk.internal.PayIntent;
 import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Payment;
@@ -704,21 +702,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     /*
      * Need this to get a V2 of refund request
      */
-    class RefundRequestMessageV2 extends Message {
-      public final String orderId;
-      public final String paymentId;
-      public final long amount;
-      public final boolean fullRefund;
-
-      public RefundRequestMessageV2(String orderId, String paymentID, long amount, boolean fullRefund) {
-        super(Method.REFUND_REQUEST, 2);
-        this.orderId = orderId;
-        this.paymentId = paymentID;
-        this.amount = amount;
-        this.fullRefund = fullRefund;
-      }
-    }
-    RefundRequestMessageV2 refundRequestMessage = new RefundRequestMessageV2(orderId, paymentId, amount, fullAmount);
+    RefundRequestMessage refundRequestMessage = new RefundRequestMessage(orderId, paymentId, amount, fullAmount);
     sendObjectMessage(refundRequestMessage, 2);
   }
 

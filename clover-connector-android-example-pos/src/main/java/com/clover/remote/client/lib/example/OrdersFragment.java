@@ -31,7 +31,6 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
-import com.clover.remote.client.CloverConnector;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.lib.example.adapter.ItemsListViewAdapter;
 import com.clover.remote.client.lib.example.adapter.OrdersListViewAdapter;
@@ -173,7 +172,6 @@ public class OrdersFragment extends Fragment implements OrderObserver {
                         vpr.setOrderId(posExchange.getOrderId());
                         vpr.setVoidReason(VoidReason.USER_CANCEL.name());
                         cloverConnector.voidPayment(vpr);
-                        //dlg.disiss();
                         break;
                       }
                       case "Refund Payment": {

@@ -90,7 +90,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnSignatureVerifyRequest(VerifySignatureRequest request) {
+  public void notifyOnVerifySignatureRequest(VerifySignatureRequest request) {
     for (ICloverConnectorListener listener : this) {
       listener.onVerifySignatureRequest(request);
     }
