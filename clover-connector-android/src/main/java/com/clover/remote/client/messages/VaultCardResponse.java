@@ -19,7 +19,7 @@ package com.clover.remote.client.messages;
 import com.clover.sdk.v3.payments.VaultedCard;
 
 /**
- * Created by blakewilliams on 1/17/16.
+ * response to a vaultCard request
  */
 public class VaultCardResponse extends BaseResponse {
   private VaultedCard card;

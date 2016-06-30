@@ -26,18 +26,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import com.clover.common2.Signature2;
-import com.clover.remote.client.CloverConnector;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.messages.VerifySignatureRequest;
 
-/**
- * A fragment with a Google +1 button.
- * Activities that contain this fragment must implement the
- * {@link SignatureFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link SignatureFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class SignatureFragment extends Fragment {
 
 
@@ -49,15 +41,6 @@ public class SignatureFragment extends Fragment {
   private OnFragmentInteractionListener mListener;
   private VerifySignatureRequest verifySignatureRequest;
   private ICloverConnector cloverConnector;
-
-  /**
-   * Use this factory method to create a new instance of
-   * this fragment using the provided parameters.
-   *
-   * @param verifySignatureRequest Parameter 1.
-   * @param cloverConnector        Parameter 2.
-   * @return A new instance of fragment SignatureFragment.
-   */
 
   public static SignatureFragment newInstance(VerifySignatureRequest verifySignatureRequest, ICloverConnector cloverConnector) {
     SignatureFragment fragment = new SignatureFragment();
@@ -98,7 +81,6 @@ public class SignatureFragment extends Fragment {
           fragmentTransaction.hide(SignatureFragment.this);
           fragmentTransaction.commit();
           cloverConnector.acceptSignature(verifySignatureRequest);
-          //((FrameLayout)view.getParent()).removeView(view);
         }
       });
       rejectButton.setOnClickListener(new View.OnClickListener() {
@@ -108,7 +90,6 @@ public class SignatureFragment extends Fragment {
           fragmentTransaction.hide(SignatureFragment.this);
           fragmentTransaction.commit();
           cloverConnector.rejectSignature(verifySignatureRequest);
-          //((FrameLayout)view.getParent()).removeView(view);
         }
       });
     }
@@ -155,16 +136,6 @@ public class SignatureFragment extends Fragment {
     this.cloverConnector = cloverConnector;
   }
 
-  /**
-   * This interface must be implemented by activities that contain this
-   * fragment to allow an interaction in this fragment to be communicated
-   * to the activity and potentially other fragments contained in that
-   * activity.
-   * <p>
-   * See the Android Training lesson <a href=
-   * "http://developer.android.com/training/basics/fragments/communicating.html"
-   * >Communicating with Other Fragments</a> for more information.
-   */
   public interface OnFragmentInteractionListener {
     public void onFragmentInteraction(Uri uri);
   }
@@ -176,17 +147,8 @@ public class SignatureFragment extends Fragment {
     int sigWidth = Math.abs(signature.getBounds().first.x - signature.getBounds().second.x);
     int sigHeight = Math.abs(signature.getBounds().first.y - signature.getBounds().second.y);
 
-    float widthToHeight = sigHeight == 0 ? 2 : (1.0f * sigWidth / sigHeight);
-
-    int parentWidth = ((View) getView().getParent()).getWidth();
-    int parentHeight = ((View) getView().getParent()).getHeight();
-
-
     sigCanvas.setMinimumHeight(sigHeight);
     sigCanvas.setMinimumWidth(sigWidth);
 
-
   }
-
-
 }

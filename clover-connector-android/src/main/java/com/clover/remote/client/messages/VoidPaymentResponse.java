@@ -16,6 +16,9 @@
 
 package com.clover.remote.client.messages;
 
+/**
+ * Response to a void payment request
+ */
 public class VoidPaymentResponse extends PaymentResponse {
   private String PaymentId;
 

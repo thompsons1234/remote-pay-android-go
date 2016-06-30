@@ -18,6 +18,9 @@ package com.clover.remote.client.messages;
 
 import com.clover.sdk.v3.payments.Payment;
 
+/**
+ * Callback to the POS to request a payment declined receipt
+ */
 public class PrintPaymentDeclineReceiptMessage {
   private Payment payment;
   private String reason;

@@ -25,6 +25,7 @@ import com.clover.remote.TxState;
 import com.clover.remote.UiState;
 import com.clover.remote.client.device.CloverDevice;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
+import com.clover.remote.client.messages.ResultCode;
 import com.clover.remote.message.DiscoveryResponseMessage;
 import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.order.VoidReason;
@@ -60,7 +61,7 @@ public interface CloverDeviceObserver {
 
   void onVerifySignature(Payment payment, Signature2 signature);
 
-  void onPaymentVoided(Payment payment, VoidReason voidReason);
+  void onPaymentVoided(Payment payment, VoidReason voidReason, ResultStatus result, String reason, String message);
 
   void onKeyPressed(KeyPress keyPress);
 
@@ -71,17 +72,6 @@ public interface CloverDeviceObserver {
   void onCapturePreAuth(ResultStatus status, String reason, String paymentId, long amount, long tipAmount);
 
   void onCloseoutResponse(ResultStatus status, String reason, Batch batch);
-
-  //void onPrint(Payment payment, Order order);
-  //void onPrint(Credit credit);
-  //void onPrintDecline(Payment payment, String reason);
-  //void onPrintDecline(Credit credit, String reason);
-  //void onPrintMerchantCopy(Payment payment);
-  //void onModifyOrder(AddDiscountAction addDiscountAction);
-  //void onModifyOrder(RemoveDiscountAction removeDiscountAction);
-  //void onModifyOrder(AddLineItemAction addLineItemAction);
-  //void onModifyOrder(RemoveLineItemAction removeLineItemAction);
-  //void onTxStartResponse(boolean success);
 
   void onDeviceDisconnected(CloverDevice device);
 
@@ -97,4 +87,6 @@ public interface CloverDeviceObserver {
   void onPrintPayment(Payment payment, Order order);
   void onPrintCredit(Credit credit);
   void onPrintCreditDecline(Credit credit, String reason);
+
+  void onMessageAck(String sourceMessageId);
 }

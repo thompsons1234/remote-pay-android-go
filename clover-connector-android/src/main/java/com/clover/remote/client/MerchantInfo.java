@@ -27,6 +27,7 @@ public class MerchantInfo {
     deviceInfo.name = drm.name;
     deviceInfo.model = drm.model;
     deviceInfo.serial = drm.serial;
+    deviceInfo.supportsAcks = drm.supportsAcknowledgement;
     supportsPreAuths = drm.supportsTipAdjust;
     supportsManualRefunds = drm.supportsManualRefund;
     supportsTipAdjust = drm.supportsTipAdjust;
@@ -50,6 +51,7 @@ public class MerchantInfo {
     String name;
     String serial;
     String model;
+    boolean supportsAcks = false;
 
     public String getName() {
       return name;
@@ -61,6 +63,10 @@ public class MerchantInfo {
 
     public String getModel() {
       return model;
+    }
+
+    public boolean supportsAcks() {
+      return supportsAcks;
     }
   }
 

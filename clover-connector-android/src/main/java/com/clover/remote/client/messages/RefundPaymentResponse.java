@@ -18,6 +18,9 @@ package com.clover.remote.client.messages;
 
 import com.clover.sdk.v3.payments.Refund;
 
+/**
+ * Response to a refundPayment request
+ */
 public class RefundPaymentResponse extends BaseResponse {
   private String orderId;
   private String paymentId;

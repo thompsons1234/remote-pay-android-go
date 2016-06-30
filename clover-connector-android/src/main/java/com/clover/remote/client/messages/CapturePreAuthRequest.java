@@ -16,9 +16,10 @@
 
 package com.clover.remote.client.messages;
 
-/// <summary>
-///
-/// </summary>
+/**
+ * Request to capture a payment that had been previously
+ * obtained from a preAuth(PreAuthRequest request) call
+ */
 public class CapturePreAuthRequest extends BaseRequest {
   public String paymentID;
   public long amount;

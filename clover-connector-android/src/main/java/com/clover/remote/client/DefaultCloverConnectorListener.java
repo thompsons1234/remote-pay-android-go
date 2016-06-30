@@ -27,6 +27,11 @@ import com.clover.remote.message.TipAddedMessage;
 public class DefaultCloverConnectorListener implements ICloverConnectorListener {
   private boolean ready = false;
   MerchantInfo merchantInfo;
+  ICloverConnector cloverConnector;
+
+  public DefaultCloverConnectorListener(ICloverConnector cloverConnector) {
+    this.cloverConnector = cloverConnector;
+  }
 
   public boolean isReady() {
     return ready;
@@ -70,7 +75,9 @@ public class DefaultCloverConnectorListener implements ICloverConnectorListener 
   }
 
   @Override public void onVerifySignatureRequest(VerifySignatureRequest request) {
-
+    if(cloverConnector != null) {
+      cloverConnector.acceptSignature(request);
+    }
   }
 
   @Override public void onCloseoutResponse(CloseoutResponse response) {

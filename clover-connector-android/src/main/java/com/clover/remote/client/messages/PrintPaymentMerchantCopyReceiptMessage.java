@@ -17,6 +17,10 @@ package com.clover.remote.client.messages;
 
 import com.clover.sdk.v3.payments.Payment;
 
+/**
+ * Callback to the POS to request a merchant payment receipt
+ * be printed
+ */
 public class PrintPaymentMerchantCopyReceiptMessage {
   private Payment payment;
 

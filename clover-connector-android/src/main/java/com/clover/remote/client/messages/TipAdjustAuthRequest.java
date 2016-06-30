@@ -16,6 +16,10 @@
 
 package com.clover.remote.client.messages;
 
+/**
+ * Request to adjust the tip amount of a payment
+ * acquired from an auth(AuthRequest request) call
+ */
 public class TipAdjustAuthRequest extends BaseRequest {
   private String paymentId;
   private String orderId;

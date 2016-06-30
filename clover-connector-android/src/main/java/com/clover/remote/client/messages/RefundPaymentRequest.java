@@ -16,6 +16,9 @@
 
 package com.clover.remote.client.messages;
 
+/**
+ * Request to refund a payment, either partially or fully
+ */
 public class RefundPaymentRequest extends BaseRequest {
   private String orderId;
   private String paymentId;
