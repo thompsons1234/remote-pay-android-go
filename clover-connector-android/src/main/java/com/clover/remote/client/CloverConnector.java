@@ -144,7 +144,6 @@ public class CloverConnector implements ICloverConnector {
       protected Object doInBackground(Object[] params) {
         device = CloverDeviceFactory.get(config); // network access, so needs to be off UI thread
         if (device != null) {
-          device.setSupportsAcks(merchantInfo.deviceInfo.supportsAcks);
           device.Subscribe(deviceObserver);
         }
         return null;
@@ -949,7 +948,7 @@ public class CloverConnector implements ICloverConnector {
       VoidPaymentResponse response = new VoidPaymentResponse(success, success ? ResultCode.SUCCESS : ResultCode.FAIL);
       response.setReason(reason != null ? reason : result.toString());
       response.setMessage(message != null ? message : "No extended information provided.");
-      response.setPaymentId(null);
+      response.setPaymentId(payment != null ? payment.getId() : null);
       cloverConnector.showWelcomeScreen();
       cloverConnector.broadcaster.notifyOnVoidPaymentResponse(response);
     }
@@ -1013,6 +1012,7 @@ public class CloverConnector implements ICloverConnector {
       cloverConnector.device.doShowWelcomeScreen();
       MerchantInfo merchantInfo = new MerchantInfo(drm);
       cloverConnector.merchantInfo = merchantInfo;
+      device.setSupportsAcks(merchantInfo.deviceInfo.supportsAcks);
 
       if (drm.ready) {
         cloverConnector.broadcaster.notifyOnReady(merchantInfo);

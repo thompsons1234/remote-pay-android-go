@@ -20,7 +20,6 @@ import com.clover.common2.payments.PayIntent;
 import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
 import com.clover.remote.client.CloverDeviceObserver;
-import com.clover.remote.client.messages.ResultCode;
 import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.client.transport.CloverTransportObserver;
 import com.clover.remote.message.AcknowledgementMessage;
@@ -84,8 +83,6 @@ import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class DefaultCloverDevice extends CloverDevice implements CloverTransportObserver {
   private static final String TAG = DefaultCloverDevice.class.getName();
@@ -93,13 +90,11 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   private static int id = 0;
   private RefundResponseMessage refRespMsg;
   private static final String REMOTE_SDK = "com.clover.android.sdk:1.0";
-  private boolean supportsACKs = false;
 
   private String applicationId;
-  private final Timer ackTimer = new Timer();
-  private Runnable voidPaymentSuccessfulRunnable;
-  private Runnable voidPaymentFailedRunnable;
-  Map<String, TimerTask> msgIdToAckTimeoutTask = new HashMap<String, TimerTask>();
+  Map<String, AsyncTask> msgIdToTask = new HashMap<String, AsyncTask>();
+
+  Object ackLock = new Object();
 
   public DefaultCloverDevice(CloverDeviceConfiguration configuration) {
     this(configuration.getMessagePackageName(), configuration.getCloverTransport(), configuration.getApplicationId());
@@ -331,20 +326,21 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   }
 
   private void notifyObserverAck(final AcknowledgementMessage ackMessage) {
-    TimerTask ackTimerTask = msgIdToAckTimeoutTask.get(ackMessage);
-    if(ackTimerTask != null) {
-      if(ackTimerTask.cancel()) {
-        voidPaymentSuccessfulRunnable.run();
+    synchronized (ackLock) {
+      AsyncTask ackTask = msgIdToTask.remove(ackMessage.sourceMessageId);
+      if(ackTask != null) {
+        ackTask.execute();
       }
-    }
-    new AsyncTask() {
-      @Override protected Object doInBackground(Object[] params) {
-        for (final CloverDeviceObserver observer : deviceObservers) {
-          observer.onMessageAck(ackMessage.sourceMessageId);
+      // go ahead and notify listeners of the ACK
+      new AsyncTask() {
+        @Override protected Object doInBackground(Object[] params) {
+          for (final CloverDeviceObserver observer : deviceObservers) {
+            observer.onMessageAck(ackMessage.sourceMessageId);
+          }
+          return null;
         }
-        return null;
-      }
-    }.execute();
+      }.execute();
+    }
   }
 
   private void notifyObserversPrintMessage(final RefundPaymentPrintMessage rppm) {
@@ -728,38 +724,24 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   }
 
   public void doVoidPayment(final Payment payment, final VoidReason reason) {
-    final String msgId = sendObjectMessage(new VoidPaymentMessage(payment, reason));
-    voidPaymentSuccessfulRunnable = new Runnable(){
-      @Override public void run() {
-        notifyObserversPaymentVoided(payment, reason, ResultStatus.SUCCESS, null, null);
-      }
-    };
-    voidPaymentFailedRunnable = new Runnable(){
-      @Override public void run() {
-        notifyObserversPaymentVoided(payment, reason, ResultStatus.FAIL, null, null);
-      }
-    };
+    synchronized (ackLock) {
+      final String msgId = sendObjectMessage(new VoidPaymentMessage(payment, reason));
 
-    if(!supportsAcks()) {
-      new AsyncTask() {
+      AsyncTask aTask = new AsyncTask() {
         @Override
         protected Object doInBackground(Object[] params) {
-          voidPaymentSuccessfulRunnable.run();
+          notifyObserversPaymentVoided(payment, reason, ResultStatus.SUCCESS, null, null);
           return null;
         }
-      }.execute();
-    }
-    else {
-      // we will send back response after we get an ack, if we don't, then fail response
-      TimerTask timerTask = new TimerTask() {
-        @Override public void run() {
-          msgIdToAckTimeoutTask.remove(msgId);
-          voidPaymentFailedRunnable.run();
-        }
       };
-      msgIdToAckTimeoutTask.put(msgId, timerTask);
-      ackTimer.schedule(timerTask, 5000);
 
+      if(!supportsAcks()) {
+        aTask.execute();
+      }
+      else {
+        // we will send back response after we get an ack
+        msgIdToTask.put(msgId, aTask);
+      }
     }
   }
 
