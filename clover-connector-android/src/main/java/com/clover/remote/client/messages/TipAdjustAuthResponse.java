@@ -18,7 +18,7 @@ package com.clover.remote.client.messages;
 
 public class TipAdjustAuthResponse extends BaseResponse {
   private String paymentId;
-  private long tipAmount;
+  private Long tipAmount;
   private boolean success;
 
   public TipAdjustAuthResponse(boolean success, ResultCode result) {
@@ -33,7 +33,7 @@ public class TipAdjustAuthResponse extends BaseResponse {
     this.paymentId = paymentId;
   }
 
-  public long getTipAmount() {
+  public Long getTipAmount() {
     return tipAmount;
   }
 

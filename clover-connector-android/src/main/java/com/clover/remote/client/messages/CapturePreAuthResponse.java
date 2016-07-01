@@ -16,8 +16,6 @@
 
 package com.clover.remote.client.messages;
 
-import com.clover.remote.ResultStatus;
-
 public class CapturePreAuthResponse extends BaseResponse {
   String reason;
   String paymentID;
@@ -44,7 +42,7 @@ public class CapturePreAuthResponse extends BaseResponse {
     this.paymentID = paymentID;
   }
 
-  public long getAmount() {
+  public Long getAmount() {
     return amount;
   }
 
