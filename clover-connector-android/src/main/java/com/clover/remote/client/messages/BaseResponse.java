@@ -48,12 +48,9 @@ public class BaseResponse {
   * Get the field value
   * If true then the requested operation succeeded
   */
-  public boolean getSuccess() {
-    return this.success;
-  }
 
-  public boolean isSuccess() {
-    return getSuccess();
+  public final boolean isSuccess() {
+    return this.success;
   }
   /**
   * Set the field value

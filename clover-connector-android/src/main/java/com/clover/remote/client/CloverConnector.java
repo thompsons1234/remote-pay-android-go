@@ -875,14 +875,15 @@ public class CloverConnector implements ICloverConnector {
       TipAdjustAuthResponse response = new TipAdjustAuthResponse(success, success ? ResultCode.SUCCESS : ResultCode.FAIL);
       response.setPaymentId(paymentId);
       response.setTipAmount(amount);
-      if(!response.isSuccess()) {
+      if(!success) {
         response.setReason("Failure");
         response.setMessage("TipAdjustAuth failed to process for payment ID: " + paymentId);
       }
       cloverConnector.broadcaster.notifyOnTipAdjustAuthResponse(response);
     }
 
-    public void onAuthTipAdjusted(ResultCode resultCode, String reason, String message) {
+    // convenience, used for failure only
+    private void onAuthTipAdjusted(ResultCode resultCode, String reason, String message) {
       TipAdjustAuthResponse taar = new TipAdjustAuthResponse(resultCode == ResultCode.SUCCESS, resultCode);
       taar.setPaymentId(null);
       taar.setTipAmount(0);

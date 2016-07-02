@@ -19,7 +19,6 @@ package com.clover.remote.client.messages;
 public class TipAdjustAuthResponse extends BaseResponse {
   private String paymentId;
   private Long tipAmount;
-  private boolean success;
 
   public TipAdjustAuthResponse(boolean success, ResultCode result) {
     super(success, result);
@@ -40,12 +39,5 @@ public class TipAdjustAuthResponse extends BaseResponse {
   public void setTipAmount(long tipAmount) {
     this.tipAmount = tipAmount;
   }
-
-  public boolean isSuccess() {
-    return success;
-  }
-
-  public void setSuccess(boolean success) {
-    this.success = success;
-  }
+  
 }
