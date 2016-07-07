@@ -21,6 +21,9 @@ import com.clover.sdk.v3.payments.Payment;
 
 import java.io.Serializable;
 
+/**
+ * request sent from the Mini for the POS to verify or reject a signature
+ */
 public class VerifySignatureRequest implements Serializable {
   private Signature2 signature;
   private Payment payment;

@@ -57,7 +57,6 @@ import com.clover.remote.client.lib.example.utils.CurrencyUtils;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
 import com.clover.remote.client.messages.CloseoutRequest;
-import com.clover.remote.client.messages.ConfigErrorResponse;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.PreAuthResponse;
@@ -101,8 +100,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public static final String EXTRA_CLOVER_CONNECTOR_CONFIG = "EXTRA_CLOVER_CONNECTOR_CONFIG";
 
   boolean usb = true;
-
-  String _checksURL = null;
 
   ICloverConnector cloverConnector;
 
@@ -164,7 +161,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == WS_ENDPOINT_ACTIVITY) {
       if (!usb) {
-        //loadBaseURL();
         initialize();
       }
     }
@@ -172,53 +168,19 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
-    // Inflate the menu; this adds items to the action bar if it is present.
     getMenuInflater().inflate(R.menu.menu_parent, menu);
     return true;
   }
 
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
-    // Handle action bar item clicks here. The action bar will
-    // automatically handle clicks on the Home/Up button, so long
-    // as you specify a parent activity in AndroidManifest.xml.
     int id = item.getItemId();
 
-    //noinspection SimplifiableIfStatement
     if (id == R.id.action_settings) {
       return true;
     }
 
     return super.onOptionsItemSelected(item);
-  }
-
-  protected int getCardEntryMethods() {
-    return CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE | CloverConnector.CARD_ENTRY_METHOD_ICC_CONTACT | CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE | CloverConnector.CARD_ENTRY_METHOD_NFC_CONTACTLESS;
-  }
-
-  public void onClickWelcome(View view) {
-    cloverConnector.showWelcomeScreen();
-  }
-
-  public void onClickThankYou(View view) {
-    cloverConnector.showThankYouScreen();
-  }
-
-  public void onClickStatus(View view) {
-
-    //Toast.makeText(ExamplePOSActivity.this, "Status: " + cloverConnector.getStatus() + " [Error:" + cloverConnector.getLastException() + "]", Toast.LENGTH_SHORT).show();
-  }
-
-  public void onClickDisplayMessage(View view) {
-    //EditText editText = (EditText)findViewById(R.id.DeviceM);
-    //cloverConnector.showMessage(editText.getText().toString());
-  }
-
-  public void onPrintTextMessage(View view) {
-//        EditText editText = (EditText)findViewById(R.id.PrintTextMessageContent);
-//        List<String> messages = new ArrayList<String>();
-//        messages.add(editText.getText().toString());
-//        cloverConnector.printText(messages);
   }
 
   public void onClickCancel(View view) {
@@ -270,15 +232,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
             @Override
             public void run() {
               showMessage("Error: " + e.getMessage(), Toast.LENGTH_LONG);
-            }
-          });
-        }
-
-        public void onConfigErrorResponse(final ConfigErrorResponse response) {
-          runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-              showMessage("Merchant Configuration Error: " + response.getMessage(), Toast.LENGTH_LONG);
             }
           });
         }

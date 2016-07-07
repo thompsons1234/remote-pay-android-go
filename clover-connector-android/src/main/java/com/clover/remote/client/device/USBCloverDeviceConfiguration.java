@@ -24,7 +24,7 @@ import android.content.Context;
 import java.io.Serializable;
 
 /**
- * Created by blakewilliams on 3/30/16.
+ * Default configuration to communicate with the Mini via USB connection
  */
 public class USBCloverDeviceConfiguration implements CloverDeviceConfiguration, Serializable {
   Context context;

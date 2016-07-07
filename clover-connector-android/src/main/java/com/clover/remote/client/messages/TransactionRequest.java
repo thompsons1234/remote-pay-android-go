@@ -5,6 +5,10 @@ package com.clover.remote.client.messages;
 
 import com.clover.common2.payments.PayIntent;
 
+/**
+ * base class used by all transaction requests
+ * SaleRequest, AuthRequest, PreAuthRequest and ManualRefundRequest
+ */
 @SuppressWarnings(value="unused")
 public abstract class TransactionRequest extends BaseRequest {
 

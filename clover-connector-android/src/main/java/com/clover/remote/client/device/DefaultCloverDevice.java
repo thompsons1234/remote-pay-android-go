@@ -18,11 +18,11 @@ package com.clover.remote.client.device;
 
 import com.clover.common2.payments.PayIntent;
 import com.clover.remote.KeyPress;
+import com.clover.remote.ResultStatus;
 import com.clover.remote.client.CloverDeviceObserver;
-import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
-import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
 import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.client.transport.CloverTransportObserver;
+import com.clover.remote.message.AcknowledgementMessage;
 import com.clover.remote.message.BreakMessage;
 import com.clover.remote.message.CapturePreAuthMessage;
 import com.clover.remote.message.CapturePreAuthResponseMessage;
@@ -57,6 +57,7 @@ import com.clover.remote.message.TipAddedMessage;
 import com.clover.remote.message.TipAdjustMessage;
 import com.clover.remote.message.TipAdjustResponseMessage;
 import com.clover.remote.message.TxStartRequestMessage;
+import com.clover.remote.message.TxStartResponseMessage;
 import com.clover.remote.message.TxStateMessage;
 import com.clover.remote.message.UiStateMessage;
 import com.clover.remote.message.VaultCardMessage;
@@ -79,7 +80,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 import com.google.gson.Gson;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DefaultCloverDevice extends CloverDevice implements CloverTransportObserver {
   private static final String TAG = DefaultCloverDevice.class.getName();
@@ -87,9 +90,11 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   private static int id = 0;
   private RefundResponseMessage refRespMsg;
   private static final String REMOTE_SDK = "com.clover.android.sdk:1.0";
-  private boolean supportsACKs = false;
 
   private String applicationId;
+  Map<String, AsyncTask> msgIdToTask = new HashMap<String, AsyncTask>();
+
+  Object ackLock = new Object();
 
   public DefaultCloverDevice(CloverDeviceConfiguration configuration) {
     this(configuration.getMessagePackageName(), configuration.getCloverTransport(), configuration.getApplicationId());
@@ -130,7 +135,6 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
       try {
 
-        if (!"ACK".equals(rMessage.method)) {
           m = Method.valueOf(rMessage.method);
           switch (m) {
             case BREAK:
@@ -138,6 +142,10 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
             case CASHBACK_SELECTED:
               CashbackSelectedMessage cbsMessage = (CashbackSelectedMessage) Message.fromJsonString(rMessage.payload);
               notifyObserversCashbackSelected(cbsMessage);
+              break;
+            case ACK:
+              AcknowledgementMessage ackMessage = (AcknowledgementMessage) Message.fromJsonString(rMessage.payload);
+              notifyObserverAck(ackMessage);
               break;
             case DISCOVERY_RESPONSE:
               Log.d(getClass().getSimpleName(), "Got a Discovery Response");
@@ -164,13 +172,15 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
             case PAYMENT_VOIDED:
               VoidPaymentMessage vpMessage = (VoidPaymentMessage) Message.fromJsonString(rMessage.payload);
               //Payment payment = gson.fromJson(vpMessage.payment, Payment.class);
-              notifyObserversPaymentVoided(vpMessage.payment, vpMessage.voidReason);
+              notifyObserversPaymentVoided(vpMessage.payment, vpMessage.voidReason, ResultStatus.SUCCESS, null, null);
               break;
             case TIP_ADDED:
               TipAddedMessage tipMessage = (TipAddedMessage) Message.fromJsonString(rMessage.payload);
               notifyObserversTipAdded(tipMessage);
               break;
             case TX_START_RESPONSE:
+              TxStartResponseMessage txStartResponse = (TxStartResponseMessage) Message.fromJsonString(rMessage.payload);
+              notifyObserverTxStart(txStartResponse);
               break;
             case TX_STATE:
               TxStateMessage txStateMsg = (TxStateMessage) Message.fromJsonString(rMessage.payload);
@@ -304,7 +314,6 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
               //Outbound no-op
               break;
           }
-        }
       } catch (Exception e) {
         Log.e(TAG, "Invalid method type: " + rMessage.payload);
         e.printStackTrace();
@@ -313,6 +322,24 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     } catch (Exception e) {
       e.printStackTrace();
       //onError(e);
+    }
+  }
+
+  private void notifyObserverAck(final AcknowledgementMessage ackMessage) {
+    synchronized (ackLock) {
+      AsyncTask ackTask = msgIdToTask.remove(ackMessage.sourceMessageId);
+      if(ackTask != null) {
+        ackTask.execute();
+      }
+      // go ahead and notify listeners of the ACK
+      new AsyncTask() {
+        @Override protected Object doInBackground(Object[] params) {
+          for (final CloverDeviceObserver observer : deviceObservers) {
+            observer.onMessageAck(ackMessage.sourceMessageId);
+          }
+          return null;
+        }
+      }.execute();
     }
   }
 
@@ -473,6 +500,18 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   }
 
+  public void notifyObserverTxStart(final TxStartResponseMessage txsrm) {
+    new AsyncTask() {
+      @Override
+      protected Object doInBackground(Object[] params) {
+        for (CloverDeviceObserver observer : deviceObservers) {
+          observer.onTxStartResponse(txsrm.result, txsrm.externalPaymentId);
+        }
+        return null;
+      }
+    }.execute();
+  }
+
   public void notifyObserversTipAdjusted(final TipAdjustResponseMessage tarm) {
     new AsyncTask() {
       @Override
@@ -499,12 +538,12 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   }
 
-  public void notifyObserversPaymentVoided(final Payment payment, final VoidReason reason) {
+  public void notifyObserversPaymentVoided(final Payment payment, final VoidReason voidReason, final ResultStatus result, final String reason, final String message) {
     new AsyncTask() {
       @Override
       protected Object doInBackground(Object[] params) {
         for (CloverDeviceObserver observer : deviceObservers) {
-          observer.onPaymentVoided(payment, reason);
+          observer.onPaymentVoided(payment, voidReason, result, reason, message);
         }
         return null;
       }
@@ -684,18 +723,26 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     sendObjectMessage(ipm);
   }
 
-
   public void doVoidPayment(final Payment payment, final VoidReason reason) {
-    sendObjectMessage(new VoidPaymentMessage(payment, reason));
+    synchronized (ackLock) {
+      final String msgId = sendObjectMessage(new VoidPaymentMessage(payment, reason));
 
-    // because we don't get a callback from the device, we can create one to keep the api consistent
-    new AsyncTask() {
-      @Override
-      protected Object doInBackground(Object[] params) {
-        notifyObserversPaymentVoided(payment, reason);
-        return null;
+      AsyncTask aTask = new AsyncTask() {
+        @Override
+        protected Object doInBackground(Object[] params) {
+          notifyObserversPaymentVoided(payment, reason, ResultStatus.SUCCESS, null, null);
+          return null;
+        }
+      };
+
+      if(!supportsAcks()) {
+        aTask.execute();
       }
-    }.execute();
+      else {
+        // we will send back response after we get an ack
+        msgIdToTask.put(msgId, aTask);
+      }
+    }
   }
 
   public void doPaymentRefund(String orderId, String paymentId, long amount, boolean fullAmount) {
@@ -752,26 +799,28 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     }
   }
 
-  private void sendObjectMessage(Message message) {
-    sendObjectMessage(message, 1);
+  private String sendObjectMessage(Message message) {
+    return sendObjectMessage(message, 1);
   }
-  private void sendObjectMessage(Message message, int version) {
+  private String sendObjectMessage(Message message, int version) {
     if (message == null) {
       Log.d(getClass().getName(), "Message is null");
-      return;
+      return null;
     }
     Log.d(getClass().getName(), message.toString());
     if (message.method == null) {
       Log.e(getClass().getName(), "Invalid message", new IllegalArgumentException("Invalid message: " + message.toString()));
-      return;
+      return null;
     }
     if (applicationId == null) {
       Log.e(getClass().getName(), "Invalid applicationId: " + applicationId);
       throw new IllegalArgumentException("Invalid applicationId");
     }
 
-    RemoteMessage remoteMessage = new RemoteMessage("" + id++, RemoteMessage.Type.COMMAND, this.packageName, message.method.toString(), message.toJsonString(), REMOTE_SDK, applicationId);
+    String messageId = (++id) + "";
+    RemoteMessage remoteMessage = new RemoteMessage(messageId, RemoteMessage.Type.COMMAND, this.packageName, message.method.toString(), message.toJsonString(), REMOTE_SDK, applicationId);
     String msg = gson.toJson(remoteMessage);
     transport.sendMessage(msg);
+    return messageId;
   }
 }

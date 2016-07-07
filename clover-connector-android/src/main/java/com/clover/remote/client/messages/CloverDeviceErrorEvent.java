@@ -16,11 +16,14 @@
 
 package com.clover.remote.client.messages;
 
+/**
+ * General error used for reporting error events
+ * to the POS
+ */
 public class CloverDeviceErrorEvent {
 
-  public enum CloverDeviceErrorType
-
-  { COMMUNICATION_ERROR,
+  public enum CloverDeviceErrorType {
+    COMMUNICATION_ERROR,
     VALIDATION_ERROR,
     EXCEPTION
   }

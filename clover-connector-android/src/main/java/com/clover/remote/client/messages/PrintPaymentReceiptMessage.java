@@ -18,6 +18,9 @@ package com.clover.remote.client.messages;
 import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.payments.Payment;
 
+/**
+ * Callback to the POS to request a payment receipt be printed
+ */
 public class PrintPaymentReceiptMessage {
   Order order;
   Payment payment;

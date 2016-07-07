@@ -16,6 +16,9 @@
 
 package com.clover.remote.client.messages;
 
+/**
+ * Response to a tipAdjust(...) call
+ */
 public class TipAdjustAuthResponse extends BaseResponse {
   private String paymentId;
   private Long tipAmount;

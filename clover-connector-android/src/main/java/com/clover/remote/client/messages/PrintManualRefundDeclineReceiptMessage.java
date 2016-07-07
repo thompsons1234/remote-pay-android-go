@@ -18,6 +18,9 @@ package com.clover.remote.client.messages;
 
 import com.clover.sdk.v3.payments.Credit;
 
+/**
+ * Callback to request the POS print a ManualRefund declined receipt
+ */
 public class PrintManualRefundDeclineReceiptMessage {
   private Credit credit;
   private String reason;

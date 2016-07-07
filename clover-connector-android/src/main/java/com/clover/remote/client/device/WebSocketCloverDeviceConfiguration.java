@@ -22,6 +22,9 @@ import com.clover.remote.client.transport.websocket.WebSocketCloverTransport;
 import java.io.Serializable;
 import java.net.URI;
 
+/**
+ * Default configuration to communicate with the Mini via WebSockets to the LAN Pay Display
+ */
 public class WebSocketCloverDeviceConfiguration implements CloverDeviceConfiguration, Serializable {
   private URI uri = null;
   /**

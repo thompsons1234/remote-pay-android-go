@@ -77,7 +77,9 @@ import com.google.gson.Gson;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.SecureRandom;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CloverConnector implements ICloverConnector {
 
@@ -128,10 +130,11 @@ public class CloverConnector implements ICloverConnector {
     broadcaster.remove(connectorListener);
   }
 
-  /// <summary>
-  /// Initialize the connector with a given configuration
-  /// </summary>
-  /// <param name="config">A CloverDeviceConfiguration object; TestDeviceConfiguration can be used for testing</param>
+  /**
+   * Initialize the connector with a given configuration
+   *
+   * @param config - A CloverDeviceConfiguration object; TestDeviceConfiguration can be used for testing
+   */
   private void initialize(final CloverDeviceConfiguration config) {
     this.configuration = config;
     deviceObserver = new InnerDeviceObserver(this);
@@ -154,11 +157,7 @@ public class CloverConnector implements ICloverConnector {
       initialize(configuration);
     }
   }
-  /**
-   * Sale method, aka "purchase"
-   *
-   * @param request
-   */
+
   public void sale(SaleRequest request) {
     lastRequest = request;
     if(device == null || !isReady) {
@@ -278,11 +277,6 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-  /**
-   * If signature is captured during a Sale, this method accepts the signature as entered
-   *
-   * @param request
-   */
   public void acceptSignature(VerifySignatureRequest request) {
     if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In acceptSignature: Device is not connected."));
@@ -295,11 +289,6 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-  /**
-   * If signature is captured during a Sale, this method rejects the signature as entered
-   *
-   * @param request
-   */
   public void rejectSignature(VerifySignatureRequest request) {
     if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In rejectSignature: Device is not connected."));
@@ -312,11 +301,6 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-  /**
-   * Auth method to obtain an Auth or Pre-Auth(deprecated - use preAuth()), based on the AuthRequest IsPreAuth flag
-   *
-   * @param request
-   */
   public void auth(AuthRequest request) {
     lastRequest = request;
     if(device == null || !isReady) {
@@ -375,12 +359,6 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-  /**
-   * Capture a previous Auth. Note: Should only be called if request's PaymentID is from an AuthResponse
-   *
-   * @param request
-   */
-
   public void capturePreAuth(CapturePreAuthRequest request) {
     if(device == null || !isReady) {
       deviceObserver.onCapturePreAuth(ResultCode.ERROR, "Device connection Error", "In capturePreAuth: CapturePreAuth - The Clover device is not connected.", null, null);
@@ -403,12 +381,6 @@ public class CloverConnector implements ICloverConnector {
 
   }
 
-
-  /**
-   * Adjust the tip for a previous Auth. Note: Should only be called if request's PaymentID is from an AuthResponse
-   *
-   * @param request
-   */
   public void tipAdjustAuth(TipAdjustAuthRequest request) {
     if(device == null || !isReady) {
       deviceObserver.onAuthTipAdjusted(ResultCode.ERROR, "Device connection Error", "In tipAdjustAuth: TipAdjustAuthRequest - The Clover device is not connected.");
@@ -438,15 +410,8 @@ public class CloverConnector implements ICloverConnector {
 
   }
 
-  /**
-   * Void a transaction, given a previously used order ID and/or payment ID
-   * TBD - defining a payment or order ID to be used with a void without requiring a response from Sale()
-   *
-   * @param request
-   */
   public void voidPayment(VoidPaymentRequest request)
   {
-
     if(device == null || !isReady) {
       deviceObserver.onPaymentVoided(ResultCode.ERROR, "Device connection Error", "In voidPayment: VoidPaymentRequest - The Clover device is not connected.");
     } else if(request == null) {
@@ -466,19 +431,6 @@ public class CloverConnector implements ICloverConnector {
 
   }
 
-  /**
-   * called when requesting a payment be voided when only the request UUID is available
-   * @param request
-   */
-    /*public void VoidTransaction(VoidTransactionRequest request) {
-        return 0;
-    }*/
-
-  /**
-   * Refund a specific payment
-   *
-   * @param request
-   */
   public void refundPayment(RefundPaymentRequest request) {
     if (device == null || !isReady)
     {
@@ -514,11 +466,6 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-  /**
-   * Manual refund method, aka "naked credit"
-   *
-   * @param request
-   */
   public void manualRefund(ManualRefundRequest request) // NakedRefund is a Transaction, with just negative amount
   {
     lastRequest = request;
@@ -556,9 +503,6 @@ public class CloverConnector implements ICloverConnector {
 
   }
 
-  /**
-   * Send a request to the server to closeout all orders.
-   */
   public void closeout(CloseoutRequest request) {
     if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "closeout: The Clover device is not connected."));
@@ -568,9 +512,6 @@ public class CloverConnector implements ICloverConnector {
   }
 
 
-  /**
-   * Cancels the device from waiting for payment card
-   */
   public void cancel() {
     if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "cancel: The Clover device is not connected."));
@@ -579,11 +520,6 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-  /**
-   * Print simple lines of text to the Clover Mini printer
-   *
-   * @param messages - list of messages that will be printed, one per line
-   */
   public void printText(List<String> messages) {
     if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "printText: The Clover device is not connected."));
@@ -594,11 +530,6 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-  /**
-   * Print an image on the Clover Mini printer
-   *
-   * @param bitmap
-   */
   public void printImage(Bitmap bitmap) //Bitmap img
   {
     if(device == null || !isReady) {
@@ -620,11 +551,6 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-  /**
-   * Show a message on the Clover Mini screen
-   *
-   * @param message
-   */
   public void showMessage(String message) {
     if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "showMessage : The Clover device is not connected."));
@@ -635,9 +561,6 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-  /**
-   * Return the device to the Welcome Screen
-   */
   public void showWelcomeScreen() {
     if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "showWelcomeScreen : The Clover device is not connected."));
@@ -646,9 +569,6 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-  /**
-   * Show the thank you screen on the device
-   */
   public void showThankYouScreen() {
     if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "showThankYouScreen : The Clover device is not connected."));
@@ -657,9 +577,6 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-  /**
-   * Show the customer facing receipt option screen for the specified order/payment.
-   */
   public void displayPaymentReceiptOptions(String orderId, String paymentId) {
     if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "displayPaymentReceiptOptions : The Clover device is not connected."));
@@ -672,12 +589,6 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-  /**
-   * Will trigger cash drawer to open that is connected to Clover Mini
-   *
-   * @param reason
-   */
-
   public void openCashDrawer(String reason) {
     if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "displayPaymentReceiptOptions : The Clover device is not connected."));
@@ -686,10 +597,6 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-  /// <summary>
-  /// Show the DisplayOrder on the device. Replaces the existing DisplayOrder on the device.
-  /// </summary>
-  /// <param name="order"></param>
   public void showDisplayOrder(DisplayOrder order) {
     if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "showDisplayOrder : The Clover device is not connected."));
@@ -700,10 +607,6 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-  /// <summary>
-  /// Remove the DisplayOrder from the device.
-  /// </summary>
-  /// <param name="order"></param>
   public void removeDisplayOrder(DisplayOrder order) {
     if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "removeDisplayOrder : The Clover device is not connected."));
@@ -717,9 +620,6 @@ public class CloverConnector implements ICloverConnector {
 
   }
 
-  /**
-   *
-   */
   public void dispose() {
     broadcaster.clear();
     if (device != null) {
@@ -727,10 +627,6 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-  /// <summary>
-  /// Invoke the InputOption on the device
-  /// </summary>
-  /// <param name="io"></param>
   public void invokeInputOption(InputOption io) {
     if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "invokeInputOption : The Clover device is not connected."));
@@ -782,7 +678,8 @@ public class CloverConnector implements ICloverConnector {
 
     }
 
-    @Override public void onTxStartResponse(TxStartResponseResult result, String externalId) {
+    @Override
+    public void onTxStartResponse(TxStartResponseResult result, String externalId) {
       boolean success = result.equals(TxStartResponseResult.SUCCESS) ? true : false;
       if (success)
       {
@@ -894,11 +791,11 @@ public class CloverConnector implements ICloverConnector {
     }
 
     public void onCashbackSelected(long cashbackAmount) {
-      //TODO: Implement
+      //TODO: For future use
     }
 
     public void onKeyPressed(KeyPress keyPress) {
-      //TODO: Implement
+      //TODO: For future use
     }
 
     public void onPaymentRefundResponse(String orderId, String paymentId, Refund refund, TxState code) {
@@ -909,7 +806,6 @@ public class CloverConnector implements ICloverConnector {
       prr.setPaymentId(paymentId);
       prr.setRefund(refund);
       lastPRR = prr; // set this so we have the appropriate information for when onFinish(Refund) is called
-      //cloverConnector.broadcaster.notifyOnRefundPaymentResponse(prr);
     }
 
     public void onCloseoutResponse(ResultStatus status, String reason, Batch batch) {
@@ -920,7 +816,6 @@ public class CloverConnector implements ICloverConnector {
     }
 
     public void onUiState(UiState uiState, String uiText, UiState.UiDirection uiDirection, InputOption[] inputOptions) {
-      //Console.WriteLine(uiText  + " inputOptions: " + inputOptions.Length);
       CloverDeviceEvent deviceEvent = new CloverDeviceEvent();
       deviceEvent.setInputOptions(inputOptions);
       deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.valueOf(uiState.toString()));
@@ -1047,20 +942,24 @@ public class CloverConnector implements ICloverConnector {
       broadcaster.notifyOnVerifySignatureRequest(request);
     }
 
+    @Override
+    public void onPaymentVoided(Payment payment, VoidReason voidReason, ResultStatus result, String reason, String message) {
+      boolean success = result == ResultStatus.SUCCESS;
+
+      VoidPaymentResponse response = new VoidPaymentResponse(success, success ? ResultCode.SUCCESS : ResultCode.FAIL);
+      response.setReason(reason != null ? reason : result.toString());
+      response.setMessage(message != null ? message : "No extended information provided.");
+      response.setPaymentId(payment != null ? payment.getId() : null);
+      cloverConnector.showWelcomeScreen();
+      cloverConnector.broadcaster.notifyOnVoidPaymentResponse(response);
+    }
+
     public void onPaymentVoided(ResultCode code, String reason, String message) {
       VoidPaymentResponse response = new VoidPaymentResponse(code == ResultCode.SUCCESS, code);
       response.setReason(reason != null ? reason : code.toString());
       response.setMessage(message != null ? message : "No extended information provided.");
       response.setPaymentId(null);
       cloverConnector.broadcaster.notifyOnVoidPaymentResponse(response);
-    }
-
-    public void onPaymentVoided(Payment payment, VoidReason reason) {
-      VoidPaymentResponse response = new VoidPaymentResponse(true, ResultCode.SUCCESS);
-      response.setPaymentId(payment.getId());
-
-      cloverConnector.broadcaster.notifyOnVoidPaymentResponse(response);
-      cloverConnector.device.doShowWelcomeScreen();
     }
 
     public void onCapturePreAuth(ResultStatus status, String reason, String paymentId, long amount, long tipAmount) {
@@ -1114,6 +1013,7 @@ public class CloverConnector implements ICloverConnector {
       cloverConnector.device.doShowWelcomeScreen();
       MerchantInfo merchantInfo = new MerchantInfo(drm);
       cloverConnector.merchantInfo = merchantInfo;
+      device.setSupportsAcks(merchantInfo.deviceInfo.supportsAcks);
 
       if (drm.ready) {
         cloverConnector.broadcaster.notifyOnReady(merchantInfo);
@@ -1155,11 +1055,10 @@ public class CloverConnector implements ICloverConnector {
       cloverConnector.isReady = false;
       cloverConnector.broadcaster.notifyOnDisconnect();
     }
-
-    public void onMessage(String message) {
-      //Console.WriteLine("onMessage: " + message);
+    @Override
+    public void onMessageAck(String messageId) {
+      // TODO: for future use
     }
-
 
   }
 

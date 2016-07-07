@@ -19,6 +19,10 @@ import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.payments.Payment;
 import com.clover.sdk.v3.payments.Refund;
 
+/**
+ * Callback to the POS to request a payment refund receipt
+ * be printed
+ */
 public class PrintRefundPaymentReceiptMessage {
   private Payment payment;
   private Refund refund;
