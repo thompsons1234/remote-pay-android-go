@@ -22,8 +22,8 @@ public abstract class TransactionRequest extends BaseRequest {
   private PayIntent.TransactionType type = null;
 
   public TransactionRequest(long amount, String externalId) {
-    if(externalId == null || externalId.length() > 13) {
-      throw new IllegalArgumentException("external id must be provided, and can be a max length of 13 characters.");
+    if(externalId == null || externalId.length() > 32) {
+      throw new IllegalArgumentException("The externalId must be provided.  The maximum length is 32 characters.");
     }
     this.amount = amount;
     this.externalId = externalId;
