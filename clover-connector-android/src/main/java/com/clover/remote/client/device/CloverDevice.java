@@ -17,6 +17,7 @@
 package com.clover.remote.client.device;
 
 import com.clover.common2.payments.PayIntent;
+import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
 import com.clover.remote.client.CloverDeviceObserver;
 import com.clover.remote.client.transport.CloverTransport;
@@ -102,4 +103,8 @@ public abstract class CloverDevice {
   protected boolean supportsAcks() {
     return this.supportsAcks;
   }
+
+  public abstract void doAcceptPayment(Payment payment);
+
+  public abstract void doRejectPayment(Payment payment, Challenge challenge);
 }

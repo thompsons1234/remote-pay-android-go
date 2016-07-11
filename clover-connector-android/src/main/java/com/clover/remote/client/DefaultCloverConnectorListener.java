@@ -19,6 +19,7 @@ import com.clover.remote.client.messages.TipAdjustAuthResponse;
 import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
+import com.clover.remote.message.ConfirmPaymentMessage;
 import com.clover.remote.message.TipAddedMessage;
 
 /**
@@ -78,6 +79,11 @@ public class DefaultCloverConnectorListener implements ICloverConnectorListener 
     if(cloverConnector != null) {
       cloverConnector.acceptSignature(request);
     }
+  }
+
+  @Override
+  public void onConfirmPaymentRequest(ConfirmPaymentMessage message) {
+
   }
 
   @Override public void onCloseoutResponse(CloseoutResponse response) {

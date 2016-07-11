@@ -19,6 +19,7 @@ package com.clover.remote.client;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
+import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.PrintManualRefundDeclineReceiptMessage;
 import com.clover.remote.client.messages.PrintManualRefundReceiptMessage;
@@ -35,6 +36,7 @@ import com.clover.remote.client.messages.SaleResponse;
 import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
 import com.clover.remote.client.messages.VoidPaymentResponse;
+import com.clover.remote.message.ConfirmPaymentMessage;
 import com.clover.remote.message.TipAddedMessage;
 
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -183,6 +185,12 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
   public void notifyOnPrintCreditDeclineReceipt(PrintManualRefundDeclineReceiptMessage printManualRefundDeclineReceiptMessage) {
     for (ICloverConnectorListener listener : this) {
       listener.onPrintManualRefundDeclineReceipt(printManualRefundDeclineReceiptMessage);
+    }
+  }
+
+  public void notifyOnConfirmPaymentRequest(ConfirmPaymentRequest confirmPaymentRequest) {
+    for (ICloverConnectorListener listener : this) {
+      listener.onConfirmPaymentRequest(confirmPaymentRequest);
     }
   }
 }

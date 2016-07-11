@@ -17,6 +17,7 @@
 package com.clover.remote.client.device;
 
 import com.clover.common2.payments.PayIntent;
+import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
 import com.clover.remote.client.CloverDeviceObserver;
@@ -42,8 +43,10 @@ import com.clover.remote.message.Method;
 import com.clover.remote.message.OpenCashDrawerMessage;
 import com.clover.remote.message.OrderUpdateMessage;
 import com.clover.remote.message.PartialAuthMessage;
+import com.clover.remote.message.PaymentConfirmedMessage;
 import com.clover.remote.message.PaymentPrintMerchantCopyMessage;
 import com.clover.remote.message.PaymentPrintMessage;
+import com.clover.remote.message.PaymentRejectedMessage;
 import com.clover.remote.message.RefundPaymentPrintMessage;
 import com.clover.remote.message.RefundRequestMessage;
 import com.clover.remote.message.RefundResponseMessage;
@@ -759,6 +762,16 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   public void doCaptureAuth(String paymentId, long amount, long tipAmount) {
     sendObjectMessage(new CapturePreAuthMessage(paymentId, amount, tipAmount));
+  }
+
+  public void doAcceptPayment(Payment payment) {
+    PaymentConfirmedMessage pcm = new PaymentConfirmedMessage(payment);
+    sendObjectMessage(pcm);
+  }
+
+  public void doRejectPayment(Payment payment, Challenge challenge) {
+    PaymentRejectedMessage prm = new PaymentRejectedMessage(payment, challenge.reason);
+    sendObjectMessage(prm);
   }
 
   public void doDiscoveryRequest() {
