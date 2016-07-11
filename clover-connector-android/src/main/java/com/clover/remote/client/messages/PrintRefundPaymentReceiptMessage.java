@@ -13,16 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.clover.remote.client.messages;
 
+import com.clover.sdk.v3.order.Order;
+import com.clover.sdk.v3.payments.Payment;
+import com.clover.sdk.v3.payments.Refund;
 
-/** The response to an authorization request */
-@SuppressWarnings(value="unused")
-public class AuthResponse extends PaymentResponse {
+/**
+ * Callback to the POS to request a payment refund receipt
+ * be printed
+ */
+public class PrintRefundPaymentReceiptMessage {
+  private Payment payment;
+  private Refund refund;
+  private Order order;
 
-  public AuthResponse(boolean success, ResultCode result) {
-    super(success, result);
+  public PrintRefundPaymentReceiptMessage(Payment payment, Order order, Refund refund) {
+    this.payment = payment;
+    this.order = order;
+    this.refund = refund;
   }
-  
+
+  public Payment getPayment() {
+    return payment;
+  }
+
+  public Refund getRefund() {
+    return refund;
+  }
+
+  public Order getOrder() {
+    return order;
+  }
 }

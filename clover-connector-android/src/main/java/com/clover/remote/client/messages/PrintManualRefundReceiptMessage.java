@@ -13,16 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.clover.remote.client.messages;
 
+import com.clover.sdk.v3.payments.Credit;
 
-/** The response to an authorization request */
-@SuppressWarnings(value="unused")
-public class AuthResponse extends PaymentResponse {
+/**
+ * Callback to request the POS print a refund for a
+ * ManualRefund
+ */
+public class PrintManualRefundReceiptMessage {
+  public Credit credit;
 
-  public AuthResponse(boolean success, ResultCode result) {
-    super(success, result);
+  public PrintManualRefundReceiptMessage(Credit credit) {
+    this.credit = credit;
   }
-  
+
+  public Credit getCredit() {
+    return credit;
+  }
+
 }

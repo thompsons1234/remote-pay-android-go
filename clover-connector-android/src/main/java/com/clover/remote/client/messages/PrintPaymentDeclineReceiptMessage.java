@@ -16,13 +16,25 @@
 
 package com.clover.remote.client.messages;
 
+import com.clover.sdk.v3.payments.Payment;
 
-/** The response to an authorization request */
-@SuppressWarnings(value="unused")
-public class AuthResponse extends PaymentResponse {
+/**
+ * Callback to the POS to request a payment declined receipt
+ */
+public class PrintPaymentDeclineReceiptMessage {
+  private Payment payment;
+  private String reason;
 
-  public AuthResponse(boolean success, ResultCode result) {
-    super(success, result);
+  public PrintPaymentDeclineReceiptMessage(Payment payment, String reason) {
+    this.payment = payment;
+    this.reason = reason;
   }
-  
+
+  public Payment getPayment() {
+    return payment;
+  }
+
+  public String getReason() {
+    return reason;
+  }
 }

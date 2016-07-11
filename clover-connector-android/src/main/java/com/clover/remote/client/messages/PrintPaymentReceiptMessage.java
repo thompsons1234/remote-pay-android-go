@@ -13,9 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.clover.remote.client.messages;
 
-public class TransactionResponse extends BaseResponse {
+import com.clover.sdk.v3.order.Order;
+import com.clover.sdk.v3.payments.Payment;
 
+/**
+ * Callback to the POS to request a payment receipt be printed
+ */
+public class PrintPaymentReceiptMessage {
+  Order order;
+  Payment payment;
+
+  public PrintPaymentReceiptMessage(Payment payment, Order order) {
+    this.payment = payment;
+    this.order = order;
+  }
+
+  public Payment getPayment() {
+    return payment;
+  }
+
+  public Order getOrder() {
+    return order;
+  }
 }
