@@ -37,6 +37,8 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
 import com.clover.remote.client.CloverConnector;
 import com.clover.remote.client.ICloverConnector;
@@ -57,6 +59,7 @@ import com.clover.remote.client.lib.example.utils.CurrencyUtils;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
 import com.clover.remote.client.messages.CloseoutRequest;
+import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.PreAuthResponse;
@@ -98,6 +101,32 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public static final int WS_ENDPOINT_ACTIVITY = 123;
   public static final int SVR_ACTIVITY = 456;
   public static final String EXTRA_CLOVER_CONNECTOR_CONFIG = "EXTRA_CLOVER_CONNECTOR_CONFIG";
+  Payment currentPayment = null;
+  Challenge[] currentChallenges = null;
+  PaymentConfirmationListener paymentConfirmationListener = new PaymentConfirmationListener() {
+    @Override
+    public void onRejectClicked(Challenge challenge) { // Reject payment and send the challenge along for logging/reason
+      cloverConnector.rejectPayment(currentPayment, challenge);
+      currentChallenges = null;
+      currentPayment = null;
+    }
+
+    @Override
+    public void onAcceptClicked(final int challengeIndex) {
+      if (challengeIndex == currentChallenges.length - 1) { // no more challenges, so accept the payment
+        cloverConnector.acceptPayment(currentPayment);
+        currentChallenges = null;
+        currentPayment = null;
+      } else { // show the next challenge
+        runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+            showPaymentConfirmation(paymentConfirmationListener, currentChallenges[challengeIndex + 1], challengeIndex + 1);
+          }
+        });
+      }
+    }
+  };
 
   boolean usb = true;
 
@@ -422,6 +451,22 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         }
 
         @Override
+        public void onConfirmPaymentRequest(ConfirmPaymentRequest request) {
+          if (request.getPayment() == null || request.getChallenges() == null) {
+            showMessage("Error: The ConfirmPaymentRequest was missing the payment and/or challenges.", Toast.LENGTH_LONG);
+          } else {
+            currentPayment = request.getPayment();
+            currentChallenges = request.getChallenges();
+            runOnUiThread(new Runnable() {
+              @Override
+              public void run() {
+                showPaymentConfirmation(paymentConfirmationListener, currentChallenges[0], 0);
+              }
+            });
+          }
+        }
+
+        @Override
         public void onCloseoutResponse(CloseoutResponse response) {
           if(response.isSuccess()) {
             showMessage("Closeout is scheduled.", Toast.LENGTH_SHORT);
@@ -608,6 +653,33 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   }
 
+  private void showPaymentConfirmation(PaymentConfirmationListener listenerIn, Challenge challengeIn, int challengeIndexIn) {
+    final int challengeIndex = challengeIndexIn;
+    final Challenge challenge = challengeIn;
+    final PaymentConfirmationListener listener = listenerIn;
+    AlertDialog.Builder confirmationDialog = new AlertDialog.Builder(this);
+    confirmationDialog.setTitle("Payment Confirmation");
+    confirmationDialog.setCancelable(false);
+    confirmationDialog.setMessage(challenge.message);
+    confirmationDialog.setNegativeButton("Reject", new DialogInterface.OnClickListener() {
+
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+        listener.onRejectClicked(challenge);
+        dialog.dismiss();
+      }
+    });
+    confirmationDialog.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
+
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+        listener.onAcceptClicked(challengeIndex);
+        dialog.dismiss();
+      }
+    });
+    confirmationDialog.show();
+  }
+
   private void showMessage(final String msg, final int duration) {
     runOnUiThread(new Runnable(){
       @Override public void run() {
@@ -615,6 +687,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       }
     });
   }
+
   public void showSettings(MenuItem item) {
     if(!usb) {
       Intent intent = new Intent(this, ExamplePOSSettingsActivity.class);

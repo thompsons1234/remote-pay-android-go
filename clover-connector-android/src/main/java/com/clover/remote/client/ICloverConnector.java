@@ -88,7 +88,7 @@ public interface ICloverConnector extends Serializable {
   void acceptPayment(Payment payment);
 
   /**
-   * If signature is captured during a Sale, this method rejects the signature as entered
+   * If payment confirmation is required during a Sale, this method rejects the payment
    *
    * @param payment -
    * @param challenge -

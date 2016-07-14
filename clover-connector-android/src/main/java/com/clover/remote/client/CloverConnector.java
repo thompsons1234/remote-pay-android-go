@@ -216,6 +216,7 @@ public class CloverConnector implements ICloverConnector {
         }
         builder.vaultedCard(request.getVaultedCard());
         builder.externalPaymentId(request.getExternalId().trim());
+        builder.requiresRemoteConfirmation(true);
 
 
 
@@ -327,7 +328,7 @@ public class CloverConnector implements ICloverConnector {
     } else if(challenge == null) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In rejectPayment: Challenge cannot be null."));
     } else {
-      device.doAcceptPayment(payment);
+      device.doRejectPayment(payment, challenge);
     }
   }
 

@@ -91,6 +91,7 @@ public interface ICloverConnectorListener {
 
   /**
    * Called when the Clover device requires confirmation for a payment
+   * e.g. Duplicates or Offline
    * @param request
    */
   public void onConfirmPaymentRequest(ConfirmPaymentRequest request);

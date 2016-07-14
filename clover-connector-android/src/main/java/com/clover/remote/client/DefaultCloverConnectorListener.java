@@ -5,6 +5,7 @@ import com.clover.remote.client.messages.CapturePreAuthResponse;
 import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.CloverDeviceEvent;
+import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.ManualRefundResponse;
 import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.PrintManualRefundDeclineReceiptMessage;
@@ -82,7 +83,7 @@ public class DefaultCloverConnectorListener implements ICloverConnectorListener 
   }
 
   @Override
-  public void onConfirmPaymentRequest(ConfirmPaymentMessage message) {
+  public void onConfirmPaymentRequest(ConfirmPaymentRequest request) {
 
   }
 

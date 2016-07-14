@@ -30,6 +30,7 @@ import com.clover.remote.message.CapturePreAuthResponseMessage;
 import com.clover.remote.message.CashbackSelectedMessage;
 import com.clover.remote.message.CloseoutRequestMessage;
 import com.clover.remote.message.CloseoutResponseMessage;
+import com.clover.remote.message.ConfirmPaymentMessage;
 import com.clover.remote.message.CreditPrintMessage;
 import com.clover.remote.message.DeclineCreditPrintMessage;
 import com.clover.remote.message.DeclinePaymentPrintMessage;
@@ -154,6 +155,10 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
               Log.d(getClass().getSimpleName(), "Got a Discovery Response");
               DiscoveryResponseMessage drm = (DiscoveryResponseMessage) Message.fromJsonString(rMessage.payload);
               notifyObserversReady(transport, drm);
+              break;
+            case CONFIRM_PAYMENT_MESSAGE:
+              ConfirmPaymentMessage cpym = (ConfirmPaymentMessage) Message.fromJsonString(rMessage.payload);
+              notifyObserversConfirmPayment(cpym);
               break;
             case FINISH_CANCEL:
               notifyObserversFinishCancel();
@@ -560,6 +565,20 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
       protected Object doInBackground(Object[] params) {
         for (CloverDeviceObserver observer : deviceObservers) {
           observer.onVerifySignature(verifySigMsg.payment, verifySigMsg.signature);
+        }
+        return null;
+      }
+    }.execute();
+
+  }
+
+  public void notifyObserversConfirmPayment(final ConfirmPaymentMessage confirmPaymentMessage) {
+    new AsyncTask() {
+      @Override
+      protected Object doInBackground(Object[] params) {
+        Object[] challenges = confirmPaymentMessage.challenges.toArray(new Challenge[0]);
+        for (CloverDeviceObserver observer : deviceObservers) {
+          observer.onConfirmPayment(confirmPaymentMessage.payment, (Challenge[])challenges);
         }
         return null;
       }
