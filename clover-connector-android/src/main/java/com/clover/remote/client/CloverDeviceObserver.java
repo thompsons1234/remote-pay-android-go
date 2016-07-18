@@ -17,6 +17,7 @@
 package com.clover.remote.client;
 
 import com.clover.common2.Signature2;
+import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
 import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
@@ -60,6 +61,8 @@ public interface CloverDeviceObserver {
   void onFinishCancel();
 
   void onVerifySignature(Payment payment, Signature2 signature);
+
+  void onConfirmPayment(Payment payment, Challenge[] challenges);
 
   void onPaymentVoided(Payment payment, VoidReason voidReason, ResultStatus result, String reason, String message);
 

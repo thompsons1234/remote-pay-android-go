@@ -17,6 +17,8 @@
 package com.clover.remote.client;
 
 import android.os.Parcelable;
+
+import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.CapturePreAuthRequest;
@@ -31,6 +33,7 @@ import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.remote.order.DisplayDiscount;
 import com.clover.remote.order.DisplayLineItem;
 import com.clover.remote.order.DisplayOrder;
+import com.clover.sdk.v3.payments.Payment;
 
 import android.graphics.Bitmap;
 
@@ -76,6 +79,21 @@ public interface ICloverConnector extends Serializable {
    * @param request -
    **/
   void rejectSignature(VerifySignatureRequest request);
+
+  /**
+   * If payment confirmation is required during a Sale, this method accepts the payment
+   *
+   * @param payment -
+   **/
+  void acceptPayment(Payment payment);
+
+  /**
+   * If payment confirmation is required during a Sale, this method rejects the payment
+   *
+   * @param payment -
+   * @param challenge -
+   **/
+  void rejectPayment(Payment payment, Challenge challenge);
 
   /**
    * Auth method to obtain an Auth payment that can be used as the payment

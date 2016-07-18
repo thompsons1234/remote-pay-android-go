@@ -18,6 +18,7 @@ package com.clover.remote.client;
 
 import com.clover.common2.Signature2;
 import com.clover.common2.payments.PayIntent;
+import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
 import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
@@ -33,6 +34,7 @@ import com.clover.remote.client.messages.CapturePreAuthRequest;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
 import com.clover.remote.client.messages.CloseoutRequest;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
+import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.PrintManualRefundDeclineReceiptMessage;
@@ -214,6 +216,7 @@ public class CloverConnector implements ICloverConnector {
         }
         builder.vaultedCard(request.getVaultedCard());
         builder.externalPaymentId(request.getExternalId().trim());
+        builder.requiresRemoteConfirmation(true);
 
 
 
@@ -298,6 +301,34 @@ public class CloverConnector implements ICloverConnector {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In rejectSignature: VerifySignatureRequest.Payment must have an ID."));
     } else {
       device.doSignatureVerified(request.getPayment(), false);
+    }
+  }
+
+  @Override
+  public void acceptPayment(Payment payment) {
+    if(device == null || !isReady) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In acceptPayment: Device is not connected."));
+    } else if(payment == null) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In acceptPayment: Payment cannot be null."));
+    } else if(payment.getId() == null) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In acceptPayment: Payment must have an ID."));
+    } else {
+      device.doAcceptPayment(payment);
+    }
+  }
+
+  @Override
+  public void rejectPayment(Payment payment, Challenge challenge) {
+    if(device == null || !isReady) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In rejectPayment: Device is not connected."));
+    } else if(payment == null) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In rejectPayment: Payment cannot be null."));
+    } else if(payment.getId() == null) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In rejectPayment: Payment must have an ID."));
+    } else if(challenge == null) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In rejectPayment: Challenge cannot be null."));
+    } else {
+      device.doRejectPayment(payment, challenge);
     }
   }
 
@@ -940,6 +971,14 @@ public class CloverConnector implements ICloverConnector {
       request.setSignature(signature);
       request.setPayment(payment);
       broadcaster.notifyOnVerifySignatureRequest(request);
+    }
+
+    @Override
+    public void onConfirmPayment(Payment payment, Challenge[] challenges) {
+      ConfirmPaymentRequest cpr = new ConfirmPaymentRequest();
+      cpr.setPayment(payment);
+      cpr.setChallenges(challenges);
+      broadcaster.notifyOnConfirmPaymentRequest(cpr);
     }
 
     @Override

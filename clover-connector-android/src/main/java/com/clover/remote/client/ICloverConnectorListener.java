@@ -18,6 +18,7 @@ package com.clover.remote.client;
 
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
+import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.PrintManualRefundDeclineReceiptMessage;
 import com.clover.remote.client.messages.PrintManualRefundReceiptMessage;
@@ -35,6 +36,7 @@ import com.clover.remote.client.messages.SaleResponse;
 import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
 import com.clover.remote.client.messages.VoidPaymentResponse;
+import com.clover.remote.message.ConfirmPaymentMessage;
 import com.clover.remote.message.TipAddedMessage;
 
 public interface ICloverConnectorListener {
@@ -86,6 +88,13 @@ public interface ICloverConnectorListener {
    * @param request
    */
   public void onVerifySignatureRequest(VerifySignatureRequest request);
+
+  /**
+   * Called when the Clover device requires confirmation for a payment
+   * e.g. Duplicates or Offline
+   * @param request
+   */
+  public void onConfirmPaymentRequest(ConfirmPaymentRequest request);
 
   /**
    * Called in response to a closeout being processed

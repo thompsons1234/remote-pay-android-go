@@ -17,6 +17,7 @@
 package com.clover.remote.client.device;
 
 import com.clover.common2.payments.PayIntent;
+import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
 import com.clover.remote.client.CloverDeviceObserver;
@@ -29,6 +30,7 @@ import com.clover.remote.message.CapturePreAuthResponseMessage;
 import com.clover.remote.message.CashbackSelectedMessage;
 import com.clover.remote.message.CloseoutRequestMessage;
 import com.clover.remote.message.CloseoutResponseMessage;
+import com.clover.remote.message.ConfirmPaymentMessage;
 import com.clover.remote.message.CreditPrintMessage;
 import com.clover.remote.message.DeclineCreditPrintMessage;
 import com.clover.remote.message.DeclinePaymentPrintMessage;
@@ -42,8 +44,10 @@ import com.clover.remote.message.Method;
 import com.clover.remote.message.OpenCashDrawerMessage;
 import com.clover.remote.message.OrderUpdateMessage;
 import com.clover.remote.message.PartialAuthMessage;
+import com.clover.remote.message.PaymentConfirmedMessage;
 import com.clover.remote.message.PaymentPrintMerchantCopyMessage;
 import com.clover.remote.message.PaymentPrintMessage;
+import com.clover.remote.message.PaymentRejectedMessage;
 import com.clover.remote.message.RefundPaymentPrintMessage;
 import com.clover.remote.message.RefundRequestMessage;
 import com.clover.remote.message.RefundResponseMessage;
@@ -151,6 +155,10 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
               Log.d(getClass().getSimpleName(), "Got a Discovery Response");
               DiscoveryResponseMessage drm = (DiscoveryResponseMessage) Message.fromJsonString(rMessage.payload);
               notifyObserversReady(transport, drm);
+              break;
+            case CONFIRM_PAYMENT_MESSAGE:
+              ConfirmPaymentMessage cpym = (ConfirmPaymentMessage) Message.fromJsonString(rMessage.payload);
+              notifyObserversConfirmPayment(cpym);
               break;
             case FINISH_CANCEL:
               notifyObserversFinishCancel();
@@ -564,6 +572,20 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   }
 
+  public void notifyObserversConfirmPayment(final ConfirmPaymentMessage confirmPaymentMessage) {
+    new AsyncTask() {
+      @Override
+      protected Object doInBackground(Object[] params) {
+        Object[] challenges = confirmPaymentMessage.challenges.toArray(new Challenge[0]);
+        for (CloverDeviceObserver observer : deviceObservers) {
+          observer.onConfirmPayment(confirmPaymentMessage.payment, (Challenge[])challenges);
+        }
+        return null;
+      }
+    }.execute();
+
+  }
+
   public void notifyObserverVaultCardResponse(final VaultCardResponseMessage vaultCardResponseMessage) {
     new AsyncTask() {
       @Override
@@ -759,6 +781,16 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   public void doCaptureAuth(String paymentId, long amount, long tipAmount) {
     sendObjectMessage(new CapturePreAuthMessage(paymentId, amount, tipAmount));
+  }
+
+  public void doAcceptPayment(Payment payment) {
+    PaymentConfirmedMessage pcm = new PaymentConfirmedMessage(payment);
+    sendObjectMessage(pcm);
+  }
+
+  public void doRejectPayment(Payment payment, Challenge challenge) {
+    PaymentRejectedMessage prm = new PaymentRejectedMessage(payment, challenge.reason);
+    sendObjectMessage(prm);
   }
 
   public void doDiscoveryRequest() {
