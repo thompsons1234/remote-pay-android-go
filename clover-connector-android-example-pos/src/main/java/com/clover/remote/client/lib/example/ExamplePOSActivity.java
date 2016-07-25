@@ -379,7 +379,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           if(!retrievePendingPaymentResponse.isSuccess()) {
             store.setPendingPayments(null);
           } else {
-            store.setPendingPayments(retrievePendingPaymentResponse.getPendingPayemnts());
+            store.setPendingPayments(retrievePendingPaymentResponse.getPendingPayments());
           }
         }
 
