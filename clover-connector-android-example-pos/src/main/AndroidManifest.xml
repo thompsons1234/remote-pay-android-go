@@ -19,7 +19,7 @@
     android:versionName="1.0" >
 
     <uses-sdk>
-        16
+        17
     </uses-sdk>
 
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
