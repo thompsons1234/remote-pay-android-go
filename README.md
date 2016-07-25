@@ -20,7 +20,7 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
   
   * ICloverConnector (Operations)
     * Added 
-      * printImageFromURL 
+      * printImageFromURL
       * initializeConnection (REQUIRED) 
       * addCloverConnectorListener 
       * removeCloverConnectorListener
@@ -35,21 +35,21 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
         to display/change order information displayed on the mini
       * removeDisplayOrder - formerly displayOrderDelete
     * Removed 
-      * displayOrderLineItemAdded
-      * displayOrderLineItemRemoved
-      * displayOrderDiscountAdded
-      * displayOrderDiscountRemoved
+      * displayOrderLineItemAdded - showDisplayOrder now handles this
+      * displayOrderLineItemRemoved - showDisplayOrder now handles this
+      * displayOrderDiscountAdded - showDisplayOrder now handles this
+      * displayOrderDiscountRemoved - showDisplayOrder now handles this
   * ICloverConnectorListener (Notifications)
     * Added
       * onPaymentConfirmation - (REQUIRED) consists of a Payment and a list of challenges/void reasons  
-      * onDeviceError
-      * onPrintRefundPayment
-      * onPrintMerchantReceipt
-      * onPrintPaymentDecline
-      * onPrintPayment
-      * onPrintCredit
-      * onPrintCreditDecline
-      * onRetrievePendingPaymentsResponse
+      * onDeviceError - general callback when there is an error communicating with the device
+      * onPrintManualRefundReceipt - if disablePrinting=true on the request, this will get called to indicate the POS can print this receipt
+      * onPrintManualRefundDeclineReceipt - if disablePrinting=true on the request, this will get called to indicate the POS can print this receipt
+      * onPrintPaymentReceipt - if disablePrinting=true on the request, this will get called to indicate the POS can print this receipt
+      * onPrintPaymentDeclineReceipt - if disablePrinting=true on the request, this will get called to indicate the POS can print this receipt
+      * onPrintPaymentMerchantCopyReceipt - if disablePrinting=true on the request, this will get called to indicate the POS can print this receipt
+      * onPrintRefundPaymentReceipt - if disablePrinting=true on the request, this will get called to indicate the POS can print this receipt
+      * onRetrievePendingPaymentsResponse - called with the list of payments taken on the device that aren't processed on the server yet
     * Renamed
       * onDeviceDisconnected - formerly onDisconnected
       * onDeviceConnected - formerly on onConnected
@@ -72,6 +72,12 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
                                           which have the paymentId and amount for each 
                                           payment that has yet to be sent to the server
                                           for processing.
+      * PrintManualRefundReceiptMessage - Contains the Credit object to be printed
+      * PrintManualRefundDeclineReceiptMessage - Contains the declined Credit object to be printed 
+      * PrintPaymentReceiptMessage - Contains the Order and Payment to be printed
+      * PrintPaymentDeclineReceiptMessage - Contains the declined Payment and reason to be printed
+      * PrintPaymentMerchantCopyReceiptMessage - Contains the payment to be printed
+      * PrintRefundPaymentReceiptMessage - Contains Payment, Refund and Order
     * Renamed
       * VerifySignatureRequest - formerly SignatureVerifyRequest
       * CapturePreAuthRequest - formerly CaptureAuthRequest
@@ -80,7 +86,7 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
       * TipAdjustAuthResponse - formerly AuthTipAdjustResponse
     * Removed
       * ConfigErrorResponse - These are now processed as normal operation responses
-* All Response Messages now return success(boolean), result, reason and message      
+* All Response Messages now contain success(boolean), result, reason and message      
 * voidPayment operation fix to verify connection status and check for void request
   acknowledgement from the Clover device prior to issuing a successful response
 * Added DefaultCloverConnectorListener, which automatically accepts signature if a verify
@@ -88,7 +94,7 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
 * Behavior change for RefundPaymentRequest - In the prior versions, a value of zero for 
   the amount field would trigger a refund of the full payment amount. With the 1.1 version, 
   passing zero in the amount field will trigger a validation failure. 
-  Use FullRefund:boolean to specify a full refund amount. NOTE: This will attempt to refund 
+  Set fullRefund:boolean to `true` to specify a full refund. NOTE: This will attempt to refund 
   the original (full) payment amount, not the remaining amount, in a partial refund scenario.
 * CloverConnecter now requires ApplicationId to be set via configuration of the 
   third party application. This is provided as part of the device configuration 
@@ -102,6 +108,49 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
   and the calling POS system is unsure if the prior transaction finished.  Resubmission of the
   same request with the same external id will reject as a duplicate, if the device
   recognizes it as a valid previously processed operation.
+  
+  ## Working with the SDK
+    
+  ```
+      ICloverConnect cloverConnector = new CloverConnector(new USBCloverDeviceConfiguration(getContext(), "com.yourcompany.app:2.1.1"));
+      cloverConnector.addCloverConnectorListener(new DefaultCloverConnectorListener() {
+          public void onSaleResponse(SaleResponse response) {
+             if(response.isSuccess()) {
+                // do something with response.getPayment()
+             } else {
+                // failure processing
+                // look at response.getResult() to see the reason for the failure
+             }
+          }
+          
+          public void onConfirmPaymentRequest(ConfirmPaymentRequest request) {
+              // will be called if needed by the device to
+              // confirm a payment. e.g. offline, duplicate check, etc.
+              boolean acceptPayment = false; // prompt user, config, etc.
+              if(acceptPayment) {
+                  cloverConnector.acceptPayment(request.getPayment());
+              } else {
+                  cloverConnector.rejectPayment(request.getPayment());
+              }
+          }
+          
+          // wait until this gets called to indicate the device
+          // is ready to communicate
+          public void onDeviceReady(MerchantInfo merchantInfo) {
+              super.onDeviceReady(merchantInfo);
+          }
+      }
+  
+      cloverConnector.initializeConnection();
+      ...
+      // after the connector is ready
+      if(cloverConnector.isReady()) {
+          SaleRequest saleRequest = new SaleRequest(2215, "b1234"); // $22.15 with externalID "b1234"
+          cloverConnector.sale(saleRequest);
+      }
+      
+  ```
+
   
 # Version 0.5
 * Fix performance issue in USB connector
@@ -126,7 +175,7 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
 # Version 0.1
 * Initial capability
 
-## Getting Connected
+## Getting Connected (LAN Pay Display - experimental)
 
 1. Make sure your Clover Mini Dev Kit and Android POS device are on the same network submask and have ports unblocked.
 2. Download the Network Pay Display app from the Clover App Market on your Clover Mini Dev Kit.
@@ -135,21 +184,3 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
 5. Enter the web socket address from step 3. Tap 'OK' and go back.
 6. You should see the example POS screen and connection state listed. If everything worked you'll get a connected status. If it remains disconnected, you'll want to do some network troubleshooting. Checking firewall ports and network submasks are good starting points.
 
-## Working with the SDK
-
-If the project libaries are successfully built and synced using Gradle you should see no errors from your IDE when importing or opening the project. Transactions between the device and a POS Android app will work through an instance of a CloverConnector object. Instantiating the object will require a configuration scheme which is usually a web socket device configuration. The next step is to setup a connection listener. Here is an example: 
-```
-URI uri = null;
-try {
-    if (cloverConnector != null) {
-        cloverConnector.dispose();
-    }
-    uri = new URI(_checksURL);
-    cloverConnector = new CloverConnector(new WebSocketCloverDeviceConfiguration(uri, 2000, 3000));
-    cloverConnector.addCloverConnectorListener(new ICloverConnectorListener() {
-    ...
-
-} catch (URISyntaxException e) {
-    e.printStackTrace();
-}
-```
