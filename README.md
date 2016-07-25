@@ -49,7 +49,7 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
       * onPrintPayment
       * onPrintCredit
       * onPrintCreditDecline
-      * onPendingPaymentsResponse
+      * onRetrievePendingPaymentsResponse
     * Renamed
       * onDeviceDisconnected - formerly onDisconnected
       * onDeviceConnected - formerly on onConnected
