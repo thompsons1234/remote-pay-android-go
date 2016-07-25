@@ -1,6 +1,6 @@
 # Clover SDK for Android PoS Integration
 
-Current version: 0.5
+Current version: 1.1
 
 ## Overview
 
@@ -14,7 +14,7 @@ The Android project includes both a connector and example. To effectively work w
 To complete a transaction end to end, we recommend getting a [Clover Mini Dev Kit](http://cloverdevkit.com/collections/devkits/products/clover-mini-dev-kit).
 
 ## Release Notes
-# Version 1.0
+# Version 1.1
 * Renamed/Added/Removed a number of API operations and request/response objects to establish 
   better consistency across platforms
   
@@ -27,6 +27,8 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
       * acceptPayment - (REQUIRED) Takes a payment object - possible response to a ConfirmPaymentRequest
       * rejectPayment - (REQUIRED) Takes a payment object and the challenge that was associated with
                         the rejection - possible response to a ConfirmPaymentRequest
+      * retrievePendingPayments - retrieves a list of payments that were taken offline and are pending
+                                  server submission/processing.
     * Renamed
       * capturePreAuth - formerly captureAuth
       * showDisplayOrder - formerly displayOrder - this is now the only operation needed 
@@ -47,6 +49,7 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
       * onPrintPayment
       * onPrintCredit
       * onPrintCreditDecline
+      * onPendingPaymentsResponse
     * Renamed
       * onDeviceDisconnected - formerly onDisconnected
       * onDeviceConnected - formerly on onConnected
@@ -65,6 +68,10 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
         Clover device during payment operations, if there are questions for the merchant
         on their willingness to accept whatever risk is associated with that payment's 
         challenge. 
+      * RetrievePendingPaymentsResponse - Contains a list of PendingPaymentEntry objects,
+                                          which have the paymentId and amount for each 
+                                          payment that has yet to be sent to the server
+                                          for processing.
     * Renamed
       * VerifySignatureRequest - formerly SignatureVerifyRequest
       * CapturePreAuthRequest - formerly CaptureAuthRequest
@@ -73,10 +80,28 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
       * TipAdjustAuthResponse - formerly AuthTipAdjustResponse
     * Removed
       * ConfigErrorResponse - These are now processed as normal operation responses
+* All Response Messages now return success(boolean), result, reason and message      
 * voidPayment operation fix to verify connection status and check for void request
   acknowledgement from the Clover device prior to issuing a successful response
 * Added DefaultCloverConnectorListener, which automatically accepts signature if a verify
   signature request is received
+* Behavior change for RefundPaymentRequest - In the prior versions, a value of zero for 
+  the amount field would trigger a refund of the full payment amount. With the 1.1 version, 
+  passing zero in the amount field will trigger a validation failure. 
+  Use FullRefund:boolean to specify a full refund amount. NOTE: This will attempt to refund 
+  the original (full) payment amount, not the remaining amount, in a partial refund scenario.
+* CloverConnecter now requires ApplicationId to be set via configuration of the 
+  third party application. This is provided as part of the device configuration 
+  that is passed in during the creation of the CloverConnector.  The String input parameter of
+  "applicationId", which is passed in when instantiating the DefaultCloverDevice, should be 
+  set using the format of <company specific package>:<version> e.g. com.clover.ExamplePOS:1.2
+* SaleRequest, AuthRequest, PreAuthRequest and ManualRefund require ExternalId to be set.
+  ExternalId should be unique per transaction request and will prevent the Clover device from
+  re-processing the prior transaction if it has already been completed.  This is provided
+  as a protection in the case where connectivity with the mini is temporarily interrupted
+  and the calling POS system is unsure if the prior transaction finished.  Resubmission of the
+  same request with the same external id will reject as a duplicate, if the device
+  recognizes it as a valid previously processed operation.
   
 # Version 0.5
 * Fix performance issue in USB connector
