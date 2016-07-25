@@ -16,6 +16,7 @@
 
 package com.clover.remote.client.lib.example.model;
 
+import com.clover.remote.PendingPaymentEntry;
 import com.clover.remote.client.CloverConnector;
 
 import java.util.ArrayList;
@@ -48,6 +49,7 @@ public class POSStore {
   private Boolean approveOfflinePaymentWithoutPrompt;
   private Boolean allowOfflinePayment;
   private Boolean disablePrinting;
+  private List<PendingPaymentEntry> pendingPayments;
 
   public POSStore() {
     availableItems = new LinkedHashMap<String, POSItem>();
@@ -191,5 +193,12 @@ public class POSStore {
 
   public void setDisablePrinting(Boolean disablePrinting) {
     this.disablePrinting = disablePrinting;
+  }
+
+  public void setPendingPayments(List<PendingPaymentEntry> pendingPayments) {
+    this.pendingPayments = pendingPayments;
+    for(StoreObserver so : storeObservers) {
+      so.pendingPaymentsRetrieved(pendingPayments);
+    }
   }
 }

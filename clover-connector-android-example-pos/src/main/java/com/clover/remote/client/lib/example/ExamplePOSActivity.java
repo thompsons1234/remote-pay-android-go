@@ -37,7 +37,6 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
 import com.clover.remote.client.CloverConnector;
@@ -59,8 +58,12 @@ import com.clover.remote.client.lib.example.utils.CurrencyUtils;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
 import com.clover.remote.client.messages.CloseoutRequest;
+import com.clover.remote.client.messages.CloseoutResponse;
+import com.clover.remote.client.messages.CloverDeviceErrorEvent;
+import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.ManualRefundRequest;
+import com.clover.remote.client.messages.ManualRefundResponse;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.PrintManualRefundDeclineReceiptMessage;
@@ -69,16 +72,13 @@ import com.clover.remote.client.messages.PrintPaymentDeclineReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
 import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
-import com.clover.remote.client.messages.ResultCode;
-import com.clover.remote.client.messages.VaultCardResponse;
-import com.clover.remote.client.messages.CloseoutResponse;
-import com.clover.remote.client.messages.CloverDeviceErrorEvent;
-import com.clover.remote.client.messages.CloverDeviceEvent;
-import com.clover.remote.client.messages.ManualRefundResponse;
 import com.clover.remote.client.messages.RefundPaymentResponse;
+import com.clover.remote.client.messages.ResultCode;
+import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
 import com.clover.remote.client.messages.SaleResponse;
-import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
+import com.clover.remote.client.messages.VaultCardResponse;
+import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.message.TipAddedMessage;
 import com.clover.sdk.v3.payments.CardTransactionType;
@@ -139,6 +139,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_example_pos);
 
+    initStore();
+
     CloverDeviceConfiguration config = (CloverDeviceConfiguration) getIntent().getSerializableExtra(EXTRA_CLOVER_CONNECTOR_CONFIG);
     if(config instanceof USBCloverDeviceConfiguration) {
       ((USBCloverDeviceConfiguration)config).setContext(this);
@@ -158,6 +160,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     fragmentTransaction.commit();
 
 
+
+
+  }
+
+  private void initStore() {
     // initialize store...
     store.addAvailableItem(new POSItem("0", "Chicken Nuggets", 539, true, true));
     store.addAvailableItem(new POSItem("1", "Hamburger", 699, true, true));
@@ -183,7 +190,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     store.addAvailableDiscount(new POSDiscount("None", 0));
 
     store.createOrder();
-
   }
 
   @Override
@@ -369,7 +375,15 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           });
         }
 
-        @Override
+        @Override public void onRetrievePendingPaymentsResponse(RetrievePendingPaymentsResponse retrievePendingPaymentResponse) {
+          if(!retrievePendingPaymentResponse.isSuccess()) {
+            store.setPendingPayments(null);
+          } else {
+            store.setPendingPayments(retrievePendingPaymentResponse.getPendingPayemnts());
+          }
+        }
+
+          @Override
         public void onTipAdjustAuthResponse(TipAdjustAuthResponse response) {
           if (response.isSuccess()) {
 
@@ -411,7 +425,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                     payment.setPaymentStatus(POSPayment.Status.AUTHORIZED);
                     payment.amount = paymentAmount;
                     showMessage("Sale successfully processing using Pre Authorization", Toast.LENGTH_LONG);
-                    store.getCurrentOrder().status = POSOrder.OrderStatus.AUTHORIZED;
 
                     //TODO: if order isn't fully paid, don't create a new order...
                     store.createOrder();
@@ -638,7 +651,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       cloverConnector.addCloverConnectorListener(ccListener);
       cloverConnector.initializeConnection();
       updateComponentsWithNewCloverConnector();
-
   }
 
   @Override protected void onDestroy() {
@@ -718,6 +730,29 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     if(miscFragment != null) {
       miscFragment.setCloverConnector(cloverConnector);
     }
+    PendingPaymentsFragment ppFragment = (PendingPaymentsFragment) fragmentManager.findFragmentByTag("PENDING");
+    if(ppFragment != null) {
+      ppFragment.setCloverConnector(cloverConnector);
+    }
+  }
+
+  public void showPending(View view) {
+    FragmentManager fragmentManager = getFragmentManager();
+    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+    hideFragments(fragmentManager, fragmentTransaction);
+
+    Fragment fragment = fragmentManager.findFragmentByTag("PENDING");
+
+    if(fragment == null) {
+      fragment = PendingPaymentsFragment.newInstance(store, cloverConnector);
+      fragmentTransaction.add(R.id.contentContainer, fragment, "PENDING");
+    } else {
+      ((PendingPaymentsFragment)fragment).setCloverConnector(cloverConnector);
+      fragmentTransaction.show(fragment);
+    }
+
+    fragmentTransaction.commit();
   }
 
   public void showOrders(View view) {
@@ -861,6 +896,10 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     if(fragment != null) {
       fragmentTransaction.hide(fragment);
     }
+    fragment = fragmentManager.findFragmentByTag("PENDING");
+    if(fragment != null) {
+      fragmentTransaction.hide(fragment);
+    }
   }
 
   public void captureCardClick(View view) {
@@ -949,5 +988,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       sb.append(vals[idx]);
     }
     return sb.toString();
+  }
+
+  public void refreshPendingPayments(View view) {
+    cloverConnector.retrievePendingPayments();
   }
 }

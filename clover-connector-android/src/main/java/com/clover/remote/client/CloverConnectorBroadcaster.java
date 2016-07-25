@@ -18,8 +18,11 @@ package com.clover.remote.client;
 
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
+import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
+import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
+import com.clover.remote.client.messages.ManualRefundResponse;
 import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.PrintManualRefundDeclineReceiptMessage;
 import com.clover.remote.client.messages.PrintManualRefundReceiptMessage;
@@ -27,16 +30,13 @@ import com.clover.remote.client.messages.PrintPaymentDeclineReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
 import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
-import com.clover.remote.client.messages.VaultCardResponse;
-import com.clover.remote.client.messages.CloseoutResponse;
-import com.clover.remote.client.messages.CloverDeviceEvent;
-import com.clover.remote.client.messages.ManualRefundResponse;
 import com.clover.remote.client.messages.RefundPaymentResponse;
+import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
 import com.clover.remote.client.messages.SaleResponse;
-import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
+import com.clover.remote.client.messages.VaultCardResponse;
+import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
-import com.clover.remote.message.ConfirmPaymentMessage;
 import com.clover.remote.message.TipAddedMessage;
 
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -191,6 +191,12 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
   public void notifyOnConfirmPaymentRequest(ConfirmPaymentRequest confirmPaymentRequest) {
     for (ICloverConnectorListener listener : this) {
       listener.onConfirmPaymentRequest(confirmPaymentRequest);
+    }
+  }
+
+  public void notifyOnRetrievePendingPaymentResponse(RetrievePendingPaymentsResponse rppr) {
+    for (ICloverConnectorListener listener : this) {
+      listener.onRetrievePendingPaymentsResponse(rppr);
     }
   }
 }

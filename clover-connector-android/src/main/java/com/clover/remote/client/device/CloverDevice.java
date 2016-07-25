@@ -16,18 +16,16 @@
 
 package com.clover.remote.client.device;
 
+import android.graphics.Bitmap;
 import com.clover.common2.payments.PayIntent;
 import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
 import com.clover.remote.client.CloverDeviceObserver;
 import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.order.DisplayOrder;
-
 import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Payment;
-
-import android.graphics.Bitmap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,4 +105,6 @@ public abstract class CloverDevice {
   public abstract void doAcceptPayment(Payment payment);
 
   public abstract void doRejectPayment(Payment payment, Challenge challenge);
+
+  public abstract void doRetrievePendingPayments();
 }

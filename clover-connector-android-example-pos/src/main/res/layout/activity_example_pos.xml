@@ -68,10 +68,17 @@
             android:text="PreAuth"
             android:onClick="showPreAuths"
             android:layout_alignParentTop="true"
-            android:layout_toStartOf="@+id/TestButton" android:visibility="visible"/>
+            android:layout_toStartOf="@+id/PendingButton" android:visibility="visible"/>
     <Button android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/TestButton"
+            android:id="@+id/PendingButton"
+            android:text="Pending"
+            android:onClick="showPending"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@+id/MiscButton" android:visibility="visible"/>
+    <Button android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/MiscButton"
             android:text="Misc."
             android:onClick="showMisc"
             android:layout_alignParentTop="true"

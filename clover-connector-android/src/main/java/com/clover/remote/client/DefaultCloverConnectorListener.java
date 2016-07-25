@@ -15,12 +15,12 @@ import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
 import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
 import com.clover.remote.client.messages.RefundPaymentResponse;
+import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
 import com.clover.remote.client.messages.SaleResponse;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
 import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
-import com.clover.remote.message.ConfirmPaymentMessage;
 import com.clover.remote.message.TipAddedMessage;
 
 /**
@@ -143,4 +143,7 @@ public class DefaultCloverConnectorListener implements ICloverConnectorListener 
 
   }
 
+  @Override public void onRetrievePendingPaymentsResponse(RetrievePendingPaymentsResponse retrievePendingPaymentResponse) {
+
+  }
 }

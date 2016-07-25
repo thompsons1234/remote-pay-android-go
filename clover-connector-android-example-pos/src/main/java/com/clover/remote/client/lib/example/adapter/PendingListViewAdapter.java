@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.clover.remote.client.lib.example.adapter;
 
 import android.content.Context;
@@ -22,20 +21,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import com.clover.remote.PendingPaymentEntry;
 import com.clover.remote.client.lib.example.R;
-import com.clover.remote.client.lib.example.model.POSOrder;
 import com.clover.remote.client.lib.example.utils.CurrencyUtils;
 
 import java.util.List;
 import java.util.Locale;
 
-public class OrdersListViewAdapter extends ArrayAdapter<POSOrder> {
-
-  public OrdersListViewAdapter(Context context, int resource) {
+/**
+ * Created by blakewilliams on 7/21/16.
+ */
+public class PendingListViewAdapter extends ArrayAdapter<PendingPaymentEntry> {
+  public PendingListViewAdapter(Context context, int resource) {
     super(context, resource);
   }
 
-  public OrdersListViewAdapter(Context context, int resource, List<POSOrder> items) {
+  public PendingListViewAdapter(Context context, int resource, List<PendingPaymentEntry> items) {
     super(context, resource, items);
   }
 
@@ -47,25 +48,17 @@ public class OrdersListViewAdapter extends ArrayAdapter<POSOrder> {
     if (v == null) {
       LayoutInflater vi;
       vi = LayoutInflater.from(getContext());
-      v = vi.inflate(R.layout.orders_row, null);
+      v = vi.inflate(R.layout.pendings_row, null);
     }
 
-    POSOrder posOrder = getItem(position);
+    PendingPaymentEntry pendingPaymentEntry = getItem(position);
 
-    if (posOrder != null) {
-      TextView idColumn = (TextView) v.findViewById(R.id.OrdersRowIdColumn);
-      TextView dateColumn = (TextView) v.findViewById(R.id.OrdersRowDateColumn);
-      TextView statusColumn = (TextView) v.findViewById(R.id.OrdersRowStatusColumn);
-      TextView subtotalColumn = (TextView) v.findViewById(R.id.OrdersRowSubtotalColumn);
-      TextView taxColumn = (TextView) v.findViewById(R.id.OrdersRowTaxColumn);
-      TextView totalColumn = (TextView) v.findViewById(R.id.OrdersRowTotalColumn);
+    if (pendingPaymentEntry != null) {
+      TextView idColumn = (TextView) v.findViewById(R.id.PendingPaymentIDColumn);
+      TextView amountColumn = (TextView) v.findViewById(R.id.PendingAmountColumn);
 
-      idColumn.setText(posOrder.id);
-      dateColumn.setText(posOrder.date.toString());
-      statusColumn.setText(posOrder.getStatus().toString());
-      subtotalColumn.setText(CurrencyUtils.format(posOrder.getPreTaxSubTotal(), Locale.getDefault()));
-      taxColumn.setText(CurrencyUtils.format(posOrder.getTaxAmount(), Locale.getDefault()));
-      totalColumn.setText(CurrencyUtils.format(posOrder.getTotal(), Locale.getDefault()));
+      idColumn.setText(pendingPaymentEntry.paymentId == null ? "" : pendingPaymentEntry.paymentId);
+      amountColumn.setText(CurrencyUtils.format(pendingPaymentEntry.amount, Locale.getDefault()));
     }
 
     return v;
