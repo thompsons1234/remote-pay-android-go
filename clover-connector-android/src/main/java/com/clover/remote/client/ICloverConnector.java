@@ -16,8 +16,7 @@
 
 package com.clover.remote.client;
 
-import android.os.Parcelable;
-
+import android.graphics.Bitmap;
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
 import com.clover.remote.client.messages.AuthRequest;
@@ -27,15 +26,11 @@ import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.RefundPaymentRequest;
 import com.clover.remote.client.messages.SaleRequest;
-import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.TipAdjustAuthRequest;
+import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentRequest;
-import com.clover.remote.order.DisplayDiscount;
-import com.clover.remote.order.DisplayLineItem;
 import com.clover.remote.order.DisplayOrder;
 import com.clover.sdk.v3.payments.Payment;
-
-import android.graphics.Bitmap;
 
 import java.io.Serializable;
 import java.util.List;
@@ -251,4 +246,10 @@ public interface ICloverConnector extends Serializable {
    * needs to be used cautiously as a last resort
    */
   void resetDevice();
+
+  /**
+   * Used to request a list of pending payments that have been taken offline, but
+   * haven't processed yet. will trigger an onRetrievePendingPaymentsResponse callback
+   */
+  void retrievePendingPayments();
 }

@@ -16,6 +16,9 @@
 
 package com.clover.remote.client.device;
 
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
+import android.util.Log;
 import com.clover.common2.payments.PayIntent;
 import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
@@ -52,6 +55,8 @@ import com.clover.remote.message.RefundPaymentPrintMessage;
 import com.clover.remote.message.RefundRequestMessage;
 import com.clover.remote.message.RefundResponseMessage;
 import com.clover.remote.message.RemoteMessage;
+import com.clover.remote.message.RetrievePendingPaymentsMessage;
+import com.clover.remote.message.RetrievePendingPaymentsResponseMessage;
 import com.clover.remote.message.ShowPaymentReceiptOptionsMessage;
 import com.clover.remote.message.SignatureVerifiedMessage;
 import com.clover.remote.message.TerminalMessage;
@@ -78,10 +83,6 @@ import com.clover.remote.order.operation.OrderDeletedOperation;
 import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Payment;
-
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
-import android.util.Log;
 import com.google.gson.Gson;
 
 import java.util.HashMap;
@@ -225,6 +226,9 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
             case CLOSEOUT_RESPONSE:
               CloseoutResponseMessage crm = (CloseoutResponseMessage) Message.fromJsonString(rMessage.payload);
               notifyObserversCloseout(crm);
+            case RETRIEVE_PENDING_PAYMENTS_RESPONSE:
+              RetrievePendingPaymentsResponseMessage rpprm = (RetrievePendingPaymentsResponseMessage) Message.fromJsonString(rMessage.payload);
+              notifyObserversPendingPaymentsResponse(rpprm);
             case DISCOVERY_REQUEST:
               //Outbound no-op
               break;
@@ -635,6 +639,17 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     }.execute();
   }
 
+  public void notifyObserversPendingPaymentsResponse(final RetrievePendingPaymentsResponseMessage rpprm) {
+    new AsyncTask() {
+      @Override
+      protected Object doInBackground(Object[] params) {
+        for (CloverDeviceObserver observer : deviceObservers) {
+          observer.onPendingPaymentsResponse(rpprm.status == ResultStatus.SUCCESS, rpprm.pendingPaymentEntries);
+        }
+        return null;
+      }
+    }.execute();
+  }
 
   public void notifyObserversTxState(final TxStateMessage txStateMsg) {
     new AsyncTask() {
@@ -707,6 +722,10 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   public void doSignatureVerified(Payment payment, boolean verified) {
     sendObjectMessage(new SignatureVerifiedMessage(payment, verified));
+  }
+
+  public void doRetrievePendingPayments() {
+    sendObjectMessage(new RetrievePendingPaymentsMessage());
   }
 
   public void doTerminalMessage(String text) {

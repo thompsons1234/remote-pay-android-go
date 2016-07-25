@@ -30,7 +30,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
-import com.clover.remote.client.CloverConnector;
+import com.clover.remote.PendingPaymentEntry;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.lib.example.adapter.CardsListViewAdapter;
 import com.clover.remote.client.lib.example.adapter.PreAuthListViewAdapter;
@@ -43,6 +43,7 @@ import com.clover.remote.client.lib.example.model.StoreObserver;
 import com.clover.remote.client.messages.CapturePreAuthRequest;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 public class PreAuthFragment extends Fragment {
   private static final String ARG_STORE = "store";
@@ -114,6 +115,10 @@ public class PreAuthFragment extends Fragment {
             preAuthsListView.setAdapter(cardsListViewAdapter);
           }
         }.execute();
+      }
+
+      @Override public void pendingPaymentsRetrieved(List<PendingPaymentEntry> pendingPayments) {
+
       }
     });
 

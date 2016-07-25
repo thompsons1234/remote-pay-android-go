@@ -20,13 +20,13 @@ import com.clover.common2.Signature2;
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
 import com.clover.remote.KeyPress;
+import com.clover.remote.PendingPaymentEntry;
 import com.clover.remote.ResultStatus;
 import com.clover.remote.TxStartResponseResult;
 import com.clover.remote.TxState;
 import com.clover.remote.UiState;
 import com.clover.remote.client.device.CloverDevice;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
-import com.clover.remote.client.messages.ResultCode;
 import com.clover.remote.message.DiscoveryResponseMessage;
 import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.order.VoidReason;
@@ -35,6 +35,8 @@ import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.Payment;
 import com.clover.sdk.v3.payments.Refund;
 import com.clover.sdk.v3.payments.VaultedCard;
+
+import java.util.List;
 
 public interface CloverDeviceObserver {
 
@@ -92,4 +94,6 @@ public interface CloverDeviceObserver {
   void onPrintCreditDecline(Credit credit, String reason);
 
   void onMessageAck(String sourceMessageId);
+
+  void onPendingPaymentsResponse(boolean success, List<PendingPaymentEntry> payments);
 }

@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import com.clover.remote.PendingPaymentEntry;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.lib.example.adapter.AvailableItemsAdapter;
 import com.clover.remote.client.lib.example.model.OrderObserver;
@@ -230,6 +231,10 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     }
 
     @Override public void preAuthRemoved(POSPayment payment) {
+
+    }
+
+    @Override public void pendingPaymentsRetrieved(List<PendingPaymentEntry> pendingPayments) {
 
     }
 

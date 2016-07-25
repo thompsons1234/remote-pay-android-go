@@ -16,11 +16,15 @@
 
 package com.clover.remote.client;
 
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
+import android.util.Log;
 import com.clover.common2.Signature2;
 import com.clover.common2.payments.PayIntent;
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
 import com.clover.remote.KeyPress;
+import com.clover.remote.PendingPaymentEntry;
 import com.clover.remote.ResultStatus;
 import com.clover.remote.TxStartResponseResult;
 import com.clover.remote.TxState;
@@ -33,8 +37,12 @@ import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthRequest;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
 import com.clover.remote.client.messages.CloseoutRequest;
+import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
+import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
+import com.clover.remote.client.messages.ManualRefundRequest;
+import com.clover.remote.client.messages.ManualRefundResponse;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.PrintManualRefundDeclineReceiptMessage;
@@ -43,20 +51,17 @@ import com.clover.remote.client.messages.PrintPaymentDeclineReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
 import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
-import com.clover.remote.client.messages.ResultCode;
-import com.clover.remote.client.messages.TransactionRequest;
-import com.clover.remote.client.messages.VaultCardResponse;
-import com.clover.remote.client.messages.CloseoutResponse;
-import com.clover.remote.client.messages.CloverDeviceEvent;
-import com.clover.remote.client.messages.ManualRefundRequest;
-import com.clover.remote.client.messages.ManualRefundResponse;
 import com.clover.remote.client.messages.RefundPaymentRequest;
 import com.clover.remote.client.messages.RefundPaymentResponse;
+import com.clover.remote.client.messages.ResultCode;
+import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
 import com.clover.remote.client.messages.SaleRequest;
 import com.clover.remote.client.messages.SaleResponse;
-import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.TipAdjustAuthRequest;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
+import com.clover.remote.client.messages.TransactionRequest;
+import com.clover.remote.client.messages.VaultCardResponse;
+import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.message.DiscoveryResponseMessage;
@@ -70,18 +75,13 @@ import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.Payment;
 import com.clover.sdk.v3.payments.Refund;
 import com.clover.sdk.v3.payments.VaultedCard;
-
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
-import android.util.Log;
 import com.google.gson.Gson;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.SecureRandom;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class CloverConnector implements ICloverConnector {
 
@@ -534,6 +534,15 @@ public class CloverConnector implements ICloverConnector {
 
   }
 
+
+  @Override public void retrievePendingPayments() {
+    if(device == null || !isReady) {
+      deviceObserver.onPendingPaymentsResponse(ResultCode.ERROR, "Device connection Error", "In retrievePendingPayments: The Clover device is not connected.");
+    } else {
+      device.doRetrievePendingPayments();
+    }
+  }
+
   public void closeout(CloseoutRequest request) {
     if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In closeout: CloseoutRequest - The Clover device is not connected."));
@@ -791,6 +800,17 @@ public class CloverConnector implements ICloverConnector {
       }
     }
 
+    public void onPendingPaymentsResponse(ResultCode code, String category, String message) {
+      RetrievePendingPaymentsResponse rppr = new RetrievePendingPaymentsResponse(code, category, Collections.EMPTY_LIST);
+      rppr.setMessage(message);
+      cloverConnector.broadcaster.notifyOnRetrievePendingPaymentResponse(rppr);
+    }
+
+    public void onPendingPaymentsResponse(boolean success, List<PendingPaymentEntry> payments) {
+      RetrievePendingPaymentsResponse rppr = new RetrievePendingPaymentsResponse(success ? ResultCode.SUCCESS : ResultCode.FAIL, "", payments);
+      cloverConnector.broadcaster.notifyOnRetrievePendingPaymentResponse(rppr);
+    }
+
     public void onPartialAuth(long partialAmount) {
       //TODO: For future use
     }
@@ -989,7 +1009,6 @@ public class CloverConnector implements ICloverConnector {
       response.setReason(reason != null ? reason : result.toString());
       response.setMessage(message != null ? message : "No extended information provided.");
       response.setPaymentId(payment != null ? payment.getId() : null);
-      cloverConnector.showWelcomeScreen();
       cloverConnector.broadcaster.notifyOnVoidPaymentResponse(response);
     }
 

@@ -45,20 +45,6 @@
             android:label="@string/title_activity_example_pos"
             android:screenOrientation="landscape" >
         </activity>
-        <activity
-            android:name=".ExamplePOSSettingsActivity"
-            android:label="Example POS Settings"
-            android:screenOrientation="landscape" >
-        </activity>
-        <activity
-            android:name=".OrdersActivity"
-            android:label="@string/title_activity_orders" >
-        </activity>
-        <activity
-            android:name=".MiscellaneousActivity"
-            android:label="@string/title_activity_miscellaneous" >
-        </activity>
-
     </application>
 
 </manifest>

@@ -17,13 +17,12 @@
 package com.clover.remote.client.lib.example.adapter;
 
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import com.clover.remote.PendingPaymentEntry;
 import com.clover.remote.client.lib.example.R;
 import com.clover.remote.client.lib.example.model.OrderObserver;
 import com.clover.remote.client.lib.example.model.POSCard;
@@ -113,6 +112,10 @@ public class AvailableItemsAdapter extends ArrayAdapter<POSItem>
       }
 
       @Override public void preAuthRemoved(POSPayment payment) {
+
+      }
+
+      @Override public void pendingPaymentsRetrieved(List<PendingPaymentEntry> pendingPayments) {
 
       }
     });

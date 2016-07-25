@@ -24,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import com.clover.remote.PendingPaymentEntry;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.lib.example.adapter.RefundsListViewAdapter;
 import com.clover.remote.client.lib.example.model.POSCard;
@@ -34,6 +35,7 @@ import com.clover.remote.client.lib.example.model.POSStore;
 import com.clover.remote.client.lib.example.model.StoreObserver;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 
 public class ManualRefundsFragment extends Fragment {
     private static final String ARG_STORE = "store";
@@ -95,6 +97,10 @@ public class ManualRefundsFragment extends Fragment {
             }
 
             @Override public void preAuthRemoved(POSPayment payment) {
+
+            }
+
+            @Override public void pendingPaymentsRetrieved(List<PendingPaymentEntry> pendingPayments) {
 
             }
         });
