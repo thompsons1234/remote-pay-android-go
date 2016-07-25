@@ -249,7 +249,7 @@ public interface ICloverConnector extends Serializable {
 
   /**
    * Used to request a list of pending payments that have been taken offline, but
-   * haven't processed yet. If supported on the device, will trigger an onRetrievePendingPaymentsResponse
+   * haven't processed yet. will trigger an onRetrievePendingPaymentsResponse callback
    */
   void retrievePendingPayments();
 }
