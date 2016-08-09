@@ -120,7 +120,13 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
 * Modified remote pay so prompts to take orders offline and flagging duplicate orders appear only in merchant facing mode.
 * Added ability to query pending payments.
 
-  ## Working with the SDK
+## Getting Connected
+1. Download the USB Pay Display app from the Clover App Market on your Clover Mini Dev Kit.
+2. Open the USB Pay Display app
+3. Run the Clover Connector Android Example POS app on your Android POS device (emulator, device etc.)
+4. You should see the example POS screen and connection state listed. If everything worked you'll get a connected status. If it remains disconnected, you'll want to check that 1) You are connecting the correct cable to the correct connection point on the Clover Mini “hub” - port USB(port with Clover logo). You will need to use the USB cable that the device came with. 2) That your Android devices support “host” or OTG mode, which is required to communicate with the mini, which will operate in “accessory” mode.
+  
+## Working with the SDK
     
   ```
       ICloverConnect cloverConnector = new CloverConnector(new USBCloverDeviceConfiguration(getContext(), "com.yourcompany.app:2.1.1"));
@@ -186,10 +192,4 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
 # Version 0.1
 * Initial capability
 
-## Getting Connected (LAN Pay Display - experimental)
-
-1. Download the USB Pay Display app from the Clover App Market on your Clover Mini Dev Kit.
-2. Open the USB Pay Display app
-3. Run the Clover Connector Android Example POS app on your Android POS device (emulator, device etc.)
-4. You should see the example POS screen and connection state listed. If everything worked you'll get a connected status. If it remains disconnected, you'll want to check that 1) You are connecting the correct cable to the correct connection point on the Clover Mini “hub” - port USB(port with Clover logo). You will need to use the USB cable that the device came with. 2) That your Android devices support “host” or OTG mode, which is required to communicate with the mini, which will operate in “accessory” mode.
 
