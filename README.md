@@ -39,6 +39,12 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
       * displayOrderLineItemRemoved - showDisplayOrder now handles this
       * displayOrderDiscountAdded - showDisplayOrder now handles this
       * displayOrderDiscountRemoved - showDisplayOrder now handles this
+    * Modified
+      * SaleRequest, AuthRequest, PreAuthRequest and ManualRefund require ExternalId to be set. (REQUIRED)
+        * ExternalId should be unique per transaction allowing the Clover device to detect, and potentially reject, if the same externalID is reused for subsequent transaction requests
+      * changed all device action API calls to return void 
+      * CloverConnecter now requires ApplicationId to be set via configuration/installation of the third party application. This is provided as part of the device configuration that is passed in during the creation of the CloverConnector.
+      * Behavior change for RefundPaymentRequest. In the prior versions, a value of zero for the amount field would trigger a refund of the full payment amount. With the 1.0 version, passing zero in the amount field will trigger a validation failure. Use FullRefund:boolean to specify a full refund amount. NOTE: This will attempt to refund the original (full) payment amount, not the remaining amount, in a partial refund scenario.    
   * ICloverConnectorListener (Notifications)
     * Added
       * onPaymentConfirmation - (REQUIRED) consists of a Payment and a list of challenges/void reasons  
@@ -85,7 +91,17 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
       * CloseoutRequest - formerly separate field-level parameters
       * TipAdjustAuthResponse - formerly AuthTipAdjustResponse
     * Removed
-      * ConfigErrorResponse - These are now processed as normal operation responses
+      * ConfigErrorResponse - These are now processed as normal operation 
+    * Modified
+      * All Response Messages now return the following:​
+        * Success:boolean
+        * Result:enum [SUCCESS|FAIL|CANCEL|ERROR|UNSUPPORTED] FAIL - failed to process with values/properties as-is CANCEL - canceled, retry could work ERROR - un expected exception occurred UNSUPPORTED - merchant config won't allow the request
+        * Reason:String optional information about result value, if not SUCCESS
+        * Message:String optional detail information about the result value, if not success
+      * SaleResponse, AuthResponse and PreAuthResponse have 3 new flags (e.g. The payment gateway may force an AuthRequest to a SaleRequest)
+      * IsSale:boolean - true if the payment is closed
+      * IsAuth:boolean - true if the payment can be tip adjusted before closeout
+      * IsPreAuth:boolean - true if the payment needs to be "captured" before closeout will close it
 * All Response Messages now contain success(boolean), result, reason and message      
 * voidPayment operation fix to verify connection status and check for void request
   acknowledgement from the Clover device prior to issuing a successful response
@@ -101,14 +117,9 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
   that is passed in during the creation of the CloverConnector.  The String input parameter of
   "applicationId", which is passed in when instantiating the DefaultCloverDevice, should be 
   set using the format of <company specific package>:<version> e.g. com.clover.ExamplePOS:1.2
-* SaleRequest, AuthRequest, PreAuthRequest and ManualRefund require ExternalId to be set.
-  ExternalId should be unique per transaction request and will prevent the Clover device from
-  re-processing the prior transaction if it has already been completed.  This is provided
-  as a protection in the case where connectivity with the mini is temporarily interrupted
-  and the calling POS system is unsure if the prior transaction finished.  Resubmission of the
-  same request with the same external id will reject as a duplicate, if the device
-  recognizes it as a valid previously processed operation.
-  
+* Modified remote pay so prompts to take orders offline and flagging duplicate orders appear only in merchant facing mode.
+* Added ability to query pending payments.
+
   ## Working with the SDK
     
   ```
@@ -177,10 +188,8 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
 
 ## Getting Connected (LAN Pay Display - experimental)
 
-1. Make sure your Clover Mini Dev Kit and Android POS device are on the same network submask and have ports unblocked.
-2. Download the Network Pay Display app from the Clover App Market on your Clover Mini Dev Kit.
-3. Open the Network Pay Display app and you should see a web socket address.
-4. Run the Clover Connector Android Example POS app on your Android POS device (emulator, device etc.)
-5. Enter the web socket address from step 3. Tap 'OK' and go back.
-6. You should see the example POS screen and connection state listed. If everything worked you'll get a connected status. If it remains disconnected, you'll want to do some network troubleshooting. Checking firewall ports and network submasks are good starting points.
+1. Download the USB Pay Display app from the Clover App Market on your Clover Mini Dev Kit.
+2. Open the USB Pay Display app
+3. Run the Clover Connector Android Example POS app on your Android POS device (emulator, device etc.)
+4. You should see the example POS screen and connection state listed. If everything worked you'll get a connected status. If it remains disconnected, you'll want to check that 1) You are connecting the correct cable to the correct connection point on the Clover Mini “hub” - port USB(port with Clover logo). You will need to use the USB cable that the device came with. 2) That your Android devices support “host” or OTG mode, which is required to communicate with the mini, which will operate in “accessory” mode.
 
