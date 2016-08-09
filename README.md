@@ -102,7 +102,6 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
       * IsSale:boolean - true if the payment is closed
       * IsAuth:boolean - true if the payment can be tip adjusted before closeout
       * IsPreAuth:boolean - true if the payment needs to be "captured" before closeout will close it
-* All Response Messages now contain success(boolean), result, reason and message      
 * voidPayment operation fix to verify connection status and check for void request
   acknowledgement from the Clover device prior to issuing a successful response
 * Added DefaultCloverConnectorListener, which automatically accepts signature if a verify
