@@ -26,7 +26,7 @@ import com.clover.remote.message.TipAddedMessage;
 /**
  * Created by blakewilliams on 6/14/16.
  */
-public class DefaultCloverConnectorListener implements ICloverConnectorListener {
+public abstract class DefaultCloverConnectorListener implements ICloverConnectorListener {
   private boolean ready = false;
   MerchantInfo merchantInfo;
   ICloverConnector cloverConnector;
@@ -83,9 +83,7 @@ public class DefaultCloverConnectorListener implements ICloverConnectorListener 
   }
 
   @Override
-  public void onConfirmPaymentRequest(ConfirmPaymentRequest request) {
-
-  }
+  public abstract void onConfirmPaymentRequest(ConfirmPaymentRequest request);
 
   @Override public void onCloseoutResponse(CloseoutResponse response) {
 
