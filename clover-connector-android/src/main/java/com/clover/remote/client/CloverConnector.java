@@ -838,11 +838,14 @@ public class CloverConnector implements ICloverConnector {
       boolean success = code == ResultCode.SUCCESS;
       ReadCardDataResponse rcdr = new ReadCardDataResponse(success, code);
       rcdr.setMessage(message);
+      cloverConnector.device.doShowWelcomeScreen();
       cloverConnector.broadcaster.notifyOnReadCardDataResponse(rcdr);
     }
+
     public void onReadCardDataResponse(boolean success, CardData cardData) {
       ReadCardDataResponse rcdr = new ReadCardDataResponse(success, success ? ResultCode.SUCCESS : ResultCode.FAIL);
       rcdr.setCardData(cardData);
+      cloverConnector.device.doShowWelcomeScreen();
       cloverConnector.broadcaster.notifyOnReadCardDataResponse(rcdr);
     }
 

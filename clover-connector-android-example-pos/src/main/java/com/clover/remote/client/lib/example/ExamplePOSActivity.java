@@ -322,7 +322,62 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
                   LayoutInflater inflater = ExamplePOSActivity.this.getLayoutInflater();
 
-                  builder.setView(inflater.inflate(R.layout.card_data_table, null));
+                  View view = inflater.inflate(R.layout.card_data_table, null);
+                  ListView listView = (ListView)view.findViewById(R.id.cardDataListView);
+
+
+                  if(listView != null) {
+                    class RowData {
+                      RowData(String label, String value) {
+                        this.text1 = label;
+                        this.text2 = value;
+                      }
+                      String text1;
+                      String text2;
+                    }
+
+                    ArrayAdapter<RowData> data = new ArrayAdapter<RowData>(getBaseContext(), android.R.layout.simple_list_item_2) {
+                      @Override public View getView(int position, View convertView, ViewGroup parent) {
+                        View v = convertView;
+
+                        if (v == null) {
+                          LayoutInflater vi;
+                          vi = LayoutInflater.from(getContext());
+                          v = vi.inflate(android.R.layout.simple_list_item_2, null);
+                        }
+
+                        RowData rowData = getItem(position);
+
+                        if (rowData != null) {
+                          TextView primaryColumn = (TextView) v.findViewById(android.R.id.text1);
+                          TextView secondaryColumn = (TextView) v.findViewById(android.R.id.text2);
+
+                          primaryColumn.setText(rowData.text2);
+                          secondaryColumn.setText(rowData.text1);
+                        }
+
+                        return v;
+                      }
+                    };
+                    listView.setAdapter(data);
+                    CardData cardData = response.getCardData();
+                    data.addAll(new RowData("Encrypted", cardData.encrypted+""));
+                    data.addAll(new RowData("Cardholder Name", cardData.cardholderName));
+                    data.addAll(new RowData("First Name", cardData.firstName));
+                    data.addAll(new RowData("Last Name", cardData.lastName));
+                    data.addAll(new RowData("Expiration", cardData.exp));
+                    data.addAll(new RowData("First 4", cardData.first4));
+                    data.addAll(new RowData("Last 6", cardData.last6));
+                    data.addAll(new RowData("Track 1", cardData.track1));
+                    data.addAll(new RowData("Track 2", cardData.track2));
+                    data.addAll(new RowData("Track 3", cardData.track3));
+                    data.addAll(new RowData("Masked Track 1", cardData.maskedTrack1));
+                    data.addAll(new RowData("Masked Track 2", cardData.maskedTrack2));
+                    data.addAll(new RowData("Masked Track 3", cardData.maskedTrack3));
+                    data.addAll(new RowData("Pan", cardData.pan));
+
+                  }
+                  builder.setView(view);
 
                 } else if(response.getResult() == ResultCode.CANCEL) {
                   builder.setMessage("Get card data canceled.");
@@ -337,61 +392,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                 });
                 AlertDialog dialog = builder.create();
                 dialog.show();
-
-                // only available after the show() call
-                ListView listView = (ListView)dialog.findViewById(R.id.cardDataListView);
-                class RowData {
-                  RowData(String label, String value) {
-                    this.text1 = label;
-                    this.text2 = value;
-                  }
-                  String text1;
-                  String text2;
-                }
-
-                if(listView != null) {
-
-                  ArrayAdapter<RowData> data = new ArrayAdapter<RowData>(getBaseContext(), android.R.layout.simple_list_item_2) {
-                    @Override public View getView(int position, View convertView, ViewGroup parent) {
-                      View v = convertView;
-
-                      if (v == null) {
-                        LayoutInflater vi;
-                        vi = LayoutInflater.from(getContext());
-                        v = vi.inflate(android.R.layout.simple_list_item_2, null);
-                      }
-
-                      RowData rowData = getItem(position);
-
-                      if (rowData != null) {
-                        TextView primaryColumn = (TextView) v.findViewById(android.R.id.text1);
-                        TextView secondaryColumn = (TextView) v.findViewById(android.R.id.text2);
-
-                        primaryColumn.setText(rowData.text2);
-                        secondaryColumn.setText(rowData.text1);
-                      }
-
-                      return v;
-                    }
-                  };
-                  listView.setAdapter(data);
-                  CardData cardData = response.getCardData();
-                  data.addAll(new RowData("Encrypted", cardData.encrypted+""));
-                  data.addAll(new RowData("Cardholder Name", cardData.cardholderName));
-                  data.addAll(new RowData("First Name", cardData.firstName));
-                  data.addAll(new RowData("Last Name", cardData.lastName));
-                  data.addAll(new RowData("Expiration", cardData.exp));
-                  data.addAll(new RowData("First 4", cardData.first4));
-                  data.addAll(new RowData("Last 6", cardData.last6));
-                  data.addAll(new RowData("Track 1", cardData.track1));
-                  data.addAll(new RowData("Track 2", cardData.track2));
-                  data.addAll(new RowData("Track 3", cardData.track3));
-                  data.addAll(new RowData("Masked Track 1", cardData.maskedTrack1));
-                  data.addAll(new RowData("Masked Track 2", cardData.maskedTrack2));
-                  data.addAll(new RowData("Masked Track 3", cardData.maskedTrack3));
-                  data.addAll(new RowData("Pan", cardData.pan));
-
-                }
 
               }
             });
