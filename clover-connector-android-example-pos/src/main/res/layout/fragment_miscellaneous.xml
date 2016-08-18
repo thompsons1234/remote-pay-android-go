@@ -147,10 +147,9 @@
             <Button android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight=".5"
-                    android:text="Hidden"
-
-                    android:id="@+id/HiddenButton"
-                    android:visibility="invisible"
+                    android:text="Read Card Data"
+                    android:onClick="onReadCardDataClick"
+                    android:id="@+id/ReadCardDataButton"
             />
         </LinearLayout>
         <LinearLayout

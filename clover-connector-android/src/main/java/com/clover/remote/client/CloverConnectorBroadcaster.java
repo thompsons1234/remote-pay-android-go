@@ -30,6 +30,7 @@ import com.clover.remote.client.messages.PrintPaymentDeclineReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
 import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
+import com.clover.remote.client.messages.ReadCardDataResponse;
 import com.clover.remote.client.messages.RefundPaymentResponse;
 import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
 import com.clover.remote.client.messages.SaleResponse;
@@ -197,6 +198,12 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
   public void notifyOnRetrievePendingPaymentResponse(RetrievePendingPaymentsResponse rppr) {
     for (ICloverConnectorListener listener : this) {
       listener.onRetrievePendingPaymentsResponse(rppr);
+    }
+  }
+
+  public void notifyOnReadCardDataResponse(ReadCardDataResponse rcdr) {
+    for (ICloverConnectorListener listener : this) {
+      listener.onReadCardDataResponse(rcdr);
     }
   }
 }

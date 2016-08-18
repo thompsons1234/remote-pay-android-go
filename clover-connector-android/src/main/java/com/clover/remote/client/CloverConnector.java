@@ -21,6 +21,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import com.clover.common2.Signature2;
 import com.clover.common2.payments.PayIntent;
+import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
 import com.clover.remote.KeyPress;
@@ -51,6 +52,7 @@ import com.clover.remote.client.messages.PrintPaymentDeclineReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
 import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
+import com.clover.remote.client.messages.ReadCardDataResponse;
 import com.clover.remote.client.messages.RefundPaymentRequest;
 import com.clover.remote.client.messages.RefundPaymentResponse;
 import com.clover.remote.client.messages.ResultCode;
@@ -543,6 +545,16 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
+  @Override public void readCardData(Integer cardEntryMethods) {
+    if(device == null || !isReady) {
+      deviceObserver.onReadCardDataResponse(ResultCode.ERROR, "Device connection Error", "In readCardData: The Clover device is not connected.");
+    } else {
+      device.doReadCardData(cardEntryMethods == null ? getCardEntryMethods() : cardEntryMethods);
+    }
+  }
+
+
+
   public void closeout(CloseoutRequest request) {
     if(device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In closeout: CloseoutRequest - The Clover device is not connected."));
@@ -809,6 +821,29 @@ public class CloverConnector implements ICloverConnector {
     public void onPendingPaymentsResponse(boolean success, List<PendingPaymentEntry> payments) {
       RetrievePendingPaymentsResponse rppr = new RetrievePendingPaymentsResponse(success ? ResultCode.SUCCESS : ResultCode.FAIL, "", payments);
       cloverConnector.broadcaster.notifyOnRetrievePendingPaymentResponse(rppr);
+    }
+
+    @Override public void onReadCardResponse(ResultStatus status, String reason, CardData cardData) {
+      boolean success = status == ResultStatus.SUCCESS;
+      if(success) {
+        onReadCardDataResponse(success, cardData);
+      } else if (status == ResultStatus.CANCEL) {
+        onReadCardDataResponse(ResultCode.CANCEL, reason, "");
+      } else {
+        onReadCardDataResponse(ResultCode.FAIL, reason, "");
+      }
+    }
+
+    public void onReadCardDataResponse(ResultCode code, String category, String message) {
+      boolean success = code == ResultCode.SUCCESS;
+      ReadCardDataResponse rcdr = new ReadCardDataResponse(success, code);
+      rcdr.setMessage(message);
+      cloverConnector.broadcaster.notifyOnReadCardDataResponse(rcdr);
+    }
+    public void onReadCardDataResponse(boolean success, CardData cardData) {
+      ReadCardDataResponse rcdr = new ReadCardDataResponse(success, success ? ResultCode.SUCCESS : ResultCode.FAIL);
+      rcdr.setCardData(cardData);
+      cloverConnector.broadcaster.notifyOnReadCardDataResponse(rcdr);
     }
 
     public void onPartialAuth(long partialAmount) {

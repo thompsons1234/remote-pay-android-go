@@ -16,10 +16,13 @@
 
 package com.clover.remote.client.device;
 
+import android.content.ComponentName;
+import android.content.Intent;
 import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.client.transport.usb.USBCloverTransport;
 
 import android.content.Context;
+import com.clover.sdk.util.Platform;
 
 import java.io.Serializable;
 
@@ -56,6 +59,15 @@ public class USBCloverDeviceConfiguration implements CloverDeviceConfiguration, 
 
   @Override
   public CloverTransport getCloverTransport() {
+
+    if(Platform.isCloverStation()) {
+      // If on the Clover Station disable the USB Pay app on the Station so it doesn't interfere with the Mini
+      Intent disableIntent = new Intent();
+      disableIntent.setComponent(new ComponentName("com.clover.remote.protocol.usb", "com.clover.remote.protocol.usb.pos.EnablePosReceiver"));
+      disableIntent.putExtra("enabled", false);
+      context.sendBroadcast(disableIntent);
+    }
+
     return new USBCloverTransport(context);
   }
 

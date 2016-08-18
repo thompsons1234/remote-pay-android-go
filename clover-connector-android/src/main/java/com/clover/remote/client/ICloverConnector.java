@@ -252,4 +252,11 @@ public interface ICloverConnector extends Serializable {
    * haven't processed yet. will trigger an onRetrievePendingPaymentsResponse callback
    */
   void retrievePendingPayments();
+
+  /**
+   * Used to request card information. Specifically track1 and track2 information
+   *
+   * @param cardEntryMethods - The card entry methods allowed to request track information. null will provide default values
+   */
+  void readCardData(Integer cardEntryMethods);
 }
