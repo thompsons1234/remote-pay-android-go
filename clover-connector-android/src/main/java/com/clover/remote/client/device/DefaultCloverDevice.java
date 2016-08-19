@@ -183,7 +183,6 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
               break;
             case PAYMENT_VOIDED:
               VoidPaymentMessage vpMessage = (VoidPaymentMessage) Message.fromJsonString(rMessage.payload);
-              //Payment payment = gson.fromJson(vpMessage.payment, Payment.class);
               notifyObserversPaymentVoided(vpMessage.payment, vpMessage.voidReason, ResultStatus.SUCCESS, null, null);
               break;
             case TIP_ADDED:
@@ -233,7 +232,6 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
               RetrievePendingPaymentsResponseMessage rpprm = (RetrievePendingPaymentsResponseMessage) Message.fromJsonString(rMessage.payload);
               notifyObserversPendingPaymentsResponse(rpprm);
             case CARD_DATA_RESPONSE:
-//              ReadCardDataResponse rcdr = (ReadCardDataResponse)
               CardDataResponseMessage rcdrm = (CardDataResponseMessage) Message.fromJsonString(rMessage.payload);
               notifyObserversReadCardData(rcdrm);
             case DISCOVERY_REQUEST:
@@ -340,7 +338,6 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
     } catch (Exception e) {
       e.printStackTrace();
-      //onError(e);
     }
   }
 
