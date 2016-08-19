@@ -52,6 +52,7 @@ import com.clover.remote.client.messages.PrintPaymentDeclineReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
 import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
+import com.clover.remote.client.messages.ReadCardDataRequest;
 import com.clover.remote.client.messages.ReadCardDataResponse;
 import com.clover.remote.client.messages.RefundPaymentRequest;
 import com.clover.remote.client.messages.RefundPaymentResponse;
@@ -545,11 +546,21 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
-  @Override public void readCardData(Integer cardEntryMethods) {
+  @Override public void readCardData(ReadCardDataRequest request) {
     if(device == null || !isReady) {
       deviceObserver.onReadCardDataResponse(ResultCode.ERROR, "Device connection Error", "In readCardData: The Clover device is not connected.");
+    } else if (request == null) {
+      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid Argument.", "In readCardData: ReadCardDataRequest - The request that was passed in for processing is null.");
     } else {
-      device.doReadCardData(cardEntryMethods == null ? getCardEntryMethods() : cardEntryMethods);
+
+      // create pay intent...
+      PayIntent.Builder builder = new PayIntent.Builder();
+      builder.transactionType(PayIntent.TransactionType.DATA);
+      builder.cardEntryMethods(request.getCardEntryMethods() != null ? request.getCardEntryMethods() : cardEntryMethods);
+      builder.forceSwipePinEntry(request.isForceSwipePinEntry());
+
+      PayIntent pi = builder.build();
+      device.doReadCardData(pi);
     }
   }
 

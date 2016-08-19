@@ -108,5 +108,5 @@ public abstract class CloverDevice {
 
   public abstract void doRetrievePendingPayments();
 
-  public abstract void doReadCardData(int cardEntryMethods);
+  public abstract void doReadCardData(PayIntent payment);
 }

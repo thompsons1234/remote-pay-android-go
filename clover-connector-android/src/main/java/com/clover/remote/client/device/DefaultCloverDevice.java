@@ -770,8 +770,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     sendObjectMessage(tpm);
   }
 
-  public void doReadCardData(int val) {
-    CardDataRequestMessage rcdr = new CardDataRequestMessage(val);
+  public void doReadCardData(PayIntent payIntent) {
+    CardDataRequestMessage rcdr = new CardDataRequestMessage(payIntent);
     sendObjectMessage(rcdr);
   }
 

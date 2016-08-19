@@ -78,6 +78,7 @@ import com.clover.remote.client.messages.PrintPaymentDeclineReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
 import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
+import com.clover.remote.client.messages.ReadCardDataRequest;
 import com.clover.remote.client.messages.ReadCardDataResponse;
 import com.clover.remote.client.messages.RefundPaymentResponse;
 import com.clover.remote.client.messages.ResultCode;
@@ -1077,7 +1078,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void onReadCardDataClick(View view) {
-    cloverConnector.readCardData(store.getCardEntryMethods());
+
+    cloverConnector.readCardData(new ReadCardDataRequest(store.getCardEntryMethods()));
   }
 
   private static final SecureRandom random = new SecureRandom();
