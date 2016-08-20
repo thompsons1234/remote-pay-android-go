@@ -107,4 +107,6 @@ public abstract class CloverDevice {
   public abstract void doRejectPayment(Payment payment, Challenge challenge);
 
   public abstract void doRetrievePendingPayments();
+
+  public abstract void doReadCardData(PayIntent payment);
 }

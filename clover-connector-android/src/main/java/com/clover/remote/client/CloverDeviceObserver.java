@@ -17,6 +17,7 @@
 package com.clover.remote.client;
 
 import com.clover.common2.Signature2;
+import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
 import com.clover.remote.KeyPress;
@@ -96,4 +97,6 @@ public interface CloverDeviceObserver {
   void onMessageAck(String sourceMessageId);
 
   void onPendingPaymentsResponse(boolean success, List<PendingPaymentEntry> payments);
+
+  void onReadCardResponse(ResultStatus status, String reason, CardData cardData);
 }

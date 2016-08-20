@@ -24,6 +24,7 @@ import com.clover.remote.client.messages.CapturePreAuthRequest;
 import com.clover.remote.client.messages.CloseoutRequest;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.PreAuthRequest;
+import com.clover.remote.client.messages.ReadCardDataRequest;
 import com.clover.remote.client.messages.RefundPaymentRequest;
 import com.clover.remote.client.messages.SaleRequest;
 import com.clover.remote.client.messages.TipAdjustAuthRequest;
@@ -252,4 +253,11 @@ public interface ICloverConnector extends Serializable {
    * haven't processed yet. will trigger an onRetrievePendingPaymentsResponse callback
    */
   void retrievePendingPayments();
+
+  /**
+   * Used to request card information. Specifically track1 and track2 information
+   *
+   * @param request - The card entry methods allowed to request track information. null will provide default values
+   */
+  void readCardData(ReadCardDataRequest request);
 }

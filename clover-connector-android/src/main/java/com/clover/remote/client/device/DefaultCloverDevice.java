@@ -24,12 +24,15 @@ import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
 import com.clover.remote.client.CloverDeviceObserver;
+import com.clover.remote.client.messages.ReadCardDataResponse;
 import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.client.transport.CloverTransportObserver;
 import com.clover.remote.message.AcknowledgementMessage;
 import com.clover.remote.message.BreakMessage;
 import com.clover.remote.message.CapturePreAuthMessage;
 import com.clover.remote.message.CapturePreAuthResponseMessage;
+import com.clover.remote.message.CardDataRequestMessage;
+import com.clover.remote.message.CardDataResponseMessage;
 import com.clover.remote.message.CashbackSelectedMessage;
 import com.clover.remote.message.CloseoutRequestMessage;
 import com.clover.remote.message.CloseoutResponseMessage;
@@ -180,7 +183,6 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
               break;
             case PAYMENT_VOIDED:
               VoidPaymentMessage vpMessage = (VoidPaymentMessage) Message.fromJsonString(rMessage.payload);
-              //Payment payment = gson.fromJson(vpMessage.payment, Payment.class);
               notifyObserversPaymentVoided(vpMessage.payment, vpMessage.voidReason, ResultStatus.SUCCESS, null, null);
               break;
             case TIP_ADDED:
@@ -229,6 +231,9 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
             case RETRIEVE_PENDING_PAYMENTS_RESPONSE:
               RetrievePendingPaymentsResponseMessage rpprm = (RetrievePendingPaymentsResponseMessage) Message.fromJsonString(rMessage.payload);
               notifyObserversPendingPaymentsResponse(rpprm);
+            case CARD_DATA_RESPONSE:
+              CardDataResponseMessage rcdrm = (CardDataResponseMessage) Message.fromJsonString(rMessage.payload);
+              notifyObserversReadCardData(rcdrm);
             case DISCOVERY_REQUEST:
               //Outbound no-op
               break;
@@ -333,9 +338,9 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
     } catch (Exception e) {
       e.printStackTrace();
-      //onError(e);
     }
   }
+
 
   private void notifyObserverAck(final AcknowledgementMessage ackMessage) {
     synchronized (ackLock) {
@@ -353,6 +358,17 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
         }
       }.execute();
     }
+  }
+
+  private void notifyObserversReadCardData(final CardDataResponseMessage rcdrm) {
+    new AsyncTask() {
+      @Override protected Object doInBackground(Object[] params) {
+        for (final CloverDeviceObserver observer : deviceObservers) {
+          observer.onReadCardResponse(rcdrm.status, rcdrm.reason, rcdrm.cardData);
+        }
+        return null;
+      }
+    }.execute();
   }
 
   private void notifyObserversPrintMessage(final RefundPaymentPrintMessage rppm) {
@@ -752,6 +768,11 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   public void doPrintText(List<String> textLines) {
     TextPrintMessage tpm = new TextPrintMessage(textLines);
     sendObjectMessage(tpm);
+  }
+
+  public void doReadCardData(PayIntent payIntent) {
+    CardDataRequestMessage rcdr = new CardDataRequestMessage(payIntent);
+    sendObjectMessage(rcdr);
   }
 
   public void doPrintImage(Bitmap bitmap) {

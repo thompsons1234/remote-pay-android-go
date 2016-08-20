@@ -29,14 +29,20 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.TwoLineListItem;
+import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
 import com.clover.remote.client.CloverConnector;
@@ -72,6 +78,8 @@ import com.clover.remote.client.messages.PrintPaymentDeclineReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
 import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
+import com.clover.remote.client.messages.ReadCardDataRequest;
+import com.clover.remote.client.messages.ReadCardDataResponse;
 import com.clover.remote.client.messages.RefundPaymentResponse;
 import com.clover.remote.client.messages.ResultCode;
 import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
@@ -306,7 +314,91 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           });
         }
 
-        @Override
+          @Override public void onReadCardDataResponse(final ReadCardDataResponse response) {
+            runOnUiThread(new Runnable(){
+              @Override public void run() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
+                builder.setTitle("Read Card Data Response");
+                if(response.isSuccess()) {
+
+                  LayoutInflater inflater = ExamplePOSActivity.this.getLayoutInflater();
+
+                  View view = inflater.inflate(R.layout.card_data_table, null);
+                  ListView listView = (ListView)view.findViewById(R.id.cardDataListView);
+
+
+                  if(listView != null) {
+                    class RowData {
+                      RowData(String label, String value) {
+                        this.text1 = label;
+                        this.text2 = value;
+                      }
+                      String text1;
+                      String text2;
+                    }
+
+                    ArrayAdapter<RowData> data = new ArrayAdapter<RowData>(getBaseContext(), android.R.layout.simple_list_item_2) {
+                      @Override public View getView(int position, View convertView, ViewGroup parent) {
+                        View v = convertView;
+
+                        if (v == null) {
+                          LayoutInflater vi;
+                          vi = LayoutInflater.from(getContext());
+                          v = vi.inflate(android.R.layout.simple_list_item_2, null);
+                        }
+
+                        RowData rowData = getItem(position);
+
+                        if (rowData != null) {
+                          TextView primaryColumn = (TextView) v.findViewById(android.R.id.text1);
+                          TextView secondaryColumn = (TextView) v.findViewById(android.R.id.text2);
+
+                          primaryColumn.setText(rowData.text2);
+                          secondaryColumn.setText(rowData.text1);
+                        }
+
+                        return v;
+                      }
+                    };
+                    listView.setAdapter(data);
+                    CardData cardData = response.getCardData();
+                    data.addAll(new RowData("Encrypted", cardData.encrypted+""));
+                    data.addAll(new RowData("Cardholder Name", cardData.cardholderName));
+                    data.addAll(new RowData("First Name", cardData.firstName));
+                    data.addAll(new RowData("Last Name", cardData.lastName));
+                    data.addAll(new RowData("Expiration", cardData.exp));
+                    data.addAll(new RowData("First 4", cardData.first4));
+                    data.addAll(new RowData("Last 6", cardData.last6));
+                    data.addAll(new RowData("Track 1", cardData.track1));
+                    data.addAll(new RowData("Track 2", cardData.track2));
+                    data.addAll(new RowData("Track 3", cardData.track3));
+                    data.addAll(new RowData("Masked Track 1", cardData.maskedTrack1));
+                    data.addAll(new RowData("Masked Track 2", cardData.maskedTrack2));
+                    data.addAll(new RowData("Masked Track 3", cardData.maskedTrack3));
+                    data.addAll(new RowData("Pan", cardData.pan));
+
+                  }
+                  builder.setView(view);
+
+                } else if(response.getResult() == ResultCode.CANCEL) {
+                  builder.setMessage("Get card data canceled.");
+                } else {
+                  builder.setMessage("Error getting card data. " + response.getReason() + ": " + response.getMessage());
+                }
+
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                  @Override public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                  }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+              }
+            });
+          }
+
+          @Override
         public void onDeviceActivityEnd(final CloverDeviceEvent deviceEvent) {
           runOnUiThread(new Runnable() {
             @Override
@@ -539,7 +631,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         }
 
         @Override
-        public void onRefundPaymentResponse(RefundPaymentResponse response) {
+        public void onRefundPaymentResponse(final RefundPaymentResponse response) {
           if (response.isSuccess()) {
             POSRefund refund = new POSRefund(response.getRefund().getId(), response.getPaymentId(), response.getOrderId(), "DEFAULT", response.getRefund().getAmount());
             boolean done = false;
@@ -560,10 +652,14 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               }
             }
           } else {
-            AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
-            builder.setTitle("Refund Error").setMessage("There was an error refunding the payment");
-            builder.create().show();
-            Log.d(getClass().getName(), "Got refund response of " + response.getReason());
+            runOnUiThread(new Runnable(){
+              @Override public void run() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
+                builder.setTitle("Refund Error").setMessage("There was an error refunding the payment");
+                builder.create().show();
+                Log.d(getClass().getName(), "Got refund response of " + response.getReason());
+              }
+            });
           }
         }
 
@@ -965,16 +1061,25 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void onResetDeviceClick(View view) {
-    new AlertDialog.Builder(this)
-        .setTitle("Reset Device")
-        .setMessage(String.format("Are you sure you want to reset the device? Warning: You may lose any pending transaction information."))
-        .setPositiveButton("Yes", new DialogInterface.OnClickListener(){
-          @Override public void onClick(DialogInterface dialog, int which) {
-            cloverConnector.resetDevice();
-          }
-        })
-        .setNegativeButton("No", null)
-        .show();
+    runOnUiThread(new Runnable(){
+      @Override public void run() {
+        new AlertDialog.Builder(ExamplePOSActivity.this)
+            .setTitle("Reset Device")
+            .setMessage(String.format("Are you sure you want to reset the device? Warning: You may lose any pending transaction information."))
+            .setPositiveButton("Yes", new DialogInterface.OnClickListener(){
+              @Override public void onClick(DialogInterface dialog, int which) {
+                cloverConnector.resetDevice();
+              }
+            })
+            .setNegativeButton("No", null)
+            .show();
+      }
+    });
+  }
+
+  public void onReadCardDataClick(View view) {
+
+    cloverConnector.readCardData(new ReadCardDataRequest(store.getCardEntryMethods()));
   }
 
   private static final SecureRandom random = new SecureRandom();

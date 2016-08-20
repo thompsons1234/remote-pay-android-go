@@ -30,6 +30,7 @@ import com.clover.remote.client.messages.PrintPaymentDeclineReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
 import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
+import com.clover.remote.client.messages.ReadCardDataResponse;
 import com.clover.remote.client.messages.RefundPaymentResponse;
 import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
 import com.clover.remote.client.messages.SaleResponse;
@@ -201,4 +202,9 @@ public interface ICloverConnectorListener {
    */
   public void onRetrievePendingPaymentsResponse(RetrievePendingPaymentsResponse retrievePendingPaymentResponse);
 
+  /**
+   * Called in response to a readCardData(...) request.
+   * @param response
+   */
+  public void onReadCardDataResponse(ReadCardDataResponse response);
 }
