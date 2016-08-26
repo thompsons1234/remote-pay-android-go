@@ -362,6 +362,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   private void sendPong(RemoteMessage pingMessage) {
     RemoteMessage remoteMessage = new RemoteMessage(null, RemoteMessage.Type.PONG, this.packageName, null, null, REMOTE_SDK, applicationId);
+    Log.d(TAG, "Sending PONG...");
     sendRemoteMessage(remoteMessage);
   }
 
