@@ -344,6 +344,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
                 Log.e(TAG, "Don't support COMMAND messages of method: " + rMessage.method);
                 break;
               }
+            } else {
+              Log.e(TAG, "Method is null");
             }
           } else {
             Log.e(TAG, "Don't support messages of type: " + rMessage.type.toString());
