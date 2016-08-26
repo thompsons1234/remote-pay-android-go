@@ -141,6 +141,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   ICloverConnector cloverConnector;
 
   POSStore store = new POSStore();
+  private transient CloverDeviceEvent.DeviceEventState lastDeviceEvent;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -291,6 +292,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         @Override
         public void onDeviceActivityStart(final CloverDeviceEvent deviceEvent) {
 
+          lastDeviceEvent = deviceEvent.getEventState();
           runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -400,14 +402,16 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
           @Override
         public void onDeviceActivityEnd(final CloverDeviceEvent deviceEvent) {
-          runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-              ((TextView) findViewById(R.id.DeviceStatus)).setText("");
-              LinearLayout ll = (LinearLayout) findViewById(R.id.DeviceOptionsPanel);
-              ll.removeAllViews();
+            if(deviceEvent.getEventState() == lastDeviceEvent) {
+              runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                  ((TextView) findViewById(R.id.DeviceStatus)).setText("");
+                  LinearLayout ll = (LinearLayout) findViewById(R.id.DeviceOptionsPanel);
+                  ll.removeAllViews();
+                }
+              });
             }
-          });
         }
 
         @Override
@@ -441,7 +445,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
             cloverConnector.showMessage("There was a problem processing the transaction");
             SystemClock.sleep(3000);
           }
-          cloverConnector.showWelcomeScreen();
         }
 
         @Override
@@ -465,6 +468,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               }
             }
           });
+          SystemClock.sleep(3000);
+          cloverConnector.showWelcomeScreen();
         }
 
         @Override public void onRetrievePendingPaymentsResponse(RetrievePendingPaymentsResponse retrievePendingPaymentResponse) {
@@ -608,6 +613,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           } else { //Handle null payment response
             showMessage("Error: Null SaleResponse", Toast.LENGTH_LONG);
           }
+          SystemClock.sleep(3000);
           cloverConnector.showWelcomeScreen();
         }
 

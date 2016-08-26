@@ -142,205 +142,231 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
       Method m = null;
 
       try {
-
-          m = Method.valueOf(rMessage.method);
-          switch (m) {
-            case BREAK:
-              break;
-            case CASHBACK_SELECTED:
-              CashbackSelectedMessage cbsMessage = (CashbackSelectedMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversCashbackSelected(cbsMessage);
-              break;
-            case ACK:
-              AcknowledgementMessage ackMessage = (AcknowledgementMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserverAck(ackMessage);
-              break;
-            case DISCOVERY_RESPONSE:
-              Log.d(getClass().getSimpleName(), "Got a Discovery Response");
-              DiscoveryResponseMessage drm = (DiscoveryResponseMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversReady(transport, drm);
-              break;
-            case CONFIRM_PAYMENT_MESSAGE:
-              ConfirmPaymentMessage cpym = (ConfirmPaymentMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversConfirmPayment(cpym);
-              break;
-            case FINISH_CANCEL:
-              notifyObserversFinishCancel();
-              break;
-            case FINISH_OK:
-              FinishOkMessage fokmsg = (FinishOkMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversFinishOk(fokmsg);
-              break;
-            case KEY_PRESS:
-              KeyPressMessage kpm = (KeyPressMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversKeyPressed(kpm);
-              break;
-            case ORDER_ACTION_RESPONSE:
-              break;
-            case PARTIAL_AUTH:
-              PartialAuthMessage partialAuth = (PartialAuthMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversPartialAuth(partialAuth);
-              break;
-            case PAYMENT_VOIDED:
-              VoidPaymentMessage vpMessage = (VoidPaymentMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversPaymentVoided(vpMessage.payment, vpMessage.voidReason, ResultStatus.SUCCESS, null, null);
-              break;
-            case TIP_ADDED:
-              TipAddedMessage tipMessage = (TipAddedMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversTipAdded(tipMessage);
-              break;
-            case TX_START_RESPONSE:
-              TxStartResponseMessage txStartResponse = (TxStartResponseMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserverTxStart(txStartResponse);
-              break;
-            case TX_STATE:
-              TxStateMessage txStateMsg = (TxStateMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversTxState(txStateMsg);
-              break;
-            case UI_STATE:
-              UiStateMessage uiStateMsg = (UiStateMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversUiState(uiStateMsg);
-              break;
-            case VERIFY_SIGNATURE:
-              VerifySignatureMessage vsigMsg = (VerifySignatureMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversVerifySignature(vsigMsg);
-              break;
-            case REFUND_RESPONSE:
-              // for now, deprecating and refund is handled in finish_ok
-              // finish_ok also get this message after a receipt, but it doesn't have all the information
-              refRespMsg = (RefundResponseMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversPaymentRefundResponse(refRespMsg);
-              break;
-            case REFUND_REQUEST:
-              //Outbound no-op
-              break;
-            case TIP_ADJUST_RESPONSE:
-              TipAdjustResponseMessage tipAdjustMsg = (TipAdjustResponseMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversTipAdjusted(tipAdjustMsg);
-              break;
-            case VAULT_CARD_RESPONSE:
-              VaultCardResponseMessage vcrm = (VaultCardResponseMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserverVaultCardResponse(vcrm);
-              break;
-            case CAPTURE_PREAUTH_RESPONSE:
-              CapturePreAuthResponseMessage cparm = (CapturePreAuthResponseMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversCapturePreAuth(cparm);
-            case CLOSEOUT_RESPONSE:
-              CloseoutResponseMessage crm = (CloseoutResponseMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversCloseout(crm);
-            case RETRIEVE_PENDING_PAYMENTS_RESPONSE:
-              RetrievePendingPaymentsResponseMessage rpprm = (RetrievePendingPaymentsResponseMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversPendingPaymentsResponse(rpprm);
-            case CARD_DATA_RESPONSE:
-              CardDataResponseMessage rcdrm = (CardDataResponseMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversReadCardData(rcdrm);
-            case DISCOVERY_REQUEST:
-              //Outbound no-op
-              break;
-            case ORDER_ACTION_ADD_DISCOUNT:
-              //Outbound no-op
-              break;
-            case ORDER_ACTION_ADD_LINE_ITEM:
-              //Outbound no-op
-              break;
-            case ORDER_ACTION_REMOVE_LINE_ITEM:
-              //Outbound no-op
-              break;
-            case ORDER_ACTION_REMOVE_DISCOUNT:
-              //Outbound no-op
-              break;
-            case PRINT_IMAGE:
-              //Outbound no-op
-              break;
-            case PRINT_TEXT:
-              //Outbound no-op
-              break;
-            case PRINT_CREDIT:
-              CreditPrintMessage cpm = (CreditPrintMessage)Message.fromJsonString(rMessage.payload);
-              notifyObserversPrintCredit(cpm);
-              break;
-            case PRINT_CREDIT_DECLINE:
-              DeclineCreditPrintMessage dcpm = (DeclineCreditPrintMessage)Message.fromJsonString(rMessage.payload);
-              notifyObserversPrintCreditDecline(dcpm);
-              break;
-            case PRINT_PAYMENT:
-              PaymentPrintMessage ppm = (PaymentPrintMessage)Message.fromJsonString(rMessage.payload);
-              notifyObserversPrintPayment(ppm);
-              break;
-            case PRINT_PAYMENT_DECLINE:
-              DeclinePaymentPrintMessage dppm = (DeclinePaymentPrintMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversPrintPaymentDecline(dppm);
-              break;
-            case PRINT_PAYMENT_MERCHANT_COPY:
-              PaymentPrintMerchantCopyMessage ppmcm = (PaymentPrintMerchantCopyMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversPrintMerchantCopy(ppmcm);
-              break;
-            case REFUND_PRINT_PAYMENT:
-              RefundPaymentPrintMessage rppm = (RefundPaymentPrintMessage) Message.fromJsonString(rMessage.payload);
-              notifyObserversPrintMessage(rppm);
-              break;
-            case SHOW_ORDER_SCREEN:
-              //Outbound no-op
-              break;
-            case SHOW_THANK_YOU_SCREEN:
-              //Outbound no-op
-              break;
-            case SHOW_WELCOME_SCREEN:
-              //Outbound no-op
-              break;
-            case SIGNATURE_VERIFIED:
-              //Outbound no-op
-              break;
-            case TERMINAL_MESSAGE:
-              //Outbound no-op
-              break;
-            case TX_START:
-              //Outbound no-op
-              break;
-            case VOID_PAYMENT:
-              //Outbound no-op
-              break;
-            case CAPTURE_PREAUTH:
-              //Outbound no-op
-              break;
-            case LAST_MSG_REQUEST:
-              //Outbound no-op
-              break;
-            case LAST_MSG_RESPONSE:
-              //Outbound no-op
-              break;
-            case TIP_ADJUST:
-              //Outbound no-op
-              break;
-            case OPEN_CASH_DRAWER:
-              //Outbound no-op
-              break;
-            case SHOW_PAYMENT_RECEIPT_OPTIONS:
-              //Outbound no-op
-              break;
-//            case SHOW_REFUND_RECEIPT_OPTIONS:
-//              //Outbound no-op
-//              break;
-//            case SHOW_MANUAL_REFUND_RECEIPT_OPTIONS:
-//              //Outbound no-op
-//              break;
-            case VAULT_CARD:
-              //Outbound no-op
-              break;
-            case CLOSEOUT_REQUEST:
-              //Outbound no-op
-              break;
+          RemoteMessage.Type msgType = rMessage.type;
+          if(msgType == RemoteMessage.Type.PING) {
+             sendPong(rMessage);
+          } else if(msgType == RemoteMessage.Type.COMMAND) {
+            try {
+              m = Method.valueOf(rMessage.method);
+            } catch(IllegalArgumentException iae) {
+              Log.e(TAG, "Unsupported method type: " + rMessage.method);
+            }
+            if(m != null) {
+              switch (m) {
+              case BREAK:
+                break;
+              case CASHBACK_SELECTED:
+                CashbackSelectedMessage cbsMessage = (CashbackSelectedMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversCashbackSelected(cbsMessage);
+                break;
+              case ACK:
+                AcknowledgementMessage ackMessage = (AcknowledgementMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserverAck(ackMessage);
+                break;
+              case DISCOVERY_RESPONSE:
+                Log.d(getClass().getSimpleName(), "Got a Discovery Response");
+                DiscoveryResponseMessage drm = (DiscoveryResponseMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversReady(transport, drm);
+                break;
+              case CONFIRM_PAYMENT_MESSAGE:
+                ConfirmPaymentMessage cpym = (ConfirmPaymentMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversConfirmPayment(cpym);
+                break;
+              case FINISH_CANCEL:
+                notifyObserversFinishCancel();
+                break;
+              case FINISH_OK:
+                FinishOkMessage fokmsg = (FinishOkMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversFinishOk(fokmsg);
+                break;
+              case KEY_PRESS:
+                KeyPressMessage kpm = (KeyPressMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversKeyPressed(kpm);
+                break;
+              case ORDER_ACTION_RESPONSE:
+                break;
+              case PARTIAL_AUTH:
+                PartialAuthMessage partialAuth = (PartialAuthMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversPartialAuth(partialAuth);
+                break;
+              case PAYMENT_VOIDED:
+                VoidPaymentMessage vpMessage = (VoidPaymentMessage) Message.fromJsonString(rMessage.payload);
+                //Payment payment = gson.fromJson(vpMessage.payment, Payment.class);
+                notifyObserversPaymentVoided(vpMessage.payment, vpMessage.voidReason, ResultStatus.SUCCESS, null, null);
+                break;
+              case TIP_ADDED:
+                TipAddedMessage tipMessage = (TipAddedMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversTipAdded(tipMessage);
+                break;
+              case TX_START_RESPONSE:
+                TxStartResponseMessage txStartResponse = (TxStartResponseMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserverTxStart(txStartResponse);
+                break;
+              case TX_STATE:
+                TxStateMessage txStateMsg = (TxStateMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversTxState(txStateMsg);
+                break;
+              case UI_STATE:
+                UiStateMessage uiStateMsg = (UiStateMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversUiState(uiStateMsg);
+                break;
+              case VERIFY_SIGNATURE:
+                VerifySignatureMessage vsigMsg = (VerifySignatureMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversVerifySignature(vsigMsg);
+                break;
+              case REFUND_RESPONSE:
+                // for now, deprecating and refund is handled in finish_ok
+                // finish_ok also get this message after a receipt, but it doesn't have all the information
+                refRespMsg = (RefundResponseMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversPaymentRefundResponse(refRespMsg);
+                break;
+              case REFUND_REQUEST:
+                //Outbound no-op
+                break;
+              case TIP_ADJUST_RESPONSE:
+                TipAdjustResponseMessage tipAdjustMsg = (TipAdjustResponseMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversTipAdjusted(tipAdjustMsg);
+                break;
+              case VAULT_CARD_RESPONSE:
+                VaultCardResponseMessage vcrm = (VaultCardResponseMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserverVaultCardResponse(vcrm);
+                break;
+              case CAPTURE_PREAUTH_RESPONSE:
+                CapturePreAuthResponseMessage cparm = (CapturePreAuthResponseMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversCapturePreAuth(cparm);
+              case CLOSEOUT_RESPONSE:
+                CloseoutResponseMessage crm = (CloseoutResponseMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversCloseout(crm);
+              case RETRIEVE_PENDING_PAYMENTS_RESPONSE:
+                RetrievePendingPaymentsResponseMessage rpprm = (RetrievePendingPaymentsResponseMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversPendingPaymentsResponse(rpprm);
+              case CARD_DATA_RESPONSE:
+                //              ReadCardDataResponse rcdr = (ReadCardDataResponse)
+                CardDataResponseMessage rcdrm = (CardDataResponseMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversReadCardData(rcdrm);
+              case DISCOVERY_REQUEST:
+                //Outbound no-op
+                break;
+              case ORDER_ACTION_ADD_DISCOUNT:
+                //Outbound no-op
+                break;
+              case ORDER_ACTION_ADD_LINE_ITEM:
+                //Outbound no-op
+                break;
+              case ORDER_ACTION_REMOVE_LINE_ITEM:
+                //Outbound no-op
+                break;
+              case ORDER_ACTION_REMOVE_DISCOUNT:
+                //Outbound no-op
+                break;
+              case PRINT_IMAGE:
+                //Outbound no-op
+                break;
+              case PRINT_TEXT:
+                //Outbound no-op
+                break;
+              case PRINT_CREDIT:
+                CreditPrintMessage cpm = (CreditPrintMessage)Message.fromJsonString(rMessage.payload);
+                notifyObserversPrintCredit(cpm);
+                break;
+              case PRINT_CREDIT_DECLINE:
+                DeclineCreditPrintMessage dcpm = (DeclineCreditPrintMessage)Message.fromJsonString(rMessage.payload);
+                notifyObserversPrintCreditDecline(dcpm);
+                break;
+              case PRINT_PAYMENT:
+                PaymentPrintMessage ppm = (PaymentPrintMessage)Message.fromJsonString(rMessage.payload);
+                notifyObserversPrintPayment(ppm);
+                break;
+              case PRINT_PAYMENT_DECLINE:
+                DeclinePaymentPrintMessage dppm = (DeclinePaymentPrintMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversPrintPaymentDecline(dppm);
+                break;
+              case PRINT_PAYMENT_MERCHANT_COPY:
+                PaymentPrintMerchantCopyMessage ppmcm = (PaymentPrintMerchantCopyMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversPrintMerchantCopy(ppmcm);
+                break;
+              case REFUND_PRINT_PAYMENT:
+                RefundPaymentPrintMessage rppm = (RefundPaymentPrintMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversPrintMessage(rppm);
+                break;
+              case SHOW_ORDER_SCREEN:
+                //Outbound no-op
+                break;
+              case SHOW_THANK_YOU_SCREEN:
+                //Outbound no-op
+                break;
+              case SHOW_WELCOME_SCREEN:
+                //Outbound no-op
+                break;
+              case SIGNATURE_VERIFIED:
+                //Outbound no-op
+                break;
+              case TERMINAL_MESSAGE:
+                //Outbound no-op
+                break;
+              case TX_START:
+                //Outbound no-op
+                break;
+              case VOID_PAYMENT:
+                //Outbound no-op
+                break;
+              case CAPTURE_PREAUTH:
+                //Outbound no-op
+                break;
+              case LAST_MSG_REQUEST:
+                //Outbound no-op
+                break;
+              case LAST_MSG_RESPONSE:
+                //Outbound no-op
+                break;
+              case TIP_ADJUST:
+                //Outbound no-op
+                break;
+              case OPEN_CASH_DRAWER:
+                //Outbound no-op
+                break;
+              case SHOW_PAYMENT_RECEIPT_OPTIONS:
+                //Outbound no-op
+                break;
+              //            case SHOW_REFUND_RECEIPT_OPTIONS:
+              //              //Outbound no-op
+              //              break;
+              //            case SHOW_MANUAL_REFUND_RECEIPT_OPTIONS:
+              //              //Outbound no-op
+              //              break;
+              case VAULT_CARD:
+                //Outbound no-op
+                break;
+              case CLOSEOUT_REQUEST:
+                //Outbound no-op
+                break;
+              default:
+                Log.e(TAG, "Don't support COMMAND messages of method: " + rMessage.method);
+                break;
+              }
+            } else {
+              Log.e(TAG, "Method is null");
+            }
+          } else {
+            Log.e(TAG, "Don't support messages of type: " + rMessage.type.toString());
           }
+
       } catch (Exception e) {
-        Log.e(TAG, "Invalid method type: " + rMessage.payload);
+        Log.e(TAG, "Error processing message: " + rMessage.payload);
         e.printStackTrace();
       }
 
     } catch (Exception e) {
       e.printStackTrace();
+      //onError(e);
     }
   }
 
+  private void sendPong(RemoteMessage pingMessage) {
+    RemoteMessage remoteMessage = new RemoteMessage(null, RemoteMessage.Type.PONG, this.packageName, null, null, REMOTE_SDK, applicationId);
+    Log.d(TAG, "Sending PONG...");
+    sendRemoteMessage(remoteMessage);
+  }
 
   private void notifyObserverAck(final AcknowledgementMessage ackMessage) {
     synchronized (ackLock) {
@@ -871,6 +897,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     }
   }
 
+
   private String sendObjectMessage(Message message) {
     return sendObjectMessage(message, 1);
   }
@@ -891,8 +918,11 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
     String messageId = (++id) + "";
     RemoteMessage remoteMessage = new RemoteMessage(messageId, RemoteMessage.Type.COMMAND, this.packageName, message.method.toString(), message.toJsonString(), REMOTE_SDK, applicationId);
+    sendRemoteMessage(remoteMessage);
+    return messageId;
+  }
+  private void sendRemoteMessage(RemoteMessage remoteMessage) {
     String msg = gson.toJson(remoteMessage);
     transport.sendMessage(msg);
-    return messageId;
   }
 }
