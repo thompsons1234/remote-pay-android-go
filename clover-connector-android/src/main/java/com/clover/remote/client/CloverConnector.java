@@ -932,6 +932,7 @@ public class CloverConnector implements ICloverConnector {
 
     public void onFinishOk(Payment payment, Signature2 signature2) {
       try {
+        cloverConnector.device.doShowThankYouScreen(); //need to do this first, so Listener implementation can replace the screen as desired
         Object lastReq = cloverConnector.lastRequest;
         cloverConnector.lastRequest = null;
         if (lastReq instanceof PreAuthRequest) {
@@ -953,24 +954,25 @@ public class CloverConnector implements ICloverConnector {
           Log.e(getClass().getSimpleName(), String.format("Failed to pair this response: %s", payment));
         }
       } finally {
-        cloverConnector.device.doShowThankYouScreen();
+        // do nothing for now...
       }
     }
 
     public void onFinishOk(Credit credit) {
 
       try {
+        cloverConnector.device.doShowWelcomeScreen();
         cloverConnector.lastRequest = null;
         ManualRefundResponse response = new ManualRefundResponse(true, ResultCode.SUCCESS);
         response.setCredit(credit);
         cloverConnector.broadcaster.notifyOnManualRefundResponse(response);
       } finally {
-        cloverConnector.device.doShowWelcomeScreen();
       }
     }
 
     public void onFinishOk(Refund refund) {
       try {
+        cloverConnector.device.doShowWelcomeScreen();
         cloverConnector.lastRequest = null;
         RefundPaymentResponse lastRefundResponse = lastPRR;
         lastPRR = null;
@@ -989,12 +991,14 @@ public class CloverConnector implements ICloverConnector {
           Log.e(this.getClass().getName(), "Shouldn't get an onFinishOk with having gotten an onPaymentRefund!");
         }
       } finally {
-        cloverConnector.device.doShowWelcomeScreen();
       }
     }
 
     private void onFinishCancel(ResultCode result, String reason, String message) {
       try {
+        if(device != null) {
+          device.doShowWelcomeScreen();
+        }
         Object lastReq = lastRequest;
         lastRequest = null;
         if (lastReq instanceof PreAuthRequest) {
@@ -1026,9 +1030,7 @@ public class CloverConnector implements ICloverConnector {
           lastPRR = null;
         }
       } finally {
-        if(device != null) {
-          device.doShowWelcomeScreen();
-        }
+        // do nothing
       }
     }
     public void onFinishCancel() {
