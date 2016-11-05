@@ -54,7 +54,7 @@ public abstract class CloverDevice {
 
   public abstract void doDiscoveryRequest();
 
-  public abstract void doTxStart(PayIntent payIntent, Order order, boolean suppressTipScreen);
+  public abstract void doTxStart(PayIntent payIntent, Order order);
 
   public abstract void doKeyPress(KeyPress keyPress);
 
