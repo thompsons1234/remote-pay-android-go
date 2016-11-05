@@ -84,6 +84,7 @@ import com.clover.remote.client.messages.ReadCardDataResponse;
 import com.clover.remote.client.messages.RefundPaymentResponse;
 import com.clover.remote.client.messages.ResultCode;
 import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
+import com.clover.remote.client.messages.SaleRequest;
 import com.clover.remote.client.messages.SaleResponse;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
 import com.clover.remote.client.messages.VaultCardResponse;
@@ -92,7 +93,10 @@ import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.message.TipAddedMessage;
 import com.clover.sdk.v3.payments.CardTransactionType;
 import com.clover.sdk.v3.payments.Credit;
+import com.clover.sdk.v3.payments.DataEntryLocation;
 import com.clover.sdk.v3.payments.Payment;
+import com.clover.sdk.v3.payments.TipMode;
+import com.clover.sdk.v3.payments.TransactionSettings;
 
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -168,10 +172,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     fragmentTransaction.add(R.id.contentContainer, register, "REGISTER");
     fragmentTransaction.commit();
-
-
-
-
   }
 
   private void initStore() {
@@ -199,7 +199,22 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     store.addAvailableDiscount(new POSDiscount("$5 Off", 500));
     store.addAvailableDiscount(new POSDiscount("None", 0));
 
-    store.createOrder();
+    store.createOrder(false);
+    // Defaults for testing sign on paper with no Clover printing or receipt options screen
+    // Also allow offline payments without any prompt
+    // This setup would be used if you want the most minimal interaction with the mini
+    // (i.e. payment only)
+    //
+    store.setTipMode(SaleRequest.TipMode.ON_SCREEN_BEFORE_PAYMENT);
+    store.setSignatureEntryLocation(DataEntryLocation.ON_PAPER);
+    store.setCloverHandlesReceipts(false);
+    store.setDisableReceiptOptions(true);
+    store.setDisableDuplicateChecking(true);
+    store.setAllowOfflinePayment(true);
+    store.setApproveOfflinePaymentWithoutPrompt(true);
+    store.setAutomaticSignatureConfirmation(true);
+    store.setAutomaticPaymentConfirmation(true);
+
   }
 
   @Override
@@ -432,7 +447,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                 store.addPaymentToOrder(payment, store.getCurrentOrder());
                 showMessage("Auth successfully processed.", Toast.LENGTH_SHORT);
 
-                store.createOrder();
+                store.createOrder(false);
                 CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
                 currentOrderFragment.setOrder(store.getCurrentOrder());
 
@@ -522,7 +537,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                     showMessage("Sale successfully processing using Pre Authorization", Toast.LENGTH_LONG);
 
                     //TODO: if order isn't fully paid, don't create a new order...
-                    store.createOrder();
+                    store.createOrder(false);
                     CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
                     currentOrderFragment.setOrder(store.getCurrentOrder());
                     showRegister(null);
@@ -541,21 +556,25 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         @Override
         public void onVerifySignatureRequest(VerifySignatureRequest request) {
 
-          FragmentManager fragmentManager = getFragmentManager();
-          FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-          hideFragments(fragmentManager, fragmentTransaction);
-
-          Fragment fragment = fragmentManager.findFragmentByTag("SIGNATURE");
-          if (fragment == null) {
-            fragment = SignatureFragment.newInstance(request, cloverConnector);
-            fragmentTransaction.add(R.id.contentContainer, fragment, "SIGNATURE");
+          if (store.getAutomaticSignatureConfirmation()) {
+            cloverConnector.acceptSignature(request);
           } else {
-            ((SignatureFragment) fragment).setVerifySignatureRequest(request);
-            fragmentTransaction.show(fragment);
-          }
+            FragmentManager fragmentManager = getFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-          fragmentTransaction.commit();
+            hideFragments(fragmentManager, fragmentTransaction);
+
+            Fragment fragment = fragmentManager.findFragmentByTag("SIGNATURE");
+            if (fragment == null) {
+              fragment = SignatureFragment.newInstance(request, cloverConnector);
+              fragmentTransaction.add(R.id.contentContainer, fragment, "SIGNATURE");
+            } else {
+              ((SignatureFragment) fragment).setVerifySignatureRequest(request);
+              fragmentTransaction.show(fragment);
+            }
+
+            fragmentTransaction.commit();
+          }
         }
 
         @Override
@@ -563,14 +582,18 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           if (request.getPayment() == null || request.getChallenges() == null) {
             showMessage("Error: The ConfirmPaymentRequest was missing the payment and/or challenges.", Toast.LENGTH_LONG);
           } else {
-            currentPayment = request.getPayment();
-            currentChallenges = request.getChallenges();
-            runOnUiThread(new Runnable() {
-              @Override
-              public void run() {
-                showPaymentConfirmation(paymentConfirmationListener, currentChallenges[0], 0);
-              }
-            });
+            if (store.getAutomaticPaymentConfirmation()) {
+              cloverConnector.acceptPayment(request.getPayment());
+            } else {
+              currentPayment = request.getPayment();
+              currentChallenges = request.getChallenges();
+              runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                  showPaymentConfirmation(paymentConfirmationListener, currentChallenges[0], 0);
+                }
+              });
+            }
           }
         }
 
@@ -597,7 +620,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                 runOnUiThread(new Runnable() {
                   @Override
                   public void run() {
-                    store.createOrder();
+                    store.createOrder(false);
                     CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
                     currentOrderFragment.setOrder(store.getCurrentOrder());
                     showRegister(null);
@@ -1024,7 +1047,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       ManualRefundRequest request = new ManualRefundRequest(refundAmount, getNextId());
       request.setAmount(refundAmount);
       request.setCardEntryMethods(store.getCardEntryMethods());
-      request.setDisablePrinting(store.getDisablePrinting());
+      request.setCloverShouldHandleReceipts(store.getCloverHandlesReceipts());
+      request.setDisableReceiptSelection(store.getDisableReceiptOptions());
       cloverConnector.manualRefund(request);
     } catch(NumberFormatException nfe) {
       showMessage("Invalid value. Must be an integer.", Toast.LENGTH_LONG);
@@ -1058,7 +1082,10 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public void preauthCardClick(View view) {
     PreAuthRequest request = new PreAuthRequest(5000L, getNextId());
     request.setCardEntryMethods(store.getCardEntryMethods());
-    request.setDisablePrinting(store.getDisablePrinting());
+    request.setCloverShouldHandleReceipts(store.getCloverHandlesReceipts());
+    request.setSignatureEntryLocation(store.getSignatureEntryLocation());
+    request.setSignatureThreshold(store.getSignatureThreshold());
+    request.setDisableReceiptSelection(store.getDisableReceiptOptions());
     cloverConnector.preAuth(request);
   }
 

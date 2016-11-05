@@ -18,6 +18,8 @@ package com.clover.remote.client.lib.example.model;
 
 import com.clover.remote.PendingPaymentEntry;
 import com.clover.remote.client.CloverConnector;
+import com.clover.remote.client.messages.SaleRequest;
+import com.clover.sdk.v3.payments.DataEntryLocation;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,7 +50,15 @@ public class POSStore {
   private int cardEntryMethods = CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE | CloverConnector.CARD_ENTRY_METHOD_NFC_CONTACTLESS | CloverConnector.CARD_ENTRY_METHOD_ICC_CONTACT;
   private Boolean approveOfflinePaymentWithoutPrompt;
   private Boolean allowOfflinePayment;
-  private Boolean disablePrinting;
+  private Boolean enableCloverHandlesReceipts;
+  private Long tipAmount;
+  private Long signatureThreshold;
+  private DataEntryLocation signatureEntryLocation;
+  private SaleRequest.TipMode tipMode;
+  private Boolean disableReceiptOptions;
+  private Boolean disableDuplicateChecking;
+  private Boolean automaticSignatureConfirmation;
+  private Boolean automaticPaymentConfirmation;
   private List<PendingPaymentEntry> pendingPayments;
 
   public POSStore() {
@@ -60,7 +70,7 @@ public class POSStore {
     preAuths = new ArrayList<POSPayment>();
   }
 
-  public void createOrder() {
+  public void createOrder(boolean userInitiated) {
     if (currentOrder != null) {
       for (OrderObserver oo : orderObservers) {
         currentOrder.removeObserver(oo);
@@ -75,12 +85,12 @@ public class POSStore {
     orders.add(order);
     orderIdToOrder.put(order.id, order);
 
-    notifyNewOrderCreated(currentOrder);
+    notifyNewOrderCreated(currentOrder, userInitiated);
   }
 
-  private void notifyNewOrderCreated(POSOrder currentOrder) {
+  private void notifyNewOrderCreated(POSOrder currentOrder, boolean userInitiated) {
     for (StoreObserver so : storeObservers) {
-      so.newOrderCreated(currentOrder);
+      so.newOrderCreated(currentOrder, userInitiated);
     }
   }
 
@@ -187,18 +197,62 @@ public class POSStore {
     return cardEntryMethods;
   }
 
-  public Boolean getDisablePrinting() {
-    return disablePrinting;
+  public Boolean getCloverHandlesReceipts() {
+    return enableCloverHandlesReceipts;
   }
 
-  public void setDisablePrinting(Boolean disablePrinting) {
-    this.disablePrinting = disablePrinting;
+  public void setCloverHandlesReceipts(Boolean cloverHandlesReceipts) {
+    this.enableCloverHandlesReceipts = cloverHandlesReceipts;
   }
+
+  public DataEntryLocation getSignatureEntryLocation() {return signatureEntryLocation;}
+
+  public void setSignatureEntryLocation(DataEntryLocation signatureEntryLocation) {this.signatureEntryLocation = signatureEntryLocation;}
+
+  public Long getSignatureThreshold() {return signatureThreshold;}
+
+  public void setSignatureThreshold(Long signatureThreshold) {this.signatureThreshold = signatureThreshold;}
+
+  public Boolean getDisableReceiptOptions() {return disableReceiptOptions;}
+
+  public void setDisableReceiptOptions(Boolean disableReceiptOptions) {this.disableReceiptOptions = disableReceiptOptions;}
+
+  public SaleRequest.TipMode getTipMode() {return tipMode;}
+
+  public void setTipMode(SaleRequest.TipMode tipMode) {this.tipMode = tipMode;}
+
+  public Long getTipAmount() {return tipAmount;}
+
+  public void setTipAmount(Long tipAmount) {this.tipAmount = tipAmount;}
 
   public void setPendingPayments(List<PendingPaymentEntry> pendingPayments) {
     this.pendingPayments = pendingPayments;
     for(StoreObserver so : storeObservers) {
       so.pendingPaymentsRetrieved(pendingPayments);
     }
+  }
+
+  public Boolean getDisableDuplicateChecking() {
+    return disableDuplicateChecking;
+  }
+
+  public void setDisableDuplicateChecking(Boolean disableDuplicateChecking) {
+    this.disableDuplicateChecking = disableDuplicateChecking;
+  }
+
+  public Boolean getAutomaticSignatureConfirmation() {
+    return automaticSignatureConfirmation;
+  }
+
+  public void setAutomaticSignatureConfirmation(Boolean automaticSignatureConfirmation) {
+    this.automaticSignatureConfirmation = automaticSignatureConfirmation;
+  }
+
+  public Boolean getAutomaticPaymentConfirmation() {
+    return automaticPaymentConfirmation;
+  }
+
+  public void setAutomaticPaymentConfirmation(Boolean automaticPaymentConfirmation) {
+    this.automaticPaymentConfirmation = automaticPaymentConfirmation;
   }
 }

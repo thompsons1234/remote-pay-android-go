@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import com.clover.remote.PendingPaymentEntry;
+import com.clover.sdk.v3.payments.TransactionSettings;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.lib.example.adapter.AvailableItemsAdapter;
 import com.clover.remote.client.lib.example.model.OrderObserver;
@@ -162,16 +163,21 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
     request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
     request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
-    request.setDisablePrinting(store.getDisablePrinting());
+    request.setCloverShouldHandleReceipts(store.getCloverHandlesReceipts());
+    request.setTipMode(store.getTipMode());
+    request.setSignatureEntryLocation(store.getSignatureEntryLocation());
+    request.setSignatureThreshold(store.getSignatureThreshold());
+    request.setDisableReceiptSelection(store.getDisableReceiptOptions());
+    request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
+    request.setTipAmount(store.getTipAmount());
     cloverConnector.sale(request);
   }
 
   @Override
   public void onNewOrderClicked() {
-    store.createOrder();
+    store.createOrder(true);
     CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
     currentOrderFragment.setOrder(store.getCurrentOrder());
-    cloverConnector.showWelcomeScreen();
   }
 
   @Override
@@ -182,7 +188,11 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
     request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
     request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
-    request.setDisablePrinting(store.getDisablePrinting());
+    request.setCloverShouldHandleReceipts(store.getCloverHandlesReceipts());
+    request.setSignatureEntryLocation(store.getSignatureEntryLocation());
+    request.setSignatureThreshold(store.getSignatureThreshold());
+    request.setDisableReceiptSelection(store.getDisableReceiptOptions());
+    request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
     cloverConnector.auth(request);
   }
 
@@ -205,8 +215,8 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     }
 
     @Override
-    public void newOrderCreated(POSOrder order) {
-      if (cloverConnector != null) {
+    public void newOrderCreated(POSOrder order, boolean userInitiated) {
+      if (cloverConnector != null && userInitiated) {
         cloverConnector.showWelcomeScreen();
       }
       liToDli.clear();

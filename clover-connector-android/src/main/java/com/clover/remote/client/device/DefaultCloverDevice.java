@@ -23,6 +23,7 @@ import com.clover.common2.payments.PayIntent;
 import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
+import com.clover.sdk.v3.payments.TransactionSettings;
 import com.clover.remote.client.CloverDeviceObserver;
 import com.clover.remote.client.messages.ReadCardDataResponse;
 import com.clover.remote.client.transport.CloverTransport;
@@ -786,8 +787,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     sendObjectMessage(new CloseoutRequestMessage(allowOpenTabs, batchId));
   }
 
-  public void doTxStart(PayIntent payIntent, Order order, boolean suppressTipScreen) {
-    sendObjectMessage(new TxStartRequestMessage(payIntent, order, suppressTipScreen));
+  public void doTxStart(PayIntent payIntent, Order order) {
+    sendObjectMessage(new TxStartRequestMessage(payIntent, order));
   }
 
   public void doTipAdjustAuth(String orderId, String paymentId, long amount) {

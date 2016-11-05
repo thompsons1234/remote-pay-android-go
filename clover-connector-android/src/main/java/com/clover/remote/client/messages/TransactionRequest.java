@@ -4,6 +4,9 @@
 package com.clover.remote.client.messages;
 
 import com.clover.common2.payments.PayIntent;
+import com.clover.sdk.v3.payments.DataEntryLocation;
+import com.clover.sdk.v3.payments.TipMode;
+import com.clover.sdk.v3.payments.TransactionSettings;
 
 /**
  * base class used by all transaction requests
@@ -12,7 +15,7 @@ import com.clover.common2.payments.PayIntent;
 @SuppressWarnings(value="unused")
 public abstract class TransactionRequest extends BaseRequest {
 
-  private java.lang.Boolean disablePrinting = null;
+  private java.lang.Boolean cloverShouldHandleReceipts = null;
   private java.lang.Boolean cardNotPresent = null;
   private java.lang.Boolean disableRestartTransactionOnFail = null;
   private long amount;
@@ -20,6 +23,10 @@ public abstract class TransactionRequest extends BaseRequest {
   private com.clover.sdk.v3.payments.VaultedCard vaultedCard = null;
   private java.lang.String externalId = null;
   private PayIntent.TransactionType type = null;
+  private java.lang.Long signatureThreshold = null;
+  private DataEntryLocation signatureEntryLocation = null;
+  private java.lang.Boolean disableReceiptSelection = null;
+  private java.lang.Boolean disableDuplicateChecking = null;
 
   public TransactionRequest(long amount, String externalId) {
     if(externalId == null || externalId.length() > 32) {
@@ -34,16 +41,16 @@ public abstract class TransactionRequest extends BaseRequest {
   * Do not print
   *
   */
-  public void setDisablePrinting(java.lang.Boolean disablePrinting) {
-    this.disablePrinting = disablePrinting;
+  public void setCloverShouldHandleReceipts(java.lang.Boolean cloverShouldHandleReceipts) {
+    this.cloverShouldHandleReceipts = cloverShouldHandleReceipts;
   }
 
   /**
   * Get the field value
   * Do not print
   */
-  public java.lang.Boolean getDisablePrinting() {
-    return this.disablePrinting;
+  public java.lang.Boolean getCloverShouldHandleReceipts() {
+    return this.cloverShouldHandleReceipts;
   }  
   /**
   * Set the field value
@@ -148,4 +155,74 @@ public abstract class TransactionRequest extends BaseRequest {
   * The type of the transaction.
   */
   abstract public PayIntent.TransactionType getType();
+
+  /**
+   * Set the field value
+   * The signature threshold settings overrides
+   *
+   */
+  public void setSignatureThreshold(Long signatureThreshold) {
+    this.signatureThreshold = signatureThreshold;
+  }
+
+  /**
+   * Get the field value
+   * The transaction level settings overrides
+   */
+  public Long getSignatureThreshold() {
+    return this.signatureThreshold;
+  }
+
+  /**
+   * Set the field value
+   * The signature entry location settings overrides
+   *
+  */
+  public void setSignatureEntryLocation(DataEntryLocation signatureEntryLocation) {
+    this.signatureEntryLocation = signatureEntryLocation;
+  }
+
+  /**
+   * Get the field value
+   * The transaction level settings overrides
+   */
+  public DataEntryLocation getSignatureEntryLocation() {
+    return this.signatureEntryLocation;
+  }
+
+  /**
+   * Set the field value
+   * The disable receipt options screen settings overrides
+   *
+   */
+  public void setDisableReceiptSelection(Boolean disableReceiptSelection) {
+    this.disableReceiptSelection = disableReceiptSelection;
+  }
+
+  /**
+   * Get the field value
+   * The disable receipt options screen settings overrides
+   */
+  public Boolean getDisableReceiptSelection() {
+    return this.disableReceiptSelection;
+  }
+
+  /**
+   * Set the field value
+   * The disable duplicate transaction validation settings overrides
+   *
+   */
+  public void setDisableDuplicateChecking(Boolean disableDuplicateChecking) {
+    this.disableDuplicateChecking = disableDuplicateChecking;
+  }
+
+  /**
+   * Get the field value
+   * The disable duplicate transaction validation settings overrides
+   */
+  public Boolean getDisableDuplicateChecking() {
+    return this.disableDuplicateChecking;
+  }
+
+
 }
