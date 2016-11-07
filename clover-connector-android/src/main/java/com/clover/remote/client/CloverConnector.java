@@ -236,6 +236,7 @@ public class CloverConnector implements ICloverConnector {
       transactionSettings.setSignatureEntryLocation(request.getSignatureEntryLocation());
       transactionSettings.setSignatureThreshold(request.getSignatureThreshold());
       transactionSettings.setDisableReceiptSelection(request.getDisableReceiptSelection());
+      transactionSettings.setDisableDuplicateCheck(request.getDisableDuplicateChecking());
 
       if (request instanceof PreAuthRequest) {
         // nothing extra as of now
