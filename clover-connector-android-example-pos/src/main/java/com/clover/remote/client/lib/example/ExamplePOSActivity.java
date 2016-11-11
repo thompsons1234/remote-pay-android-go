@@ -630,7 +630,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                 showMessage("Error: Sale response was missing the payment", Toast.LENGTH_LONG);
               }
             } else {
-              showMessage("User canceled the transaction", Toast.LENGTH_SHORT);
+              showMessage(response.getResult().toString() + ":" + response.getReason() + "  " + response.getMessage(), Toast.LENGTH_LONG);
             }
           } else { //Handle null payment response
             showMessage("Error: Null SaleResponse", Toast.LENGTH_LONG);
