@@ -27,6 +27,8 @@ public abstract class TransactionRequest extends BaseRequest {
   private DataEntryLocation signatureEntryLocation = null;
   private java.lang.Boolean disableReceiptSelection = null;
   private java.lang.Boolean disableDuplicateChecking = null;
+  private java.lang.Boolean autoAcceptPaymentConfirmations = null;
+  private java.lang.Boolean autoAcceptSignature = null;
 
   public TransactionRequest(long amount, String externalId) {
     if(externalId == null || externalId.length() > 32) {
@@ -222,6 +224,40 @@ public abstract class TransactionRequest extends BaseRequest {
    */
   public Boolean getDisableDuplicateChecking() {
     return this.disableDuplicateChecking;
+  }
+
+  /**
+   * Set the field value
+   * The automatically accept payment confirmations settings override
+   *
+   */
+  public void setAutoAcceptPaymentConfirmations(Boolean autoAcceptPaymentConfirmations) {
+    this.autoAcceptPaymentConfirmations = autoAcceptPaymentConfirmations;
+  }
+
+  /**
+   * Get the field value
+   * The automatically accept payment confirmations settings override
+   */
+  public Boolean getAutoAcceptPaymentConfirmations() {
+    return this.autoAcceptPaymentConfirmations;
+  }
+
+  /**
+   * Set the field value
+   * The automatically accept signature override
+   *
+   */
+  public void setAutoAcceptSignature(Boolean autoAcceptSignature) {
+    this.autoAcceptSignature = autoAcceptSignature;
+  }
+
+  /**
+   * Get the field value
+   * The automatically accept signature override
+   */
+  public Boolean getAutoAcceptSignature() {
+    return this.autoAcceptSignature;
   }
 
 

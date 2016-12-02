@@ -170,6 +170,8 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     request.setDisableReceiptSelection(store.getDisableReceiptOptions());
     request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
     request.setTipAmount(store.getTipAmount());
+    request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
+    request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
     cloverConnector.sale(request);
   }
 
@@ -193,6 +195,8 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     request.setSignatureThreshold(store.getSignatureThreshold());
     request.setDisableReceiptSelection(store.getDisableReceiptOptions());
     request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
+    request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
+    request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
     cloverConnector.auth(request);
   }
 
