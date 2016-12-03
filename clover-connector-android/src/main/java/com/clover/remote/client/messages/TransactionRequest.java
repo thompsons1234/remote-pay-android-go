@@ -259,6 +259,4 @@ public abstract class TransactionRequest extends BaseRequest {
   public Boolean getAutoAcceptSignature() {
     return this.autoAcceptSignature;
   }
-
-
 }

@@ -225,7 +225,6 @@ public class CloverConnector implements ICloverConnector {
       if(request.getCardNotPresent() != null) {
         builder.cardNotPresent(request.getCardNotPresent());
       }
-
       transactionSettings.setCardEntryMethods(request.getCardEntryMethods() != null ? request.getCardEntryMethods() : cardEntryMethods);
       if(request.getCloverShouldHandleReceipts() != null) {
         transactionSettings.setCloverShouldHandleReceipts(request.getCloverShouldHandleReceipts());
@@ -285,6 +284,7 @@ public class CloverConnector implements ICloverConnector {
         // SaleRequest
         if(req.getTippableAmount() != null) {
           transactionSettings.setTippableAmount(req.getTippableAmount());
+<<<<<<< HEAD
         }
         if(req.getTipAmount() != null) {
           builder.tipAmount(req.getTipAmount());
@@ -292,6 +292,15 @@ public class CloverConnector implements ICloverConnector {
         if (req.getTipMode() != null) {
           transactionSettings.setTipMode(getV3TipModeFromRequestTipMode(req.getTipMode()));
         }
+=======
+        }
+        if(req.getTipAmount() != null) {
+          builder.tipAmount(req.getTipAmount());
+        }
+        if (req.getTipMode() != null) {
+          transactionSettings.setTipMode(getV3TipModeFromRequestTipMode(req.getTipMode()));
+        }
+>>>>>>> 946d3dbfdfe4873a84e8fa49a5606b7c5344ca12
       }
 
       builder.transactionSettings(transactionSettings);
