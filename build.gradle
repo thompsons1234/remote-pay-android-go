@@ -13,7 +13,7 @@ buildscript {
     mavenPlugin = "com.github.dcendents:android-maven-gradle-plugin:1.3"
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:1.5.0'
+    classpath 'com.android.tools.build:gradle:2.2.0'
     classpath mavenPlugin
   }
 }
