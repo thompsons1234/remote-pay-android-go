@@ -17,8 +17,6 @@
 package com.clover.remote.client.transport.websocket;
 
 import android.util.Log;
-import com.clover.remote.client.CloverDeviceObserver;
-import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.PairingCodeMessage;
 import com.clover.remote.client.messages.remote.PairingCodeRemoteMessage;
 import com.clover.remote.client.messages.remote.PairingRequest;
@@ -31,19 +29,12 @@ import com.clover.remote.message.Method;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.neovisionaries.ws.client.WebSocketListener;
 
 import java.net.URI;
 import java.security.KeyStore;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
-
-//import org.java_websocket.WebSocket;
-//import org.java_websocket.client.WebSocketClient;
-//import org.java_websocket.exceptions.WebsocketNotConnectedException;
-//import org.java_websocket.handshake.ServerHandshake;
-//import org.eclipse.jetty.websocket.client.WebSocketClient;
 
 public class WebSocketCloverTransport extends CloverTransport implements CloverNVWebSocketClientListener {
 
@@ -59,10 +50,6 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
 
   PairingDeviceConfiguration pairingDeviceConfiguration;
 
-  //  CloverSocketIOClient webSocket;
-  //  CloverWebSocketClient webSocket;
-  //  WebSocketClient webSocket;
-  //  CloverWSClient webSocket;
   CloverNVWebSocketClient webSocket;
 
   String status = "Disconnected";
@@ -121,20 +108,6 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
       reconnect();
     }
     return -1;
-    /*if (webSocket != null && webSocket.getConnection().isOpen()) {
-      try {
-        Log.d(getClass().getName(), "Sending message to WebSocket: " + message);
-        webSocket.send(message);
-      } catch (WebsocketNotConnectedException e) {
-        Log.i(getClass().getSimpleName(), String.format("Error sending message: %s", message), e);
-        reconnect();
-      }
-
-      return 0;
-    } else {
-      reconnect();
-    }
-    return -1;*/
   }
 
   private synchronized void clearWebsocket() {
@@ -145,21 +118,6 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
   }
 
   private synchronized void initialize(URI deviceEndpoint) {
-
-    /*if (webSocket != null) {
-      if(webSocket.isOpen()) {
-        return;
-      } else {
-        clearWebsocket();
-      }
-    }
-
-    try {
-      webSocket = new CloverWebSocketClient(deviceEndpoint, this, heartbeatInterval, trustStore);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }*/
-
 
     if (webSocket != null) {
       if (webSocket.isOpen() || webSocket.isConnecting()) {
@@ -172,9 +130,6 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
       }
     }
 
-    //    webSocket = new CloverWebSocketClient(deviceEndpoint, this, heartbeatInterval, trustStore);
-    //    webSocket = new CloverSocketIOClient(deviceEndpoint, this, trustStore);
-    //    webSocket = new CloverWSClient(deviceEndpoint, this, 5000, trustStore);
     webSocket = new CloverNVWebSocketClient(deviceEndpoint, this, 5000, trustStore);
 
     webSocket.connect();
@@ -192,13 +147,7 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
       }
     }
     clearWebsocket();
-    /*shutdown = true;
-    if (webSocket != null) {
-      notifyDeviceDisconnected();
-      webSocket.setNotifyClose(true);   // <-- need to notify because close was requested
-      webSocket.close();
-    }
-    clearWebsocket();*/
+
   }
 
 
@@ -222,8 +171,6 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
     reconnect();
   }
 
-  //  public void onNotResponding(WebSocketClient ws) {
-  //  public void onNotResponding(CloverSocketIOClient ws) {
   public void onNotResponding(CloverNVWebSocketClient ws) {
     Log.d(getClass().getSimpleName(), "Not Responding...");
     if (webSocket == ws) {
@@ -235,8 +182,6 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
   }
 
 
-  //  public void onPingResponding(WebSocketClient ws) {
-  //  public void onPingResponding(CloverSocketIOClient ws) {
   public void onPingResponding(CloverNVWebSocketClient ws) {
     Log.d(getClass().getSimpleName(), "Ping Responding");
     if (webSocket == ws) {
@@ -247,17 +192,9 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
     }
   }
 
-  /*@Override public void onOpen(org.eclipse.jetty.websocket.api.Session session) {
-    notifyDeviceConnected();
-    sendPairRequest();
-  }*/
-
 
 
   @Override
-  //  public void onOpen(WebSocketClient ws, ServerHandshake handshakedata) {
-  //  public void onOpen(CloverSocketIOClient ws) {
-  //  public void onOpen(CloverWSClient ws) {
   public void onOpen(CloverNVWebSocketClient ws) {
 
     Log.d(getClass().getSimpleName(), "Open...");
@@ -280,16 +217,6 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
   }
 
 
-
-
-  /*public synchronized void onClose(CloverWebSocketClient ws) {
-    Log.d(getClass().getSimpleName(), "Closing...");
-    if (webSocket == ws) {
-      clearWebsocket();
-      reconnectPool.getQueue().clear();
-      reconnect();
-    }
-  }*/
   @Override
   public void onClose(CloverNVWebSocketClient ws, int code, String reason, boolean remote) {
     Log.d(getClass().getSimpleName(), "onClose: " + reason + ", remote? " + remote);
@@ -312,8 +239,6 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
 
 
   @Override
-  //  public void onMessage(WebSocketClient ws, String message) {
-  //  public void onMessage(CloverSocketIOClient ws, String message) {
   public void onMessage(CloverNVWebSocketClient ws, String message) {
     if (webSocket == ws) {
       if(isPairing) {
