@@ -5,9 +5,22 @@ apply plugin: 'com.android.application'
 
 repositories {
   mavenLocal()
+  maven { url "http://artifactory.corp.clover.com:8081/artifactory/repo" }
   mavenCentral()
+  jcenter()
   flatDir {
     dirs '../lib'
+  }
+}
+
+sourceSets {
+  main {
+    java {
+      srcDirs = ['src/main/java']
+    }
+    resources {
+      srcDirs = ['src/main/resources']
+    }
   }
 }
 

@@ -41,6 +41,7 @@ import com.clover.remote.client.messages.CloseoutRequest;
 import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.CloverDeviceEvent;
+import com.clover.remote.client.messages.PairingCodeMessage;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.ManualRefundResponse;
@@ -67,6 +68,7 @@ import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
+import com.clover.remote.client.messages.remote.PairingCodeRemoteMessage;
 import com.clover.remote.message.DiscoveryResponseMessage;
 import com.clover.remote.order.DisplayOrder;
 import com.clover.remote.order.operation.OrderDeletedOperation;
@@ -85,6 +87,8 @@ import java.io.StringWriter;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class CloverConnector implements ICloverConnector {
 
@@ -113,6 +117,8 @@ public class CloverConnector implements ICloverConnector {
   private CloverDeviceConfiguration configuration;
 
   boolean isReady = false;
+
+  private Executor executor = Executors.newSingleThreadExecutor();
 
   public CloverConnector() {
 
@@ -918,15 +924,20 @@ public class CloverConnector implements ICloverConnector {
     public void onUiState(UiState uiState, String uiText, UiState.UiDirection uiDirection, InputOption[] inputOptions) {
       CloverDeviceEvent deviceEvent = new CloverDeviceEvent();
       deviceEvent.setInputOptions(inputOptions);
-      deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.valueOf(uiState.toString()));
-      deviceEvent.setMessage(uiText);
-      if (uiDirection == UiState.UiDirection.ENTER) {
-        cloverConnector.broadcaster.notifyOnDeviceActivityStart(deviceEvent);
-      } else if (uiDirection == UiState.UiDirection.EXIT) {
-        cloverConnector.broadcaster.notifyOnDeviceActivityEnd(deviceEvent);
-        if (uiState.toString().equals(CloverDeviceEvent.DeviceEventState.RECEIPT_OPTIONS.toString())) {
-          cloverConnector.device.doShowWelcomeScreen();
+      try {
+        CloverDeviceEvent.DeviceEventState eventState = CloverDeviceEvent.DeviceEventState.valueOf(uiState.toString());
+        deviceEvent.setEventState(eventState);
+        deviceEvent.setMessage(uiText);
+        if (uiDirection == UiState.UiDirection.ENTER) {
+          cloverConnector.broadcaster.notifyOnDeviceActivityStart(deviceEvent);
+        } else if (uiDirection == UiState.UiDirection.EXIT) {
+          cloverConnector.broadcaster.notifyOnDeviceActivityEnd(deviceEvent);
+          if (uiState.toString().equals(CloverDeviceEvent.DeviceEventState.RECEIPT_OPTIONS.toString())) {
+            cloverConnector.device.doShowWelcomeScreen();
+          }
         }
+      } catch(IllegalArgumentException iae) {
+        Log.w(getClass().getSimpleName(), "Unsupported UI event type: " + uiState);
       }
     }
 
