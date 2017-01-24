@@ -33,8 +33,7 @@ android {
 defaultTasks 'install'
 
 dependencies {
-//  compile(name: 'clover-remote-interface-175', ext: 'aar')
-//  compile(name: 'clover-android-sdk-148', ext: 'aar')
+
   compile 'com.clover:clover-remote-interface:180.4'
   compile 'com.clover.sdk:clover-android-sdk:160.1'
   compile 'com.google.code.gson:gson:2.3.1'

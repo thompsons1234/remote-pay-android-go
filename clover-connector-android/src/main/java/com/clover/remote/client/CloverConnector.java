@@ -1130,12 +1130,13 @@ public class CloverConnector implements ICloverConnector {
     public void onDeviceReady(CloverDevice device, DiscoveryResponseMessage drm) {
       Log.d(getClass().getSimpleName(), "Ready");
       cloverConnector.isReady = drm.ready;
-      cloverConnector.device.doShowWelcomeScreen();
+
       MerchantInfo merchantInfo = new MerchantInfo(drm);
       cloverConnector.merchantInfo = merchantInfo;
       device.setSupportsAcks(merchantInfo.deviceInfo.supportsAcks);
 
       if (drm.ready) {
+        cloverConnector.device.doShowWelcomeScreen();
         cloverConnector.broadcaster.notifyOnReady(merchantInfo);
       } else {
         cloverConnector.broadcaster.notifyOnConnect();
