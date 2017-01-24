@@ -16,6 +16,7 @@
 
 package com.clover.remote.client.transport.websocket;
 
+import android.os.AsyncTask;
 import android.util.Log;
 import com.clover.remote.client.messages.PairingCodeMessage;
 import com.clover.remote.client.messages.remote.PairingCodeRemoteMessage;
@@ -34,12 +35,13 @@ import java.net.URI;
 import java.security.KeyStore;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.prefs.Preferences;
 
 public class WebSocketCloverTransport extends CloverTransport implements CloverNVWebSocketClientListener {
 
-  public static final String AUTH_TOKEN = "AUTH_TOKEN";
   private final Gson GSON = new Gson();
+  private final String posName;
+  private final String serialNumber;
+  private String authToken;
   /*
     These hold the configurable options
      */
@@ -83,13 +85,16 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
   public static final String METHOD = "method";
   public static final String PAYLOAD = "payload";
 
-  public WebSocketCloverTransport(URI endpoint, long heartbeatInterval, long reconnectDelay, int retriesUntilDisconnect, KeyStore trustStore) {
+  public WebSocketCloverTransport(URI endpoint, long heartbeatInterval, long reconnectDelay, int retriesUntilDisconnect, KeyStore trustStore, String posName, String serialNumber, String authToken) {
 
     this.endpoint = endpoint;
     this.heartbeatInterval = Math.max(10, heartbeatInterval);
     this.reconnectDelay = Math.max(0, reconnectDelay);
     this.maxPingRetriesBeforeDisconnect = Math.max(0, retriesUntilDisconnect);
     this.trustStore = trustStore;
+    this.posName = posName;
+    this.serialNumber = serialNumber;
+    this.authToken = authToken;
     initialize(endpoint);
   }
 
@@ -207,13 +212,10 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
 
   private void sendPairRequest() {
     isPairing = true;
-    Preferences preferences = Preferences.userNodeForPackage(WebSocketCloverTransport.class);
-    final String authToken = preferences.get(AUTH_TOKEN, "");
-    PairingRequest pr = new PairingRequest("Clover Java Example POS", "1", authToken);
+    PairingRequest pr = new PairingRequest(posName, serialNumber, authToken);
     PairingRequestMessage prm = new PairingRequestMessage(pr);
 
     webSocket.send(new Gson().toJson(prm));
-
   }
 
 
@@ -256,11 +258,21 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
           if (PairingCodeMessage.PAIRED.equals(response.pairingState) || PairingCodeMessage.INITIAL.equals(response.pairingState)) {
             Log.d(getClass().getName(), "Got PAIRED pair response");
             isPairing = false;
-            String pairingToken = response.authenticationToken;
-            Preferences preferences = Preferences.userNodeForPackage(WebSocketCloverTransport.class);
-            preferences.put(AUTH_TOKEN, pairingToken);
+            authToken = response.authenticationToken;
 
-            notifyDeviceReady();
+            new AsyncTask<Void, Void, Void>() {
+              @Override protected Void doInBackground(Void... params) {
+                try {
+                  pairingDeviceConfiguration.onPairingSuccess(authToken);
+                } catch (Exception e) {
+                  Log.e(pairingDeviceConfiguration.getClass().getSimpleName(), "Error", e);
+                } finally {
+                  notifyDeviceReady();
+                }
+                return null;
+              }
+            }.execute();
+
           } else if (PairingCodeMessage.FAILED.equals(method.getAsString())) {
             Log.d(getClass().getName(), "Got FAILED pair response");
             isPairing = true;

@@ -100,6 +100,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.prefs.Preferences;
 
 public class ExamplePOSActivity extends Activity implements CurrentOrderFragment.OnFragmentInteractionListener,
     AvailableItem.OnFragmentInteractionListener, OrdersFragment.OnFragmentInteractionListener,
@@ -164,7 +165,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     } else if ("WS".equals(configType)) {
       URI uri = (URI) getIntent().getSerializableExtra(EXTRA_WS_ENDPOINT);
       KeyStore trustStore = createTrustStore();
-      config = new WebSocketCloverDeviceConfiguration(uri, 10000, 2000, "Clover Example POS:1.1.0.1", trustStore) {
+      String authToken = Preferences.userNodeForPackage(ExamplePOSActivity.class).get("AUTH_TOKEN", null);
+
+      config = new WebSocketCloverDeviceConfiguration(uri, 10000, 2000, "Clover Example POS:1.1.0.1", trustStore, "Clover Example POS", "Aisle 3", authToken) {
 
 
         @Override public void onPairingCode(final String pairingCode) {
@@ -175,6 +178,18 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               builder.setMessage("Enter pairing code: " + pairingCode);
               pairingCodeDialog = builder.create();
               pairingCodeDialog.show();
+            }
+          });
+        }
+
+        @Override public void onPairingSuccess(String authToken) {
+          Preferences.userNodeForPackage(ExamplePOSActivity.class).put("AUTH_TOKEN", authToken);
+          runOnUiThread(new Runnable(){
+            @Override public void run() {
+              if(pairingCodeDialog != null && pairingCodeDialog.isShowing()) {
+                pairingCodeDialog.dismiss();
+                pairingCodeDialog = null;
+              }
             }
           });
         }
@@ -312,10 +327,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         public void onDeviceReady(final MerchantInfo merchantInfo) {
           runOnUiThread(new Runnable() {
             public void run() {
-              if(pairingCodeDialog != null && pairingCodeDialog.isShowing()) {
-                pairingCodeDialog.dismiss();
-                pairingCodeDialog = null;
-              }
               showMessage("Ready!", Toast.LENGTH_SHORT);
               ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText(String.format("Connected: %s (%s)", merchantInfo.getDeviceInfo().getSerial(), merchantInfo.getMerchantName()));
             }
