@@ -1,14 +1,26 @@
 group = 'com.clover.sdk'
-version = '0.5'
+version = '1.1'
 
 apply plugin: 'com.android.application'
 
 repositories {
-  maven { url "http://artifactory.corp.clover.com:8081/artifactory/repo" }
   mavenLocal()
+  maven { url "http://artifactory.corp.clover.com:8081/artifactory/repo" }
   mavenCentral()
+  jcenter()
   flatDir {
     dirs '../lib'
+  }
+}
+
+sourceSets {
+  main {
+    java {
+      srcDirs = ['src/main/java']
+    }
+    resources {
+      srcDirs = ['src/main/resources']
+    }
   }
 }
 
