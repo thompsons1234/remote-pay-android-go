@@ -29,6 +29,9 @@ import java.security.KeyStore;
  * Default configuration to communicate with the Mini via WebSockets to the LAN Pay Display
  */
 public abstract class WebSocketCloverDeviceConfiguration implements PairingDeviceConfiguration, CloverDeviceConfiguration, Serializable {
+  private final String posName;
+  private final String serialNumber;
+  private final String authToken;
   private URI uri = null;
   /**
    * ping heartbeat interval in milliseconds
@@ -51,16 +54,20 @@ public abstract class WebSocketCloverDeviceConfiguration implements PairingDevic
 
   private final String appId;
 
-  public WebSocketCloverDeviceConfiguration(URI endpoint, String applicationId, KeyStore trustStore) {
+  public WebSocketCloverDeviceConfiguration(URI endpoint, String applicationId, KeyStore trustStore, String posName, String serialNumber, String authToken) {
     this.uri = endpoint;
     this.appId = applicationId;
     this.trustStore = trustStore;
+    this.posName = posName;
+    this.serialNumber = serialNumber;
+    this.authToken = authToken;
   }
 
-  public WebSocketCloverDeviceConfiguration(URI endpoint, long heartbeatInterval, long reconnectDelay, String applicationId, KeyStore trustStore) {
-    this(endpoint, applicationId, trustStore);
+  public WebSocketCloverDeviceConfiguration(URI endpoint, long heartbeatInterval, long reconnectDelay, String applicationId, KeyStore trustStore, String posName, String serialNumber, String authToken) {
+    this(endpoint, applicationId, trustStore, posName, serialNumber, authToken);
     this.heartbeatInterval = Math.max(100, heartbeatInterval);
     this.reconnectDelay = Math.max(0, reconnectDelay);
+
   }
 
   @Override public String getApplicationId() {
@@ -109,7 +116,7 @@ public abstract class WebSocketCloverDeviceConfiguration implements PairingDevic
 
   @Override
   public CloverTransport getCloverTransport() {
-    WebSocketCloverTransport transport = new WebSocketCloverTransport(uri, heartbeatInterval, reconnectDelay, pingRetryCountBeforeReconnect, trustStore);
+    WebSocketCloverTransport transport = new WebSocketCloverTransport(uri, heartbeatInterval, reconnectDelay, pingRetryCountBeforeReconnect, trustStore, posName, serialNumber, authToken);
     transport.setPairingDeviceConfiguration(this);
     return transport;
   }
