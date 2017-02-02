@@ -556,25 +556,21 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         @Override
         public void onVerifySignatureRequest(VerifySignatureRequest request) {
 
-          if (store.getAutomaticSignatureConfirmation()) {
-            cloverConnector.acceptSignature(request);
+          FragmentManager fragmentManager = getFragmentManager();
+          FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+          hideFragments(fragmentManager, fragmentTransaction);
+
+          Fragment fragment = fragmentManager.findFragmentByTag("SIGNATURE");
+          if (fragment == null) {
+            fragment = SignatureFragment.newInstance(request, cloverConnector);
+            fragmentTransaction.add(R.id.contentContainer, fragment, "SIGNATURE");
           } else {
-            FragmentManager fragmentManager = getFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-            hideFragments(fragmentManager, fragmentTransaction);
-
-            Fragment fragment = fragmentManager.findFragmentByTag("SIGNATURE");
-            if (fragment == null) {
-              fragment = SignatureFragment.newInstance(request, cloverConnector);
-              fragmentTransaction.add(R.id.contentContainer, fragment, "SIGNATURE");
-            } else {
-              ((SignatureFragment) fragment).setVerifySignatureRequest(request);
-              fragmentTransaction.show(fragment);
-            }
-
-            fragmentTransaction.commit();
+            ((SignatureFragment) fragment).setVerifySignatureRequest(request);
+            fragmentTransaction.show(fragment);
           }
+
+          fragmentTransaction.commit();
         }
 
         @Override
@@ -582,18 +578,14 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           if (request.getPayment() == null || request.getChallenges() == null) {
             showMessage("Error: The ConfirmPaymentRequest was missing the payment and/or challenges.", Toast.LENGTH_LONG);
           } else {
-            if (store.getAutomaticPaymentConfirmation()) {
-              cloverConnector.acceptPayment(request.getPayment());
-            } else {
-              currentPayment = request.getPayment();
-              currentChallenges = request.getChallenges();
-              runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                  showPaymentConfirmation(paymentConfirmationListener, currentChallenges[0], 0);
-                }
-              });
-            }
+            currentPayment = request.getPayment();
+            currentChallenges = request.getChallenges();
+            runOnUiThread(new Runnable() {
+              @Override
+              public void run() {
+                showPaymentConfirmation(paymentConfirmationListener, currentChallenges[0], 0);
+              }
+            });
           }
         }
 
