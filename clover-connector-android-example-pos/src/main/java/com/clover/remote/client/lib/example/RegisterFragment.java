@@ -163,7 +163,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
     request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
     request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
-    request.setCloverShouldHandleReceipts(store.getCloverHandlesReceipts());
+    request.setDisablePrinting(store.getDisablePrinting());
     request.setTipMode(store.getTipMode());
     request.setSignatureEntryLocation(store.getSignatureEntryLocation());
     request.setSignatureThreshold(store.getSignatureThreshold());
@@ -190,7 +190,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
     request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
     request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
-    request.setCloverShouldHandleReceipts(store.getCloverHandlesReceipts());
+    request.setDisablePrinting(store.getDisablePrinting());
     request.setSignatureEntryLocation(store.getSignatureEntryLocation());
     request.setSignatureThreshold(store.getSignatureThreshold());
     request.setDisableReceiptSelection(store.getDisableReceiptOptions());

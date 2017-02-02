@@ -50,7 +50,7 @@ public class POSStore {
   private int cardEntryMethods = CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE | CloverConnector.CARD_ENTRY_METHOD_NFC_CONTACTLESS | CloverConnector.CARD_ENTRY_METHOD_ICC_CONTACT;
   private Boolean approveOfflinePaymentWithoutPrompt;
   private Boolean allowOfflinePayment;
-  private Boolean enableCloverHandlesReceipts;
+  private Boolean disablePrinting;
   private Long tipAmount;
   private Long signatureThreshold;
   private DataEntryLocation signatureEntryLocation;
@@ -197,12 +197,12 @@ public class POSStore {
     return cardEntryMethods;
   }
 
-  public Boolean getCloverHandlesReceipts() {
-    return enableCloverHandlesReceipts;
+  public Boolean getDisablePrinting() {
+    return disablePrinting;
   }
 
-  public void setCloverHandlesReceipts(Boolean cloverHandlesReceipts) {
-    this.enableCloverHandlesReceipts = cloverHandlesReceipts;
+  public void setDisablePrinting(Boolean disablePrinting) {
+    this.disablePrinting = disablePrinting;
   }
 
   public DataEntryLocation getSignatureEntryLocation() {return signatureEntryLocation;}

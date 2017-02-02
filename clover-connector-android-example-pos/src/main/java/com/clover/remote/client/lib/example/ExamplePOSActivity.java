@@ -207,7 +207,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     //
     store.setTipMode(SaleRequest.TipMode.ON_SCREEN_BEFORE_PAYMENT);
     store.setSignatureEntryLocation(DataEntryLocation.ON_PAPER);
-    store.setCloverHandlesReceipts(false);
+    store.setDisablePrinting(true);
     store.setDisableReceiptOptions(true);
     store.setDisableDuplicateChecking(true);
     store.setAllowOfflinePayment(true);
@@ -1047,7 +1047,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       ManualRefundRequest request = new ManualRefundRequest(refundAmount, getNextId());
       request.setAmount(refundAmount);
       request.setCardEntryMethods(store.getCardEntryMethods());
-      request.setCloverShouldHandleReceipts(store.getCloverHandlesReceipts());
+      request.setDisablePrinting(store.getDisablePrinting());
       request.setDisableReceiptSelection(store.getDisableReceiptOptions());
       cloverConnector.manualRefund(request);
     } catch(NumberFormatException nfe) {
@@ -1082,7 +1082,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public void preauthCardClick(View view) {
     PreAuthRequest request = new PreAuthRequest(5000L, getNextId());
     request.setCardEntryMethods(store.getCardEntryMethods());
-    request.setCloverShouldHandleReceipts(store.getCloverHandlesReceipts());
+    request.setDisablePrinting(store.getDisablePrinting());
     request.setSignatureEntryLocation(store.getSignatureEntryLocation());
     request.setSignatureThreshold(store.getSignatureThreshold());
     request.setDisableReceiptSelection(store.getDisableReceiptOptions());

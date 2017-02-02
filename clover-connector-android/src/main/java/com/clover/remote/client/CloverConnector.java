@@ -226,8 +226,8 @@ public class CloverConnector implements ICloverConnector {
         builder.cardNotPresent(request.getCardNotPresent());
       }
       transactionSettings.setCardEntryMethods(request.getCardEntryMethods() != null ? request.getCardEntryMethods() : cardEntryMethods);
-      if(request.getCloverShouldHandleReceipts() != null) {
-        transactionSettings.setCloverShouldHandleReceipts(request.getCloverShouldHandleReceipts());
+      if(request.getDisablePrinting() != null) {
+        transactionSettings.setCloverShouldHandleReceipts(!request.getDisablePrinting());
       }
       if(request.getDisableRestartTransactionOnFail() != null) {
         transactionSettings.setDisableRestartTransactionOnFailure(request.getDisableRestartTransactionOnFail());
@@ -554,8 +554,8 @@ public class CloverConnector implements ICloverConnector {
           .externalPaymentId(request.getExternalId());
 
       transactionSettings.setCardEntryMethods(request.getCardEntryMethods() != null ? request.getCardEntryMethods() : cardEntryMethods);
-      if(request.getCloverShouldHandleReceipts() != null) {
-        transactionSettings.setCloverShouldHandleReceipts(request.getCloverShouldHandleReceipts());
+      if(request.getDisablePrinting() != null) {
+        transactionSettings.setCloverShouldHandleReceipts(!request.getDisablePrinting());
       }
       if(request.getDisableRestartTransactionOnFail() != null) {
         transactionSettings.setDisableRestartTransactionOnFailure(request.getDisableRestartTransactionOnFail());

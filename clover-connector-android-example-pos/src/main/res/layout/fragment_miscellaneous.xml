@@ -341,7 +341,7 @@
             <Switch
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Clover Device Printing"
+                android:text="Disable Device Printing"
                 android:id="@+id/PrintingSwitch"/>
             <Switch
                 android:layout_width="match_parent"

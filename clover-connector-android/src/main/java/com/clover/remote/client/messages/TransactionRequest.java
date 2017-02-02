@@ -15,7 +15,7 @@ import com.clover.sdk.v3.payments.TransactionSettings;
 @SuppressWarnings(value="unused")
 public abstract class TransactionRequest extends BaseRequest {
 
-  private java.lang.Boolean cloverShouldHandleReceipts = null;
+  private java.lang.Boolean disablePrinting = null;
   private java.lang.Boolean cardNotPresent = null;
   private java.lang.Boolean disableRestartTransactionOnFail = null;
   private long amount;
@@ -43,16 +43,16 @@ public abstract class TransactionRequest extends BaseRequest {
   * Do not print
   *
   */
-  public void setCloverShouldHandleReceipts(java.lang.Boolean cloverShouldHandleReceipts) {
-    this.cloverShouldHandleReceipts = cloverShouldHandleReceipts;
+  public void setDisablePrinting(java.lang.Boolean disablePrinting) {
+    this.disablePrinting = disablePrinting;
   }
 
   /**
   * Get the field value
   * Do not print
   */
-  public java.lang.Boolean getCloverShouldHandleReceipts() {
-    return this.cloverShouldHandleReceipts;
+  public java.lang.Boolean getDisablePrinting() {
+    return this.disablePrinting;
   }  
   /**
   * Set the field value

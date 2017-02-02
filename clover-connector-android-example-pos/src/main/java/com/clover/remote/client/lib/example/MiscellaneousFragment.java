@@ -306,7 +306,7 @@ public class MiscellaneousFragment extends Fragment {
     printingSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
       @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if(!updatingSwitches) {
-          store.setCloverHandlesReceipts(isChecked);
+          store.setDisablePrinting(isChecked);
         }
       }
     });
@@ -407,7 +407,7 @@ public class MiscellaneousFragment extends Fragment {
       chipSwitch.setChecked((store.getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_ICC_CONTACT) == CloverConnector.CARD_ENTRY_METHOD_ICC_CONTACT);
       swipeSwitch.setChecked((store.getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE) == CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE);
 
-      printingSwitch.setChecked(store.getCloverHandlesReceipts() != null ? store.getCloverHandlesReceipts() : false);
+      printingSwitch.setChecked(store.getDisablePrinting() != null ? store.getDisablePrinting() : false);
       disableReceiptOptionsSwitch.setChecked(store.getDisableReceiptOptions() != null ? store.getDisableReceiptOptions() : false);
       disableDuplicateCheckSwitch.setChecked(store.getDisableDuplicateChecking() != null ? store.getDisableDuplicateChecking() : false);
       automaticSignatureConfirmationSwitch.setChecked(store.getAutomaticSignatureConfirmation() != null ? store.getAutomaticSignatureConfirmation() : false);
