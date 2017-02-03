@@ -28,6 +28,7 @@ import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Payment;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public abstract class CloverDevice {

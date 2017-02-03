@@ -41,7 +41,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.TwoLineListItem;
 import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
@@ -51,6 +50,7 @@ import com.clover.remote.client.ICloverConnectorListener;
 import com.clover.remote.client.MerchantInfo;
 import com.clover.remote.client.device.CloverDeviceConfiguration;
 import com.clover.remote.client.device.USBCloverDeviceConfiguration;
+import com.clover.remote.client.device.WebSocketCloverDeviceConfiguration;
 import com.clover.remote.client.lib.example.model.POSCard;
 import com.clover.remote.client.lib.example.model.POSDiscount;
 import com.clover.remote.client.lib.example.model.POSExchange;
@@ -91,17 +91,20 @@ import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.message.TipAddedMessage;
-import com.clover.sdk.v3.payments.CardTransactionType;
 import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.DataEntryLocation;
 import com.clover.sdk.v3.payments.Payment;
 import com.clover.sdk.v3.payments.TipMode;
 import com.clover.sdk.v3.payments.TransactionSettings;
 
+import java.io.InputStream;
+import java.net.URI;
+import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.prefs.Preferences;
 
 public class ExamplePOSActivity extends Activity implements CurrentOrderFragment.OnFragmentInteractionListener,
     AvailableItem.OnFragmentInteractionListener, OrdersFragment.OnFragmentInteractionListener,
@@ -114,6 +117,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public static final int WS_ENDPOINT_ACTIVITY = 123;
   public static final int SVR_ACTIVITY = 456;
   public static final String EXTRA_CLOVER_CONNECTOR_CONFIG = "EXTRA_CLOVER_CONNECTOR_CONFIG";
+  public static final String EXTRA_WS_ENDPOINT = "WS_ENDPOINT";
+
   Payment currentPayment = null;
   Challenge[] currentChallenges = null;
   PaymentConfirmationListener paymentConfirmationListener = new PaymentConfirmationListener() {
@@ -146,8 +151,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   ICloverConnector cloverConnector;
 
   POSStore store = new POSStore();
-  private transient CloverDeviceEvent.DeviceEventState lastDeviceEvent;
+  private AlertDialog pairingCodeDialog;
 
+  private transient CloverDeviceEvent.DeviceEventState lastDeviceEvent;
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -155,10 +161,48 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     initStore();
 
-    CloverDeviceConfiguration config = (CloverDeviceConfiguration) getIntent().getSerializableExtra(EXTRA_CLOVER_CONNECTOR_CONFIG);
-    if(config instanceof USBCloverDeviceConfiguration) {
-      ((USBCloverDeviceConfiguration)config).setContext(this);
+    CloverDeviceConfiguration config = null;
+
+    String configType = (String) getIntent().getStringExtra(EXTRA_CLOVER_CONNECTOR_CONFIG);
+    if("USB".equals(configType)) {
+      config = new USBCloverDeviceConfiguration(this, "Clover Example POS:1.1.0.1");
+    } else if ("WS".equals(configType)) {
+      URI uri = (URI) getIntent().getSerializableExtra(EXTRA_WS_ENDPOINT);
+      KeyStore trustStore = createTrustStore();
+      String authToken = Preferences.userNodeForPackage(ExamplePOSActivity.class).get("AUTH_TOKEN", null);
+
+      config = new WebSocketCloverDeviceConfiguration(uri, 10000, 2000, "Clover Example POS:1.1.0.1", trustStore, "Clover Example POS", "Aisle 3", authToken) {
+
+
+        @Override public void onPairingCode(final String pairingCode) {
+          runOnUiThread(new Runnable() {
+            @Override public void run() {
+              AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
+              builder.setTitle("Pairing Code");
+              builder.setMessage("Enter pairing code: " + pairingCode);
+              pairingCodeDialog = builder.create();
+              pairingCodeDialog.show();
+            }
+          });
+        }
+
+        @Override public void onPairingSuccess(String authToken) {
+          Preferences.userNodeForPackage(ExamplePOSActivity.class).put("AUTH_TOKEN", authToken);
+          runOnUiThread(new Runnable(){
+            @Override public void run() {
+              if(pairingCodeDialog != null && pairingCodeDialog.isShowing()) {
+                pairingCodeDialog.dismiss();
+                pairingCodeDialog = null;
+              }
+            }
+          });
+        }
+      };
+    } else {
+      finish();
+      return;
     }
+
     cloverConnector = new CloverConnector(config);
 
     initialize();
@@ -172,6 +216,27 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     fragmentTransaction.add(R.id.contentContainer, register, "REGISTER");
     fragmentTransaction.commit();
+
+  }
+
+
+  private KeyStore createTrustStore() {
+    try {
+
+      String STORETYPE = "PKCS12";
+      KeyStore trustStore = KeyStore.getInstance( STORETYPE );
+      InputStream trustStoreStream = getClass().getResourceAsStream("/certs/clover_cacerts.p12");
+      String TRUST_STORE_PASSWORD = "clover";
+
+      trustStore.load( trustStoreStream, TRUST_STORE_PASSWORD.toCharArray() );
+
+      return trustStore;
+    } catch(Throwable t) {
+      Log.e(getClass().getSimpleName(), "Error loading trust store", t);
+      t.printStackTrace();
+      return null;
+    }
+
   }
 
   private void initStore() {

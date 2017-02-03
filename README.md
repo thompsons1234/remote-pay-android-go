@@ -13,6 +13,8 @@ The Android project includes both a connector and example. To effectively work w
 
 To complete a transaction end to end, we recommend getting a [Clover Mini Dev Kit](http://cloverdevkit.com/collections/devkits/products/clover-mini-dev-kit).
 
+For more developer documentation and information about the Semi-Integration program, please visit our [semi-integration developer documents] (https://docs.clover.com/build/integration-overview-requirements/). 
+
 ## Release Notes
 # Version 1.1
 * Renamed/Added/Removed a number of API operations and request/response objects to establish 
