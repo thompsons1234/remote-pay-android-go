@@ -84,6 +84,7 @@ import com.clover.remote.client.messages.ReadCardDataResponse;
 import com.clover.remote.client.messages.RefundPaymentResponse;
 import com.clover.remote.client.messages.ResultCode;
 import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
+import com.clover.remote.client.messages.SaleRequest;
 import com.clover.remote.client.messages.SaleResponse;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
 import com.clover.remote.client.messages.VaultCardResponse;
@@ -91,7 +92,10 @@ import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.message.TipAddedMessage;
 import com.clover.sdk.v3.payments.Credit;
+import com.clover.sdk.v3.payments.DataEntryLocation;
 import com.clover.sdk.v3.payments.Payment;
+import com.clover.sdk.v3.payments.TipMode;
+import com.clover.sdk.v3.payments.TransactionSettings;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -260,7 +264,22 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     store.addAvailableDiscount(new POSDiscount("$5 Off", 500));
     store.addAvailableDiscount(new POSDiscount("None", 0));
 
-    store.createOrder();
+    store.createOrder(false);
+    // Defaults for testing sign on paper with no Clover printing or receipt options screen
+    // Also allow offline payments without any prompt
+    // This setup would be used if you want the most minimal interaction with the mini
+    // (i.e. payment only)
+    //
+    store.setTipMode(SaleRequest.TipMode.ON_SCREEN_BEFORE_PAYMENT);
+    store.setSignatureEntryLocation(DataEntryLocation.ON_PAPER);
+    store.setDisablePrinting(true);
+    store.setDisableReceiptOptions(true);
+    store.setDisableDuplicateChecking(true);
+    store.setAllowOfflinePayment(true);
+    store.setApproveOfflinePaymentWithoutPrompt(true);
+    store.setAutomaticSignatureConfirmation(true);
+    store.setAutomaticPaymentConfirmation(true);
+
   }
 
   @Override
@@ -493,7 +512,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                 store.addPaymentToOrder(payment, store.getCurrentOrder());
                 showMessage("Auth successfully processed.", Toast.LENGTH_SHORT);
 
-                store.createOrder();
+                store.createOrder(false);
                 CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
                 currentOrderFragment.setOrder(store.getCurrentOrder());
 
@@ -583,7 +602,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                     showMessage("Sale successfully processing using Pre Authorization", Toast.LENGTH_LONG);
 
                     //TODO: if order isn't fully paid, don't create a new order...
-                    store.createOrder();
+                    store.createOrder(false);
                     CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
                     currentOrderFragment.setOrder(store.getCurrentOrder());
                     showRegister(null);
@@ -658,7 +677,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                 runOnUiThread(new Runnable() {
                   @Override
                   public void run() {
-                    store.createOrder();
+                    store.createOrder(false);
                     CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
                     currentOrderFragment.setOrder(store.getCurrentOrder());
                     showRegister(null);
@@ -668,7 +687,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                 showMessage("Error: Sale response was missing the payment", Toast.LENGTH_LONG);
               }
             } else {
-              showMessage("User canceled the transaction", Toast.LENGTH_SHORT);
+              showMessage(response.getResult().toString() + ":" + response.getReason() + "  " + response.getMessage(), Toast.LENGTH_LONG);
             }
           } else { //Handle null payment response
             showMessage("Error: Null SaleResponse", Toast.LENGTH_LONG);
@@ -1086,6 +1105,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       request.setAmount(refundAmount);
       request.setCardEntryMethods(store.getCardEntryMethods());
       request.setDisablePrinting(store.getDisablePrinting());
+      request.setDisableReceiptSelection(store.getDisableReceiptOptions());
       cloverConnector.manualRefund(request);
     } catch(NumberFormatException nfe) {
       showMessage("Invalid value. Must be an integer.", Toast.LENGTH_LONG);
@@ -1120,6 +1140,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     PreAuthRequest request = new PreAuthRequest(5000L, getNextId());
     request.setCardEntryMethods(store.getCardEntryMethods());
     request.setDisablePrinting(store.getDisablePrinting());
+    request.setSignatureEntryLocation(store.getSignatureEntryLocation());
+    request.setSignatureThreshold(store.getSignatureThreshold());
+    request.setDisableReceiptSelection(store.getDisableReceiptOptions());
     cloverConnector.preAuth(request);
   }
 
