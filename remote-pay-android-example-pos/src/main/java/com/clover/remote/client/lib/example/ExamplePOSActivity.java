@@ -40,6 +40,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.clover.remote.CardData;
@@ -1217,6 +1218,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     CustomActivityRequest car = new CustomActivityRequest(activityId);
     car.setPayload(payload);
+    boolean nonBlocking = ((Switch)findViewById(R.id.customActivityBlocking)).isChecked();
+    car.setNonBlocking(nonBlocking);
     cloverConnector.startCustomActivity(car);
   }
 }

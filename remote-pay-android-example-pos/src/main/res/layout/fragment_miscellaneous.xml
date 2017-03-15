@@ -159,11 +159,17 @@
                     android:layout_height="wrap_content"
                     android:inputType="textMultiLine"
                     android:ems="10"
-                    android:id="@+id/activity_payload" android:layout_gravity="center_horizontal"/>
+                    android:id="@+id/activity_payload" android:layout_gravity="center_horizontal" android:text="{&quot;name&quot;:&quot;Bob&quot;}"/>
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
                 <EditText android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight=".5" android:id="@+id/activity_id"/>
                 <Button android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight=".5" android:text="Start" android:onClick="startActivity"/>
             </LinearLayout>
+            <Switch
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="false"
+                    android:text="Non-Blocking"
+                    android:id="@+id/customActivityBlocking"/>
         </LinearLayout>
         <LinearLayout
             android:orientation="vertical"
