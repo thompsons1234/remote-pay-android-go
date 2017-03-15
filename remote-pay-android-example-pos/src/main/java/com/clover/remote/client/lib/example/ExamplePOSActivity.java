@@ -36,6 +36,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -61,6 +62,7 @@ import com.clover.remote.client.lib.example.model.POSPayment;
 import com.clover.remote.client.lib.example.model.POSRefund;
 import com.clover.remote.client.lib.example.model.POSStore;
 import com.clover.remote.client.lib.example.utils.CurrencyUtils;
+import com.clover.remote.client.messages.ActivityMessage;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
 import com.clover.remote.client.messages.CloseoutRequest;
@@ -68,6 +70,8 @@ import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
+import com.clover.remote.client.messages.CustomActivityRequest;
+import com.clover.remote.client.messages.CustomActivityResponse;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.ManualRefundResponse;
 import com.clover.remote.client.messages.PaymentResponse;
@@ -346,6 +350,10 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         public void onDeviceReady(final MerchantInfo merchantInfo) {
           runOnUiThread(new Runnable() {
             public void run() {
+              if(pairingCodeDialog != null && pairingCodeDialog.isShowing()) {
+                pairingCodeDialog.dismiss();
+                pairingCodeDialog = null;
+              }
               showMessage("Ready!", Toast.LENGTH_SHORT);
               ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText(String.format("Connected: %s (%s)", merchantInfo.getDeviceInfo().getSerial(), merchantInfo.getMerchantName()));
             }
@@ -827,6 +835,10 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
             showMessage("Print Request for RefundPayment Receipt", Toast.LENGTH_SHORT);
           }
 
+          @Override public void onCustomActivityResponse(CustomActivityResponse response) {
+            showMessage("Got: " + response.payload + " from CustomActivity", 5000);
+          }
+
         };
 
       cloverConnector.addCloverConnectorListener(ccListener);
@@ -1197,5 +1209,14 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   public void refreshPendingPayments(View view) {
     cloverConnector.retrievePendingPayments();
+  }
+
+  public void startActivity(View view) {
+    String activityId = ((EditText)findViewById(R.id.activity_id)).getText().toString();
+    String payload = ((EditText)findViewById(R.id.activity_payload)).getText().toString();
+
+    CustomActivityRequest car = new CustomActivityRequest(activityId);
+    car.setPayload(payload);
+    cloverConnector.startCustomActivity(car);
   }
 }
