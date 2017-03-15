@@ -40,6 +40,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -1213,7 +1214,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void startActivity(View view) {
-    String activityId = ((EditText)findViewById(R.id.activity_id)).getText().toString();
+    String activityId = ((Spinner)findViewById(R.id.activity_id)).getSelectedItem().toString();
     String payload = ((EditText)findViewById(R.id.activity_payload)).getText().toString();
 
     CustomActivityRequest car = new CustomActivityRequest(activityId);

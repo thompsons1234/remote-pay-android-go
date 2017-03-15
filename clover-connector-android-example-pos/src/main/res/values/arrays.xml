@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="customIds"><item>com.clover.cfp.activities.BasicCFPExample</item></string-array>
+</resources>
