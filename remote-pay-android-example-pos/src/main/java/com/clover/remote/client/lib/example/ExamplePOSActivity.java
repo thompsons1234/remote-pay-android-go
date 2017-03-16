@@ -35,6 +35,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -1214,7 +1215,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void startActivity(View view) {
-    String activityId = ((Spinner)findViewById(R.id.activity_id)).getSelectedItem().toString();
+    String activityId = ((EditText)findViewById(R.id.activity_id)).getText().toString();
     String payload = ((EditText)findViewById(R.id.activity_payload)).getText().toString();
 
     CustomActivityRequest car = new CustomActivityRequest(activityId);
