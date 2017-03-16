@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="customIds">
-        <item>com.clover.cfp.activities.BasicCFPExample</item>
-        <item>com.clover.cfp.activities.Carousel</item>
-        <item>com.clover.cfp.activities.RatingsApp</item>
+        <item>com.clover.cfp.activities.BasicExample</item>
+        <item>com.clover.cfp.activities.WebViewExample</item>
+        <item>com.clover.cfp.activities.CarouselExample</item>
+        <item>com.clover.cfp.activities.RatingsExample</item>
     </string-array>
 </resources>
