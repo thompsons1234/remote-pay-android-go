@@ -839,7 +839,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           }
 
           @Override public void onCustomActivityResponse(CustomActivityResponse response) {
-            showMessage("Got: " + response.payload + " from CustomActivity", 5000);
+            showMessage((response.isSuccess() ? "Success!" : "Failed!" ) + " Got: " + response.payload + " from CustomActivity: " + response.action + " reason: " + response.getReason(), 5000);
           }
 
         };

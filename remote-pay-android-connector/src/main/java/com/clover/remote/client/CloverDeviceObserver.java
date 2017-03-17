@@ -100,5 +100,5 @@ public interface CloverDeviceObserver {
 
   void onReadCardResponse(ResultStatus status, String reason, CardData cardData);
 
-  void onActivityResponse(ResultStatus status, String payload, String failReason);
+  void onActivityResponse(ResultStatus status, String action, String payload, String failReason);
 }

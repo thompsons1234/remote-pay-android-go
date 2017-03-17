@@ -414,7 +414,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
       @Override protected Object doInBackground(Object[] params) {
         for (final CloverDeviceObserver observer : deviceObservers) {
           ResultStatus status = arm.resultCode == -1 ? ResultStatus.SUCCESS : ResultStatus.CANCEL;
-          observer.onActivityResponse(status, arm.payload, arm.failReason);
+          observer.onActivityResponse(status, arm.action, arm.payload, arm.failReason);
         }
         return null;
       }

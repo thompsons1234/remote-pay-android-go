@@ -905,9 +905,9 @@ public class CloverConnector implements ICloverConnector {
       cloverConnector.broadcaster.notifyOnReadCardDataResponse(rcdr);
     }
 
-    public void onActivityResponse(ResultStatus status, String payload, String failReason) {
+    public void onActivityResponse(ResultStatus status, String action, String payload, String failReason) {
       boolean success = status == ResultStatus.SUCCESS;
-      CustomActivityResponse car = new CustomActivityResponse(success, success ? ResultCode.SUCCESS : ResultCode.CANCEL, payload, failReason);
+      CustomActivityResponse car = new CustomActivityResponse(success, success ? ResultCode.SUCCESS : ResultCode.CANCEL, action, payload, failReason);
       cloverConnector.broadcaster.notifyOnActivityResponse(car);
     }
 
