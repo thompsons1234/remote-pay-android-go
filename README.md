@@ -1,13 +1,13 @@
 # Clover SDK for Android PoS Integration
 
-Current version: 1.1
+Current version: 1.2
 
 ## Overview
 
 This SDK provides an API with which to allow your Android-based Point-of-Sale (POS) system to interface with a [Clover® Mini device] (https://www.clover.com/pos-hardware/mini). From the Mini, merchants can accept payments using: credit, debit, EMV contact and contactless (including Apple Pay), gift cards, EBT (electronic benefit transfer), and more. Learn more about integrations at [clover.com/integrations](https://www.clover.com/integrations).
 
 The Android project includes both a connector and example. To effectively work with the project you'll need:
-- [Gradle](https://gradle.org) (suggested version 2.10).
+- [Gradle](https://gradle.org) (suggested version 3.1).
 - An [Android SDK](http://developer.android.com/sdk/index.html) (17+).
 - An [IDE](http://developer.android.com/tools/studio/index.html), Android Studio works well .
 
@@ -16,8 +16,9 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
 For more developer documentation and information about the Semi-Integration program, please visit our [semi-integration developer documents] (https://docs.clover.com/build/integration-overview-requirements/). 
 
 ## Release Notes
-# Version 1.1
-* Renamed/Added/Removed a number of API operations and request/response objects to establish 
+# Version 1.2
+
+* Renamed/Added/Removed a number of API operations and request/response objects to establish
   better consistency across platforms
   
   * ICloverConnector (Operations)
@@ -120,6 +121,25 @@ For more developer documentation and information about the Semi-Integration prog
   set using the format of <company specific package>:<version> e.g. com.clover.ExamplePOS:1.2
 * Modified remote pay so prompts to take orders offline and flagging duplicate orders appear only in merchant facing mode.
 * Added ability to query pending payments.
+* PreAuthRequest - no longer prompts for signature, signature verification or receipt options on the customer facing device.
+* Changes to support certain transaction level overrides have been included in this version. To facilitate the addition of the new override capabilities, some new options were added to the SaleRequest & TransactionRequest classes.
+  * TransactionRequest - extended by SaleRequest, AuthRequest, PreAuthRequest & ManualRefundRequest
+    * (Long) signatureThreshold was added to enable the override of the signature threshold in the Merchant settings for payments.
+    * (DataEntryLocation) signatureEntryLocation was added to enable the override of the Signature Entry Location in the Merchant Signature Settings for Payments.  Value of NONE will cause the device to skip requesting a signature for the specified transaction.
+    Possible values:
+      * ON_SCREEN
+      * ON_PAPER
+      * NONE
+    * (Boolean) disableReceiptSelection was added to enable bypassing the customer-facing receipt selection screen.
+    * (Boolean) disableDuplicateChecking was added to enable bypassing any duplicate transaction logic and associated requests for confirmation.
+    * (Boolean) autoAcceptPaymentConfirmations was added to enable the automatic acceptance of any payment confirmations that might be applicable for the given transaction (e.g. offline payment confirmation).  This override prevents any payment confirmation requests from being transmitted back to the calling program and continues processing as if a confirmPayment() was initiated by the caller.
+    * (Boolean) autoAcceptSignature was added to enable the automatic acceptance of a signature (on screen or on paper) if applicable for the given transaction.  This override prevents signature confirmation requests from being transmitted back to the calling program and continues processing as if a acceptSignature() was initiated by the caller.
+  * SaleRequest (extends TransactionRequest)
+    * (TipMode) tipMode was added to specify the location from which to accept the tip.  You can now provide a tip up front or specify no tip to override the merchant configured (on screen/on paper) settings. **NOTE** If you desire to take the tip on paper, populate the signatureEntryLocation with ON_PAPER
+    Possible values:
+      * TIP_PROVIDED - tip is included in the request
+      * ON_SCREEN_BEFORE_PAYMENT - valid when requested via Mini or Mobile
+      * NO_TIP - tip will not be requested for this payment
 
 ## Getting Connected
 1. Download the USB Pay Display app from the Clover App Market on your Clover Mini Dev Kit.
