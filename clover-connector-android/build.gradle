@@ -1,5 +1,5 @@
 group = 'com.clover.sdk'
-version = '1.1.0.1'
+version = '1.2'
 
 apply plugin: 'android-library'
 
@@ -21,8 +21,8 @@ android {
   buildToolsVersion "25.0.0"
 
   defaultConfig {
-    minSdkVersion 16
-    targetSdkVersion 16
+    minSdkVersion 17
+    targetSdkVersion 21
   }
 
   packagingOptions {

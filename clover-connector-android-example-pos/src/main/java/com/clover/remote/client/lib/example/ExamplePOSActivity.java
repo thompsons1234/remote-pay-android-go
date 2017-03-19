@@ -1143,6 +1143,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     request.setSignatureEntryLocation(store.getSignatureEntryLocation());
     request.setSignatureThreshold(store.getSignatureThreshold());
     request.setDisableReceiptSelection(store.getDisableReceiptOptions());
+    request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
     cloverConnector.preAuth(request);
   }
 
