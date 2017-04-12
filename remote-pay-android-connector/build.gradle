@@ -33,6 +33,7 @@ android {
 defaultTasks 'install'
 
 dependencies {
+  compile 'com.clover.sdk:clovergoclient:2.0-SNAPSHOT'
 
   compile 'com.clover:clover-remote-interface:195'
   compile 'com.clover.sdk:clover-android-sdk:168'

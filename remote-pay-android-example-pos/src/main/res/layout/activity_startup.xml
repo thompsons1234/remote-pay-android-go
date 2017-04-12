@@ -16,7 +16,13 @@
                 android:layout_height="wrap_content"
                 android:checked="true"
                 android:text="USB Clover Connector"
-                android:id="@+id/usbRadioButton" android:layout_centerVertical="true" android:layout_alignLeft="@+id/lanRadioButton"/>
+                android:id="@+id/usbRadioButton" android:layout_centerVertical="true" android:layout_alignLeft="@+id/goRadioButton"/>
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Clover Go"
+            android:id="@+id/goRadioButton" android:layout_centerVertical="true" android:layout_alignLeft="@+id/lanRadioButton"/>
         <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

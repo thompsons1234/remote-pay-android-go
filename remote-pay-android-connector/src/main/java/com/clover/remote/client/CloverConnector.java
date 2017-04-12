@@ -41,7 +41,6 @@ import com.clover.remote.client.messages.CloseoutRequest;
 import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.CloverDeviceEvent;
-import com.clover.remote.client.messages.PairingCodeMessage;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.ManualRefundResponse;
@@ -68,7 +67,6 @@ import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
-import com.clover.remote.client.messages.remote.PairingCodeRemoteMessage;
 import com.clover.remote.message.DiscoveryResponseMessage;
 import com.clover.remote.order.DisplayOrder;
 import com.clover.remote.order.operation.OrderDeletedOperation;
@@ -92,13 +90,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class CloverConnector implements ICloverConnector {
-
-  private static final int KIOSK_CARD_ENTRY_METHODS = 1 << 15;
-  public static final int CARD_ENTRY_METHOD_MAG_STRIPE = 0b0001 | 0b0001_00000000 | KIOSK_CARD_ENTRY_METHODS; // 33026
-  public static final int CARD_ENTRY_METHOD_ICC_CONTACT = 0b0010 | 0b0010_00000000 | KIOSK_CARD_ENTRY_METHODS; // 33282
-  public static final int CARD_ENTRY_METHOD_NFC_CONTACTLESS = 0b0100 | 0b0100_00000000 | KIOSK_CARD_ENTRY_METHODS; // 33796
-  public static final int CARD_ENTRY_METHOD_MANUAL = 0b1000 | 0b1000_00000000 | KIOSK_CARD_ENTRY_METHODS; // 34824
+public class CloverConnector extends DefaultCloverConnector {
 
   public static final InputOption CANCEL_INPUT_OPTION = new InputOption(KeyPress.ESC, "Cancel");
 
@@ -107,12 +99,10 @@ public class CloverConnector implements ICloverConnector {
   private Object lastRequest;
 
   // manual is not enabled by default
-  private final int cardEntryMethods = CARD_ENTRY_METHOD_MAG_STRIPE | CARD_ENTRY_METHOD_ICC_CONTACT | CARD_ENTRY_METHOD_NFC_CONTACTLESS;// | CARD_ENTRY_METHOD_MANUAL;
+  private final int cardEntryMethods = Constants.CARD_ENTRY_METHOD_MAG_STRIPE | Constants.CARD_ENTRY_METHOD_ICC_CONTACT | Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS;// | CARD_ENTRY_METHOD_MANUAL;
 
   protected CloverDevice device;
   private InnerDeviceObserver deviceObserver;
-
-  private CloverConnectorBroadcaster broadcaster = new CloverConnectorBroadcaster();
 
   private MerchantInfo merchantInfo;
 
@@ -127,20 +117,12 @@ public class CloverConnector implements ICloverConnector {
   }
 
   /**
-   * CloverConnector constructor
+   * CloverConnector constructor - package private
    *
    * @param config - A CloverDeviceConfiguration object; TestDeviceConfiguration can be used for testing
    */
-  public CloverConnector(CloverDeviceConfiguration config) {
+  CloverConnector(CloverDeviceConfiguration config) {
     this.configuration = config;
-  }
-
-  public void addCloverConnectorListener(ICloverConnectorListener connectorListener) {
-    broadcaster.add(connectorListener);
-  }
-
-  public void removeCloverConnectorListener(ICloverConnectorListener connectorListener) {
-    broadcaster.remove(connectorListener);
   }
 
   /**
