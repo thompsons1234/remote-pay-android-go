@@ -44,6 +44,7 @@ public class StartupActivity extends Activity {
   public static final String LAN_PAY_DISPLAY_URL = "LAN_PAY_DISPLAY_URL";
   public static final String CONNECTION_MODE = "CONNECTION_MODE";
   public static final String USB = "USB";
+  public static final String GO = "GO";
   public static final String LAN = "LAN";
 
   @Override protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +101,11 @@ public class StartupActivity extends Activity {
     String config = null;
 
 
-    if(group.getCheckedRadioButtonId() == R.id.usbRadioButton) {
+    if (group.getCheckedRadioButtonId() == R.id.goRadioButton) {
+      config = "GO";
+      editor.putString(CONNECTION_MODE, GO);
+      editor.commit();
+    } else if (group.getCheckedRadioButtonId() == R.id.usbRadioButton) {
       config = "USB";
       editor.putString(CONNECTION_MODE, USB);
       editor.commit();
@@ -120,12 +125,10 @@ public class StartupActivity extends Activity {
       }
     }
 
-    if(config.equals("USB") || (config.equals("WS") && uri != null)) {
+    if (config.equals("USB") || config.equals("GO") || (config.equals("WS") && uri != null)) {
       intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
       intent.putExtra(ExamplePOSActivity.EXTRA_WS_ENDPOINT, uri);
       startActivity(intent);
     }
-
   }
-
 }

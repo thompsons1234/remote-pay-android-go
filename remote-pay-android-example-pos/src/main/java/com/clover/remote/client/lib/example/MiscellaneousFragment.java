@@ -21,7 +21,6 @@ import android.app.Fragment;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,13 +29,12 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ExpandableListAdapter;
-import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Switch;
 import com.clover.remote.client.CloverConnector;
+import com.clover.remote.client.Constants;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.lib.example.model.OrderObserver;
 import com.clover.remote.client.lib.example.model.POSDiscount;
@@ -48,7 +46,6 @@ import com.clover.remote.client.lib.example.model.POSRefund;
 import com.clover.remote.client.lib.example.model.POSStore;
 import com.clover.remote.client.messages.SaleRequest;
 import com.clover.sdk.v3.payments.DataEntryLocation;
-import com.clover.sdk.v3.payments.TipMode;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -160,10 +157,10 @@ public class MiscellaneousFragment extends Fragment {
     ArrayAdapter<String> customAdapter = new ArrayAdapter<String>(this.getActivity().getBaseContext(), android.R.layout.simple_list_item_1, samples);
     customActivityId.setAdapter(customAdapter);
 
-    manualSwitch.setTag(CloverConnector.CARD_ENTRY_METHOD_MANUAL);
-    swipeSwitch.setTag(CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE);
-    chipSwitch.setTag(CloverConnector.CARD_ENTRY_METHOD_ICC_CONTACT);
-    contactlessSwitch.setTag(CloverConnector.CARD_ENTRY_METHOD_NFC_CONTACTLESS);
+    manualSwitch.setTag(Constants.CARD_ENTRY_METHOD_MANUAL);
+    swipeSwitch.setTag(Constants.CARD_ENTRY_METHOD_MAG_STRIPE);
+    chipSwitch.setTag(Constants.CARD_ENTRY_METHOD_ICC_CONTACT);
+    contactlessSwitch.setTag(Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS);
 
     EditText.OnFocusChangeListener signatureThresholdChangeListener = new EditText.OnFocusChangeListener() {
 
@@ -407,15 +404,15 @@ public class MiscellaneousFragment extends Fragment {
     if (manualSwitch != null) {
 
       updatingSwitches = true;
-      CloverConnector cc = (CloverConnector)cloverConnectorWeakReference.get();
+      ICloverConnector cc = (ICloverConnector)cloverConnectorWeakReference.get();
       if(cc == null) {
         Log.e(getClass().getSimpleName(), "Clover Connector Weak Reference is null");
         return;
       }
-      manualSwitch.setChecked((store.getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_MANUAL) == CloverConnector.CARD_ENTRY_METHOD_MANUAL);
-      contactlessSwitch.setChecked((store.getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_NFC_CONTACTLESS) == CloverConnector.CARD_ENTRY_METHOD_NFC_CONTACTLESS);
-      chipSwitch.setChecked((store.getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_ICC_CONTACT) == CloverConnector.CARD_ENTRY_METHOD_ICC_CONTACT);
-      swipeSwitch.setChecked((store.getCardEntryMethods() & CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE) == CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE);
+      manualSwitch.setChecked((store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_MANUAL) == Constants.CARD_ENTRY_METHOD_MANUAL);
+      contactlessSwitch.setChecked((store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS) == Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS);
+      chipSwitch.setChecked((store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_ICC_CONTACT) == Constants.CARD_ENTRY_METHOD_ICC_CONTACT);
+      swipeSwitch.setChecked((store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_MAG_STRIPE) == Constants.CARD_ENTRY_METHOD_MAG_STRIPE);
 
       printingSwitch.setChecked(store.getDisablePrinting() != null ? store.getDisablePrinting() : false);
       disableReceiptOptionsSwitch.setChecked(store.getDisableReceiptOptions() != null ? store.getDisableReceiptOptions() : false);

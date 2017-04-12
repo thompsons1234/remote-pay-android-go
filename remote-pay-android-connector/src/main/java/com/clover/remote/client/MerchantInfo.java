@@ -19,7 +19,9 @@ package com.clover.remote.client;
 import com.clover.remote.message.DiscoveryResponseMessage;
 
 public class MerchantInfo {
-  public MerchantInfo(){}
+
+  public MerchantInfo() {}
+
   public MerchantInfo(DiscoveryResponseMessage drm) {
     merchantID = drm.merchantId;
     merchantMID = drm.merchantMId;
@@ -34,6 +36,13 @@ public class MerchantInfo {
     supportsAuths = drm.supportsTipAdjust;
     supportsVaultCards = drm.supportsManualRefund;
   }
+
+  public MerchantInfo(String merchantID) {
+    this.merchantID = merchantID;
+    this.merchantName = merchantID;
+    this.merchantMID = merchantID;
+  }
+
   DeviceInfo deviceInfo = new DeviceInfo();
 
   String merchantID;

@@ -17,7 +17,7 @@
 package com.clover.remote.client.lib.example.model;
 
 import com.clover.remote.PendingPaymentEntry;
-import com.clover.remote.client.CloverConnector;
+import com.clover.remote.client.Constants;
 import com.clover.remote.client.messages.SaleRequest;
 import com.clover.sdk.v3.payments.DataEntryLocation;
 
@@ -47,7 +47,7 @@ public class POSStore {
   private transient List<StoreObserver> storeObservers = new ArrayList<StoreObserver>();
 
 
-  private int cardEntryMethods = CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE | CloverConnector.CARD_ENTRY_METHOD_NFC_CONTACTLESS | CloverConnector.CARD_ENTRY_METHOD_ICC_CONTACT;
+  private int cardEntryMethods = Constants.CARD_ENTRY_METHOD_MAG_STRIPE | Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS | Constants.CARD_ENTRY_METHOD_ICC_CONTACT;
   private Boolean approveOfflinePaymentWithoutPrompt;
   private Boolean allowOfflinePayment;
   private Boolean disablePrinting;
