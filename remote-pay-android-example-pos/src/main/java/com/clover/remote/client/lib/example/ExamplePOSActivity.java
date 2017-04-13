@@ -45,8 +45,7 @@ import android.widget.Toast;
 import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
-import com.clover.remote.client.CloverConnector;
-import com.clover.remote.client.CloverConnectorFactory;
+import com.clover.remote.client.ConnectorFactory;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.ICloverConnectorListener;
 import com.clover.remote.client.MerchantInfo;
@@ -97,8 +96,6 @@ import com.clover.remote.message.TipAddedMessage;
 import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.DataEntryLocation;
 import com.clover.sdk.v3.payments.Payment;
-import com.clover.sdk.v3.payments.TipMode;
-import com.clover.sdk.v3.payments.TransactionSettings;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -216,7 +213,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       return;
     }
 
-    cloverConnector = CloverConnectorFactory.createCloverConnector(config);
+    cloverConnector = ConnectorFactory.createCloverConnector(config);
 
     initialize();
 
@@ -395,16 +392,18 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
             LinearLayout ll = (LinearLayout) findViewById(R.id.DeviceOptionsPanel);
             ll.removeAllViews();
 
-            for (final InputOption io : deviceEvent.getInputOptions()) {
-              Button btn = new Button(ExamplePOSActivity.this);
-              btn.setText(io.description);
-              btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                  cloverConnector.invokeInputOption(io);
-                }
-              });
-              ll.addView(btn);
+            if (deviceEvent.getInputOptions() != null) {
+              for (final InputOption io : deviceEvent.getInputOptions()) {
+                Button btn = new Button(ExamplePOSActivity.this);
+                btn.setText(io.description);
+                btn.setOnClickListener(new View.OnClickListener() {
+                  @Override
+                  public void onClick(View v) {
+                    cloverConnector.invokeInputOption(io);
+                  }
+                });
+                ll.addView(btn);
+              }
             }
           }
         });
