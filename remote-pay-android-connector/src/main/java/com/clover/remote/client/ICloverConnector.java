@@ -16,6 +16,7 @@
 
 package com.clover.remote.client;
 
+<<<<<<< HEAD
 import android.graphics.Bitmap;
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
@@ -38,6 +39,9 @@ import java.io.Serializable;
 import java.util.List;
 
 public interface ICloverConnector extends Serializable, IPaymentConnector, IDeviceConnector, IPrintConnector {
+=======
+public interface ICloverConnector extends IPaymentConnector, IDeviceConnector, IPrintConnector {
+>>>>>>> a5f1b07e5f8cef5acbe8407d1acbf56b2bd64479
 
   /**
    * Initialize the CloverConnector's connection. Must be called before calling any other method other than to add or remove listeners

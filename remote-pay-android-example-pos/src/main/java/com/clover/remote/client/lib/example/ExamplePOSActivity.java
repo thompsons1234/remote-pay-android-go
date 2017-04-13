@@ -428,12 +428,20 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
             AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
             builder.setTitle("Read Card Data Response");
             if (response.isSuccess()) {
+<<<<<<< HEAD
 
               LayoutInflater inflater = ExamplePOSActivity.this.getLayoutInflater();
 
               View view = inflater.inflate(R.layout.card_data_table, null);
               ListView listView = (ListView) view.findViewById(R.id.cardDataListView);
 
+=======
+
+              LayoutInflater inflater = ExamplePOSActivity.this.getLayoutInflater();
+
+              View view = inflater.inflate(R.layout.card_data_table, null);
+              ListView listView = (ListView) view.findViewById(R.id.cardDataListView);
+>>>>>>> a5f1b07e5f8cef5acbe8407d1acbf56b2bd64479
 
               if (listView != null) {
                 class RowData {
@@ -442,6 +450,16 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                     this.text2 = value;
                   }
 
+<<<<<<< HEAD
+=======
+              if (listView != null) {
+                class RowData {
+                  RowData(String label, String value) {
+                    this.text1 = label;
+                    this.text2 = value;
+                  }
+
+>>>>>>> a5f1b07e5f8cef5acbe8407d1acbf56b2bd64479
                   String text1;
                   String text2;
                 }
@@ -858,6 +876,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       public void onPrintPaymentMerchantCopyReceipt(PrintPaymentMerchantCopyReceiptMessage ppmcrm) {
         showMessage("Print Request for MerchantCopy of a Payment Receipt", Toast.LENGTH_SHORT);
       }
+<<<<<<< HEAD
 
       @Override
       public void onPrintRefundPaymentReceipt(PrintRefundPaymentReceiptMessage pprrm) {
@@ -871,6 +890,16 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     };
 
+=======
+
+      @Override
+      public void onPrintRefundPaymentReceipt(PrintRefundPaymentReceiptMessage pprrm) {
+        showMessage("Print Request for RefundPayment Receipt", Toast.LENGTH_SHORT);
+      }
+
+    };
+
+>>>>>>> a5f1b07e5f8cef5acbe8407d1acbf56b2bd64479
     cloverConnector.addCloverConnectorListener(ccListener);
     cloverConnector.initializeConnection();
     updateComponentsWithNewCloverConnector();
