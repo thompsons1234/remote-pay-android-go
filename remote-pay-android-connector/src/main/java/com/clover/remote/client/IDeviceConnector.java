@@ -1,6 +1,7 @@
 package com.clover.remote.client;
 
 import com.clover.remote.InputOption;
+import com.clover.remote.client.messages.CustomActivityRequest;
 import com.clover.remote.order.DisplayOrder;
 
 public interface IDeviceConnector {

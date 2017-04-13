@@ -5,6 +5,7 @@ import com.clover.remote.InputOption;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.CapturePreAuthRequest;
 import com.clover.remote.client.messages.CloseoutRequest;
+import com.clover.remote.client.messages.CustomActivityRequest;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.ReadCardDataRequest;
@@ -186,5 +187,10 @@ public class DefaultCloverConnector implements ICloverConnector {
   @Override
   public void closeout(CloseoutRequest request) {
     
+  }
+
+  @Override
+  public void startCustomActivity(CustomActivityRequest request) {
+
   }
 }

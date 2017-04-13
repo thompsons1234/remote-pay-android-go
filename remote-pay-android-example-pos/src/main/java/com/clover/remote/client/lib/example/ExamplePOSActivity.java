@@ -16,36 +16,6 @@
 
 package com.clover.remote.client.lib.example;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.SystemClock;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.Spinner;
-import android.widget.Switch;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
@@ -67,7 +37,6 @@ import com.clover.remote.client.lib.example.model.POSPayment;
 import com.clover.remote.client.lib.example.model.POSRefund;
 import com.clover.remote.client.lib.example.model.POSStore;
 import com.clover.remote.client.lib.example.utils.CurrencyUtils;
-import com.clover.remote.client.messages.ActivityMessage;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
 import com.clover.remote.client.messages.CloseoutRequest;
@@ -103,6 +72,34 @@ import com.clover.remote.message.TipAddedMessage;
 import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.DataEntryLocation;
 import com.clover.sdk.v3.payments.Payment;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.SystemClock;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.Switch;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -428,20 +425,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
             AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
             builder.setTitle("Read Card Data Response");
             if (response.isSuccess()) {
-<<<<<<< HEAD
 
               LayoutInflater inflater = ExamplePOSActivity.this.getLayoutInflater();
 
               View view = inflater.inflate(R.layout.card_data_table, null);
               ListView listView = (ListView) view.findViewById(R.id.cardDataListView);
-
-=======
-
-              LayoutInflater inflater = ExamplePOSActivity.this.getLayoutInflater();
-
-              View view = inflater.inflate(R.layout.card_data_table, null);
-              ListView listView = (ListView) view.findViewById(R.id.cardDataListView);
->>>>>>> a5f1b07e5f8cef5acbe8407d1acbf56b2bd64479
 
               if (listView != null) {
                 class RowData {
@@ -450,16 +438,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                     this.text2 = value;
                   }
 
-<<<<<<< HEAD
-=======
-              if (listView != null) {
-                class RowData {
-                  RowData(String label, String value) {
-                    this.text1 = label;
-                    this.text2 = value;
-                  }
-
->>>>>>> a5f1b07e5f8cef5acbe8407d1acbf56b2bd64479
                   String text1;
                   String text2;
                 }
@@ -876,7 +854,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       public void onPrintPaymentMerchantCopyReceipt(PrintPaymentMerchantCopyReceiptMessage ppmcrm) {
         showMessage("Print Request for MerchantCopy of a Payment Receipt", Toast.LENGTH_SHORT);
       }
-<<<<<<< HEAD
 
       @Override
       public void onPrintRefundPaymentReceipt(PrintRefundPaymentReceiptMessage pprrm) {
@@ -890,16 +867,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     };
 
-=======
-
-      @Override
-      public void onPrintRefundPaymentReceipt(PrintRefundPaymentReceiptMessage pprrm) {
-        showMessage("Print Request for RefundPayment Receipt", Toast.LENGTH_SHORT);
-      }
-
-    };
-
->>>>>>> a5f1b07e5f8cef5acbe8407d1acbf56b2bd64479
     cloverConnector.addCloverConnectorListener(ccListener);
     cloverConnector.initializeConnection();
     updateComponentsWithNewCloverConnector();
