@@ -68,6 +68,7 @@ public class MiscellaneousFragment extends Fragment {
   private Switch chipSwitch;
   private Switch contactlessSwitch;
   private RadioGroup allowOfflineRG;
+  private RadioGroup forceOfflineRG;
   private RadioGroup approveOfflineNoPromptRG;
   private Switch printingSwitch;
   private Spinner tipModeSpinner;
@@ -142,6 +143,7 @@ public class MiscellaneousFragment extends Fragment {
     chipSwitch = ((Switch)view.findViewById(R.id.ChipSwitch));
     contactlessSwitch = ((Switch)view.findViewById(R.id.ContactlessSwitch));
     allowOfflineRG = (RadioGroup) view.findViewById(R.id.AcceptOfflinePaymentRG);
+    forceOfflineRG = (RadioGroup) view.findViewById(R.id.ForceOfflinePaymentRG);
     approveOfflineNoPromptRG = (RadioGroup) view.findViewById(R.id.ApproveOfflineWithoutPromptRG);
     tipModeSpinner = ((Spinner) view.findViewById(R.id.TipModeSpinner));
     tipAmountText = ((EditText) view.findViewById(R.id.tipAmount));
@@ -202,6 +204,15 @@ public class MiscellaneousFragment extends Fragment {
               case R.id.acceptOfflineTrue : { allowOffline = true; break; }
             }
             store.setAllowOfflinePayment(allowOffline);
+          } else if (group == forceOfflineRG) {
+            int checkedRadioButtonId = group.getCheckedRadioButtonId();
+            Boolean forceOffline = null;
+            switch (checkedRadioButtonId) {
+              case R.id.forceOfflineDefault:  { forceOffline = null; break; }
+              case R.id.forceOfflineFalse: { forceOffline = false; break; }
+              case R.id.forceOfflineTrue: { forceOffline = true; break; }
+            }
+            store.setForceOfflinePayment(forceOffline);
           } else if (group == approveOfflineNoPromptRG) {
             int checkedRadioButtonId = group.getCheckedRadioButtonId();
             Boolean approveWOPrompt = null;
@@ -269,6 +280,7 @@ public class MiscellaneousFragment extends Fragment {
     contactlessSwitch.setOnCheckedChangeListener(changeListener);
 
     allowOfflineRG.setOnCheckedChangeListener(radioGroupChangeListener);
+    forceOfflineRG.setOnCheckedChangeListener(radioGroupChangeListener);
     approveOfflineNoPromptRG.setOnCheckedChangeListener(radioGroupChangeListener);
 
     ArrayList<String> values = new ArrayList<>();
@@ -430,6 +442,10 @@ public class MiscellaneousFragment extends Fragment {
       ((RadioButton) view.findViewById(R.id.acceptOfflineDefault)).setChecked(allowOfflinePayment == null);
       ((RadioButton) view.findViewById(R.id.acceptOfflineTrue)).setChecked(allowOfflinePayment != null && allowOfflinePayment);
       ((RadioButton) view.findViewById(R.id.acceptOfflineFalse)).setChecked(allowOfflinePayment != null && !allowOfflinePayment);
+      Boolean forceOfflinePayment = store.getForceOfflinePayment();
+      ((RadioButton) view.findViewById(R.id.forceOfflineDefault)).setChecked(forceOfflinePayment == null);
+      ((RadioButton) view.findViewById(R.id.forceOfflineTrue)).setChecked(forceOfflinePayment != null && forceOfflinePayment);
+      ((RadioButton) view.findViewById(R.id.forceOfflineFalse)).setChecked(forceOfflinePayment != null && !forceOfflinePayment);
       Boolean approveOfflinePaymentWithoutPrompt = store.getApproveOfflinePaymentWithoutPrompt();
       ((RadioButton) view.findViewById(R.id.approveOfflineWithoutPromptDefault)).setChecked(approveOfflinePaymentWithoutPrompt == null);
       ((RadioButton) view.findViewById(R.id.approveOfflineWithoutPromptTrue)).setChecked(approveOfflinePaymentWithoutPrompt != null && allowOfflinePayment);

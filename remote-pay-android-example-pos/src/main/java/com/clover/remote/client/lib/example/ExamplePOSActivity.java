@@ -283,6 +283,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     store.setDisableReceiptOptions(true);
     store.setDisableDuplicateChecking(true);
     store.setAllowOfflinePayment(true);
+    store.setForceOfflinePayment(true);
     store.setApproveOfflinePaymentWithoutPrompt(true);
     store.setAutomaticSignatureConfirmation(true);
     store.setAutomaticPaymentConfirmation(true);

@@ -31,6 +31,7 @@ public class SaleRequest extends TransactionRequest {
   private Boolean disableTipOnScreen = null;
   private Long taxAmount = null;
   private Boolean allowOfflinePayment = null;
+  private Boolean forceOfflinePayment = null;
   private Boolean approveOfflinePaymentWithoutPrompt = null;
   private TipMode tipMode = null;
 
@@ -132,7 +133,25 @@ public class SaleRequest extends TransactionRequest {
   */
   public Boolean getAllowOfflinePayment() {
     return this.allowOfflinePayment;
-  }  
+  }
+
+  /**
+   * Set the field value
+   * If true then the payment will be taken offline
+   *
+   */
+  public void setForceOfflinePayment(Boolean forceOfflinePayment) {
+    this.forceOfflinePayment = forceOfflinePayment;
+  }
+
+  /**
+   * Get the field value
+   * If true then the payment will be taken offline
+   */
+  public Boolean getForceOfflinePayment() {
+    return this.forceOfflinePayment;
+  }
+
   /**
   * Set the field value
   * If true then offline payments will be approved without a prompt
