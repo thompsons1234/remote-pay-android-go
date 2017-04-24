@@ -27,6 +27,7 @@ public class AuthRequest extends TransactionRequest {
   private Long tippableAmount = null;
   private Boolean allowOfflinePayment = null;
   private Boolean approveOfflinePaymentWithoutPrompt = null;
+  private Boolean forceOfflinePayment = null;
 
   public AuthRequest(long amount, String externalId) {
     super(amount, externalId);
@@ -73,12 +74,30 @@ public class AuthRequest extends TransactionRequest {
   }
 
   /**
+   * Set the field value
+   * If true then the payment will be taken offline
+   *
+   */
+  public void setForceOfflinePayment(Boolean forceOfflinePayment) {
+    this.forceOfflinePayment = forceOfflinePayment;
+  }
+
+  /**
   * Get the field value
   * If true then offline payments can be accepted
   */
   public Boolean getAllowOfflinePayment() {
     return this.allowOfflinePayment;
-  }  
+  }
+
+  /**
+   * Get the field value
+   * If true then the payment will be taken offline
+   */
+  public Boolean getForceOfflinePayment() {
+    return this.forceOfflinePayment;
+  }
+
   /**
   * Set the field value
   * If true then offline payments will be approved without a prompt.  Currently must be true.

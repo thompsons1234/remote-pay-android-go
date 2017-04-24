@@ -160,6 +160,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     SaleRequest request = new SaleRequest(store.getCurrentOrder().getTotal(), ExamplePOSActivity.getNextId());
     request.setCardEntryMethods(store.getCardEntryMethods());
     request.setAllowOfflinePayment(store.getAllowOfflinePayment());
+    request.setForceOfflinePayment(store.getForceOfflinePayment());
     request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
     request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
     request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
@@ -187,6 +188,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), ExamplePOSActivity.getNextId());
     request.setCardEntryMethods(store.getCardEntryMethods());
     request.setAllowOfflinePayment(store.getAllowOfflinePayment());
+    request.setForceOfflinePayment(store.getForceOfflinePayment());
     request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
     request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
     request.setTaxAmount(store.getCurrentOrder().getTaxAmount());

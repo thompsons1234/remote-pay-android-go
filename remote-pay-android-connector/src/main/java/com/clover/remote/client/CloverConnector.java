@@ -264,6 +264,9 @@ public class CloverConnector implements ICloverConnector {
         if(req.getAllowOfflinePayment() != null) {
           transactionSettings.setAllowOfflinePayment(req.getAllowOfflinePayment());
         }
+        if(req.getForceOfflinePayment() != null) {
+          transactionSettings.setForceOfflinePayment(req.getForceOfflinePayment());
+        }
         if(req.getApproveOfflinePaymentWithoutPrompt() != null) {
           transactionSettings.setApproveOfflinePaymentWithoutPrompt(req.getApproveOfflinePaymentWithoutPrompt());
         }
@@ -279,6 +282,9 @@ public class CloverConnector implements ICloverConnector {
         // shared with AuthRequest
         if(req.getAllowOfflinePayment() != null) {
           transactionSettings.setAllowOfflinePayment(req.getAllowOfflinePayment());
+        }
+        if(req.getForceOfflinePayment() != null) {
+          transactionSettings.setForceOfflinePayment(req.getForceOfflinePayment());
         }
         if(req.getApproveOfflinePaymentWithoutPrompt() != null) {
           transactionSettings.setApproveOfflinePaymentWithoutPrompt(req.getApproveOfflinePaymentWithoutPrompt());
