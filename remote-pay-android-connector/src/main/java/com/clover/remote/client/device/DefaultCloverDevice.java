@@ -19,10 +19,15 @@ package com.clover.remote.client.device;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
+
 import com.clover.common2.payments.PayIntent;
 import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
+import com.clover.remote.RetrieveDeviceStatusOptions;
+import com.clover.remote.client.messages.ResultCode;
+import com.clover.remote.message.RetrieveDeviceStatusRequestMessage;
+import com.clover.remote.message.RetrieveDeviceStatusResponseMessage;
 import com.clover.sdk.v3.payments.TransactionSettings;
 import com.clover.remote.client.CloverDeviceObserver;
 import com.clover.remote.client.messages.ReadCardDataResponse;
@@ -89,6 +94,7 @@ import com.clover.remote.order.operation.OrderDeletedOperation;
 import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Payment;
+
 import com.google.gson.Gson;
 
 import java.util.HashMap;
@@ -146,17 +152,17 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
       Method m = null;
 
       try {
-          RemoteMessage.Type msgType = rMessage.type;
-          if(msgType == RemoteMessage.Type.PING) {
-             sendPong(rMessage);
-          } else if(msgType == RemoteMessage.Type.COMMAND) {
-            try {
-              m = Method.valueOf(rMessage.method);
-            } catch(IllegalArgumentException iae) {
-              Log.e(TAG, "Unsupported method type: " + rMessage.method);
-            }
-            if(m != null) {
-              switch (m) {
+        RemoteMessage.Type msgType = rMessage.type;
+        if (msgType == RemoteMessage.Type.PING) {
+          sendPong(rMessage);
+        } else if (msgType == RemoteMessage.Type.COMMAND) {
+          try {
+            m = Method.valueOf(rMessage.method);
+          } catch (IllegalArgumentException iae) {
+            Log.e(TAG, "Unsupported method type: " + rMessage.method);
+          }
+          if (m != null) {
+            switch (m) {
               case BREAK:
                 break;
               case CASHBACK_SELECTED:
@@ -277,15 +283,15 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
                 //Outbound no-op
                 break;
               case PRINT_CREDIT:
-                CreditPrintMessage cpm = (CreditPrintMessage)Message.fromJsonString(rMessage.payload);
+                CreditPrintMessage cpm = (CreditPrintMessage) Message.fromJsonString(rMessage.payload);
                 notifyObserversPrintCredit(cpm);
                 break;
               case PRINT_CREDIT_DECLINE:
-                DeclineCreditPrintMessage dcpm = (DeclineCreditPrintMessage)Message.fromJsonString(rMessage.payload);
+                DeclineCreditPrintMessage dcpm = (DeclineCreditPrintMessage) Message.fromJsonString(rMessage.payload);
                 notifyObserversPrintCreditDecline(dcpm);
                 break;
               case PRINT_PAYMENT:
-                PaymentPrintMessage ppm = (PaymentPrintMessage)Message.fromJsonString(rMessage.payload);
+                PaymentPrintMessage ppm = (PaymentPrintMessage) Message.fromJsonString(rMessage.payload);
                 notifyObserversPrintPayment(ppm);
                 break;
               case PRINT_PAYMENT_DECLINE:
@@ -351,17 +357,24 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
               case CLOSEOUT_REQUEST:
                 //Outbound no-op
                 break;
+              case RETRIEVE_DEVICE_STATUS_REQUEST:
+                break;
+              case RETRIEVE_DEVICE_STATUS_RESPONSE:
+                RetrieveDeviceStatusResponseMessage rdsr = (RetrieveDeviceStatusResponseMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversRetrieveDeviceStatusResponse(rdsr);
+                break;
+
               default:
                 Log.e(TAG, "Don't support COMMAND messages of method: " + rMessage.method);
                 break;
-              }
-            } else {
-              // let's see if it is a pairing code message, which isn't a subclass of RemoteMessage
-              Log.e(TAG, "Method is null");
             }
           } else {
-            Log.e(TAG, "Don't support messages of type: " + rMessage.type.toString());
+            // let's see if it is a pairing code message, which isn't a subclass of RemoteMessage
+            Log.e(TAG, "Method is null");
           }
+        } else {
+          Log.e(TAG, "Don't support messages of type: " + rMessage.type.toString());
+        }
 
       } catch (Exception e) {
         Log.e(TAG, "Error processing message: " + rMessage.payload);
@@ -383,12 +396,13 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   private void notifyObserverAck(final AcknowledgementMessage ackMessage) {
     synchronized (ackLock) {
       AsyncTask ackTask = msgIdToTask.remove(ackMessage.sourceMessageId);
-      if(ackTask != null) {
+      if (ackTask != null) {
         ackTask.execute();
       }
       // go ahead and notify listeners of the ACK
       new AsyncTask() {
-        @Override protected Object doInBackground(Object[] params) {
+        @Override
+        protected Object doInBackground(Object[] params) {
           for (final CloverDeviceObserver observer : deviceObservers) {
             observer.onMessageAck(ackMessage.sourceMessageId);
           }
@@ -400,7 +414,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   private void notifyObserversReadCardData(final CardDataResponseMessage rcdrm) {
     new AsyncTask() {
-      @Override protected Object doInBackground(Object[] params) {
+      @Override
+      protected Object doInBackground(Object[] params) {
         for (final CloverDeviceObserver observer : deviceObservers) {
           observer.onReadCardResponse(rcdrm.status, rcdrm.reason, rcdrm.cardData);
         }
@@ -411,7 +426,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   private void notifyObserversActivityResponse(final ActivityResponseMessage arm) {
     new AsyncTask() {
-      @Override protected Object doInBackground(Object[] params) {
+      @Override
+      protected Object doInBackground(Object[] params) {
         for (final CloverDeviceObserver observer : deviceObservers) {
           ResultStatus status = arm.resultCode == -1 ? ResultStatus.SUCCESS : ResultStatus.CANCEL;
           observer.onActivityResponse(status, arm.action, arm.payload, arm.failReason);
@@ -423,7 +439,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   private void notifyObserversPrintMessage(final RefundPaymentPrintMessage rppm) {
     new AsyncTask() {
-      @Override protected Object doInBackground(Object[] params) {
+      @Override
+      protected Object doInBackground(Object[] params) {
         for (final CloverDeviceObserver observer : deviceObservers) {
           observer.onPrintRefundPayment(rppm.payment, rppm.order, rppm.refund);
         }
@@ -434,7 +451,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   private void notifyObserversPrintMerchantCopy(final PaymentPrintMerchantCopyMessage ppmcm) {
     new AsyncTask() {
-      @Override protected Object doInBackground(Object[] params) {
+      @Override
+      protected Object doInBackground(Object[] params) {
         for (final CloverDeviceObserver observer : deviceObservers) {
           observer.onPrintMerchantReceipt(ppmcm.payment);
         }
@@ -445,7 +463,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   private void notifyObserversPrintPaymentDecline(final DeclinePaymentPrintMessage dppm) {
     new AsyncTask() {
-      @Override protected Object doInBackground(Object[] params) {
+      @Override
+      protected Object doInBackground(Object[] params) {
         for (final CloverDeviceObserver observer : deviceObservers) {
           observer.onPrintPaymentDecline(dppm.payment, dppm.reason);
         }
@@ -456,7 +475,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   private void notifyObserversPrintPayment(final PaymentPrintMessage ppm) {
     new AsyncTask() {
-      @Override protected Object doInBackground(Object[] params) {
+      @Override
+      protected Object doInBackground(Object[] params) {
         for (final CloverDeviceObserver observer : deviceObservers) {
           observer.onPrintPayment(ppm.payment, ppm.order);
         }
@@ -465,9 +485,22 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     }.execute();
   }
 
+  private void notifyObserversRetrieveDeviceStatusResponse(final RetrieveDeviceStatusResponseMessage rdsr) {
+    new AsyncTask() {
+      @Override
+      protected Object doInBackground(Object[] params) {
+        for (final CloverDeviceObserver observer : deviceObservers) {
+          observer.onDeviceStatusResponse(ResultCode.SUCCESS, rdsr.reason, rdsr.state, rdsr.data);
+        }
+        return null;
+      }
+    }.execute();
+  }
+
   private void notifyObserversPrintCredit(final CreditPrintMessage cpm) {
     new AsyncTask() {
-      @Override protected Object doInBackground(Object[] params) {
+      @Override
+      protected Object doInBackground(Object[] params) {
         for (final CloverDeviceObserver observer : deviceObservers) {
           observer.onPrintCredit(cpm.credit);
         }
@@ -478,7 +511,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   private void notifyObserversPrintCreditDecline(final DeclineCreditPrintMessage dcpm) {
     new AsyncTask() {
-      @Override protected Object doInBackground(Object[] params) {
+      @Override
+      protected Object doInBackground(Object[] params) {
         for (final CloverDeviceObserver observer : deviceObservers) {
           observer.onPrintCreditDecline(dcpm.credit, dcpm.reason);
         }
@@ -648,7 +682,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
       protected Object doInBackground(Object[] params) {
         Object[] challenges = confirmPaymentMessage.challenges.toArray(new Challenge[0]);
         for (CloverDeviceObserver observer : deviceObservers) {
-          observer.onConfirmPayment(confirmPaymentMessage.payment, (Challenge[])challenges);
+          observer.onConfirmPayment(confirmPaymentMessage.payment, (Challenge[]) challenges);
         }
         return null;
       }
@@ -852,10 +886,9 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
         }
       };
 
-      if(!supportsAcks()) {
+      if (!supportsAcks()) {
         aTask.execute();
-      }
-      else {
+      } else {
         // we will send back response after we get an ack
         msgIdToTask.put(msgId, aTask);
       }
@@ -917,6 +950,11 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     sendObjectMessage(new BreakMessage());
   }
 
+  @Override
+  public void doRetrieveDeviceStatus(RetrieveDeviceStatusOptions options) {
+    sendObjectMessage(new RetrieveDeviceStatusRequestMessage(options));
+  }
+
   public void dispose() {
     deviceObservers.clear();
     refRespMsg = null;
@@ -930,6 +968,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   private String sendObjectMessage(Message message) {
     return sendObjectMessage(message, 1);
   }
+
   private String sendObjectMessage(Message message, int version) {
     if (message == null) {
       Log.d(getClass().getName(), "Message is null");
@@ -950,6 +989,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     sendRemoteMessage(remoteMessage);
     return messageId;
   }
+
   private void sendRemoteMessage(RemoteMessage remoteMessage) {
     String msg = gson.toJson(remoteMessage);
     Log.d(getClass().getSimpleName(), "Sending: " + msg);

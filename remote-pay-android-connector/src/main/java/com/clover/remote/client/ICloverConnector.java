@@ -19,6 +19,7 @@ package com.clover.remote.client;
 import android.graphics.Bitmap;
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
+import com.clover.remote.RetrieveDeviceStatusOptions;
 import com.clover.remote.client.messages.CustomActivityRequest;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.CapturePreAuthRequest;
@@ -46,12 +47,14 @@ public interface ICloverConnector extends Serializable {
 
   /**
    * add an ICloverConnectorListener to receive callbacks
+   *
    * @param listener
    */
   public void addCloverConnectorListener(ICloverConnectorListener listener);
 
   /**
    * remove an ICloverConnectorListener from receiving callbacks
+   *
    * @param listener
    */
   public void removeCloverConnectorListener(ICloverConnectorListener listener);
@@ -87,7 +90,7 @@ public interface ICloverConnector extends Serializable {
   /**
    * If payment confirmation is required during a Sale, this method rejects the payment
    *
-   * @param payment -
+   * @param payment   -
    * @param challenge -
    **/
   void rejectPayment(Payment payment, Challenge challenge);
@@ -178,6 +181,7 @@ public interface ICloverConnector extends Serializable {
 
   /**
    * Print an image on the Clover Mini printer
+   *
    * @param url
    */
   void printImageFromURL(String url);
@@ -266,4 +270,15 @@ public interface ICloverConnector extends Serializable {
    * start an custom activity on the device
    */
   void startCustomActivity(CustomActivityRequest request);
+
+  /**
+   * retrieve the status of the device
+   */
+  void retrieveDeviceStatus();
+
+  /**
+   * retrieve the status of the device, and conditionally re-send the last response
+   */
+  void retrieveDeviceStatus(RetrieveDeviceStatusOptions options);
+
 }

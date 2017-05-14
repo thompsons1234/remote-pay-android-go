@@ -19,6 +19,9 @@ package com.clover.remote.client;
 import com.clover.common2.Signature2;
 import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
+import com.clover.remote.ExternalDeviceState;
+import com.clover.remote.ExternalDeviceStateData;
+import com.clover.remote.ExternalDeviceSubState;
 import com.clover.remote.InputOption;
 import com.clover.remote.KeyPress;
 import com.clover.remote.PendingPaymentEntry;
@@ -28,6 +31,7 @@ import com.clover.remote.TxState;
 import com.clover.remote.UiState;
 import com.clover.remote.client.device.CloverDevice;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
+import com.clover.remote.client.messages.ResultCode;
 import com.clover.remote.message.DiscoveryResponseMessage;
 import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.order.VoidReason;
@@ -101,4 +105,6 @@ public interface CloverDeviceObserver {
   void onReadCardResponse(ResultStatus status, String reason, CardData cardData);
 
   void onActivityResponse(ResultStatus status, String action, String payload, String failReason);
+
+  void onDeviceStatusResponse(ResultCode result, String reason, ExternalDeviceState state, ExternalDeviceStateData data);
 }

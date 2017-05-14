@@ -137,22 +137,47 @@
             <Button
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:text="Reset Device"
+                    android:text="Get Device Status (Resend)"
                     android:layout_weight=".5"
-                    android:onClick="onResetDeviceClick"
-                    android:id="@+id/ResetButton"
+                    android:onClick="onGetDeviceStatusCBClick"
+                    android:id="@+id/GetDeviceStatusButtonCB"
                     android:layout_below="@+id/button4"
                     android:layout_alignParentLeft="true"
-                    android:layout_alignRight="@+id/button3" android:backgroundTint="@color/warning_red"/>
+                    android:layout_alignRight="@+id/button3"/>
+            <Button android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".5"
+                    android:text="Get Device Status"
+                    android:onClick="onGetDeviceStatusClick"
+                    android:id="@+id/GetDeviceStatusButton"
+            />
+        </LinearLayout>
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:id="@+id/ReadCardDataBox"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ResetBox"
+            android:layout_toStartOf="@+id/button2" android:layout_alignRight="@+id/WelcomeThankYouBox">
             <Button android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight=".5"
                     android:text="Read Card Data"
                     android:onClick="onReadCardDataClick"
                     android:id="@+id/ReadCardDataButton"
-            />
+                />
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:text="Reset Device"
+                android:layout_weight=".5"
+                android:onClick="onResetDeviceClick"
+                android:id="@+id/ResetButton"
+                android:layout_below="@+id/button4"
+                android:layout_alignParentLeft="true"
+                android:layout_alignRight="@+id/button3" android:backgroundTint="@color/warning_red"/>
         </LinearLayout>
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/CustomActivityBox" android:orientation="vertical" android:layout_below="@id/ResetBox"
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/CustomActivityBox" android:orientation="vertical" android:layout_below="@id/ReadCardDataBox"
                       android:layout_alignRight="@+id/WelcomeThankYouBox">
             <EditText
                     android:layout_width="match_parent"
