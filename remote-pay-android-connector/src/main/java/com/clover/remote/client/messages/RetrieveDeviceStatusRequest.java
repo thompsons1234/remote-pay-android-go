@@ -1,10 +1,10 @@
 package com.clover.remote.client.messages;
 
-import com.clover.remote.RetrieveDeviceStatusOptions;
+import com.clover.remote.DeviceStatusRequest;
 
 public class RetrieveDeviceStatusRequest {
 
-  public RetrieveDeviceStatusRequest(RetrieveDeviceStatusOptions options) {
+  public RetrieveDeviceStatusRequest(DeviceStatusRequest request) {
 
   }
 }

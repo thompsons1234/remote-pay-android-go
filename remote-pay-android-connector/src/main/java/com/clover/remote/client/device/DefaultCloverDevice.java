@@ -24,7 +24,7 @@ import com.clover.common2.payments.PayIntent;
 import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
-import com.clover.remote.RetrieveDeviceStatusOptions;
+import com.clover.remote.DeviceStatusRequest;
 import com.clover.remote.client.messages.ResultCode;
 import com.clover.remote.message.RetrieveDeviceStatusRequestMessage;
 import com.clover.remote.message.RetrieveDeviceStatusResponseMessage;
@@ -951,8 +951,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   }
 
   @Override
-  public void doRetrieveDeviceStatus(RetrieveDeviceStatusOptions options) {
-    sendObjectMessage(new RetrieveDeviceStatusRequestMessage(options));
+  public void doRetrieveDeviceStatus(DeviceStatusRequest request) {
+    sendObjectMessage(new RetrieveDeviceStatusRequestMessage(request));
   }
 
   public void dispose() {

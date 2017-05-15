@@ -16,40 +16,10 @@
 
 package com.clover.remote.client.lib.example;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.SystemClock;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.Spinner;
-import android.widget.Switch;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
+import com.clover.remote.DeviceStatusRequest;
 import com.clover.remote.InputOption;
-import com.clover.remote.RetrieveDeviceStatusOptions;
 import com.clover.remote.client.CloverConnector;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.ICloverConnectorListener;
@@ -67,7 +37,6 @@ import com.clover.remote.client.lib.example.model.POSPayment;
 import com.clover.remote.client.lib.example.model.POSRefund;
 import com.clover.remote.client.lib.example.model.POSStore;
 import com.clover.remote.client.lib.example.utils.CurrencyUtils;
-import com.clover.remote.client.messages.ActivityMessage;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
 import com.clover.remote.client.messages.CloseoutRequest;
@@ -104,8 +73,34 @@ import com.clover.remote.message.TipAddedMessage;
 import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.DataEntryLocation;
 import com.clover.sdk.v3.payments.Payment;
-import com.clover.sdk.v3.payments.TipMode;
-import com.clover.sdk.v3.payments.TransactionSettings;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.SystemClock;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.Switch;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -1232,12 +1227,13 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void onGetDeviceStatusClick(View view) {
-    cloverConnector.retrieveDeviceStatus();
+    cloverConnector.retrieveDeviceStatus(null);
   }
 
   public void onGetDeviceStatusCBClick(View view) {
-    RetrieveDeviceStatusOptions options = new RetrieveDeviceStatusOptions(true);
-    cloverConnector.retrieveDeviceStatus(options);
+    DeviceStatusRequest request = new DeviceStatusRequest();
+    request.sendLastMessage = true;
+    cloverConnector.retrieveDeviceStatus(request);
   }
 
   private static final SecureRandom random = new SecureRandom();

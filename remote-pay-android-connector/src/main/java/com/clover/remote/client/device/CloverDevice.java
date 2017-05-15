@@ -20,7 +20,7 @@ import android.graphics.Bitmap;
 import com.clover.common2.payments.PayIntent;
 import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
-import com.clover.remote.RetrieveDeviceStatusOptions;
+import com.clover.remote.DeviceStatusRequest;
 import com.clover.remote.client.CloverDeviceObserver;
 import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.order.DisplayOrder;
@@ -114,6 +114,6 @@ public abstract class CloverDevice {
 
   public abstract void doStartActivity(String action, String payload, boolean nonBlocking);
 
-  public abstract void doRetrieveDeviceStatus(RetrieveDeviceStatusOptions options);
+  public abstract void doRetrieveDeviceStatus(DeviceStatusRequest request);
 
 }

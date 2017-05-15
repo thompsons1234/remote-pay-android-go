@@ -19,7 +19,7 @@ package com.clover.remote.client;
 import android.graphics.Bitmap;
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
-import com.clover.remote.RetrieveDeviceStatusOptions;
+import com.clover.remote.DeviceStatusRequest;
 import com.clover.remote.client.messages.CustomActivityRequest;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.CapturePreAuthRequest;
@@ -28,6 +28,7 @@ import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.ReadCardDataRequest;
 import com.clover.remote.client.messages.RefundPaymentRequest;
+import com.clover.remote.client.messages.RetrieveDeviceStatusRequest;
 import com.clover.remote.client.messages.SaleRequest;
 import com.clover.remote.client.messages.TipAdjustAuthRequest;
 import com.clover.remote.client.messages.VerifySignatureRequest;
@@ -271,14 +272,10 @@ public interface ICloverConnector extends Serializable {
    */
   void startCustomActivity(CustomActivityRequest request);
 
-  /**
-   * retrieve the status of the device
-   */
-  void retrieveDeviceStatus();
 
   /**
    * retrieve the status of the device, and conditionally re-send the last response
    */
-  void retrieveDeviceStatus(RetrieveDeviceStatusOptions options);
+  void retrieveDeviceStatus(DeviceStatusRequest request);
 
 }

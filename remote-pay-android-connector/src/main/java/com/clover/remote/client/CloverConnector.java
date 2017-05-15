@@ -27,7 +27,7 @@ import com.clover.remote.InputOption;
 import com.clover.remote.KeyPress;
 import com.clover.remote.PendingPaymentEntry;
 import com.clover.remote.ResultStatus;
-import com.clover.remote.RetrieveDeviceStatusOptions;
+import com.clover.remote.DeviceStatusRequest;
 import com.clover.remote.TxStartResponseResult;
 import com.clover.remote.TxState;
 import com.clover.remote.UiState;
@@ -759,18 +759,12 @@ public class CloverConnector implements ICloverConnector {
   }
 
   @Override
-  public void retrieveDeviceStatus(RetrieveDeviceStatusOptions options) {
+  public void retrieveDeviceStatus(DeviceStatusRequest request) {
     if (device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In resetDevice: The Clover device is not connected."));
     } else {
-      device.doRetrieveDeviceStatus(options);
+      device.doRetrieveDeviceStatus(request);
     }
-  }
-
-
-  @Override
-  public void retrieveDeviceStatus() {
-    retrieveDeviceStatus(new RetrieveDeviceStatusOptions());
   }
 
   private int getCardEntryMethods() {
