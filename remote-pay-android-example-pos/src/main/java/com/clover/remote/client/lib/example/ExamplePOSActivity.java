@@ -185,6 +185,16 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           runOnUiThread(new Runnable() {
             @Override
             public void run() {
+              // If we previously created a dialog and the pairing failed, reuse
+              // the dialog previously created so that we don't get a stack of dialogs
+              if (pairingCodeDialog != null) {
+                pairingCodeDialog.setMessage("Enter pairing code: " + pairingCode);
+              } else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
+                builder.setTitle("Pairing Code");
+                builder.setMessage("Enter pairing code: " + pairingCode);
+                pairingCodeDialog = builder.create();
+              }
               AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
               builder.setTitle("Pairing Code");
               builder.setMessage("Enter pairing code: " + pairingCode);
@@ -864,7 +874,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       @Override
       public void onRetrieveDeviceStatusResponse(RetrieveDeviceStatusResponse response) {
         showMessage((response.isSuccess() ? "Success!" : "Failed!") + " State: " + response.getState()
-                    +  " ExternalActivityId: " + response.getData().toString()
+                    + " ExternalActivityId: " + response.getData().toString()
                     + " reason: " + response.getReason(), Toast.LENGTH_LONG);
 
       }
