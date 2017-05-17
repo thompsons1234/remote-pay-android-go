@@ -195,10 +195,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                 builder.setMessage("Enter pairing code: " + pairingCode);
                 pairingCodeDialog = builder.create();
               }
-              AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
-              builder.setTitle("Pairing Code");
-              builder.setMessage("Enter pairing code: " + pairingCode);
-              pairingCodeDialog = builder.create();
               pairingCodeDialog.show();
             }
           });
