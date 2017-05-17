@@ -73,7 +73,6 @@ public class CloverDeviceEvent {
     // tender handling flow
     HANDLE_TENDER,
 
-    CUSTOM_ACTIVITY,
     // starting custom activity, called from RTKA
     STARTING_CUSTOM_ACTIVITY
   }

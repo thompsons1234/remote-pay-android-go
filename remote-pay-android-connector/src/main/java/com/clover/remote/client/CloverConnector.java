@@ -42,6 +42,8 @@ import com.clover.remote.client.messages.CloseoutRequest;
 import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.CloverDeviceEvent;
+import com.clover.remote.client.messages.MessageFromActivity;
+import com.clover.remote.client.messages.MessageToActivity;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.CustomActivityRequest;
 import com.clover.remote.client.messages.CustomActivityResponse;
@@ -616,10 +618,22 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
+  @Override
+  public void sendMessageToActivity(MessageToActivity request) {
+    if(device == null || !isReady) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In sendMessageToActivity: The Clover device is not connected."));
+    } else if (request == null) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In sendMessageToActivity: Invalid argument. Null is not allowed."));
+    } else {
+      device.doSendMessageToActivity(request.action, request.payload);
+    }
+  }
 
   public void closeout(CloseoutRequest request) {
     if (device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In closeout: CloseoutRequest - The Clover device is not connected."));
+    } else if (request == null) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In closeout: Invalid argument. Null is not allowed."));
     } else {
       device.doCloseout(request.isAllowOpenTabs(), request.getBatchId());
     }
@@ -774,7 +788,7 @@ public class CloverConnector implements ICloverConnector {
   @Override
   public void startCustomActivity(CustomActivityRequest request) {
     if (device == null || !isReady) {
-      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In promptForTip: The Clover device is not connected."));
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In startCustomActivity: The Clover device is not connected."));
     } else {
       device.doStartActivity(request.action, request.getPayload(), request.isNonBlocking());
     }
@@ -891,6 +905,12 @@ public class CloverConnector implements ICloverConnector {
       }
     }
 
+    @Override
+    public void onMessageFromActivity(String actionId, String payload) {
+      MessageFromActivity messageFromActivity = new MessageFromActivity(actionId, payload);
+      cloverConnector.broadcaster.notifyOnActivityMessage(messageFromActivity);
+    }
+
     public void onReadCardDataResponse(ResultCode code, String category, String message) {
       boolean success = code == ResultCode.SUCCESS;
       ReadCardDataResponse rcdr = new ReadCardDataResponse(success, code);
@@ -899,9 +919,10 @@ public class CloverConnector implements ICloverConnector {
       cloverConnector.broadcaster.notifyOnReadCardDataResponse(rcdr);
     }
 
-    public void onActivityResponse(ResultStatus status, String action, String payload, String failReason) {
+    @Override
+    public void onActivityResponse(ResultStatus status, String payload, String failReason, String actionId) {
       boolean success = status == ResultStatus.SUCCESS;
-      CustomActivityResponse car = new CustomActivityResponse(success, success ? ResultCode.SUCCESS : ResultCode.CANCEL, action, payload, failReason);
+      CustomActivityResponse car = new CustomActivityResponse(success, success ? ResultCode.SUCCESS : ResultCode.CANCEL, payload, failReason, actionId);
       cloverConnector.broadcaster.notifyOnActivityResponse(car);
     }
 

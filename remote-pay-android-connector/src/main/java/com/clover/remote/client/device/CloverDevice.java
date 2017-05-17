@@ -112,6 +112,8 @@ public abstract class CloverDevice {
 
   public abstract void doReadCardData(PayIntent payment);
 
+  public abstract void doSendMessageToActivity(String actionId, String payload);
+
   public abstract void doStartActivity(String action, String payload, boolean nonBlocking);
 
   public abstract void doRetrieveDeviceStatus(DeviceStatusRequest request);

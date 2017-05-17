@@ -34,7 +34,7 @@
                 android:name=".StartupActivity"
                 android:label="@string/title_activity_example_pos"
                 android:windowSoftInputMode="stateHidden"
-                android:screenOrientation="landscape">
+                android:screenOrientation="sensor">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -43,7 +43,7 @@
         <activity
             android:name=".ExamplePOSActivity"
             android:label="@string/title_activity_example_pos"
-            android:screenOrientation="landscape" >
+            android:screenOrientation="sensor" >
         </activity>
     </application>
 

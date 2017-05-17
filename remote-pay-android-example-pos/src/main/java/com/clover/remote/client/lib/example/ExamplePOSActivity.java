@@ -27,6 +27,8 @@ import com.clover.remote.client.MerchantInfo;
 import com.clover.remote.client.device.CloverDeviceConfiguration;
 import com.clover.remote.client.device.USBCloverDeviceConfiguration;
 import com.clover.remote.client.device.WebSocketCloverDeviceConfiguration;
+import com.clover.remote.client.lib.example.model.CustomerInfo;
+import com.clover.remote.client.lib.example.model.CustomerInfoMessage;
 import com.clover.remote.client.lib.example.model.POSCard;
 import com.clover.remote.client.lib.example.model.POSDiscount;
 import com.clover.remote.client.lib.example.model.POSExchange;
@@ -36,6 +38,10 @@ import com.clover.remote.client.lib.example.model.POSOrder;
 import com.clover.remote.client.lib.example.model.POSPayment;
 import com.clover.remote.client.lib.example.model.POSRefund;
 import com.clover.remote.client.lib.example.model.POSStore;
+import com.clover.remote.client.lib.example.model.PayloadMessage;
+import com.clover.remote.client.lib.example.model.PhoneNumberMessage;
+import com.clover.remote.client.lib.example.model.Rating;
+import com.clover.remote.client.lib.example.model.RatingsMessage;
 import com.clover.remote.client.lib.example.utils.CurrencyUtils;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
@@ -48,6 +54,8 @@ import com.clover.remote.client.messages.CustomActivityRequest;
 import com.clover.remote.client.messages.CustomActivityResponse;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.ManualRefundResponse;
+import com.clover.remote.client.messages.MessageFromActivity;
+import com.clover.remote.client.messages.MessageToActivity;
 import com.clover.remote.client.messages.PaymentResponse;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.PreAuthResponse;
@@ -70,12 +78,14 @@ import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.message.TipAddedMessage;
+import com.clover.sdk.v3.JsonHelper;
 import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.DataEntryLocation;
 import com.clover.sdk.v3.payments.Payment;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -101,6 +111,10 @@ import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+
 
 import java.io.InputStream;
 import java.net.URI;
@@ -123,6 +137,10 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public static final int SVR_ACTIVITY = 456;
   public static final String EXTRA_CLOVER_CONNECTOR_CONFIG = "EXTRA_CLOVER_CONNECTOR_CONFIG";
   public static final String EXTRA_WS_ENDPOINT = "WS_ENDPOINT";
+
+  private Dialog ratingsDialog;
+  private ListView ratingsList;
+  private ArrayAdapter<String> ratingsAdapter;
 
   Payment currentPayment = null;
   Challenge[] currentChallenges = null;
@@ -226,6 +244,13 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     fragmentTransaction.add(R.id.contentContainer, register, "REGISTER");
     fragmentTransaction.commit();
+
+    ratingsDialog = new Dialog(ExamplePOSActivity.this);
+    ratingsDialog.setContentView(R.layout.finalratings_layout);
+    ratingsDialog.setCancelable(true);
+    ratingsDialog.setCanceledOnTouchOutside(true);
+    ratingsList = (ListView) ratingsDialog.findViewById(R.id.ratingsList);
+    ratingsAdapter = new ArrayAdapter<>(ExamplePOSActivity.this, android.R.layout.simple_list_item_1, new String[0]);
 
   }
 
@@ -660,6 +685,25 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       }
 
       @Override
+      public void onMessageFromActivity(MessageFromActivity message) {
+        //showMessage("Custom Activity Message Received for actionId: " + message.actionId + " with payload: " + message.payload, Toast.LENGTH_LONG);
+        PayloadMessage payloadMessage = new Gson().fromJson(message.payload,PayloadMessage.class);
+        switch (payloadMessage.messageType) {
+          case REQUEST_RATINGS:
+            handleRequestRatings();
+            break;
+          case RATINGS:
+            handleRatings(message.payload);
+            break;
+          case PHONE_NUMBER:
+            handleCustomerLookup(message.payload);
+            break;
+          default:
+            Toast.makeText(getApplicationContext(), R.string.unknown_payload + payloadMessage.messageType.name(), Toast.LENGTH_LONG);
+        }
+      }
+
+      @Override
       public void onConfirmPaymentRequest(ConfirmPaymentRequest request) {
         if (request.getPayment() == null || request.getChallenges() == null) {
           showMessage("Error: The ConfirmPaymentRequest was missing the payment and/or challenges.", Toast.LENGTH_LONG);
@@ -859,6 +903,13 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       @Override
       public void onCustomActivityResponse(CustomActivityResponse response) {
         showMessage((response.isSuccess() ? "Success!" : "Failed!") + " Got: " + response.payload + " from CustomActivity: " + response.action + " reason: " + response.getReason(), 5000);
+
+        // Adding the set of the mini back to the Welcome Screen, without regard to what custom
+        // activity responded.  However, the calling POS system would likely have a more tailored flow
+        // that is based on which custom activity finished and what function they would like to have
+        // the mini run next.
+        SystemClock.sleep(4000); //wait 4 seconds
+        cloverConnector.showWelcomeScreen();
       }
 
       @Override
@@ -876,6 +927,21 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     updateComponentsWithNewCloverConnector();
   }
 
+  private void showRatingsDialog(final Rating[] ratings) {
+    ExamplePOSActivity.this.runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        final String[] ratingsStrings = new String[ratings.length];
+        for (int x=0; x<ratings.length; x++) {
+          ratingsStrings[x] = ratings[x].id + ": " + ((Integer)ratings[x].value).toString() + " Stars";
+        }
+        ratingsAdapter = new ArrayAdapter<>(ExamplePOSActivity.this, android.R.layout.simple_list_item_1, ratingsStrings);
+        ratingsList.setAdapter(ratingsAdapter);
+        ratingsDialog.show();
+      }
+    });
+
+  }
   private void setPaymentStatus(POSPayment payment, PaymentResponse response) {
     if (response.isSale()) {
       payment.setPaymentStatus(POSPayment.Status.PAID);
@@ -924,6 +990,54 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       }
     });
     confirmationDialog.show();
+  }
+
+  private void handleRequestRatings() {
+    Rating rating1 = new Rating();
+    rating1.id = "Quality";
+    rating1.question = "How would you rate the overall quality of your entree?";
+    rating1.value = 0;
+    Rating rating2 = new Rating();
+    rating2.id = "Server";
+    rating2.question = "How would you rate the overall performance of your server?";
+    rating2.value = 0;
+    Rating rating3 = new Rating();
+    rating3.id = "Value";
+    rating3.question = "How would you rate the overall value of your dining experience?";
+    rating3.value = 0;
+    Rating rating4 = new Rating();
+    rating4.id = "RepeatBusiness";
+    rating4.question = "How likely are you to dine at this establishment again in the near future?";
+    rating4.value = 0;
+    Rating[] ratings = new Rating[]{rating1, rating2, rating3, rating4};
+    RatingsMessage ratingsMessage = new RatingsMessage(ratings);
+    String ratingsListJson = ratingsMessage.toJsonString();
+    sendMessageToActivity("com.clover.cfp.activities.RatingsExample", ratingsListJson);
+  }
+
+  private void handleRatings(String payload) {
+    //showMessage(payload, Toast.LENGTH_SHORT);
+    RatingsMessage ratingsMessage = (RatingsMessage) PayloadMessage.fromJsonString(payload);
+    Rating[] ratingsPayload = ratingsMessage.ratings;
+    showRatingsDialog(ratingsPayload);
+    //for (Rating rating:ratingsPayload
+    //     ) {
+    //  String ratingString = "Rating ID: " + rating.id + " - " + rating.question + " Rating value: " + Integer.toString(rating.value);
+    //  showMessage(ratingString, Toast.LENGTH_SHORT);
+    //}
+  }
+
+  private void handleCustomerLookup(String payload) {
+    PhoneNumberMessage phoneNumberMessage = new Gson().fromJson(payload, PhoneNumberMessage.class);
+    String phoneNumber = phoneNumberMessage.phoneNumber;
+    showMessage("Just received phone number " + phoneNumber + " from the Ratings remote application.", 3000);
+    showMessage("Sending customer name Ron Burgundy to the Ratings remote application for phone number " + phoneNumber, 3000);
+    CustomerInfo customerInfo = new CustomerInfo();
+    customerInfo.customerName = "Ron Burgundy";
+    customerInfo.phoneNumber = phoneNumber;
+    CustomerInfoMessage customerInfoMessage = new CustomerInfoMessage(customerInfo);
+    String customerInfoJson = customerInfoMessage.toJsonString();
+    sendMessageToActivity("com.clover.cfp.activities.RatingsExample", customerInfoJson);
   }
 
   private void showMessage(final String msg, final int duration) {
@@ -1261,6 +1375,37 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     car.setPayload(payload);
     boolean nonBlocking = ((Switch) findViewById(R.id.customActivityBlocking)).isChecked();
     car.setNonBlocking(nonBlocking);
+
+    //If the custom activity is conversational, pass in the messageTo and messageFrom action string arrays
+    if (activityId.equals("com.clover.cfp.activities.BasicConversationalExample")) {
+      Button messageButton = (Button)findViewById(R.id.sendMessageToActivityButton);
+      if (messageButton != null) {
+        messageButton.setVisibility(View.VISIBLE);
+      }
+    } else {
+      Button messageButton = (Button)findViewById(R.id.sendMessageToActivityButton);
+      if (messageButton != null) {
+        messageButton.setVisibility(View.INVISIBLE);
+      }
+    }
+
     cloverConnector.startCustomActivity(car);
+  }
+
+  public void sendMessageToActivity(View view) {
+    String activityId = ((EditText)findViewById(R.id.activity_id)).getText().toString();
+    String payload = getResources().getText(R.string.activity_message_payload).toString();
+
+    MessageToActivity messageRequest = new MessageToActivity(activityId, payload);
+    cloverConnector.sendMessageToActivity(messageRequest);
+    Button messageButton = (Button)findViewById(R.id.sendMessageToActivityButton);
+    if (messageButton != null) {
+      messageButton.setVisibility(View.INVISIBLE);
+    }
+  }
+
+  public void sendMessageToActivity(String activityId, String payload) {
+    MessageToActivity messageRequest = new MessageToActivity(activityId, payload);
+    cloverConnector.sendMessageToActivity(messageRequest);
   }
 }

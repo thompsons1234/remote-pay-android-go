@@ -189,6 +189,8 @@
                 <AutoCompleteTextView android:layout_width="0dp" android:layout_height="wrap_content" android:inputType="textAutoComplete" android:layout_weight=".5" android:id="@+id/activity_id"
                          android:entries="@array/customIds"/>
                 <Button android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight=".5" android:text="Start" android:onClick="startActivity"/>
+                <Button android:id="@+id/sendMessageToActivityButton" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight=".5"
+                        android:text="Send Message" android:onClick="sendMessageToActivity" android:visibility="invisible"/>
             </LinearLayout>
             <Switch
                     android:layout_width="wrap_content"

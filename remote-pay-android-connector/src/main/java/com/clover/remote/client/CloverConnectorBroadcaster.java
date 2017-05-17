@@ -23,6 +23,7 @@ import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.CustomActivityResponse;
+import com.clover.remote.client.messages.MessageFromActivity;
 import com.clover.remote.client.messages.PairingCodeMessage;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.ManualRefundResponse;
@@ -211,6 +212,12 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
+  public void notifyOnActivityMessage(MessageFromActivity msg) {
+    for (ICloverConnectorListener listener : this) {
+      listener.onMessageFromActivity(msg);
+    }
+  }
+
   public void notifyOnActivityResponse(CustomActivityResponse car) {
     for (ICloverConnectorListener listener : this) {
       listener.onCustomActivityResponse(car);
@@ -222,4 +229,5 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
       listener.onRetrieveDeviceStatusResponse(rdsr);
     }
   }
+
 }

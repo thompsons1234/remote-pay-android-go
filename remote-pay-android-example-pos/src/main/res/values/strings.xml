@@ -20,6 +20,7 @@
 
   <string name="pref_title_protocol">Protocol</string>
   <string name="pref_default_protocol">ws</string>
+  <string name="activity_message_payload">{&quot;Question&quot;:&quot;Why did the Storm Trooper buy an iPhone?&quot;}</string>
 
   <string-array name="pref_protocol_list_titles">
     <item>WS</item>
@@ -29,6 +30,8 @@
     <item>ws</item>
     <item>wss</item>
   </string-array>
+
+  <string name="unknown_payload">The payload received in a message from the calling system is not a known class.  messageType = </string>
 
   <string name="pref_label_server">Device Endpoint</string>
   <string name="device_endpoint_settings_label">Device Endpoint</string>

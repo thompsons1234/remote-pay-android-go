@@ -157,7 +157,7 @@ public class MiscellaneousFragment extends Fragment {
 
     customActivityId = ((AutoCompleteTextView) view.findViewById(R.id.activity_id));
 
-    // Get a reference to the AutoCompleteTextView in the layout and assign the auto-compelete choices.
+    // Get a reference to the AutoCompleteTextView in the layout and assign the auto-complete choices.
     String[] samples = getResources().getStringArray(R.array.customIds);
     ArrayAdapter<String> customAdapter = new ArrayAdapter<String>(this.getActivity().getBaseContext(), android.R.layout.simple_list_item_1, samples);
     customActivityId.setAdapter(customAdapter);

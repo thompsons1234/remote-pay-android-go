@@ -23,6 +23,7 @@ import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.CustomActivityResponse;
+import com.clover.remote.client.messages.MessageFromActivity;
 import com.clover.remote.client.messages.PairingCodeMessage;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.ManualRefundResponse;
@@ -167,6 +168,10 @@ public abstract class DefaultCloverConnectorListener implements ICloverConnector
 
   }
 
+  @Override public void onMessageFromActivity(MessageFromActivity message) {
+
+  }
+
   @Override public void onCustomActivityResponse(CustomActivityResponse response) {
 
   }
@@ -174,4 +179,5 @@ public abstract class DefaultCloverConnectorListener implements ICloverConnector
   @Override public void onRetrieveDeviceStatusResponse(RetrieveDeviceStatusResponse response){
 
   }
+
 }

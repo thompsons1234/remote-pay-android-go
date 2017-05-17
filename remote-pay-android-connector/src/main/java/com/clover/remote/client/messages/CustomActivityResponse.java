@@ -1,13 +1,16 @@
 package com.clover.remote.client.messages;
 
-public class CustomActivityResponse extends BaseResponse {
-  public final String action;
-  public final String payload;
+import java.util.HashMap;
 
-  public CustomActivityResponse(boolean success, ResultCode code, String action, String payload, String failReason) {
+public class CustomActivityResponse extends BaseResponse {
+  public final String payload;
+  public final String failReason;
+  public final String action;
+
+  public CustomActivityResponse(boolean success, ResultCode code, String payload, String failReason, String action) {
     super(success, code);
-    super.setReason(failReason);
-    this.action = action;
     this.payload = payload;
+    this.failReason = failReason;
+    this.action = action;
   }
 }

@@ -34,6 +34,8 @@ import com.clover.remote.client.messages.ReadCardDataResponse;
 import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.client.transport.CloverTransportObserver;
 import com.clover.remote.message.AcknowledgementMessage;
+import com.clover.remote.message.ActivityMessageFromActivity;
+import com.clover.remote.message.ActivityMessageToActivity;
 import com.clover.remote.message.ActivityRequest;
 import com.clover.remote.message.ActivityResponseMessage;
 import com.clover.remote.message.BreakMessage;
@@ -106,7 +108,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   Gson gson = new Gson();
   private static int id = 0;
   private RefundResponseMessage refRespMsg;
-  private static final String REMOTE_SDK = "com.clover.cloverconnector.android:1.2";
+  private static final String REMOTE_SDK = "com.clover.cloverconnector.android:1.3.1";
 
   private String applicationId;
   Map<String, AsyncTask> msgIdToTask = new HashMap<String, AsyncTask>();
@@ -256,6 +258,10 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
               case CARD_DATA_RESPONSE:
                 CardDataResponseMessage rcdrm = (CardDataResponseMessage) Message.fromJsonString(rMessage.payload);
                 notifyObserversReadCardData(rcdrm);
+                break;
+              case ACTIVITY_MESSAGE_FROM_ACTIVITY:
+                ActivityMessageFromActivity amfa = (ActivityMessageFromActivity) Message.fromJsonString(rMessage.payload);
+                notifyObserverActivityMessage(amfa);
                 break;
               case ACTIVITY_RESPONSE:
                 ActivityResponseMessage arm = (ActivityResponseMessage) Message.fromJsonString(rMessage.payload);
@@ -424,13 +430,24 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     }.execute();
   }
 
+  private void notifyObserverActivityMessage(final ActivityMessageFromActivity amfa) {
+    new AsyncTask() {
+      @Override protected Object doInBackground(Object[] params) {
+        for (final CloverDeviceObserver observer : deviceObservers) {
+          observer.onMessageFromActivity(amfa.action, amfa.payload);
+        }
+        return null;
+      }
+    }.execute();
+  }
+
   private void notifyObserversActivityResponse(final ActivityResponseMessage arm) {
     new AsyncTask() {
       @Override
       protected Object doInBackground(Object[] params) {
         for (final CloverDeviceObserver observer : deviceObservers) {
           ResultStatus status = arm.resultCode == -1 ? ResultStatus.SUCCESS : ResultStatus.CANCEL;
-          observer.onActivityResponse(status, arm.action, arm.payload, arm.failReason);
+          observer.onActivityResponse(status, arm.payload, arm.failReason, arm.action);
         }
         return null;
       }
@@ -867,6 +884,11 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   public void doPrintImage(String url) {
     ImagePrintMessage ipm = new ImagePrintMessage(url);
     sendObjectMessage(ipm);
+  }
+
+  @Override public void doSendMessageToActivity(String actionId, String payload) {
+    ActivityMessageToActivity msg = new ActivityMessageToActivity(actionId, payload);
+    sendObjectMessage(msg);
   }
 
   public void doStartActivity(String action, String payload, boolean nonBlocking) {
