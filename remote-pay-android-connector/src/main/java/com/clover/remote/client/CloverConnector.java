@@ -61,6 +61,7 @@ import com.clover.remote.client.messages.ReadCardDataRequest;
 import com.clover.remote.client.messages.ReadCardDataResponse;
 import com.clover.remote.client.messages.RefundPaymentRequest;
 import com.clover.remote.client.messages.RefundPaymentResponse;
+import com.clover.remote.client.messages.ResetDeviceResponse;
 import com.clover.remote.client.messages.ResultCode;
 import com.clover.remote.client.messages.RetrieveDeviceStatusResponse;
 import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
@@ -930,6 +931,12 @@ public class CloverConnector implements ICloverConnector {
       boolean success = result == ResultCode.SUCCESS;
       RetrieveDeviceStatusResponse rdsr = new RetrieveDeviceStatusResponse(success, success ? ResultCode.SUCCESS : ResultCode.CANCEL, state, data);
       cloverConnector.broadcaster.notifyOnRetrieveDeviceStatusResponse(rdsr);
+    }
+
+    public void onResetDeviceResponse(ResultCode result, String reason, ExternalDeviceState state) {
+      boolean success = result == ResultCode.SUCCESS;
+      ResetDeviceResponse rdr = new ResetDeviceResponse(success, success ? ResultCode.SUCCESS : ResultCode.CANCEL, state);
+      cloverConnector.broadcaster.notifyOnResetDeviceResponse(rdr);
     }
 
     public void onReadCardDataResponse(boolean success, CardData cardData) {

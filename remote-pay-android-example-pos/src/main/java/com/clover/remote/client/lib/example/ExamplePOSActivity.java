@@ -68,6 +68,7 @@ import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
 import com.clover.remote.client.messages.ReadCardDataRequest;
 import com.clover.remote.client.messages.ReadCardDataResponse;
 import com.clover.remote.client.messages.RefundPaymentResponse;
+import com.clover.remote.client.messages.ResetDeviceResponse;
 import com.clover.remote.client.messages.ResultCode;
 import com.clover.remote.client.messages.RetrieveDeviceStatusResponse;
 import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
@@ -915,7 +916,14 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       @Override
       public void onRetrieveDeviceStatusResponse(RetrieveDeviceStatusResponse response) {
         showMessage((response.isSuccess() ? "Success!" : "Failed!") + " State: " + response.getState()
-                    +  " ExternalActivityId: " + response.getData().toString()
+                    + " ExternalActivityId: " + response.getData().toString()
+                    + " reason: " + response.getReason(), Toast.LENGTH_LONG);
+
+      }
+
+      @Override
+      public void onResetDeviceResponse(ResetDeviceResponse response) {
+        showMessage((response.isSuccess() ? "Success!" : "Failed!") + " State: " + response.getState()
                     + " reason: " + response.getReason(), Toast.LENGTH_LONG);
 
       }

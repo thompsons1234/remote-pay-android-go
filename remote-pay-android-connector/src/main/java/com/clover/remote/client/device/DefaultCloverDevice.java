@@ -25,7 +25,9 @@ import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
 import com.clover.remote.DeviceStatusRequest;
+import com.clover.remote.client.messages.ResetDeviceResponse;
 import com.clover.remote.client.messages.ResultCode;
+import com.clover.remote.message.ResetDeviceResponseMessage;
 import com.clover.remote.message.RetrieveDeviceStatusRequestMessage;
 import com.clover.remote.message.RetrieveDeviceStatusResponseMessage;
 import com.clover.sdk.v3.payments.TransactionSettings;
@@ -369,7 +371,10 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
                 RetrieveDeviceStatusResponseMessage rdsr = (RetrieveDeviceStatusResponseMessage) Message.fromJsonString(rMessage.payload);
                 notifyObserversRetrieveDeviceStatusResponse(rdsr);
                 break;
-
+              case RESET_DEVICE_RESPONSE:
+                ResetDeviceResponseMessage rdr = (ResetDeviceResponseMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversResetDeviceResponse(rdr);
+                break;
               default:
                 Log.e(TAG, "Don't support COMMAND messages of method: " + rMessage.method);
                 break;
@@ -513,6 +518,19 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
       }
     }.execute();
   }
+
+  private void notifyObserversResetDeviceResponse(final ResetDeviceResponseMessage rdr) {
+    new AsyncTask() {
+      @Override
+      protected Object doInBackground(Object[] params) {
+        for (final CloverDeviceObserver observer : deviceObservers) {
+          observer.onResetDeviceResponse(ResultCode.SUCCESS, rdr.reason, rdr.state);
+        }
+        return null;
+      }
+    }.execute();
+  }
+
 
   private void notifyObserversPrintCredit(final CreditPrintMessage cpm) {
     new AsyncTask() {
