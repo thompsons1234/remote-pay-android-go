@@ -27,6 +27,8 @@ import com.clover.remote.client.MerchantInfo;
 import com.clover.remote.client.device.CloverDeviceConfiguration;
 import com.clover.remote.client.device.USBCloverDeviceConfiguration;
 import com.clover.remote.client.device.WebSocketCloverDeviceConfiguration;
+import com.clover.remote.client.lib.example.model.ConversationQuestionMessage;
+import com.clover.remote.client.lib.example.model.ConversationResponseMessage;
 import com.clover.remote.client.lib.example.model.CustomerInfo;
 import com.clover.remote.client.lib.example.model.CustomerInfoMessage;
 import com.clover.remote.client.lib.example.model.POSCard;
@@ -108,6 +110,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -137,6 +140,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public static final int SVR_ACTIVITY = 456;
   public static final String EXTRA_CLOVER_CONNECTOR_CONFIG = "EXTRA_CLOVER_CONNECTOR_CONFIG";
   public static final String EXTRA_WS_ENDPOINT = "WS_ENDPOINT";
+
+  // Package name for example custom activities
+  public static final String CUSTOM_ACTIVITY_PACKAGE = "com.clover.cfp.activities.";
 
   private Dialog ratingsDialog;
   private ListView ratingsList;
@@ -698,6 +704,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           case PHONE_NUMBER:
             handleCustomerLookup(message.payload);
             break;
+          case CONVERSATION_RESPONSE:
+            handleJokeResponse(message.payload);
+            break;
           default:
             Toast.makeText(getApplicationContext(), R.string.unknown_payload + payloadMessage.messageType.name(), Toast.LENGTH_LONG);
         }
@@ -908,7 +917,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         // activity responded.  However, the calling POS system would likely have a more tailored flow
         // that is based on which custom activity finished and what function they would like to have
         // the mini run next.
-        SystemClock.sleep(4000); //wait 4 seconds
         cloverConnector.showWelcomeScreen();
       }
 
@@ -1038,6 +1046,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     CustomerInfoMessage customerInfoMessage = new CustomerInfoMessage(customerInfo);
     String customerInfoJson = customerInfoMessage.toJsonString();
     sendMessageToActivity("com.clover.cfp.activities.RatingsExample", customerInfoJson);
+  }
+
+  private void handleJokeResponse(String payload) {
+    ConversationResponseMessage jokeResponseMessage = (ConversationResponseMessage) PayloadMessage.fromJsonString(payload);
+    showMessage("Received JokeResponse of: " + jokeResponseMessage.message, 1000);
   }
 
   private void showMessage(final String msg, final int duration) {
@@ -1368,7 +1381,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void startActivity(View view) {
-    String activityId = ((EditText) findViewById(R.id.activity_id)).getText().toString();
+    String selectedItem = (String)((Spinner) findViewById(R.id.activity_id)).getSelectedItem();
+    String activityId = CUSTOM_ACTIVITY_PACKAGE + selectedItem;
     String payload = ((EditText) findViewById(R.id.activity_payload)).getText().toString();
 
     CustomActivityRequest car = new CustomActivityRequest(activityId);
@@ -1393,9 +1407,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void sendMessageToActivity(View view) {
-    String activityId = ((EditText)findViewById(R.id.activity_id)).getText().toString();
-    String payload = getResources().getText(R.string.activity_message_payload).toString();
-
+    String activityId = CUSTOM_ACTIVITY_PACKAGE + ((Spinner)findViewById(R.id.activity_id)).getSelectedItem().toString();
+    ConversationQuestionMessage message = new ConversationQuestionMessage("Why did the Storm Trooper buy an iPhone?");
+    String payload = message.toJsonString();
     MessageToActivity messageRequest = new MessageToActivity(activityId, payload);
     cloverConnector.sendMessageToActivity(messageRequest);
     Button messageButton = (Button)findViewById(R.id.sendMessageToActivityButton);

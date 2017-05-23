@@ -5,6 +5,6 @@ package com.clover.remote.client.lib.example.model;
  */
 public class RequestRatingsMessage extends PayloadMessage {
   public RequestRatingsMessage() {
-    super(null, RatingsMessageType.REQUEST_RATINGS);
+    super(null, MessageType.REQUEST_RATINGS);
   }
 }

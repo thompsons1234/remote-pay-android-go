@@ -6,7 +6,7 @@ package com.clover.remote.client.lib.example.model;
 public class RatingsMessage extends PayloadMessage {
   public final Rating[] ratings;
   public RatingsMessage(Rating[] ratings) {
-    super("RatingsMessage", RatingsMessageType.RATINGS);
+    super("RatingsMessage", MessageType.RATINGS);
     this.ratings = ratings;
   }
 }

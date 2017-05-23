@@ -6,7 +6,7 @@ package com.clover.remote.client.lib.example.model;
 public class PhoneNumberMessage extends PayloadMessage{
   public final String phoneNumber;
   public PhoneNumberMessage(String phoneNumber) {
-    super("PhoneNumberMessage", RatingsMessageType.PHONE_NUMBER);
+    super("PhoneNumberMessage", MessageType.PHONE_NUMBER);
     this.phoneNumber = phoneNumber;
   }
 }
