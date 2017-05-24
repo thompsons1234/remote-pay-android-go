@@ -109,4 +109,7 @@ public interface CloverDeviceObserver {
   void onActivityResponse(ResultStatus status, String payload, String failReason, String actionId);
 
   void onDeviceStatusResponse(ResultCode result, String reason, ExternalDeviceState state, ExternalDeviceStateData data);
+
+  void onResetDeviceResponse(ResultCode result, String reason, ExternalDeviceState state);
+
 }

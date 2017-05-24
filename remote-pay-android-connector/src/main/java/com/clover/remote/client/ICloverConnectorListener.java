@@ -34,6 +34,7 @@ import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
 import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
 import com.clover.remote.client.messages.ReadCardDataResponse;
 import com.clover.remote.client.messages.RefundPaymentResponse;
+import com.clover.remote.client.messages.ResetDeviceResponse;
 import com.clover.remote.client.messages.RetrieveDeviceStatusResponse;
 import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
 import com.clover.remote.client.messages.SaleResponse;
@@ -256,5 +257,12 @@ public interface ICloverConnectorListener {
    * @param response
    */
   void onRetrieveDeviceStatusResponse(RetrieveDeviceStatusResponse response);
+
+  /**
+   * Called in response to a ResetDevice request
+   *
+   * @param response
+   */
+  void onResetDeviceResponse(ResetDeviceResponse response);
 
 }

@@ -36,6 +36,7 @@ import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
 import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
 import com.clover.remote.client.messages.ReadCardDataResponse;
 import com.clover.remote.client.messages.RefundPaymentResponse;
+import com.clover.remote.client.messages.ResetDeviceResponse;
 import com.clover.remote.client.messages.RetrieveDeviceStatusResponse;
 import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
 import com.clover.remote.client.messages.SaleResponse;
@@ -177,6 +178,10 @@ public abstract class DefaultCloverConnectorListener implements ICloverConnector
   }
 
   @Override public void onRetrieveDeviceStatusResponse(RetrieveDeviceStatusResponse response){
+
+  }
+
+  @Override public void onResetDeviceResponse(ResetDeviceResponse response){
 
   }
 

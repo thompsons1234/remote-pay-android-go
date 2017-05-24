@@ -36,6 +36,7 @@ import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
 import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
 import com.clover.remote.client.messages.ReadCardDataResponse;
 import com.clover.remote.client.messages.RefundPaymentResponse;
+import com.clover.remote.client.messages.ResetDeviceResponse;
 import com.clover.remote.client.messages.RetrieveDeviceStatusResponse;
 import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
 import com.clover.remote.client.messages.SaleResponse;
@@ -227,6 +228,12 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
   public void notifyOnRetrieveDeviceStatusResponse(RetrieveDeviceStatusResponse rdsr) {
     for (ICloverConnectorListener listener : this) {
       listener.onRetrieveDeviceStatusResponse(rdsr);
+    }
+  }
+
+  public void notifyOnResetDeviceResponse(ResetDeviceResponse rdr) {
+    for (ICloverConnectorListener listener : this) {
+      listener.onResetDeviceResponse(rdr);
     }
   }
 
