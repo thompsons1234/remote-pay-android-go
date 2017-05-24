@@ -15,7 +15,7 @@ import com.google.gson.JsonParser;
  */
 public class PayloadMessage {
   public final String payloadClassName;
-  public final RatingsMessageType messageType;
+  public final MessageType messageType;
   private static final Gson GSON;
 
   static {
@@ -27,7 +27,7 @@ public class PayloadMessage {
 
   private static final JsonParser PARSER = new JsonParser();
 
-  public PayloadMessage(String payloadClassName, RatingsMessageType messageType) {
+  public PayloadMessage(String payloadClassName, MessageType messageType) {
     if (payloadClassName == null || payloadClassName.isEmpty()) {
       this.payloadClassName = "PayloadMessage";
     } else {

@@ -21,7 +21,7 @@
     android:layout_height="wrap_content"
     android:layout_width="fill_parent"
     android:orientation="horizontal"
-    android:layout_below="@+id/linearLayout2"
+    android:layout_below="@+id/TransactionSettings"
     android:layout_above="@+id/linearLayout">
   <LinearLayout
       android:orientation="vertical"
