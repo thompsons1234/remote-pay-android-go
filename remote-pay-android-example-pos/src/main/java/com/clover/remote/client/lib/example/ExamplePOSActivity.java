@@ -192,9 +192,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     initStore();
 
-    CloverDeviceConfiguration config = null;
+    CloverDeviceConfiguration config;
 
-    String configType = (String) getIntent().getStringExtra(EXTRA_CLOVER_CONNECTOR_CONFIG);
+    String configType = getIntent().getStringExtra(EXTRA_CLOVER_CONNECTOR_CONFIG);
     if ("USB".equals(configType)) {
       config = new USBCloverDeviceConfiguration(this, "Clover Example POS:1.2");
     } else if ("WS".equals(configType)) {
@@ -715,7 +715,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
             handleJokeResponse(message.payload);
             break;
           default:
-            Toast.makeText(getApplicationContext(), R.string.unknown_payload + payloadMessage.messageType.name(), Toast.LENGTH_LONG);
+            Toast.makeText(getApplicationContext(), R.string.unknown_payload + payloadMessage.messageType.name(), Toast.LENGTH_LONG).show();
         }
       }
 
@@ -923,9 +923,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           showMessage("Success! Got: " + response.payload + " from CustomActivity: " + response.action, 5000);
         } else {
           if (response.getResult().equals(ResultCode.CANCEL)) {
-            showMessage("Custom activity: " + response.action + " was canceled.  Reason: " + response.failReason, 5000);
+            showMessage("Custom activity: " + response.action + " was canceled.  Reason: " + response.getReason(), 5000);
           } else {
-            showMessage("Failure! Custom activity: " + response.action + " failed.  Reason: " + response.failReason, 5000);
+            showMessage("Failure! Custom activity: " + response.action + " failed.  Reason: " + response.getReason(), 5000);
           }
         }
       }
@@ -1351,7 +1351,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       public void run() {
         new AlertDialog.Builder(ExamplePOSActivity.this)
             .setTitle("Reset Device")
-            .setMessage(String.format("Are you sure you want to reset the device? Warning: You may lose any pending transaction information."))
+            .setMessage("Are you sure you want to reset the device? Warning: You may lose any pending transaction information.")
             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
               @Override
               public void onClick(DialogInterface dialog, int which) {
