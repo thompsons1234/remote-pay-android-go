@@ -23,6 +23,7 @@ import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.CustomActivityResponse;
+import com.clover.remote.client.messages.GetPaymentResponse;
 import com.clover.remote.client.messages.MessageFromActivity;
 import com.clover.remote.client.messages.PairingCodeMessage;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
@@ -234,6 +235,11 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
   public void notifyOnResetDeviceResponse(ResetDeviceResponse rdr) {
     for (ICloverConnectorListener listener : this) {
       listener.onResetDeviceResponse(rdr);
+    }
+  }
+  public void notifyOnGetPaymentResponse(GetPaymentResponse gpr) {
+    for (ICloverConnectorListener listener : this) {
+      listener.onGetPaymentResponse(gpr);
     }
   }
 

@@ -25,6 +25,7 @@ import com.clover.remote.ExternalDeviceSubState;
 import com.clover.remote.InputOption;
 import com.clover.remote.KeyPress;
 import com.clover.remote.PendingPaymentEntry;
+import com.clover.remote.QueryStatus;
 import com.clover.remote.ResultStatus;
 import com.clover.remote.TxStartResponseResult;
 import com.clover.remote.TxState;
@@ -111,5 +112,7 @@ public interface CloverDeviceObserver {
   void onDeviceStatusResponse(ResultCode result, String reason, ExternalDeviceState state, ExternalDeviceStateData data);
 
   void onResetDeviceResponse(ResultCode result, String reason, ExternalDeviceState state);
+
+  void onGetPaymentResponse(ResultCode result, String reason, String externalId, QueryStatus queryStatus, Payment payment);
 
 }
