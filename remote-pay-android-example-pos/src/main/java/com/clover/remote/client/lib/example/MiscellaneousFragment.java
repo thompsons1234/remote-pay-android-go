@@ -88,35 +88,43 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     fragment.setArguments(args);
 
     store.addCurrentOrderObserver(new OrderObserver() {
-      @Override public void lineItemAdded(POSOrder posOrder, POSLineItem lineItem) {
+      @Override
+      public void lineItemAdded(POSOrder posOrder, POSLineItem lineItem) {
 
       }
 
-      @Override public void lineItemRemoved(POSOrder posOrder, POSLineItem lineItem) {
+      @Override
+      public void lineItemRemoved(POSOrder posOrder, POSLineItem lineItem) {
 
       }
 
-      @Override public void lineItemChanged(POSOrder posOrder, POSLineItem lineItem) {
+      @Override
+      public void lineItemChanged(POSOrder posOrder, POSLineItem lineItem) {
 
       }
 
-      @Override public void paymentAdded(POSOrder posOrder, POSPayment payment) {
+      @Override
+      public void paymentAdded(POSOrder posOrder, POSPayment payment) {
 
       }
 
-      @Override public void refundAdded(POSOrder posOrder, POSRefund refund) {
+      @Override
+      public void refundAdded(POSOrder posOrder, POSRefund refund) {
 
       }
 
-      @Override public void paymentChanged(POSOrder posOrder, POSExchange pay) {
+      @Override
+      public void paymentChanged(POSOrder posOrder, POSExchange pay) {
 
       }
 
-      @Override public void discountAdded(POSOrder posOrder, POSDiscount discount) {
+      @Override
+      public void discountAdded(POSOrder posOrder, POSDiscount discount) {
 
       }
 
-      @Override public void discountChanged(POSOrder posOrder, POSDiscount discount) {
+      @Override
+      public void discountChanged(POSOrder posOrder, POSDiscount discount) {
 
       }
     });
@@ -128,18 +136,20 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     // Required empty public constructor
   }
 
-  @Override public void onCreate(Bundle savedInstanceState) {
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
   }
 
-  @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+  @Override
+  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     // Inflate the layout for this fragment
     View view = inflater.inflate(R.layout.fragment_miscellaneous, container, false);
 
-    manualSwitch = ((Switch)view.findViewById(R.id.ManualSwitch));
-    swipeSwitch = ((Switch)view.findViewById(R.id.SwipeSwitch));
-    chipSwitch = ((Switch)view.findViewById(R.id.ChipSwitch));
-    contactlessSwitch = ((Switch)view.findViewById(R.id.ContactlessSwitch));
+    manualSwitch = ((Switch) view.findViewById(R.id.ManualSwitch));
+    swipeSwitch = ((Switch) view.findViewById(R.id.SwipeSwitch));
+    chipSwitch = ((Switch) view.findViewById(R.id.ChipSwitch));
+    contactlessSwitch = ((Switch) view.findViewById(R.id.ContactlessSwitch));
     allowOfflineRG = (RadioGroup) view.findViewById(R.id.AcceptOfflinePaymentRG);
     forceOfflineRG = (RadioGroup) view.findViewById(R.id.ForceOfflinePaymentRG);
     approveOfflineNoPromptRG = (RadioGroup) view.findViewById(R.id.ApproveOfflineWithoutPromptRG);
@@ -190,10 +200,11 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     };
 
     RadioGroup.OnCheckedChangeListener radioGroupChangeListener = new RadioGroup.OnCheckedChangeListener() {
-      @Override public void onCheckedChanged(RadioGroup group, int checkedId) {
-        if(!updatingSwitches) {
+      @Override
+      public void onCheckedChanged(RadioGroup group, int checkedId) {
+        if (!updatingSwitches) {
           CloverConnector cc = (CloverConnector) cloverConnectorWeakReference.get();
-          if(cc == null) {
+          if (cc == null) {
             Log.e(getClass().getSimpleName(), "Clover Connector reference is null");
             return;
           }
@@ -201,36 +212,72 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
             int checkedRadioButtonId = group.getCheckedRadioButtonId();
             Boolean allowOffline = null;
             switch (checkedRadioButtonId) {
-              case R.id.acceptOfflineDefault :  { allowOffline = null; break; }
-              case R.id.acceptOfflineFalse : { allowOffline = false; break; }
-              case R.id.acceptOfflineTrue : { allowOffline = true; break; }
+              case R.id.acceptOfflineDefault: {
+                allowOffline = null;
+                break;
+              }
+              case R.id.acceptOfflineFalse: {
+                allowOffline = false;
+                break;
+              }
+              case R.id.acceptOfflineTrue: {
+                allowOffline = true;
+                break;
+              }
             }
             store.setAllowOfflinePayment(allowOffline);
           } else if (group == forceOfflineRG) {
             int checkedRadioButtonId = group.getCheckedRadioButtonId();
             Boolean forceOffline = null;
             switch (checkedRadioButtonId) {
-              case R.id.forceOfflineDefault:  { forceOffline = null; break; }
-              case R.id.forceOfflineFalse: { forceOffline = false; break; }
-              case R.id.forceOfflineTrue: { forceOffline = true; break; }
+              case R.id.forceOfflineDefault: {
+                forceOffline = null;
+                break;
+              }
+              case R.id.forceOfflineFalse: {
+                forceOffline = false;
+                break;
+              }
+              case R.id.forceOfflineTrue: {
+                forceOffline = true;
+                break;
+              }
             }
             store.setForceOfflinePayment(forceOffline);
           } else if (group == approveOfflineNoPromptRG) {
             int checkedRadioButtonId = group.getCheckedRadioButtonId();
             Boolean approveWOPrompt = null;
             switch (checkedRadioButtonId) {
-              case R.id.approveOfflineWithoutPromptDefault:  { approveWOPrompt = null; break; }
-              case R.id.approveOfflineWithoutPromptFalse: { approveWOPrompt = false; break; }
-              case R.id.approveOfflineWithoutPromptTrue: { approveWOPrompt = true; break; }
+              case R.id.approveOfflineWithoutPromptDefault: {
+                approveWOPrompt = null;
+                break;
+              }
+              case R.id.approveOfflineWithoutPromptFalse: {
+                approveWOPrompt = false;
+                break;
+              }
+              case R.id.approveOfflineWithoutPromptTrue: {
+                approveWOPrompt = true;
+                break;
+              }
             }
             store.setApproveOfflinePaymentWithoutPrompt(approveWOPrompt);
           } else if (group == signatureEntryLocationRG) {
             int checkedRadioButtonId = group.getCheckedRadioButtonId();
             DataEntryLocation sigEntryLocation = null;
             switch (checkedRadioButtonId) {
-              case R.id.sigEntryLocationNone:  { sigEntryLocation = DataEntryLocation.NONE; break; }
-              case R.id.sigEntryLocationOnScreen: { sigEntryLocation = DataEntryLocation.ON_SCREEN; break; }
-              case R.id.sigEntryLocationOnPaper: { sigEntryLocation = DataEntryLocation.ON_PAPER; break; }
+              case R.id.sigEntryLocationNone: {
+                sigEntryLocation = DataEntryLocation.NONE;
+                break;
+              }
+              case R.id.sigEntryLocationOnScreen: {
+                sigEntryLocation = DataEntryLocation.ON_SCREEN;
+                break;
+              }
+              case R.id.sigEntryLocationOnPaper: {
+                sigEntryLocation = DataEntryLocation.ON_PAPER;
+                break;
+              }
             }
             store.setSignatureEntryLocation(sigEntryLocation);
           }
@@ -239,8 +286,9 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     };
 
     CompoundButton.OnCheckedChangeListener changeListener = new CompoundButton.OnCheckedChangeListener() {
-      @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if(!updatingSwitches) {
+      @Override
+      public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (!updatingSwitches) {
           store.setCardEntryMethods(getCardEntryMethodStates());
         }
       }
@@ -288,7 +336,7 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     ArrayList<String> values = new ArrayList<>();
 
     int i = 0;
-    for (SaleRequest.TipMode tipMode: SaleRequest.TipMode.values()) {
+    for (SaleRequest.TipMode tipMode : SaleRequest.TipMode.values()) {
       values.add(i, tipMode.toString());
       i++;
     }
@@ -311,8 +359,9 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
 
     signatureEntryLocationRG.setOnCheckedChangeListener(radioGroupChangeListener);
     disableReceiptOptionsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-      @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if(!updatingSwitches) {
+      @Override
+      public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (!updatingSwitches) {
           store.setDisableReceiptOptions(isChecked);
         }
       }
@@ -320,30 +369,34 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
 
     signatureThresholdText.setOnFocusChangeListener(signatureThresholdChangeListener);
     disableDuplicateCheckSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-      @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if(!updatingSwitches) {
+      @Override
+      public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (!updatingSwitches) {
           store.setDisableDuplicateChecking(isChecked);
         }
       }
     });
 
     printingSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-      @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if(!updatingSwitches) {
+      @Override
+      public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (!updatingSwitches) {
           store.setDisablePrinting(isChecked);
         }
       }
     });
     automaticSignatureConfirmationSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-      @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if(!updatingSwitches) {
+      @Override
+      public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (!updatingSwitches) {
           store.setAutomaticSignatureConfirmation(isChecked);
         }
       }
     });
     automaticPaymentConfirmationSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-      @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if(!updatingSwitches) {
+      @Override
+      public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (!updatingSwitches) {
           store.setAutomaticPaymentConfirmation(isChecked);
         }
       }
@@ -364,8 +417,8 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
   }
 
   private SaleRequest.TipMode getTipModeFromString(String tipModeString) {
-    for (SaleRequest.TipMode tipMode: SaleRequest.TipMode.values()) {
-      if(tipMode.toString().equals(tipModeString)) {
+    for (SaleRequest.TipMode tipMode : SaleRequest.TipMode.values()) {
+      if (tipMode.toString().equals(tipModeString)) {
         return tipMode;
       }
     }
@@ -373,7 +426,7 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
   }
 
   private int getTipModePositionFromString(String value) {
-    for (int i=0; i<tipModeSpinner.getAdapter().getCount(); i++) {
+    for (int i = 0; i < tipModeSpinner.getAdapter().getCount(); i++) {
       if (tipModeSpinner.getItemAtPosition(i).toString().equals(value)) {
         return i;
       }
@@ -383,15 +436,16 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
 
   private int getCardEntryMethodStates() {
     int val = 0;
-    val |= manualSwitch.isChecked() ? (Integer)manualSwitch.getTag() : 0;
-    val |= swipeSwitch.isChecked() ? (Integer)swipeSwitch.getTag() : 0;
-    val |= chipSwitch.isChecked() ? (Integer)chipSwitch.getTag() : 0;
-    val |= contactlessSwitch.isChecked() ? (Integer)contactlessSwitch.getTag() : 0;
+    val |= manualSwitch.isChecked() ? (Integer) manualSwitch.getTag() : 0;
+    val |= swipeSwitch.isChecked() ? (Integer) swipeSwitch.getTag() : 0;
+    val |= chipSwitch.isChecked() ? (Integer) chipSwitch.getTag() : 0;
+    val |= contactlessSwitch.isChecked() ? (Integer) contactlessSwitch.getTag() : 0;
 
     return val;
   }
 
-  @Override public void onAttach(Activity activity) {
+  @Override
+  public void onAttach(Activity activity) {
     super.onAttach(activity);
     try {
       mListener = (OnFragmentInteractionListener) activity;
@@ -400,7 +454,8 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     }
   }
 
-  @Override public void onDetach() {
+  @Override
+  public void onDetach() {
     super.onDetach();
     mListener = null;
   }
@@ -435,8 +490,8 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     if (manualSwitch != null) {
 
       updatingSwitches = true;
-      CloverConnector cc = (CloverConnector)cloverConnectorWeakReference.get();
-      if(cc == null) {
+      CloverConnector cc = (CloverConnector) cloverConnectorWeakReference.get();
+      if (cc == null) {
         Log.e(getClass().getSimpleName(), "Clover Connector Weak Reference is null");
         return;
       }

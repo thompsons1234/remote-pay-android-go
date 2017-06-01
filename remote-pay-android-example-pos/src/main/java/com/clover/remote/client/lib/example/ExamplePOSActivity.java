@@ -144,7 +144,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public static final String EXTRA_WS_ENDPOINT = "WS_ENDPOINT";
 
   // Package name for example custom activities
-  public static final String CUSTOM_ACTIVITY_PACKAGE = "com.clover.cfp.activities.";
+  public static final String CUSTOM_ACTIVITY_PACKAGE = "com.clover.cfp.examples.";
 
   private Dialog ratingsDialog;
   private ListView ratingsList;
@@ -919,13 +919,16 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       @Override
       public void onCustomActivityResponse(CustomActivityResponse response) {
-        showMessage((response.isSuccess() ? "Success!" : "Failed!") + " Got: " + response.payload + " from CustomActivity: " + response.action + " reason: " + response.getReason(), 5000);
-
-        // Adding the set of the mini back to the Welcome Screen, without regard to what custom
-        // activity responded.  However, the calling POS system would likely have a more tailored flow
-        // that is based on which custom activity finished and what function they would like to have
-        // the mini run next.
-        cloverConnector.showWelcomeScreen();
+        boolean success = response.isSuccess();
+        if (success) {
+          showMessage("Success! Got: " + response.payload + " from CustomActivity: " + response.action, 5000);
+        } else {
+          if (response.getResult().equals(ResultCode.CANCEL)) {
+            showMessage("Custom activity: " + response.action + " was canceled.  Reason: " + response.failReason, 5000);
+          } else {
+            showMessage("Failure! Custom activity: " + response.action + " failed.  Reason: " + response.failReason, 5000);
+          }
+        }
       }
 
       @Override
@@ -1042,7 +1045,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     Rating[] ratings = new Rating[]{rating1, rating2, rating3, rating4};
     RatingsMessage ratingsMessage = new RatingsMessage(ratings);
     String ratingsListJson = ratingsMessage.toJsonString();
-    sendMessageToActivity("com.clover.cfp.activities.RatingsExample", ratingsListJson);
+    sendMessageToActivity("com.clover.cfp.examples.RatingsExample", ratingsListJson);
   }
 
   private void handleRatings(String payload) {
@@ -1067,7 +1070,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     customerInfo.phoneNumber = phoneNumber;
     CustomerInfoMessage customerInfoMessage = new CustomerInfoMessage(customerInfo);
     String customerInfoJson = customerInfoMessage.toJsonString();
-    sendMessageToActivity("com.clover.cfp.activities.RatingsExample", customerInfoJson);
+    sendMessageToActivity("com.clover.cfp.examples.RatingsExample", customerInfoJson);
   }
 
   private void handleJokeResponse(String payload) {
@@ -1417,7 +1420,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     car.setNonBlocking(nonBlocking);
 
     //If the custom activity is conversational, pass in the messageTo and messageFrom action string arrays
-    if (activityId.equals("com.clover.cfp.activities.BasicConversationalExample")) {
+    if (activityId.equals("com.clover.cfp.examples.BasicConversationalExample")) {
       Button messageButton = (Button) findViewById(R.id.sendMessageToActivityButton);
       if (messageButton != null) {
         messageButton.setVisibility(View.VISIBLE);

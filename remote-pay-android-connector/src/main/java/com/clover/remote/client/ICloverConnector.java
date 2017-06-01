@@ -287,8 +287,8 @@ public interface ICloverConnector extends Serializable {
   void retrieveDeviceStatus(DeviceStatusRequest request);
 
   /**
-   * Sends a request to get a paym
-   * .ent.  Only valid for payments made in the past 24 hours on the device queried
+   * Sends a request to get a payment.
+   * Only valid for payments made in the past 24 hours on the device queried
    */
   void getPayment(String externalId);
 

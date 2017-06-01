@@ -18,13 +18,13 @@
 package com.clover.remote.client.messages;
 
 public class GetPaymentRequest extends BaseRequest {
-  public void setExternalId(String externalId) {
-    this.externalId = externalId;
+  private String externalPaymentId;
+
+  public GetPaymentRequest(String externalPaymentId) {
+    this.externalPaymentId = externalPaymentId;
   }
 
-  private String externalId;
-
-  public GetPaymentRequest(String externalId) {
-    this.externalId = externalId;
+  public void setExternalId(String externalPaymentId) {
+    this.externalPaymentId = externalPaymentId;
   }
 }
