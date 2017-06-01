@@ -444,7 +444,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   private void notifyObserverActivityMessage(final ActivityMessageFromActivity amfa) {
     new AsyncTask() {
-      @Override protected Object doInBackground(Object[] params) {
+      @Override
+      protected Object doInBackground(Object[] params) {
         for (final CloverDeviceObserver observer : deviceObservers) {
           observer.onMessageFromActivity(amfa.action, amfa.payload);
         }
@@ -923,7 +924,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     sendObjectMessage(ipm);
   }
 
-  @Override public void doSendMessageToActivity(String actionId, String payload) {
+  @Override
+  public void doSendMessageToActivity(String actionId, String payload) {
     ActivityMessageToActivity msg = new ActivityMessageToActivity(actionId, payload);
     sendObjectMessage(msg);
   }
@@ -1015,8 +1017,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   }
 
   @Override
-  public void doGetPayment(String externalId) {
-    sendObjectMessage(new GetPaymentRequestMessage(externalId));
+  public void doGetPayment(String externalPaymentId) {
+    sendObjectMessage(new GetPaymentRequestMessage(externalPaymentId));
   }
 
   public void dispose() {
@@ -1027,7 +1029,6 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
       transport = null;
     }
   }
-
 
 
   private String sendObjectMessage(Message message) {

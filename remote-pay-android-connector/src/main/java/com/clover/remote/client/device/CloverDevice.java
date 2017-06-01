@@ -118,7 +118,7 @@ public abstract class CloverDevice {
 
   public abstract void doRetrieveDeviceStatus(DeviceStatusRequest request);
 
-  public abstract void doGetPayment(String externalId);
+  public abstract void doGetPayment(String externalPaymentIds);
 
 
 }

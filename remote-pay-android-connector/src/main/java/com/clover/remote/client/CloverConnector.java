@@ -271,10 +271,10 @@ public class CloverConnector implements ICloverConnector {
         if (req.getAllowOfflinePayment() != null) {
           transactionSettings.setAllowOfflinePayment(req.getAllowOfflinePayment());
         }
-        if(req.getForceOfflinePayment() != null) {
+        if (req.getForceOfflinePayment() != null) {
           transactionSettings.setForceOfflinePayment(req.getForceOfflinePayment());
         }
-        if(req.getApproveOfflinePaymentWithoutPrompt() != null) {
+        if (req.getApproveOfflinePaymentWithoutPrompt() != null) {
           transactionSettings.setApproveOfflinePaymentWithoutPrompt(req.getApproveOfflinePaymentWithoutPrompt());
         }
         if (req.getDisableCashback() != null) {
@@ -289,10 +289,10 @@ public class CloverConnector implements ICloverConnector {
         if (req.getAllowOfflinePayment() != null) {
           transactionSettings.setAllowOfflinePayment(req.getAllowOfflinePayment());
         }
-        if(req.getForceOfflinePayment() != null) {
+        if (req.getForceOfflinePayment() != null) {
           transactionSettings.setForceOfflinePayment(req.getForceOfflinePayment());
         }
-        if(req.getApproveOfflinePaymentWithoutPrompt() != null) {
+        if (req.getApproveOfflinePaymentWithoutPrompt() != null) {
           transactionSettings.setApproveOfflinePaymentWithoutPrompt(req.getApproveOfflinePaymentWithoutPrompt());
         }
         if (req.getDisableCashback() != null) {
@@ -623,7 +623,7 @@ public class CloverConnector implements ICloverConnector {
 
   @Override
   public void sendMessageToActivity(MessageToActivity request) {
-    if(device == null || !isReady) {
+    if (device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In sendMessageToActivity: The Clover device is not connected."));
     } else if (request == null) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In sendMessageToActivity: Invalid argument. Null is not allowed."));
@@ -785,11 +785,11 @@ public class CloverConnector implements ICloverConnector {
   }
 
   @Override
-  public void getPayment(String externalId) {
+  public void getPayment(String externalPaymentId) {
     if (device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In resetDevice: The Clover device is not connected."));
     } else {
-      device.doGetPayment(externalId);
+      device.doGetPayment(externalPaymentId);
     }
   }
 
@@ -950,9 +950,9 @@ public class CloverConnector implements ICloverConnector {
       cloverConnector.broadcaster.notifyOnResetDeviceResponse(rdr);
     }
 
-    public void onGetPaymentResponse(ResultCode result, String reason, String externalId, QueryStatus queryStatus, Payment payment) {
+    public void onGetPaymentResponse(ResultCode result, String reason, String externalPaymentId, QueryStatus queryStatus, Payment payment) {
       boolean success = result == ResultCode.SUCCESS;
-      GetPaymentResponse gpr = new GetPaymentResponse(result, reason, externalId, queryStatus, payment);
+      GetPaymentResponse gpr = new GetPaymentResponse(result, reason, externalPaymentId, queryStatus, payment);
       cloverConnector.broadcaster.notifyOnGetPaymentResponse(gpr);
     }
 

@@ -290,6 +290,6 @@ public interface ICloverConnector extends Serializable {
    * Sends a request to get a payment.
    * Only valid for payments made in the past 24 hours on the device queried
    */
-  void getPayment(String externalId);
+  void getPayment(String externalPaymentId);
 
 }
