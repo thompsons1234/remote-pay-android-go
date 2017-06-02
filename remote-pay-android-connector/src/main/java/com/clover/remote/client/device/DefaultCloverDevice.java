@@ -25,8 +25,11 @@ import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
 import com.clover.remote.DeviceStatusRequest;
+import com.clover.remote.client.messages.GetPaymentRequest;
 import com.clover.remote.client.messages.ResetDeviceResponse;
 import com.clover.remote.client.messages.ResultCode;
+import com.clover.remote.message.GetPaymentRequestMessage;
+import com.clover.remote.message.GetPaymentResponseMessage;
 import com.clover.remote.message.ResetDeviceResponseMessage;
 import com.clover.remote.message.RetrieveDeviceStatusRequestMessage;
 import com.clover.remote.message.RetrieveDeviceStatusResponseMessage;
@@ -371,6 +374,10 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
                 RetrieveDeviceStatusResponseMessage rdsr = (RetrieveDeviceStatusResponseMessage) Message.fromJsonString(rMessage.payload);
                 notifyObserversRetrieveDeviceStatusResponse(rdsr);
                 break;
+              case GET_PAYMENT_RESPONSE:
+                GetPaymentResponseMessage gprm = (GetPaymentResponseMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversGetPaymentResponse(gprm);
+                break;
               case RESET_DEVICE_RESPONSE:
                 ResetDeviceResponseMessage rdr = (ResetDeviceResponseMessage) Message.fromJsonString(rMessage.payload);
                 notifyObserversResetDeviceResponse(rdr);
@@ -400,7 +407,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   private void sendPong(RemoteMessage pingMessage) {
     RemoteMessage remoteMessage = new RemoteMessage(null, RemoteMessage.Type.PONG, this.packageName, null, null, REMOTE_SDK, applicationId);
-    Log.d(TAG, "Sending PONG...");
+    Log.v(TAG, "Sending PONG...");
     sendRemoteMessage(remoteMessage);
   }
 
@@ -437,7 +444,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   private void notifyObserverActivityMessage(final ActivityMessageFromActivity amfa) {
     new AsyncTask() {
-      @Override protected Object doInBackground(Object[] params) {
+      @Override
+      protected Object doInBackground(Object[] params) {
         for (final CloverDeviceObserver observer : deviceObservers) {
           observer.onMessageFromActivity(amfa.action, amfa.payload);
         }
@@ -513,6 +521,18 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
       protected Object doInBackground(Object[] params) {
         for (final CloverDeviceObserver observer : deviceObservers) {
           observer.onDeviceStatusResponse(ResultCode.SUCCESS, rdsr.reason, rdsr.state, rdsr.data);
+        }
+        return null;
+      }
+    }.execute();
+  }
+
+  private void notifyObserversGetPaymentResponse(final GetPaymentResponseMessage gprm) {
+    new AsyncTask() {
+      @Override
+      protected Object doInBackground(Object[] params) {
+        for (final CloverDeviceObserver observer : deviceObservers) {
+          observer.onGetPaymentResponse(ResultCode.SUCCESS, gprm.reason, gprm.externalPaymentId, gprm.queryStatus, gprm.payment);
         }
         return null;
       }
@@ -904,7 +924,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     sendObjectMessage(ipm);
   }
 
-  @Override public void doSendMessageToActivity(String actionId, String payload) {
+  @Override
+  public void doSendMessageToActivity(String actionId, String payload) {
     ActivityMessageToActivity msg = new ActivityMessageToActivity(actionId, payload);
     sendObjectMessage(msg);
   }
@@ -993,6 +1014,11 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   @Override
   public void doRetrieveDeviceStatus(DeviceStatusRequest request) {
     sendObjectMessage(new RetrieveDeviceStatusRequestMessage(request));
+  }
+
+  @Override
+  public void doGetPayment(String externalPaymentId) {
+    sendObjectMessage(new GetPaymentRequestMessage(externalPaymentId));
   }
 
   public void dispose() {

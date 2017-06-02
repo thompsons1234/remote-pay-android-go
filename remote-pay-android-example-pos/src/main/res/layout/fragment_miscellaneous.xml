@@ -23,39 +23,39 @@
 
   <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                   android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:background="@drawable/border"
-                  android:padding="10dip">
+                  android:layout_height="match_parent">
 
-    <TextView
-        android:text="API Examples"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/apiSection"
-        android:layout_weight=".5"
-        android:textSize="24sp"
-        android:textStyle="normal|bold"
-        android:layout_alignParentStart="true"/>
+        android:layout_height="match_parent"
+        android:id="@+id/APIButtons">
+
+      <LinearLayout
+          android:orientation="vertical"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent">
+      </LinearLayout>
+    </LinearLayout>
 
     <EditText
         android:layout_width="300dp"
+        android:layout_height="wrap_content"
         android:id="@+id/ShowMessageText"
+        android:layout_alignBottom="@+id/ShowMessageButton"
         android:layout_alignParentLeft="true"
-        android:text="Hello Message!"
-        android:layout_below="@+id/apiSection"
-        android:layout_height="45dp"/>
+        android:layout_alignEnd="@+id/PrintTextText"
+        android:text="Hello Message!"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Show Message"
         android:id="@+id/ShowMessageButton"
+        android:layout_alignParentTop="true"
         android:onClick="showMessageClick"
-        android:layout_toRightOf="@+id/ShowMessageText"
-        android:layout_alignParentLeft="false"
-        android:layout_alignParentRight="true"
-        android:layout_below="@id/apiSection"
-        android:layout_alignBottom="@+id/ShowMessageText"/>
+        android:layout_toEndOf="@+id/ShowMessageText"
+        android:layout_toRightOf="@+id/ShowMessageText"/>
 
     <EditText
         android:layout_width="300dp"
@@ -63,7 +63,7 @@
         android:inputType="textMultiLine"
         android:ems="10"
         android:id="@+id/PrintTextText"
-        android:layout_alignBottom="@+id/button2"
+        android:layout_alignBottom="@+id/PrintTextButton"
         android:layout_alignParentLeft="true"
         android:text="Print This!!!!!"/>
 
@@ -71,21 +71,42 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Print Text"
-        android:id="@+id/button2"
+        android:id="@+id/PrintTextButton"
         android:onClick="printTextClick"
         android:layout_below="@+id/ShowMessageText"
         android:layout_alignRight="@+id/ShowMessageButton"
         android:layout_toEndOf="@+id/ShowMessageText"
         android:layout_toRightOf="@+id/PrintTextText"/>
 
+    <EditText
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:ems="10"
+        android:id="@+id/QueryPaymentText"
+        android:layout_alignBottom="@+id/QueryPaymentButton"
+        android:layout_alignParentLeft="true"
+        android:text="JANRZXDFTF3JF"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Query Payment"
+        android:id="@+id/QueryPaymentButton"
+        android:onClick="queryPaymentClick"
+        android:layout_below="@+id/PrintTextButton"
+        android:layout_alignRight="@+id/PrintTextButton"
+        android:layout_toEndOf="@+id/PrintTextText"
+        android:layout_toRightOf="@+id/QueryPaymentText"/>
+
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:id="@+id/WelcomeThankYouBox"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/PrintTextText"
-        android:layout_toStartOf="@+id/button2"
-        android:layout_alignParentRight="true">
+        android:layout_below="@+id/QueryPaymentText"
+        android:layout_toStartOf="@+id/QueryPaymentButton"
+        android:layout_alignRight="@+id/QueryPaymentButton">
 
       <Button android:layout_width="100dp"
               android:layout_height="match_parent"
@@ -110,8 +131,8 @@
         android:id="@+id/CancelCashBox"
         android:layout_height="wrap_content"
         android:layout_below="@+id/WelcomeThankYouBox"
-        android:layout_toLeftOf="@+id/button2"
-        android:layout_alignParentRight="true">
+        android:layout_toLeftOf="@+id/PrintTextButton"
+        android:layout_alignRight="@+id/WelcomeThankYouBox">
 
       <Button
           android:layout_width="0dp"
@@ -141,8 +162,8 @@
         android:id="@+id/CloseoutBox"
         android:layout_height="wrap_content"
         android:layout_below="@+id/CancelCashBox"
-        android:layout_toStartOf="@+id/button2"
-        android:layout_alignParentRight="true">
+        android:layout_toStartOf="@+id/PrintTextButton"
+        android:layout_alignRight="@+id/WelcomeThankYouBox">
 
       <Button
           android:layout_width="0dp"
@@ -170,8 +191,8 @@
         android:id="@+id/ResetBox"
         android:layout_height="wrap_content"
         android:layout_below="@+id/CloseoutBox"
-        android:layout_toStartOf="@+id/button2"
-        android:layout_alignParentRight="true">
+        android:layout_toStartOf="@+id/PrintTextButton"
+        android:layout_alignRight="@+id/WelcomeThankYouBox">
 
       <Button
           android:layout_width="0dp"
@@ -199,8 +220,8 @@
         android:id="@+id/ReadCardDataBox"
         android:layout_height="wrap_content"
         android:layout_below="@+id/ResetBox"
-        android:layout_toStartOf="@+id/button2"
-        android:layout_alignParentRight="true">
+        android:layout_toStartOf="@+id/PrintTextButton"
+        android:layout_alignRight="@+id/WelcomeThankYouBox">
 
       <Button android:layout_width="0dp"
               android:layout_height="match_parent"

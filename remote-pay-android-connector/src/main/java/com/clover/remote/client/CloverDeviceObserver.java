@@ -25,6 +25,7 @@ import com.clover.remote.ExternalDeviceSubState;
 import com.clover.remote.InputOption;
 import com.clover.remote.KeyPress;
 import com.clover.remote.PendingPaymentEntry;
+import com.clover.remote.QueryStatus;
 import com.clover.remote.ResultStatus;
 import com.clover.remote.TxStartResponseResult;
 import com.clover.remote.TxState;
@@ -92,10 +93,15 @@ public interface CloverDeviceObserver {
   void onDeviceError(CloverDeviceErrorEvent errorEvent);
 
   void onPrintRefundPayment(Payment payment, Order order, Refund refund);
+
   void onPrintMerchantReceipt(Payment payment);
+
   void onPrintPaymentDecline(Payment payment, String reason);
+
   void onPrintPayment(Payment payment, Order order);
+
   void onPrintCredit(Credit credit);
+
   void onPrintCreditDecline(Credit credit, String reason);
 
   void onMessageAck(String sourceMessageId);
@@ -111,5 +117,7 @@ public interface CloverDeviceObserver {
   void onDeviceStatusResponse(ResultCode result, String reason, ExternalDeviceState state, ExternalDeviceStateData data);
 
   void onResetDeviceResponse(ResultCode result, String reason, ExternalDeviceState state);
+
+  void onGetPaymentResponse(ResultCode result, String reason, String externalPaymentId, QueryStatus queryStatus, Payment payment);
 
 }

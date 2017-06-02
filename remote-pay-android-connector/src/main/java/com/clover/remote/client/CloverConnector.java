@@ -20,14 +20,14 @@ import com.clover.common2.Signature2;
 import com.clover.common2.payments.PayIntent;
 import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
+import com.clover.remote.DeviceStatusRequest;
 import com.clover.remote.ExternalDeviceState;
 import com.clover.remote.ExternalDeviceStateData;
-import com.clover.remote.ExternalDeviceSubState;
 import com.clover.remote.InputOption;
 import com.clover.remote.KeyPress;
 import com.clover.remote.PendingPaymentEntry;
+import com.clover.remote.QueryStatus;
 import com.clover.remote.ResultStatus;
-import com.clover.remote.DeviceStatusRequest;
 import com.clover.remote.TxStartResponseResult;
 import com.clover.remote.TxState;
 import com.clover.remote.UiState;
@@ -42,13 +42,15 @@ import com.clover.remote.client.messages.CloseoutRequest;
 import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.CloverDeviceEvent;
-import com.clover.remote.client.messages.MessageFromActivity;
-import com.clover.remote.client.messages.MessageToActivity;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.CustomActivityRequest;
 import com.clover.remote.client.messages.CustomActivityResponse;
+import com.clover.remote.client.messages.GetPaymentRequest;
+import com.clover.remote.client.messages.GetPaymentResponse;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.ManualRefundResponse;
+import com.clover.remote.client.messages.MessageFromActivity;
+import com.clover.remote.client.messages.MessageToActivity;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.PrintManualRefundDeclineReceiptMessage;
@@ -269,10 +271,10 @@ public class CloverConnector implements ICloverConnector {
         if (req.getAllowOfflinePayment() != null) {
           transactionSettings.setAllowOfflinePayment(req.getAllowOfflinePayment());
         }
-        if(req.getForceOfflinePayment() != null) {
+        if (req.getForceOfflinePayment() != null) {
           transactionSettings.setForceOfflinePayment(req.getForceOfflinePayment());
         }
-        if(req.getApproveOfflinePaymentWithoutPrompt() != null) {
+        if (req.getApproveOfflinePaymentWithoutPrompt() != null) {
           transactionSettings.setApproveOfflinePaymentWithoutPrompt(req.getApproveOfflinePaymentWithoutPrompt());
         }
         if (req.getDisableCashback() != null) {
@@ -287,10 +289,10 @@ public class CloverConnector implements ICloverConnector {
         if (req.getAllowOfflinePayment() != null) {
           transactionSettings.setAllowOfflinePayment(req.getAllowOfflinePayment());
         }
-        if(req.getForceOfflinePayment() != null) {
+        if (req.getForceOfflinePayment() != null) {
           transactionSettings.setForceOfflinePayment(req.getForceOfflinePayment());
         }
-        if(req.getApproveOfflinePaymentWithoutPrompt() != null) {
+        if (req.getApproveOfflinePaymentWithoutPrompt() != null) {
           transactionSettings.setApproveOfflinePaymentWithoutPrompt(req.getApproveOfflinePaymentWithoutPrompt());
         }
         if (req.getDisableCashback() != null) {
@@ -621,7 +623,7 @@ public class CloverConnector implements ICloverConnector {
 
   @Override
   public void sendMessageToActivity(MessageToActivity request) {
-    if(device == null || !isReady) {
+    if (device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In sendMessageToActivity: The Clover device is not connected."));
     } else if (request == null) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In sendMessageToActivity: Invalid argument. Null is not allowed."));
@@ -782,6 +784,15 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
+  @Override
+  public void getPayment(String externalPaymentId) {
+    if (device == null || !isReady) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In resetDevice: The Clover device is not connected."));
+    } else {
+      device.doGetPayment(externalPaymentId);
+    }
+  }
+
   private int getCardEntryMethods() {
     return cardEntryMethods;
   }
@@ -938,6 +949,13 @@ public class CloverConnector implements ICloverConnector {
       ResetDeviceResponse rdr = new ResetDeviceResponse(success, success ? ResultCode.SUCCESS : ResultCode.CANCEL, state);
       cloverConnector.broadcaster.notifyOnResetDeviceResponse(rdr);
     }
+
+    public void onGetPaymentResponse(ResultCode result, String reason, String externalPaymentId, QueryStatus queryStatus, Payment payment) {
+      boolean success = result == ResultCode.SUCCESS;
+      GetPaymentResponse gpr = new GetPaymentResponse(result, reason, externalPaymentId, queryStatus, payment);
+      cloverConnector.broadcaster.notifyOnGetPaymentResponse(gpr);
+    }
+
 
     public void onReadCardDataResponse(boolean success, CardData cardData) {
       ReadCardDataResponse rcdr = new ReadCardDataResponse(success, success ? ResultCode.SUCCESS : ResultCode.FAIL);
