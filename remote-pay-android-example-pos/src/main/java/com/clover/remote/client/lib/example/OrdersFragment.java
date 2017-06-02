@@ -136,8 +136,10 @@ public class OrdersFragment extends Fragment implements OrderObserver {
 
         if (posExchange instanceof POSPayment) {
           if (((POSPayment)posExchange).getPaymentStatus() == POSPayment.Status.AUTHORIZED) {
+              //TODO: Remove Receipt Option for CLover GO
             options = new String[]{"Void Payment", "Refund Payment", "Tip Adjust Payment", "Receipt Options"};
           } else if (((POSPayment)posExchange).getPaymentStatus() == POSPayment.Status.PAID) {
+              //TODO: Remove Receipt Option for CLover GO
             options = new String[]{"Void Payment", "Refund Payment", "Receipt Options"};
           } else {
             return;
@@ -198,7 +200,13 @@ public class OrdersFragment extends Fragment implements OrderObserver {
                         break;
                       }
                       case "Receipt Options": {
-                        cloverConnector.displayPaymentReceiptOptions(posExchange.orderID, posExchange.getPaymentID());
+                        try{
+                          // Operation not Supported in CloverGO
+                          cloverConnector.displayPaymentReceiptOptions(posExchange.orderID, posExchange.getPaymentID());
+                        }catch (UnsupportedOperationException e){
+                          Toast.makeText(getActivity(),e.getMessage(),Toast.LENGTH_LONG).show();
+                        }
+
                         break;
                       }
 

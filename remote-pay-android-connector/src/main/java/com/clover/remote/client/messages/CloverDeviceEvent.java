@@ -75,7 +75,19 @@ public class CloverDeviceEvent {
 
     CUSTOM_ACTIVITY,
     // starting custom activity, called from RTKA
-    STARTING_CUSTOM_ACTIVITY
+    STARTING_CUSTOM_ACTIVITY,
+
+    //TODO : Rename Events Name
+    //CLOVER GO Transaction EVENTS
+    CARD_SWIPED,
+    CARD_TAPPED,
+    CANCEL_CARD_READ,
+    EMV_COMPLETE_DATA,
+    CARD_INSERTED_MSG,
+    LOW_BATTERY,
+    CARD_REMOVED_MSG,
+    PLEASE_SEE_PHONE_MSG,
+    READER_READY,
   }
 
   public CloverDeviceEvent() {

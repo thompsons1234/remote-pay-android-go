@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -221,7 +222,12 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     @Override
     public void newOrderCreated(POSOrder order, boolean userInitiated) {
       if (cloverConnector != null && userInitiated) {
-        cloverConnector.showWelcomeScreen();
+        try {
+          // Operation Not Supported in Clove Go
+          cloverConnector.showWelcomeScreen();
+        }catch (UnsupportedOperationException e){
+          Log.e("Example POS", e.getMessage());
+        }
       }
       liToDli.clear();
       displayOrder = new DisplayOrder();
@@ -270,8 +276,12 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
       items.add(dli);
       displayOrder.setLineItems(items);
       updateTotals(posOrder, displayOrder);
-      cloverConnector.showDisplayOrder(displayOrder);
-
+      try {
+        // Operation Not Supported in Clove Go
+        cloverConnector.showDisplayOrder(displayOrder);
+      }catch (UnsupportedOperationException e){
+        Log.e("Example POS", e.getMessage());
+      }
     }
 
     @Override
@@ -294,7 +304,12 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
       displayOrder.setLineItems(items);
       updateTotals(posOrder, displayOrder);
-      cloverConnector.showDisplayOrder(displayOrder);
+      try {
+        // Operation Not Supported in Clove Go
+        cloverConnector.showDisplayOrder(displayOrder);
+      }catch (UnsupportedOperationException e){
+        Log.e("Example POS", e.getMessage());
+      }
     }
 
     @Override
@@ -312,7 +327,12 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
       }
       dli.setDiscounts(dDiscounts);
       updateTotals(posOrder, displayOrder);
-      cloverConnector.showDisplayOrder(displayOrder);
+      try {
+        // Operation Not Supported in Clove Go
+        cloverConnector.showDisplayOrder(displayOrder);
+      }catch (UnsupportedOperationException e){
+        Log.e("Example POS", e.getMessage());
+      }
 
     }
 

@@ -29,13 +29,7 @@
     android:columnCount="1"
     android:rowCount="4">
   <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/TopPanel">
-    <TextView
-        android:id="@+id/ConnectionStatusLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Disconnected"
-        android:layout_gravity="fill_horizontal|center_vertical" android:layout_weight="2"
-        android:visibility="gone"/>
+
     <Button android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Register"
@@ -85,10 +79,31 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true" android:visibility="visible" android:layout_gravity="right"/>
   </LinearLayout>
+  <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/devicePanel" android:orientation="horizontal" android:layout_below="@+id/TopPanel">
+  <TextView
+      android:id="@+id/ConnectionStatusLabel"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Disconnected"
+      android:layout_weight="0.5"
+      android:layout_alignParentLeft="true"
+      android:layout_gravity="fill_horizontal|center_vertical" />
 
+  <Spinner
+      android:id="@+id/selectPaymentSpinner"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:dropDownWidth="wrap_content"
+      android:visibility="gone"
+      android:layout_weight="0.5"
+      android:entries="@array/payment_type"
+      android:prompt="@string/select_one"
+      android:spinnerMode="dropdown">
+  </Spinner>
 
+</LinearLayout>
   <FrameLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-               android:id="@+id/contentContainer" android:layout_below="@+id/TopPanel"
+               android:id="@+id/contentContainer" android:layout_below="@+id/devicePanel"
                android:layout_above="@+id/Divider">
 
   </FrameLayout>

@@ -187,7 +187,7 @@ public class POSOrder {
     payments.add(refund);
     notifyObserverRefundAdded(refund);
   }
-
+///TODO: As per Clover GO example - public OrderStatus getStatus() {
   public POSOrder.OrderStatus getStatus() {
     if(items.size() == 0 && payments.size() == 0) {
       return OrderStatus.INITIAL;

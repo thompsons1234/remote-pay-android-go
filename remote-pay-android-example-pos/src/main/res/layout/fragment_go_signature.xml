@@ -1,0 +1,58 @@
+<!--
+  ~ Copyright (C) 2016 Clover Network, Inc.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~
+  ~ You may obtain a copy of the License at
+  ~    http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white_FFFFFF"
+    tools:context=".SignatureFragment">
+
+  <Button android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:id="@+id/AcceptButton"
+      android:text="@string/accept_button_text"
+      android:onClick="acceptSignature"
+      android:layout_alignParentBottom="true" android:layout_alignParentRight="true"/>
+
+  <android.gesture.GestureOverlayView
+      android:id="@+id/SignatureView"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_centerInParent="true"
+      android:layout_marginTop="10dp"
+      android:eventsInterceptionEnabled="true"
+      android:fadeEnabled="false"
+      android:layout_above="@+id/AcceptButton"
+      android:layout_alignParentStart="true"
+      android:fadeOffset="2000"
+      android:gestureColor="#151515"
+      android:gestureStrokeLengthThreshold="0.1"
+      android:gestureStrokeType="multiple"
+      android:gestureStrokeWidth="7"
+      android:orientation="vertical"/>
+
+  <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/signature_text"
+      android:id="@+id/textHere"
+      android:textSize="16dp"
+      android:textColor="#4A4A4A"
+      android:layout_alignParentTop="true"
+      android:layout_centerHorizontal="true" />
+
+</RelativeLayout>

@@ -9,12 +9,11 @@
                 tools:context="com.clover.remote.client.lib.example.StartupActivity">
     <RadioGroup android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true"
                 android:layout_centerHorizontal="true"
-                android:onClick="connectionMethodChange"
                 android:id="@+id/radioGroup">
         <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:checked="true"
+                android:checked="false"
                 android:text="USB Clover Connector"
                 android:id="@+id/usbRadioButton" android:layout_centerVertical="true" android:layout_alignLeft="@+id/goRadioButton"/>
         <RadioButton
@@ -49,4 +48,46 @@
             android:onClick="connect"
             android:id="@+id/connectButton" android:layout_below="@+id/radioGroup" android:layout_centerHorizontal="true"/>
 
+    <RadioGroup android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/radioGroup"
+        android:visibility="gone"
+        android:orientation="horizontal"
+        android:id="@+id/readerRadioGroup">
+    <RadioButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="Contactless RP450 Reader"
+        android:id="@+id/rp450RadioButton" android:layout_centerVertical="true" android:layout_alignLeft="@+id/goRadioButton"/>
+    <RadioButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="Contact RP350 Reader"
+        android:id="@+id/rp350RadioButton" android:layout_centerVertical="true" android:layout_alignLeft="@+id/lanRadioButton"/>
+    </RadioGroup>
+<LinearLayout
+    android:id="@+id/llGoModes"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_below="@+id/readerRadioGroup"
+    android:visibility="gone"
+    android:layout_centerHorizontal="true">
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Demo Mode"
+        android:onClick="connect"
+        android:id="@+id/demoButton" android:layout_centerHorizontal="true"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Get OAUTH Token"
+        android:onClick="connectGoWithAuthMode"
+        android:layout_toRightOf="@+id/connectButton"
+        android:id="@+id/oAuthButton" android:layout_below="@+id/radioGroup" android:layout_centerHorizontal="true"/>
+</LinearLayout>
 </RelativeLayout>

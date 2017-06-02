@@ -43,6 +43,22 @@ public class MerchantInfo {
     this.merchantMID = merchantID;
   }
 
+  public MerchantInfo(String merchantID,String merchantName,boolean supportsSales,boolean supportsAuths,boolean supportsPreAuths,boolean supportsVaultCards,boolean supportsManualRefunds,boolean supportsVoids,boolean supportsTipAdjust, String name,String serial,String model) {
+    this.merchantID = merchantID;
+    this.merchantName = merchantName;
+    this.supportsSales = supportsSales;
+    this.supportsAuths = supportsAuths;
+    this.supportsPreAuths = supportsPreAuths;
+    this.supportsVaultCards = supportsVaultCards;
+    this.supportsManualRefunds = supportsManualRefunds;
+    this.supportsVoids = supportsVoids;
+    this.supportsTipAdjust = supportsTipAdjust;
+    deviceInfo.name = name;
+    deviceInfo.model = model;
+    deviceInfo.serial = serial;
+
+  }
+
   DeviceInfo deviceInfo = new DeviceInfo();
 
   String merchantID;

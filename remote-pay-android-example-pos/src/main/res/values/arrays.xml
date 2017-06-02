@@ -6,4 +6,8 @@
         <item>com.clover.cfp.activities.RatingsExample</item>
         <item>com.clover.cfp.activities.NFCExample</item>
     </string-array>
+    <string-array name="payment_type">
+        <item>RP450</item>
+        <item>RP350</item>
+    </string-array>
 </resources>

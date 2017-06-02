@@ -25,6 +25,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
+
 import com.clover.common2.Signature2;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.messages.VerifySignatureRequest;
@@ -72,7 +74,8 @@ public class SignatureFragment extends Fragment {
       rejectButton = (Button) view.findViewById(R.id.RejectButton);
       acceptButton = (Button) view.findViewById(R.id.AcceptButton);
 
-      sigCanvas.setSignature(verifySignatureRequest.getSignature());
+      if (verifySignatureRequest!= null)
+        sigCanvas.setSignature(verifySignatureRequest.getSignature());
 
       acceptButton.setOnClickListener(new View.OnClickListener() {
         @Override
@@ -80,7 +83,13 @@ public class SignatureFragment extends Fragment {
           FragmentTransaction fragmentTransaction = getActivity().getFragmentManager().beginTransaction();
           fragmentTransaction.hide(SignatureFragment.this);
           fragmentTransaction.commit();
-          cloverConnector.acceptSignature(verifySignatureRequest);
+          try{
+            // Operation not Supported in CloverGO
+            cloverConnector.acceptSignature(verifySignatureRequest);
+          }catch (UnsupportedOperationException e){
+            Toast.makeText(getActivity(),e.getMessage(),Toast.LENGTH_LONG).show();
+          }
+
         }
       });
       rejectButton.setOnClickListener(new View.OnClickListener() {
@@ -89,7 +98,14 @@ public class SignatureFragment extends Fragment {
           FragmentTransaction fragmentTransaction = getActivity().getFragmentManager().beginTransaction();
           fragmentTransaction.hide(SignatureFragment.this);
           fragmentTransaction.commit();
-          cloverConnector.rejectSignature(verifySignatureRequest);
+
+          try{
+            // Operation not Supported in CloverGO
+            cloverConnector.rejectSignature(verifySignatureRequest);
+          }catch (UnsupportedOperationException e){
+            Toast.makeText(getActivity(),e.getMessage(),Toast.LENGTH_LONG).show();
+          }
+
         }
       });
     }
@@ -107,10 +123,11 @@ public class SignatureFragment extends Fragment {
   public void onAttach(Activity activity) {
     super.onAttach(activity);
     try {
+      //TODO: check Go Example
       mListener = (SignatureFragment.OnFragmentInteractionListener) activity;
     } catch (ClassCastException e) {
       throw new ClassCastException(activity.toString()
-          + " must implement OnFragmentInteractionListener");
+              + " must implement OnFragmentInteractionListener");
     }
   }
 
