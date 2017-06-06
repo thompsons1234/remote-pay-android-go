@@ -20,7 +20,6 @@ import com.clover.common2.Signature2;
 import com.clover.common2.payments.PayIntent;
 import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
-import com.clover.remote.DeviceStatusRequest;
 import com.clover.remote.ExternalDeviceState;
 import com.clover.remote.ExternalDeviceStateData;
 import com.clover.remote.InputOption;
@@ -65,6 +64,7 @@ import com.clover.remote.client.messages.RefundPaymentRequest;
 import com.clover.remote.client.messages.RefundPaymentResponse;
 import com.clover.remote.client.messages.ResetDeviceResponse;
 import com.clover.remote.client.messages.ResultCode;
+import com.clover.remote.client.messages.RetrieveDeviceStatusRequest;
 import com.clover.remote.client.messages.RetrieveDeviceStatusResponse;
 import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
 import com.clover.remote.client.messages.SaleRequest;
@@ -776,20 +776,20 @@ public class CloverConnector implements ICloverConnector {
   }
 
   @Override
-  public void retrieveDeviceStatus(DeviceStatusRequest request) {
+  public void retrieveDeviceStatus(RetrieveDeviceStatusRequest request) {
     if (device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In resetDevice: The Clover device is not connected."));
     } else {
-      device.doRetrieveDeviceStatus(request);
+      device.doRetrieveDeviceStatus(request.isSendLastMessage());
     }
   }
 
   @Override
-  public void getPayment(String externalPaymentId) {
+  public void getPayment(GetPaymentRequest request) {
     if (device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In resetDevice: The Clover device is not connected."));
     } else {
-      device.doGetPayment(externalPaymentId);
+      device.doGetPayment(request.getExternalPaymentId());
     }
   }
 

@@ -16,28 +16,27 @@
 
 package com.clover.remote.client;
 
-import android.graphics.Bitmap;
-
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
-import com.clover.remote.DeviceStatusRequest;
-import com.clover.remote.client.messages.CustomActivityRequest;
-import com.clover.remote.client.messages.GetPaymentRequest;
-import com.clover.remote.client.messages.GetPaymentResponse;
-import com.clover.remote.client.messages.MessageToActivity;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.CapturePreAuthRequest;
 import com.clover.remote.client.messages.CloseoutRequest;
+import com.clover.remote.client.messages.CustomActivityRequest;
+import com.clover.remote.client.messages.GetPaymentRequest;
 import com.clover.remote.client.messages.ManualRefundRequest;
+import com.clover.remote.client.messages.MessageToActivity;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.ReadCardDataRequest;
 import com.clover.remote.client.messages.RefundPaymentRequest;
+import com.clover.remote.client.messages.RetrieveDeviceStatusRequest;
 import com.clover.remote.client.messages.SaleRequest;
 import com.clover.remote.client.messages.TipAdjustAuthRequest;
 import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.remote.order.DisplayOrder;
 import com.clover.sdk.v3.payments.Payment;
+
+import android.graphics.Bitmap;
 
 import java.io.Serializable;
 import java.util.List;
@@ -284,12 +283,12 @@ public interface ICloverConnector extends Serializable {
   /**
    * retrieve the status of the device, and conditionally re-send the last response
    */
-  void retrieveDeviceStatus(DeviceStatusRequest request);
+  void retrieveDeviceStatus(RetrieveDeviceStatusRequest request);
 
   /**
    * Sends a request to get a payment.
    * Only valid for payments made in the past 24 hours on the device queried
    */
-  void getPayment(String externalPaymentId);
+  void getPayment(GetPaymentRequest request);
 
 }
