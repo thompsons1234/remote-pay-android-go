@@ -24,6 +24,14 @@ public class GetPaymentRequest extends BaseRequest {
     this.externalPaymentId = externalPaymentId;
   }
 
+  public String getExternalPaymentId() {
+    return externalPaymentId;
+  }
+
+  public void setExternalPaymentId(String externalPaymentId) {
+    this.externalPaymentId = externalPaymentId;
+  }
+
   public void setExternalId(String externalPaymentId) {
     this.externalPaymentId = externalPaymentId;
   }

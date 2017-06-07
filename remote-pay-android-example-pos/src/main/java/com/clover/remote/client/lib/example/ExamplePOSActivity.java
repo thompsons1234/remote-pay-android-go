@@ -18,7 +18,6 @@ package com.clover.remote.client.lib.example;
 
 import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
-import com.clover.remote.DeviceStatusRequest;
 import com.clover.remote.InputOption;
 import com.clover.remote.client.CloverConnector;
 import com.clover.remote.client.ICloverConnector;
@@ -54,6 +53,7 @@ import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.CustomActivityRequest;
 import com.clover.remote.client.messages.CustomActivityResponse;
+import com.clover.remote.client.messages.GetPaymentRequest;
 import com.clover.remote.client.messages.GetPaymentResponse;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.ManualRefundResponse;
@@ -73,6 +73,7 @@ import com.clover.remote.client.messages.ReadCardDataResponse;
 import com.clover.remote.client.messages.RefundPaymentResponse;
 import com.clover.remote.client.messages.ResetDeviceResponse;
 import com.clover.remote.client.messages.ResultCode;
+import com.clover.remote.client.messages.RetrieveDeviceStatusRequest;
 import com.clover.remote.client.messages.RetrieveDeviceStatusResponse;
 import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
 import com.clover.remote.client.messages.SaleRequest;
@@ -1310,7 +1311,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
 
   public void queryPaymentClick(View view) {
-    cloverConnector.getPayment(((TextView) findViewById(R.id.QueryPaymentText)).getText().toString());
+    String externalPaymentId = ((TextView) findViewById(R.id.QueryPaymentText)).getText().toString();
+    cloverConnector.getPayment(new GetPaymentRequest(externalPaymentId));
   }
 
   public void printTextClick(View view) {
@@ -1387,9 +1389,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void onGetDeviceStatusCBClick(View view) {
-    DeviceStatusRequest request = new DeviceStatusRequest();
-    request.sendLastMessage = true;
-    cloverConnector.retrieveDeviceStatus(request);
+    cloverConnector.retrieveDeviceStatus(new RetrieveDeviceStatusRequest(true));
   }
 
   private static final SecureRandom random = new SecureRandom();
