@@ -77,6 +77,7 @@ import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.message.DiscoveryResponseMessage;
+import com.clover.remote.message.TxStartRequestMessage;
 import com.clover.remote.order.DisplayOrder;
 import com.clover.remote.order.operation.OrderDeletedOperation;
 import com.clover.sdk.v3.base.Reference;
@@ -256,10 +257,12 @@ public class CloverConnector implements ICloverConnector {
       transactionSettings.setAutoAcceptPaymentConfirmations(request.getAutoAcceptPaymentConfirmations());
       transactionSettings.setAutoAcceptSignature(request.getAutoAcceptSignature());
 
+      String paymentRequestType = null;
       if (request instanceof PreAuthRequest) {
+        paymentRequestType = TxStartRequestMessage.PREAUTH_REQUEST;
         // nothing extra as of now
       } else if (request instanceof AuthRequest) {
-
+        paymentRequestType = TxStartRequestMessage.AUTH_REQUEST;
         AuthRequest req = (AuthRequest) request;
         if (req.getTaxAmount() != null) {
           builder.taxAmount(req.getTaxAmount());
@@ -282,7 +285,7 @@ public class CloverConnector implements ICloverConnector {
         }
         transactionSettings.setTipMode(com.clover.sdk.v3.payments.TipMode.ON_PAPER); // overriding TipMode, since it's an Auth request
       } else if (request instanceof SaleRequest) {
-
+        paymentRequestType = TxStartRequestMessage.SALE_REQUEST;
         SaleRequest req = (SaleRequest) request;
 
         // shared with AuthRequest
@@ -317,7 +320,7 @@ public class CloverConnector implements ICloverConnector {
       builder.transactionSettings(transactionSettings);
       PayIntent payIntent = builder.build();
 
-      device.doTxStart(payIntent, null); //
+      device.doTxStart(payIntent, null, paymentRequestType); //
 
     }
   }
@@ -588,7 +591,7 @@ public class CloverConnector implements ICloverConnector {
       }
       builder.transactionSettings(transactionSettings);
       PayIntent payIntent = builder.build();
-      device.doTxStart(payIntent, null);
+      device.doTxStart(payIntent, null, TxStartRequestMessage.CREDIT_REQUEST);
     }
 
   }

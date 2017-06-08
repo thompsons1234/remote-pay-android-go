@@ -890,8 +890,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     sendObjectMessage(new CloseoutRequestMessage(allowOpenTabs, batchId));
   }
 
-  public void doTxStart(PayIntent payIntent, Order order) {
-    sendObjectMessage(new TxStartRequestMessage(payIntent, order));
+  public void doTxStart(PayIntent payIntent, Order order, String messageInfo) {
+    sendObjectMessage(new TxStartRequestMessage(payIntent, order, messageInfo));
   }
 
   public void doTipAdjustAuth(String orderId, String paymentId, long amount) {
