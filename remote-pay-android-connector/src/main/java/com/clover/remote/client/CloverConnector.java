@@ -190,22 +190,22 @@ public class CloverConnector implements ICloverConnector {
     } else if (request == null) {
       deviceObserver.onFinishCancelSale(ResultCode.FAIL, "Invalid Argument.", "In sale: SaleRequest - The request that was passed in for processing is null.");
     } else if (request.getAmount() <= 0) {
-      deviceObserver.onFinishCancel(ResultCode.FAIL, "Request Validation Error", "In sale: SaleRequest - The request amount cannot be zero. Original Request = " + request);
+      deviceObserver.onFinishCancel(ResultCode.FAIL, "Request Validation Error", "In sale: SaleRequest - The request amount cannot be zero. Original Request = " + request, TxStartRequestMessage.SALE_REQUEST);
     } else if (request.getTipAmount() != null && request.getTipAmount() < 0) {
-      deviceObserver.onFinishCancel(ResultCode.FAIL, "Request Validation Error", "In sale: SaleRequest - The tip amount cannot be less than zero. Original Request = " + request);
+      deviceObserver.onFinishCancel(ResultCode.FAIL, "Request Validation Error", "In sale: SaleRequest - The tip amount cannot be less than zero. Original Request = " + request, TxStartRequestMessage.SALE_REQUEST);
     } else if (request.getExternalId() == null || request.getExternalId().trim().length() == 0 || request.getExternalId().trim().length() > 32) {
-      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid Argument.", "In sale: SaleRequest - The externalId is required and the max length is 32 characters. Original Request = " + request);
+      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid Argument.", "In sale: SaleRequest - The externalId is required and the max length is 32 characters. Original Request = " + request, TxStartRequestMessage.SALE_REQUEST);
     } else if (request.getVaultedCard() != null && !merchantInfo.supportsVaultCards) {
-      deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In sale: SaleRequest - Vault Card support is not enabled for the payment gateway. Original Request = " + request);
+      deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In sale: SaleRequest - Vault Card support is not enabled for the payment gateway. Original Request = " + request, TxStartRequestMessage.SALE_REQUEST);
     } else if (request.getTipMode() != null &&
                !request.getTipMode().equals(SaleRequest.TipMode.TIP_PROVIDED) &&
                request.getTipAmount() != null &&
                request.getTipAmount() > 0) {
-      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid Argument.", "In sale: SaleRequest - TipMode must be null or TIP_PROVIDED when TipAmount is greater than zero.  Original Request = " + request);
+      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid Argument.", "In sale: SaleRequest - TipMode must be null or TIP_PROVIDED when TipAmount is greater than zero.  Original Request = " + request, TxStartRequestMessage.SALE_REQUEST);
     } else if (request.getTipMode() != null &&
                request.getTipMode().equals(SaleRequest.TipMode.TIP_PROVIDED) &&
                request.getTipAmount() == null) {
-      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid Argument.", "In sale: SaleRequest - TipAmount cannot be null when TipMode is TIP_PROVIDED.    Original Request = " + request);
+      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid Argument.", "In sale: SaleRequest - TipAmount cannot be null when TipMode is TIP_PROVIDED.    Original Request = " + request, TxStartRequestMessage.SALE_REQUEST);
     } else {
 
       if (request.getTipAmount() == null) {
@@ -217,7 +217,7 @@ public class CloverConnector implements ICloverConnector {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         e.printStackTrace(pw);
-        deviceObserver.onFinishCancel(ResultCode.ERROR, e.getMessage(), sw.toString());
+        deviceObserver.onFinishCancel(ResultCode.ERROR, e.getMessage(), sw.toString(), TxStartRequestMessage.SALE_REQUEST);
       }
 
     }
@@ -398,11 +398,11 @@ public class CloverConnector implements ICloverConnector {
     } else if (request == null) {
       deviceObserver.onFinishCancelAuth(ResultCode.FAIL, "Invalid Argument.", "In auth: AuthRequest - The request that was passed in for processing is null.");
     } else if (request.getAmount() <= 0) {
-      deviceObserver.onFinishCancel(ResultCode.FAIL, "Request Validation Error", "In auth: AuthRequest - The request amount cannot be zero. Original Request = " + request);
+      deviceObserver.onFinishCancel(ResultCode.FAIL, "Request Validation Error", "In auth: AuthRequest - The request amount cannot be zero. Original Request = " + request, TxStartRequestMessage.AUTH_REQUEST);
     } else if (request.getExternalId() == null || request.getExternalId().trim().length() == 0 || request.getExternalId().trim().length() > 32) {
-      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid Argument.", "In auth: AuthRequest - The externalId is invalid. It is required and the max length is 32. Original Request = " + request);
+      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid Argument.", "In auth: AuthRequest - The externalId is invalid. It is required and the max length is 32. Original Request = " + request, TxStartRequestMessage.AUTH_REQUEST);
     } else if (request.getVaultedCard() != null && !merchantInfo.supportsVaultCards) {
-      deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In auth: AuthRequest - Vault Card support is not enabled for the payment gateway. Original Request = " + request);
+      deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In auth: AuthRequest - Vault Card support is not enabled for the payment gateway. Original Request = " + request, TxStartRequestMessage.AUTH_REQUEST);
     } else {
       try {
         saleAuth(request, true);
@@ -410,7 +410,7 @@ public class CloverConnector implements ICloverConnector {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         e.printStackTrace(pw);
-        deviceObserver.onFinishCancel(ResultCode.ERROR, e.getMessage(), sw.toString());
+        deviceObserver.onFinishCancel(ResultCode.ERROR, e.getMessage(), sw.toString(), TxStartRequestMessage.AUTH_REQUEST);
       }
     }
   }
@@ -425,11 +425,11 @@ public class CloverConnector implements ICloverConnector {
     } else if (request == null) {
       deviceObserver.onFinishCancelPreAuth(ResultCode.FAIL, "Invalid Argument.", "In preAuth: PreAuthRequest - The request that was passed in for processing is null.");
     } else if (request.getAmount() <= 0) {
-      deviceObserver.onFinishCancel(ResultCode.FAIL, "Request Validation Error", "In preAuth: PreAuthRequest - The request amount cannot be zero. Original Request = " + request);
+      deviceObserver.onFinishCancel(ResultCode.FAIL, "Request Validation Error", "In preAuth: PreAuthRequest - The request amount cannot be zero. Original Request = " + request, TxStartRequestMessage.PREAUTH_REQUEST);
     } else if (request.getExternalId() == null || request.getExternalId().trim().length() == 0 || request.getExternalId().trim().length() > 32) {
-      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid Argument.", "In preAuth: PreAuthRequest - The externalId is invalid. It is required and the max length is 32. Original Request = " + request);
+      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid Argument.", "In preAuth: PreAuthRequest - The externalId is invalid. It is required and the max length is 32. Original Request = " + request, TxStartRequestMessage.PREAUTH_REQUEST);
     } else if (request.getVaultedCard() != null && !merchantInfo.supportsVaultCards) {
-      deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In preAuth: PreAuthRequest - Vault Card support is not enabled for the payment gateway. Original Request = " + request);
+      deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In preAuth: PreAuthRequest - Vault Card support is not enabled for the payment gateway. Original Request = " + request, TxStartRequestMessage.PREAUTH_REQUEST);
     } else {
 
       try {
@@ -439,7 +439,7 @@ public class CloverConnector implements ICloverConnector {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         e.printStackTrace(pw);
-        deviceObserver.onFinishCancel(ResultCode.ERROR, e.getMessage(), sw.toString());
+        deviceObserver.onFinishCancel(ResultCode.ERROR, e.getMessage(), sw.toString(), TxStartRequestMessage.PREAUTH_REQUEST);
       }
 
     }
@@ -523,28 +523,28 @@ public class CloverConnector implements ICloverConnector {
       prr.setReason("Device Connection Error");
       prr.setMessage("In refundPayment: RefundPaymentRequest - The Clover device is not connected.");
       deviceObserver.lastPRR = prr;
-      deviceObserver.onFinishCancel();
+      deviceObserver.onFinishCancel(TxStartRequestMessage.REFUND_REQUEST);
     } else if (request == null) {
       RefundPaymentResponse prr = new RefundPaymentResponse(false, ResultCode.FAIL);
       prr.setRefund(null);
       prr.setReason("Request Validation Error");
       prr.setMessage("In refundPayment: RefundPaymentRequest - The request that was passed in for processing is empty.");
       deviceObserver.lastPRR = prr;
-      deviceObserver.onFinishCancel();
+      deviceObserver.onFinishCancel(TxStartRequestMessage.REFUND_REQUEST);
     } else if (request.getPaymentId() == null) {
       RefundPaymentResponse prr = new RefundPaymentResponse(false, ResultCode.FAIL);
       prr.setRefund(null);
       prr.setReason("Request Validation Error");
       prr.setMessage("In refundPayment: RefundPaymentRequest PaymentID cannot be empty. " + request);
       deviceObserver.lastPRR = prr;
-      deviceObserver.onFinishCancel();
+      deviceObserver.onFinishCancel(TxStartRequestMessage.REFUND_REQUEST);
     } else if (request.getAmount() <= 0 && !request.isFullRefund()) {
       RefundPaymentResponse prr = new RefundPaymentResponse(false, ResultCode.FAIL);
       prr.setRefund(null);
       prr.setReason("Request Validation Error");
       prr.setMessage("In refundPayment: RefundPaymentRequest Amount must be greater than zero when FullRefund is set to false. " + request);
       deviceObserver.lastPRR = prr;
-      deviceObserver.onFinishCancel();
+      deviceObserver.onFinishCancel(TxStartRequestMessage.REFUND_REQUEST);
     } else {
       device.doPaymentRefund(request.getOrderId(), request.getPaymentId(), request.getAmount(), request.isFullRefund());
     }
@@ -561,11 +561,11 @@ public class CloverConnector implements ICloverConnector {
     } else if (request == null) {
       deviceObserver.onFinishCancelManualRefund(ResultCode.FAIL, "Invalid Argument.", "In manualRefund: ManualRefundRequest - The request that was passed in for processing is null.");
     } else if (request.getAmount() <= 0) {
-      deviceObserver.onFinishCancel(ResultCode.FAIL, "Request Validation Error", "In manualRefund: ManualRefundRequest - The request amount cannot be zero. Original Request = " + request);
+      deviceObserver.onFinishCancel(ResultCode.FAIL, "Request Validation Error", "In manualRefund: ManualRefundRequest - The request amount cannot be zero. Original Request = " + request, TxStartRequestMessage.CREDIT_REQUEST);
     } else if (request.getExternalId() == null || request.getExternalId().trim().length() == 0 || request.getExternalId().trim().length() > 32) {
-      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid Argument.", "In manualRefund: ManualRefundRequest - The externalId is invalid. It is required and the max length is 32. Original Request = " + request);
+      deviceObserver.onFinishCancel(ResultCode.FAIL, "Invalid Argument.", "In manualRefund: ManualRefundRequest - The externalId is invalid. It is required and the max length is 32. Original Request = " + request, TxStartRequestMessage.CREDIT_REQUEST);
     } else if (request.getVaultedCard() != null && !merchantInfo.supportsVaultCards) {
-      deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In manualRefund: ManualRefundRequest - Vault Card support is not enabled for the payment gateway. Original Request = " + request);
+      deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In manualRefund: ManualRefundRequest - Vault Card support is not enabled for the payment gateway. Original Request = " + request, TxStartRequestMessage.CREDIT_REQUEST);
     } else {
       PayIntent.Builder builder = new PayIntent.Builder();
       builder.amount(-Math.abs(request.getAmount()))
@@ -839,58 +839,107 @@ public class CloverConnector implements ICloverConnector {
     }
 
     @Override
-    public void onTxStartResponse(TxStartResponseResult result, String externalId) {
+    public void onTxStartResponse(TxStartResponseResult result, String externalId, String messageInfo) {
       boolean success = result.equals(TxStartResponseResult.SUCCESS) ? true : false;
       if (success) {
         return;
       }
       boolean duplicate = result.equals(TxStartResponseResult.DUPLICATE);
       try {
-
-        if (cloverConnector.lastRequest instanceof PreAuthRequest) {
-          PreAuthResponse response = new PreAuthResponse(false, ResultCode.FAIL);
-          if (duplicate) {
-            response.setResult(ResultCode.CANCEL);
-            response.setReason(result.toString());
-            response.setMessage("The provided transaction id of " + externalId + " has already been processed and cannot be resubmitted.");
-          } else {
-            response.setResult(ResultCode.FAIL);
-            response.setReason(result.toString());
+        // Use the messageInfo if it exists, to determine the request type
+        if (messageInfo != null) {
+          if (messageInfo.equals(TxStartRequestMessage.PREAUTH_REQUEST)) {
+            PreAuthResponse response = new PreAuthResponse(false, ResultCode.FAIL);
+            if (duplicate) {
+              response.setResult(ResultCode.CANCEL);
+              response.setReason(result.toString());
+              response.setMessage("The provided transaction id of " + externalId + " has already been processed and cannot be resubmitted.");
+            } else {
+              response.setResult(ResultCode.FAIL);
+              response.setReason(result.toString());
+            }
+            cloverConnector.broadcaster.notifyOnPreAuthResponse(response);
+          } else if (messageInfo.equals(TxStartRequestMessage.AUTH_REQUEST)) {
+            AuthResponse response = new AuthResponse(false, ResultCode.FAIL);
+            if (duplicate) {
+              response.setResult(ResultCode.CANCEL);
+              response.setReason(result.toString());
+              response.setMessage("The provided transaction id of " + externalId + " has already been processed and cannot be resubmitted.");
+            } else {
+              response.setResult(ResultCode.FAIL);
+              response.setReason(result.toString());
+            }
+            cloverConnector.broadcaster.notifyOnAuthResponse(response);
+          } else if (messageInfo.equals(TxStartRequestMessage.SALE_REQUEST)) {
+            SaleResponse response = new SaleResponse(false, ResultCode.FAIL);
+            if (duplicate) {
+              response.setResult(ResultCode.CANCEL);
+              response.setReason(result.toString());
+              response.setMessage("The provided transaction id of " + externalId + " has already been processed and cannot be resubmitted.");
+            } else {
+              response.setResult(ResultCode.FAIL);
+              response.setReason(result.toString());
+            }
+            cloverConnector.broadcaster.notifyOnSaleResponse(response);
+          } else if (messageInfo.equals(TxStartRequestMessage.CREDIT_REQUEST)) {
+            ManualRefundResponse response = new ManualRefundResponse(false, ResultCode.FAIL);
+            if (duplicate) {
+              response.setResult(ResultCode.CANCEL);
+              response.setReason(result.toString());
+              response.setMessage("The provided transaction id of " + externalId + " has already been processed and cannot be resubmitted.");
+            } else {
+              response.setResult(ResultCode.FAIL);
+              response.setReason(result.toString());
+            }
+            cloverConnector.broadcaster.notifyOnManualRefundResponse(response);
           }
-          cloverConnector.broadcaster.notifyOnPreAuthResponse(response);
-        } else if (cloverConnector.lastRequest instanceof AuthRequest) {
-          AuthResponse response = new AuthResponse(false, ResultCode.FAIL);
-          if (duplicate) {
-            response.setResult(ResultCode.CANCEL);
-            response.setReason(result.toString());
-            response.setMessage("The provided transaction id of " + externalId + " has already been processed and cannot be resubmitted.");
-          } else {
-            response.setResult(ResultCode.FAIL);
-            response.setReason(result.toString());
+        } else {  // This is deprecated logic and should be removed at some point in the future
+                  // when we are comfortable that there are no longer any backward compatibility issues
+          if (cloverConnector.lastRequest instanceof PreAuthRequest) {
+            PreAuthResponse response = new PreAuthResponse(false, ResultCode.FAIL);
+            if (duplicate) {
+              response.setResult(ResultCode.CANCEL);
+              response.setReason(result.toString());
+              response.setMessage("The provided transaction id of " + externalId + " has already been processed and cannot be resubmitted.");
+            } else {
+              response.setResult(ResultCode.FAIL);
+              response.setReason(result.toString());
+            }
+            cloverConnector.broadcaster.notifyOnPreAuthResponse(response);
+          } else if (cloverConnector.lastRequest instanceof AuthRequest) {
+            AuthResponse response = new AuthResponse(false, ResultCode.FAIL);
+            if (duplicate) {
+              response.setResult(ResultCode.CANCEL);
+              response.setReason(result.toString());
+              response.setMessage("The provided transaction id of " + externalId + " has already been processed and cannot be resubmitted.");
+            } else {
+              response.setResult(ResultCode.FAIL);
+              response.setReason(result.toString());
+            }
+            cloverConnector.broadcaster.notifyOnAuthResponse(response);
+          } else if (cloverConnector.lastRequest instanceof SaleRequest) {
+            SaleResponse response = new SaleResponse(false, ResultCode.FAIL);
+            if (duplicate) {
+              response.setResult(ResultCode.CANCEL);
+              response.setReason(result.toString());
+              response.setMessage("The provided transaction id of " + externalId + " has already been processed and cannot be resubmitted.");
+            } else {
+              response.setResult(ResultCode.FAIL);
+              response.setReason(result.toString());
+            }
+            cloverConnector.broadcaster.notifyOnSaleResponse(response);
+          } else if (cloverConnector.lastRequest instanceof ManualRefundRequest) {
+            ManualRefundResponse response = new ManualRefundResponse(false, ResultCode.FAIL);
+            if (duplicate) {
+              response.setResult(ResultCode.CANCEL);
+              response.setReason(result.toString());
+              response.setMessage("The provided transaction id of " + externalId + " has already been processed and cannot be resubmitted.");
+            } else {
+              response.setResult(ResultCode.FAIL);
+              response.setReason(result.toString());
+            }
+            cloverConnector.broadcaster.notifyOnManualRefundResponse(response);
           }
-          cloverConnector.broadcaster.notifyOnAuthResponse(response);
-        } else if (cloverConnector.lastRequest instanceof SaleRequest) {
-          SaleResponse response = new SaleResponse(false, ResultCode.FAIL);
-          if (duplicate) {
-            response.setResult(ResultCode.CANCEL);
-            response.setReason(result.toString());
-            response.setMessage("The provided transaction id of " + externalId + " has already been processed and cannot be resubmitted.");
-          } else {
-            response.setResult(ResultCode.FAIL);
-            response.setReason(result.toString());
-          }
-          cloverConnector.broadcaster.notifyOnSaleResponse(response);
-        } else if (cloverConnector.lastRequest instanceof ManualRefundRequest) {
-          ManualRefundResponse response = new ManualRefundResponse(false, ResultCode.FAIL);
-          if (duplicate) {
-            response.setResult(ResultCode.CANCEL);
-            response.setReason(result.toString());
-            response.setMessage("The provided transaction id of " + externalId + " has already been processed and cannot be resubmitted.");
-          } else {
-            response.setResult(ResultCode.FAIL);
-            response.setReason(result.toString());
-          }
-          cloverConnector.broadcaster.notifyOnManualRefundResponse(response);
         }
       } finally {
         cloverConnector.lastRequest = null;
@@ -1042,28 +1091,51 @@ public class CloverConnector implements ICloverConnector {
       }
     }
 
-    public void onFinishOk(Payment payment, Signature2 signature2) {
+    public void onFinishOk(Payment payment, Signature2 signature2, String messageInfo) {
       try {
         cloverConnector.device.doShowThankYouScreen(); //need to do this first, so Listener implementation can replace the screen as desired
         Object lastReq = cloverConnector.lastRequest;
         cloverConnector.lastRequest = null;
-        if (lastReq instanceof PreAuthRequest) {
-          PreAuthResponse response = new PreAuthResponse(true, ResultCode.SUCCESS);
-          response.setPayment(payment);
-          response.setSignature(signature2);
-          cloverConnector.broadcaster.notifyOnPreAuthResponse(response);
-        } else if (lastReq instanceof AuthRequest) {
-          AuthResponse response = new AuthResponse(true, ResultCode.SUCCESS);
-          response.setPayment(payment);
-          response.setSignature(signature2);
-          cloverConnector.broadcaster.notifyOnAuthResponse(response);
-        } else if (lastReq instanceof SaleRequest) {
-          SaleResponse response = new SaleResponse(true, ResultCode.SUCCESS);
-          response.setPayment(payment);
-          response.setSignature(signature2);
-          cloverConnector.broadcaster.notifyOnSaleResponse(response);
-        } else {
-          Log.e(getClass().getSimpleName(), String.format("Failed to pair this response: %s", payment));
+        // Use messageInfo if it exists, to determine the original requested type
+        if (messageInfo != null) {
+          if (messageInfo.equals(TxStartRequestMessage.PREAUTH_REQUEST)) {
+            PreAuthResponse response = new PreAuthResponse(true, ResultCode.SUCCESS);
+            response.setPayment(payment);
+            response.setSignature(signature2);
+            cloverConnector.broadcaster.notifyOnPreAuthResponse(response);
+          } else if (messageInfo.equals(TxStartRequestMessage.AUTH_REQUEST)) {
+            AuthResponse response = new AuthResponse(true, ResultCode.SUCCESS);
+            response.setPayment(payment);
+            response.setSignature(signature2);
+            cloverConnector.broadcaster.notifyOnAuthResponse(response);
+          } else if (messageInfo.equals(TxStartRequestMessage.SALE_REQUEST)) {
+            SaleResponse response = new SaleResponse(true, ResultCode.SUCCESS);
+            response.setPayment(payment);
+            response.setSignature(signature2);
+            cloverConnector.broadcaster.notifyOnSaleResponse(response);
+          } else {
+            Log.e(getClass().getSimpleName(), String.format("Failed to pair this response: %s", payment) + ".  Request Type: " + messageInfo);
+          }
+        } else {  // This is deprecated logic and should be removed at some point in the future
+                  // when we are comfortable that there are no longer any backward compatibility issues
+          if (lastReq instanceof PreAuthRequest) {
+            PreAuthResponse response = new PreAuthResponse(true, ResultCode.SUCCESS);
+            response.setPayment(payment);
+            response.setSignature(signature2);
+            cloverConnector.broadcaster.notifyOnPreAuthResponse(response);
+          } else if (lastReq instanceof AuthRequest) {
+            AuthResponse response = new AuthResponse(true, ResultCode.SUCCESS);
+            response.setPayment(payment);
+            response.setSignature(signature2);
+            cloverConnector.broadcaster.notifyOnAuthResponse(response);
+          } else if (lastReq instanceof SaleRequest) {
+            SaleResponse response = new SaleResponse(true, ResultCode.SUCCESS);
+            response.setPayment(payment);
+            response.setSignature(signature2);
+            cloverConnector.broadcaster.notifyOnSaleResponse(response);
+          } else {
+            Log.e(getClass().getSimpleName(), String.format("Failed to pair this response: %s", payment));
+          }
         }
       } finally {
         // do nothing for now...
@@ -1106,32 +1178,49 @@ public class CloverConnector implements ICloverConnector {
       }
     }
 
-    private void onFinishCancel(ResultCode result, String reason, String message) {
+    private void onFinishCancel(ResultCode result, String reason, String message, String messageInfo) {
       try {
         if (device != null) {
           device.doShowWelcomeScreen();
         }
         Object lastReq = lastRequest;
         lastRequest = null;
-        if (lastReq instanceof PreAuthRequest) {
-          onFinishCancelPreAuth(result, reason, message);
-        } else if (lastReq instanceof SaleRequest) {
-          onFinishCancelSale(result, reason, message);
-        } else if (lastReq instanceof AuthRequest) {
-          onFinishCancelAuth(result, reason, message);
-        } else if (lastReq instanceof ManualRefundRequest) {
-          onFinishCancelManualRefund(result, reason, message);
-        } else if (lastPRR instanceof RefundPaymentResponse) {
-          broadcaster.notifyOnRefundPaymentResponse(lastPRR);
-          lastPRR = null;
+        // Use messageInfo if it exists, to determine the original requested type
+        if (messageInfo != null) {
+          if (messageInfo.equals(TxStartRequestMessage.PREAUTH_REQUEST)) {
+            onFinishCancelPreAuth(result, reason, message);
+          } else if (messageInfo.equals(TxStartRequestMessage.AUTH_REQUEST)) {
+            onFinishCancelAuth(result, reason, message);
+          } else if (messageInfo.equals(TxStartRequestMessage.SALE_REQUEST)) {
+            onFinishCancelSale(result, reason, message);
+          } else if (messageInfo.equals(TxStartRequestMessage.CREDIT_REQUEST)) {
+            onFinishCancelManualRefund(result, reason, message);
+          } else if (messageInfo.equals(TxStartRequestMessage.REFUND_REQUEST)) {
+            broadcaster.notifyOnRefundPaymentResponse(lastPRR);
+            lastPRR = null;
+          }
+        } else {  // This is deprecated logic and should be removed at some point in the future
+                  // when we are comfortable that there are no longer any backward compatibility issues
+          if (lastReq instanceof PreAuthRequest) {
+            onFinishCancelPreAuth(result, reason, message);
+          } else if (lastReq instanceof SaleRequest) {
+            onFinishCancelSale(result, reason, message);
+          } else if (lastReq instanceof AuthRequest) {
+            onFinishCancelAuth(result, reason, message);
+          } else if (lastReq instanceof ManualRefundRequest) {
+            onFinishCancelManualRefund(result, reason, message);
+          } else if (lastPRR instanceof RefundPaymentResponse) {
+            broadcaster.notifyOnRefundPaymentResponse(lastPRR);
+            lastPRR = null;
+          }
         }
       } finally {
         // do nothing
       }
     }
 
-    public void onFinishCancel() {
-      onFinishCancel(ResultCode.CANCEL, null, null);
+    public void onFinishCancel(String messageInfo) {
+      onFinishCancel(ResultCode.CANCEL, null, null, messageInfo);
     }
 
     private void onFinishCancelSale(ResultCode result, String reason, String message) {

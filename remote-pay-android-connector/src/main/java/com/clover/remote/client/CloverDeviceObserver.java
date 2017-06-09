@@ -48,7 +48,7 @@ public interface CloverDeviceObserver {
 
   void onTxState(TxState txState);
 
-  void onTxStartResponse(TxStartResponseResult result, String externalId);
+  void onTxStartResponse(TxStartResponseResult result, String externalId, String messageInfo);
 
   void onUiState(UiState uiState, String uiText, UiState.UiDirection uiDirection, InputOption[] inputOptions);
 
@@ -60,13 +60,13 @@ public interface CloverDeviceObserver {
 
   void onPartialAuth(long partialAuthAmount);
 
-  void onFinishOk(Payment payment, Signature2 signature2);
+  void onFinishOk(Payment payment, Signature2 signature2, String messageInfo);
 
   void onFinishOk(Credit credit);
 
   void onFinishOk(Refund refund);
 
-  void onFinishCancel();
+  void onFinishCancel(String messageInfo);
 
   void onVerifySignature(Payment payment, Signature2 signature);
 

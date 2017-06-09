@@ -20,8 +20,12 @@ import com.clover.common2.payments.PayIntent;
 import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
-import com.clover.remote.client.CloverDeviceObserver;
 import com.clover.remote.client.messages.ResultCode;
+import com.clover.remote.message.FinishCancelMessage;
+import com.clover.remote.message.ResetDeviceResponseMessage;
+import com.clover.remote.message.RetrieveDeviceStatusRequestMessage;
+import com.clover.remote.message.RetrieveDeviceStatusResponseMessage;
+import com.clover.remote.client.CloverDeviceObserver;
 import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.client.transport.CloverTransportObserver;
 import com.clover.remote.message.AcknowledgementMessage;
@@ -59,9 +63,6 @@ import com.clover.remote.message.RefundPaymentPrintMessage;
 import com.clover.remote.message.RefundRequestMessage;
 import com.clover.remote.message.RefundResponseMessage;
 import com.clover.remote.message.RemoteMessage;
-import com.clover.remote.message.ResetDeviceResponseMessage;
-import com.clover.remote.message.RetrieveDeviceStatusRequestMessage;
-import com.clover.remote.message.RetrieveDeviceStatusResponseMessage;
 import com.clover.remote.message.RetrievePaymentRequestMessage;
 import com.clover.remote.message.RetrievePaymentResponseMessage;
 import com.clover.remote.message.RetrievePendingPaymentsMessage;
@@ -184,7 +185,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
                 notifyObserversConfirmPayment(cpym);
                 break;
               case FINISH_CANCEL:
-                notifyObserversFinishCancel();
+                FinishCancelMessage msg = (FinishCancelMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversFinishCancel(msg.messageInfo);
                 break;
               case FINISH_OK:
                 FinishOkMessage fokmsg = (FinishOkMessage) Message.fromJsonString(rMessage.payload);
@@ -666,7 +668,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
       @Override
       protected Object doInBackground(Object[] params) {
         for (CloverDeviceObserver observer : deviceObservers) {
-          observer.onTxStartResponse(txsrm.result, txsrm.externalPaymentId);
+          observer.onTxStartResponse(txsrm.result, txsrm.externalPaymentId, txsrm.messageInfo);
         }
         return null;
       }
@@ -813,12 +815,12 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
 
   }
 
-  public void notifyObserversFinishCancel() {
+  public void notifyObserversFinishCancel(final String messageInfo) {
     new AsyncTask() {
       @Override
       protected Object doInBackground(Object[] params) {
         for (CloverDeviceObserver observer : deviceObservers) {
-          observer.onFinishCancel();
+          observer.onFinishCancel(messageInfo);
         }
         return null;
       }
@@ -832,7 +834,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
       protected Object doInBackground(Object[] params) {
         for (CloverDeviceObserver observer : deviceObservers) {
           if (msg.payment != null) {
-            observer.onFinishOk(msg.payment, msg.signature);
+            observer.onFinishOk(msg.payment, msg.signature, msg.messageInfo);
           } else if (msg.credit != null) {
             observer.onFinishOk(msg.credit);
           } else if (msg.refund != null) {
