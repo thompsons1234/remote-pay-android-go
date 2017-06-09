@@ -20,8 +20,6 @@ import com.clover.common2.payments.PayIntent;
 import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
 import com.clover.remote.client.CloverDeviceObserver;
-import com.clover.remote.client.messages.GetPaymentRequest;
-import com.clover.remote.client.messages.RetrieveDeviceStatusRequest;
 import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.order.DisplayOrder;
 import com.clover.sdk.v3.order.Order;
@@ -119,7 +117,7 @@ public abstract class CloverDevice {
 
   public abstract void doRetrieveDeviceStatus(boolean sendLastResponse);
 
-  public abstract void doGetPayment(String externalPaymentId);
+  public abstract void doRetrievePayment(String externalPaymentId);
 
 
 }

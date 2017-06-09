@@ -22,7 +22,7 @@ import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.CapturePreAuthRequest;
 import com.clover.remote.client.messages.CloseoutRequest;
 import com.clover.remote.client.messages.CustomActivityRequest;
-import com.clover.remote.client.messages.GetPaymentRequest;
+import com.clover.remote.client.messages.RetrievePaymentRequest;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.MessageToActivity;
 import com.clover.remote.client.messages.PreAuthRequest;
@@ -289,6 +289,6 @@ public interface ICloverConnector extends Serializable {
    * Sends a request to get a payment.
    * Only valid for payments made in the past 24 hours on the device queried
    */
-  void getPayment(GetPaymentRequest request);
+  void retrievePayment(RetrievePaymentRequest request);
 
 }

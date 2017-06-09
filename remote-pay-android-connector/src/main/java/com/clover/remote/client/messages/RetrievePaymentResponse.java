@@ -20,12 +20,12 @@ package com.clover.remote.client.messages;
 import com.clover.remote.QueryStatus;
 import com.clover.sdk.v3.payments.Payment;
 
-public class GetPaymentResponse extends BaseResponse {
+public class RetrievePaymentResponse extends BaseResponse {
   private String externalPaymentId;
   private Payment payment;
   private QueryStatus queryStatus;
 
-  public GetPaymentResponse(ResultCode code, String message, String externalPaymentId, QueryStatus queryStatus, Payment payment) {
+  public RetrievePaymentResponse(ResultCode code, String message, String externalPaymentId, QueryStatus queryStatus, Payment payment) {
     super(code == ResultCode.SUCCESS, code);
     this.setMessage(message);
     this.externalPaymentId = externalPaymentId;
