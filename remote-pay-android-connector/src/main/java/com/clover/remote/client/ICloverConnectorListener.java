@@ -22,7 +22,7 @@ import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.CustomActivityResponse;
-import com.clover.remote.client.messages.GetPaymentResponse;
+import com.clover.remote.client.messages.RetrievePaymentResponse;
 import com.clover.remote.client.messages.MessageFromActivity;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.ManualRefundResponse;
@@ -266,7 +266,7 @@ public interface ICloverConnectorListener {
    */
   void onResetDeviceResponse(ResetDeviceResponse response);
 
-  /** * Called in response to a getPayment(...) request */
-  void onGetPaymentResponse(GetPaymentResponse response);
+  /** * Called in response to a doRetrievePayment(...) request */
+  void onGetPaymentResponse(RetrievePaymentResponse response);
   
 }

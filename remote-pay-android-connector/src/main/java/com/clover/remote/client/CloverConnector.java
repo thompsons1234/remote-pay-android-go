@@ -44,8 +44,8 @@ import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.CustomActivityRequest;
 import com.clover.remote.client.messages.CustomActivityResponse;
-import com.clover.remote.client.messages.GetPaymentRequest;
-import com.clover.remote.client.messages.GetPaymentResponse;
+import com.clover.remote.client.messages.RetrievePaymentRequest;
+import com.clover.remote.client.messages.RetrievePaymentResponse;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.ManualRefundResponse;
 import com.clover.remote.client.messages.MessageFromActivity;
@@ -785,11 +785,11 @@ public class CloverConnector implements ICloverConnector {
   }
 
   @Override
-  public void getPayment(GetPaymentRequest request) {
+  public void retrievePayment(RetrievePaymentRequest request) {
     if (device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In resetDevice: The Clover device is not connected."));
     } else {
-      device.doGetPayment(request.getExternalPaymentId());
+      device.doRetrievePayment(request.getExternalPaymentId());
     }
   }
 
@@ -950,10 +950,10 @@ public class CloverConnector implements ICloverConnector {
       cloverConnector.broadcaster.notifyOnResetDeviceResponse(rdr);
     }
 
-    public void onGetPaymentResponse(ResultCode result, String reason, String externalPaymentId, QueryStatus queryStatus, Payment payment) {
+    public void onRetrievePaymentResponse(ResultCode result, String reason, String externalPaymentId, QueryStatus queryStatus, Payment payment) {
       boolean success = result == ResultCode.SUCCESS;
-      GetPaymentResponse gpr = new GetPaymentResponse(result, reason, externalPaymentId, queryStatus, payment);
-      cloverConnector.broadcaster.notifyOnGetPaymentResponse(gpr);
+      RetrievePaymentResponse gpr = new RetrievePaymentResponse(result, reason, externalPaymentId, queryStatus, payment);
+      cloverConnector.broadcaster.notifyOnRetrievePaymentResponse(gpr);
     }
 
 

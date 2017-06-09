@@ -16,24 +16,12 @@
 
 package com.clover.remote.client.device;
 
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
-import android.util.Log;
-
 import com.clover.common2.payments.PayIntent;
 import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
-import com.clover.remote.client.messages.ResultCode;
-import com.clover.remote.client.messages.RetrieveDeviceStatusRequest;
-import com.clover.remote.message.GetPaymentRequestMessage;
-import com.clover.remote.message.GetPaymentResponseMessage;
-import com.clover.remote.message.ResetDeviceResponseMessage;
-import com.clover.remote.message.RetrieveDeviceStatusRequestMessage;
-import com.clover.remote.message.RetrieveDeviceStatusResponseMessage;
-import com.clover.sdk.v3.payments.TransactionSettings;
 import com.clover.remote.client.CloverDeviceObserver;
-import com.clover.remote.client.messages.ReadCardDataResponse;
+import com.clover.remote.client.messages.ResultCode;
 import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.client.transport.CloverTransportObserver;
 import com.clover.remote.message.AcknowledgementMessage;
@@ -71,6 +59,11 @@ import com.clover.remote.message.RefundPaymentPrintMessage;
 import com.clover.remote.message.RefundRequestMessage;
 import com.clover.remote.message.RefundResponseMessage;
 import com.clover.remote.message.RemoteMessage;
+import com.clover.remote.message.ResetDeviceResponseMessage;
+import com.clover.remote.message.RetrieveDeviceStatusRequestMessage;
+import com.clover.remote.message.RetrieveDeviceStatusResponseMessage;
+import com.clover.remote.message.RetrievePaymentRequestMessage;
+import com.clover.remote.message.RetrievePaymentResponseMessage;
 import com.clover.remote.message.RetrievePendingPaymentsMessage;
 import com.clover.remote.message.RetrievePendingPaymentsResponseMessage;
 import com.clover.remote.message.ShowPaymentReceiptOptionsMessage;
@@ -100,6 +93,9 @@ import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Payment;
 
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
+import android.util.Log;
 import com.google.gson.Gson;
 
 import java.util.HashMap;
@@ -372,9 +368,9 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
                 RetrieveDeviceStatusResponseMessage rdsr = (RetrieveDeviceStatusResponseMessage) Message.fromJsonString(rMessage.payload);
                 notifyObserversRetrieveDeviceStatusResponse(rdsr);
                 break;
-              case GET_PAYMENT_RESPONSE:
-                GetPaymentResponseMessage gprm = (GetPaymentResponseMessage) Message.fromJsonString(rMessage.payload);
-                notifyObserversGetPaymentResponse(gprm);
+              case RETRIEVE_PAYMENT_RESPONSE:
+                RetrievePaymentResponseMessage rprm = (RetrievePaymentResponseMessage) Message.fromJsonString(rMessage.payload);
+                notifyObserversRetrievePaymentResponse(rprm);
                 break;
               case RESET_DEVICE_RESPONSE:
                 ResetDeviceResponseMessage rdr = (ResetDeviceResponseMessage) Message.fromJsonString(rMessage.payload);
@@ -525,12 +521,12 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     }.execute();
   }
 
-  private void notifyObserversGetPaymentResponse(final GetPaymentResponseMessage gprm) {
+  private void notifyObserversRetrievePaymentResponse(final RetrievePaymentResponseMessage gprm) {
     new AsyncTask() {
       @Override
       protected Object doInBackground(Object[] params) {
         for (final CloverDeviceObserver observer : deviceObservers) {
-          observer.onGetPaymentResponse(ResultCode.SUCCESS, gprm.reason, gprm.externalPaymentId, gprm.queryStatus, gprm.payment);
+          observer.onRetrievePaymentResponse(ResultCode.SUCCESS, gprm.reason, gprm.externalPaymentId, gprm.queryStatus, gprm.payment);
         }
         return null;
       }
@@ -1015,8 +1011,8 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
   }
 
   @Override
-  public void doGetPayment(String externalPaymentId) {
-    sendObjectMessage(new GetPaymentRequestMessage(externalPaymentId));
+  public void doRetrievePayment(String externalPaymentId) {
+    sendObjectMessage(new RetrievePaymentRequestMessage(externalPaymentId));
   }
 
   public void dispose() {

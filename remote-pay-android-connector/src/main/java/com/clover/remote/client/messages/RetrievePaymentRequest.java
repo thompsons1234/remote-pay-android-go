@@ -17,10 +17,10 @@
 
 package com.clover.remote.client.messages;
 
-public class GetPaymentRequest extends BaseRequest {
+public class RetrievePaymentRequest extends BaseRequest {
   private String externalPaymentId;
 
-  public GetPaymentRequest(String externalPaymentId) {
+  public RetrievePaymentRequest(String externalPaymentId) {
     this.externalPaymentId = externalPaymentId;
   }
 

@@ -118,6 +118,6 @@ public interface CloverDeviceObserver {
 
   void onResetDeviceResponse(ResultCode result, String reason, ExternalDeviceState state);
 
-  void onGetPaymentResponse(ResultCode result, String reason, String externalPaymentId, QueryStatus queryStatus, Payment payment);
+  void onRetrievePaymentResponse(ResultCode result, String reason, String externalPaymentId, QueryStatus queryStatus, Payment payment);
 
 }

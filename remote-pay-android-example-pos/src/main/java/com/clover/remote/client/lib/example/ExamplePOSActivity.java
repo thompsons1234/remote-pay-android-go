@@ -53,8 +53,8 @@ import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.CustomActivityRequest;
 import com.clover.remote.client.messages.CustomActivityResponse;
-import com.clover.remote.client.messages.GetPaymentRequest;
-import com.clover.remote.client.messages.GetPaymentResponse;
+import com.clover.remote.client.messages.RetrievePaymentRequest;
+import com.clover.remote.client.messages.RetrievePaymentResponse;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.ManualRefundResponse;
 import com.clover.remote.client.messages.MessageFromActivity;
@@ -83,7 +83,6 @@ import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.message.TipAddedMessage;
-import com.clover.sdk.v3.JsonHelper;
 import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.DataEntryLocation;
 import com.clover.sdk.v3.payments.Payment;
@@ -118,8 +117,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 
 
 import java.io.InputStream;
@@ -946,7 +943,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       }
 
       @Override
-      public void onGetPaymentResponse(GetPaymentResponse response) {
+      public void onGetPaymentResponse(RetrievePaymentResponse response) {
         showMessage("GetPayment: " + (response.isSuccess() ? "Success!" : "Failed!")
                     + "QueryStatus: " + response.getQueryStatus() + " for id " + response.getExternalPaymentId()
                     + " Payment: " + response.getPayment()
@@ -1312,7 +1309,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   public void queryPaymentClick(View view) {
     String externalPaymentId = ((TextView) findViewById(R.id.QueryPaymentText)).getText().toString();
-    cloverConnector.getPayment(new GetPaymentRequest(externalPaymentId));
+    cloverConnector.retrievePayment(new RetrievePaymentRequest(externalPaymentId));
   }
 
   public void printTextClick(View view) {
