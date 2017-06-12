@@ -1073,7 +1073,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   private void handleJokeResponse(String payload) {
     ConversationResponseMessage jokeResponseMessage = (ConversationResponseMessage) PayloadMessage.fromJsonString(payload);
-    showMessage("Received JokeResponse of: " + jokeResponseMessage.message, 1000);
+    showMessage("Received JokeResponse of: " + jokeResponseMessage.message, Toast.LENGTH_SHORT);
   }
 
   private void showMessage(final String msg, final int duration) {
