@@ -93,13 +93,16 @@ import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -127,6 +130,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.prefs.Preferences;
+
+import static com.clover.remote.client.lib.example.StartupActivity.EXAMPLE_APP_NAME;
 
 public class ExamplePOSActivity extends Activity implements CurrentOrderFragment.OnFragmentInteractionListener,
     AvailableItem.OnFragmentInteractionListener, OrdersFragment.OnFragmentInteractionListener,
@@ -183,12 +188,13 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   private AlertDialog pairingCodeDialog;
 
   private transient CloverDeviceEvent.DeviceEventState lastDeviceEvent;
+  private SharedPreferences sharedPreferences;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_example_pos);
-
+    sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     initStore();
 
     CloverDeviceConfiguration config;
@@ -199,8 +205,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     } else if ("WS".equals(configType)) {
       URI uri = (URI) getIntent().getSerializableExtra(EXTRA_WS_ENDPOINT);
       KeyStore trustStore = createTrustStore();
-      String authToken = Preferences.userNodeForPackage(ExamplePOSActivity.class).get("AUTH_TOKEN", null);
+      SharedPreferences prefs = this.getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE);
 
+      String authToken = sharedPreferences.getString("AUTH_TOKEN", null);
       config = new WebSocketCloverDeviceConfiguration(uri, 10000, 2000, "Clover Example POS:1.2", trustStore, "Clover Example POS", "Aisle 3", authToken) {
 
 
@@ -227,6 +234,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         @Override
         public void onPairingSuccess(String authToken) {
           Preferences.userNodeForPackage(ExamplePOSActivity.class).put("AUTH_TOKEN", authToken);
+          sharedPreferences.edit().putString("AUTH_TOKEN", authToken).apply();
           runOnUiThread(new Runnable() {
             @Override
             public void run() {
