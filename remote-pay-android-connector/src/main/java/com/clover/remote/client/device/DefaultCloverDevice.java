@@ -186,7 +186,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
                 break;
               case FINISH_CANCEL:
                 FinishCancelMessage msg = (FinishCancelMessage) Message.fromJsonString(rMessage.payload);
-                notifyObserversFinishCancel(msg.messageInfo);
+                notifyObserversFinishCancel(msg.requestInfo);
                 break;
               case FINISH_OK:
                 FinishOkMessage fokmsg = (FinishOkMessage) Message.fromJsonString(rMessage.payload);
@@ -668,7 +668,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
       @Override
       protected Object doInBackground(Object[] params) {
         for (CloverDeviceObserver observer : deviceObservers) {
-          observer.onTxStartResponse(txsrm.result, txsrm.externalPaymentId, txsrm.messageInfo);
+          observer.onTxStartResponse(txsrm.result, txsrm.externalPaymentId, txsrm.requestInfo);
         }
         return null;
       }
@@ -834,7 +834,7 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
       protected Object doInBackground(Object[] params) {
         for (CloverDeviceObserver observer : deviceObservers) {
           if (msg.payment != null) {
-            observer.onFinishOk(msg.payment, msg.signature, msg.messageInfo);
+            observer.onFinishOk(msg.payment, msg.signature, msg.requestInfo);
           } else if (msg.credit != null) {
             observer.onFinishOk(msg.credit);
           } else if (msg.refund != null) {
