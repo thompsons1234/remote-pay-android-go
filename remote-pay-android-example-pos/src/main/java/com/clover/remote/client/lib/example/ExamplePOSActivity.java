@@ -1390,7 +1390,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void onGetDeviceStatusClick(View view) {
-    cloverConnector.retrieveDeviceStatus(null);
+    cloverConnector.retrieveDeviceStatus(new RetrieveDeviceStatusRequest(false));
   }
 
   public void onGetDeviceStatusCBClick(View view) {
