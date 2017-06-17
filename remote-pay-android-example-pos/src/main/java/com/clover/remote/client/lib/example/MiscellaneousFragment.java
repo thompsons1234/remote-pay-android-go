@@ -185,7 +185,11 @@ public class MiscellaneousFragment extends Fragment {
     RadioGroup.OnCheckedChangeListener radioGroupChangeListener = new RadioGroup.OnCheckedChangeListener() {
       @Override public void onCheckedChanged(RadioGroup group, int checkedId) {
         if(!updatingSwitches) {
-          CloverConnector cc = (CloverConnector) cloverConnectorWeakReference.get();
+          CloverConnector cc = null;
+          try {
+            cc = (CloverConnector) cloverConnectorWeakReference.get();
+          }catch (ClassCastException e){
+          }
           if(cc == null) {
             Log.e(getClass().getSimpleName(), "Clover Connector reference is null");
             return;
@@ -277,7 +281,7 @@ public class MiscellaneousFragment extends Fragment {
     }
 
     ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity().getApplicationContext(),
-        android.R.layout.simple_spinner_dropdown_item, values);
+            android.R.layout.simple_spinner_dropdown_item, values);
     tipModeSpinner.setAdapter(adapter);
     tipModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override

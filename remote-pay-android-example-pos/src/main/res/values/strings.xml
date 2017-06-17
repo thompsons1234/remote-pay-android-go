@@ -62,4 +62,9 @@
 
   <string name="select_one">Select one</string>
     <string name="signature_text">Sign to approve payment</string>
+
+  <string name="send_receipt_info_lbl">Send receipt to a mobile number or email address</string>
+  <string name="send_receipt_btn_lbl">Send Receipt</string>
+  <string name="no_receipt_btn_lbl">No Receipt</string>
+
 </resources>

@@ -34,6 +34,7 @@ import android.widget.Toast;
 
 import com.clover.remote.client.lib.example.rest.ApiClient;
 import com.clover.remote.client.lib.example.rest.ApiInterface;
+import com.clover.remote.client.lib.example.utils.Validator;
 import com.crashlytics.android.Crashlytics;
 
 import org.json.JSONException;
@@ -158,23 +159,29 @@ public class StartupActivity extends Activity {
       intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
       intent.putExtra(ExamplePOSActivity.EXTRA_WS_ENDPOINT, uri);
       startActivity(intent);
-    }else if (config.equals("GO")){
+    }else if (config.equals("GO") ){
 
-      String apiKey = "Lht4CAQq8XxgRikjxwE71JE20by5dzlY";
-      String secret = "7ebgf6ff8e98d1565ab988f5d770a911e36f0f2347e3ea4eb719478c55e74d9g";
-      String accessToken = "533238e2-dbd7-98d8-ff6b-3e953d028e30";
+      if (Validator.isNetworkConnected(this)){
 
-      intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
-      intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, accessToken);
-      intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, apiKey);
-      intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, secret);
+        String apiKey = "Lht4CAQq8XxgRikjxwE71JE20by5dzlY";
+        String secret = "7ebgf6ff8e98d1565ab988f5d770a911e36f0f2347e3ea4eb719478c55e74d9g";
+        String accessToken = "533238e2-dbd7-98d8-ff6b-3e953d028e30";
 
-      if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp450RadioButton)
-        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP450);
-      else if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp350RadioButton)
-        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP350);
+        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
+        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, accessToken);
+        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, apiKey);
+        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, secret);
 
-      startActivity(intent);
+        if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp450RadioButton)
+          intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP450);
+        else if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp350RadioButton)
+          intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP350);
+
+        startActivity(intent);
+      }else {
+        Toast.makeText(this,"Check Internet Connection",Toast.LENGTH_LONG).show();
+      }
+
     }
   }
 
@@ -249,26 +256,29 @@ public class StartupActivity extends Activity {
               Toast.makeText(StartupActivity.this, err,Toast.LENGTH_SHORT).show();
             } else if (jsonObject.has("access_token")){
 
-              String accessToken = jsonObject.getString("access_token");
-              String apiKey = "Lht4CAQq8XxgRikjxwE71JE20by5dzlY";
-              String secret = "7ebgf6ff8e98d1565ab988f5d770a911e36f0f2347e3ea4eb719478c55e74d9g";
-              String config = "GO";
+             if (Validator.isNetworkConnected(StartupActivity.this)){
+               String accessToken = jsonObject.getString("access_token");
+               String apiKey = "Lht4CAQq8XxgRikjxwE71JE20by5dzlY";
+               String secret = "7ebgf6ff8e98d1565ab988f5d770a911e36f0f2347e3ea4eb719478c55e74d9g";
+               String config = "GO";
 
 
-              Intent intent = new Intent();
-              intent.setClass(StartupActivity.this, ExamplePOSActivity.class);
-              intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
-              intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, accessToken);
-              intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, apiKey);
-              intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, secret);
+               Intent intent = new Intent();
+               intent.setClass(StartupActivity.this, ExamplePOSActivity.class);
+               intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
+               intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, accessToken);
+               intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, apiKey);
+               intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, secret);
 
-              if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp450RadioButton)
-                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP450);
-              else if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp350RadioButton)
-                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP350);
+               if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp450RadioButton)
+                 intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP450);
+               else if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp350RadioButton)
+                 intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP350);
 
-              startActivity(intent);
-
+               startActivity(intent);
+             }else {
+               Toast.makeText(StartupActivity.this,"Check Internet Connection",Toast.LENGTH_LONG).show();
+             }
 
             }
           }catch (JSONException | IOException e) {

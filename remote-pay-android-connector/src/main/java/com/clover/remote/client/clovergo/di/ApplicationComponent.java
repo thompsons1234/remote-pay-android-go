@@ -1,7 +1,7 @@
 package com.clover.remote.client.clovergo.di;
 
 
-import com.clover.remote.client.clovergo.TransactionModule;
+import com.clover.remote.client.clovergo.CloverGoConnectorImpl;
 import com.firstdata.clovergo.data.SDKDataComponent;
 
 import dagger.Component;
@@ -12,5 +12,5 @@ import dagger.Component;
 @ApplicationScope
 @Component(dependencies = SDKDataComponent.class)
 public interface ApplicationComponent {
-    void inject(TransactionModule transactionModule);
+    void inject(CloverGoConnectorImpl cloverGoConnectorImpl);
 }

@@ -23,10 +23,13 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -962,15 +965,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     ccGoListener = new ICloverGoConnectorListener() {
       public void onDeviceDisconnected() {
-        runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            Toast.makeText(ExamplePOSActivity.this, "Disconnected", Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "disconnected");
-            ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Disconnected");
-          }
-        });
-
       }
 
       @Override
@@ -1096,152 +1090,23 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       }
 
       public void onError(final Exception e) {
-        runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            showMessage("Error: " + e.getMessage(), Toast.LENGTH_LONG);
-          }
-        });
+
       }
 
       public void onDebug(final String s) {
-        runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            showMessage("Debug: " + s, Toast.LENGTH_LONG);
-          }
-        });
+
       }
 
       @Override
       public void onDeviceActivityStart(final CloverDeviceEvent deviceEvent) {
-
-        lastDeviceEvent = deviceEvent.getEventState();
-        runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            showStatus(deviceEvent.getMessage());
-            //Toast.makeText(ExamplePOSActivity.this, deviceEvent.getMessage(), Toast.LENGTH_SHORT).show();
-            LinearLayout ll = (LinearLayout) findViewById(R.id.DeviceOptionsPanel);
-            ll.removeAllViews();
-
-            if (deviceEvent.getInputOptions() != null) {
-              for (final InputOption io : deviceEvent.getInputOptions()) {
-                Button btn = new Button(ExamplePOSActivity.this);
-                btn.setText(io.description);
-                btn.setOnClickListener(new View.OnClickListener() {
-                  @Override
-                  public void onClick(View v) {
-                    getCloverConnector().invokeInputOption(io);
-                  }
-                });
-                ll.addView(btn);
-              }
-            }
-          }
-        });
       }
 
       @Override
       public void onReadCardDataResponse(final ReadCardDataResponse response) {
-        runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
-            builder.setTitle("Read Card Data Response");
-            if (response.isSuccess()) {
-
-              LayoutInflater inflater = ExamplePOSActivity.this.getLayoutInflater();
-
-              View view = inflater.inflate(R.layout.card_data_table, null);
-              ListView listView = (ListView) view.findViewById(R.id.cardDataListView);
-
-              if (listView != null) {
-                class RowData {
-                  RowData(String label, String value) {
-                    this.text1 = label;
-                    this.text2 = value;
-                  }
-
-                  String text1;
-                  String text2;
-                }
-
-                ArrayAdapter<RowData> data = new ArrayAdapter<RowData>(getBaseContext(), android.R.layout.simple_list_item_2) {
-                  @Override
-                  public View getView(int position, View convertView, ViewGroup parent) {
-                    View v = convertView;
-
-                    if (v == null) {
-                      LayoutInflater vi;
-                      vi = LayoutInflater.from(getContext());
-                      v = vi.inflate(android.R.layout.simple_list_item_2, null);
-                    }
-
-                    RowData rowData = getItem(position);
-
-                    if (rowData != null) {
-                      TextView primaryColumn = (TextView) v.findViewById(android.R.id.text1);
-                      TextView secondaryColumn = (TextView) v.findViewById(android.R.id.text2);
-
-                      primaryColumn.setText(rowData.text2);
-                      secondaryColumn.setText(rowData.text1);
-                    }
-
-                    return v;
-                  }
-                };
-                listView.setAdapter(data);
-                CardData cardData = response.getCardData();
-                data.addAll(new RowData("Encrypted", cardData.encrypted + ""));
-                data.addAll(new RowData("Cardholder Name", cardData.cardholderName));
-                data.addAll(new RowData("First Name", cardData.firstName));
-                data.addAll(new RowData("Last Name", cardData.lastName));
-                data.addAll(new RowData("Expiration", cardData.exp));
-                data.addAll(new RowData("First 6", cardData.first6));
-                data.addAll(new RowData("Last 4", cardData.last4));
-                data.addAll(new RowData("Track 1", cardData.track1));
-                data.addAll(new RowData("Track 2", cardData.track2));
-                data.addAll(new RowData("Track 3", cardData.track3));
-                data.addAll(new RowData("Masked Track 1", cardData.maskedTrack1));
-                data.addAll(new RowData("Masked Track 2", cardData.maskedTrack2));
-                data.addAll(new RowData("Masked Track 3", cardData.maskedTrack3));
-                data.addAll(new RowData("Pan", cardData.pan));
-
-              }
-              builder.setView(view);
-
-            } else if (response.getResult() == ResultCode.CANCEL) {
-              builder.setMessage("Get card data canceled.");
-            } else {
-              builder.setMessage("Error getting card data. " + response.getReason() + ": " + response.getMessage());
-            }
-
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-              @Override
-              public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-              }
-            });
-            AlertDialog dialog = builder.create();
-            dialog.show();
-
-          }
-        });
       }
 
       @Override
       public void onDeviceActivityEnd(final CloverDeviceEvent deviceEvent) {
-        if (deviceEvent.getEventState() == lastDeviceEvent) {
-          runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-              showStatus("");
-              LinearLayout ll = (LinearLayout) findViewById(R.id.DeviceOptionsPanel);
-              ll.removeAllViews();
-            }
-          });
-        }
       }
 
       @Override
@@ -1296,6 +1161,10 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
               currentOrderFragment.setOrder(store.getCurrentOrder());
 
+              if (_payment.isSignatureRequired()){
+                captureSignature(_payment.getId());
+              }
+
               showRegister(null);
               SystemClock.sleep(3000);
               showStatus("");
@@ -1331,6 +1200,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           store.addPreAuth(payment);
           showMessage("PreAuth successfully processed.", Toast.LENGTH_SHORT);
           showPreAuths(null);
+
+          if (_payment.isSignatureRequired()){
+            captureSignature(_payment.getId());
+          }
+
         } else {
           showAlertDialog(response.getReason(),response.getMessage());
 //              showMessage("PreAuth: " + response.getResult(), Toast.LENGTH_LONG);
@@ -1348,11 +1222,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       @Override
       public void onRetrievePendingPaymentsResponse(RetrievePendingPaymentsResponse retrievePendingPaymentResponse) {
-        if (!retrievePendingPaymentResponse.isSuccess()) {
-          store.setPendingPayments(null);
-        } else {
-          store.setPendingPayments(retrievePendingPaymentResponse.getPendingPayments());
-        }
       }
 
       @Override
@@ -1417,22 +1286,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       @Override
       public void onVerifySignatureRequest(VerifySignatureRequest request) {
-
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-        hideFragments(fragmentManager, fragmentTransaction);
-
-        Fragment fragment = fragmentManager.findFragmentByTag("SIGNATURE");
-        if (fragment == null) {
-          fragment = SignatureFragment.newInstance(request, getCloverConnector());
-          fragmentTransaction.add(R.id.contentContainer, fragment, "SIGNATURE");
-        } else {
-          ((SignatureFragment) fragment).setVerifySignatureRequest(request);
-          fragmentTransaction.show(fragment);
-        }
-
-        fragmentTransaction.commit();
       }
 
       @Override
@@ -1477,25 +1330,15 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
               currentOrderFragment.setOrder(store.getCurrentOrder());
               if (_payment.isSignatureRequired()){
-                takeSignature(_payment.getId());
+                captureSignature(_payment.getId());
               }
               showRegister(null);
               showStatus("");
-             /* runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                  store.createOrder(false);
-                  CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
-                  currentOrderFragment.setOrder(store.getCurrentOrder());
-                  showRegister(null);
-                }
-              });*/
             } else { // Handle null payment
               showMessage("Error: Sale response was missing the payment", Toast.LENGTH_LONG);
             }
           } else {
             showAlertDialog(response.getReason(),response.getMessage());
-            //  showMessage(response.getResult().toString() + ":" + response.getReason() + "  " + response.getMessage(), Toast.LENGTH_LONG);
           }
         } else { //Handle null payment response
           showMessage("Error: Null SaleResponse", Toast.LENGTH_LONG);
@@ -1511,21 +1354,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       @Override
       public void onManualRefundResponse(final ManualRefundResponse response) {
-        if (response.isSuccess()) {
-          Credit credit = response.getCredit();
-          final POSNakedRefund nakedRefund = new POSNakedRefund(null, credit.getAmount());
-          runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-              store.addRefund(nakedRefund);
-              showMessage("Manual Refund successfully processed", Toast.LENGTH_SHORT);
-            }
-          });
-        } else if (response.getResult() == ResultCode.CANCEL) {
-          showMessage("User canceled the Manual Refund", Toast.LENGTH_SHORT);
-        } else {
-          showMessage("Manual Refund Failed with code: " + response.getResult() + " - " + response.getMessage(), Toast.LENGTH_LONG);
-        }
       }
 
       @Override
@@ -1596,78 +1424,34 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       @Override
       public void onVaultCardResponse(final VaultCardResponse response) {
-        if (response.isSuccess()) {
-          POSCard card = new POSCard();
-          card.setFirst6(response.getCard().getFirst6());
-          card.setLast4(response.getCard().getLast4());
-          card.setName(response.getCard().getCardholderName());
-          card.setMonth(response.getCard().getExpirationDate().substring(0, 2));
-          card.setYear(response.getCard().getExpirationDate().substring(2, 4));
-          card.setToken(response.getCard().getToken());
-          store.addCard(card);
-          showMessage("Card successfully vaulted", Toast.LENGTH_SHORT);
-        } else {
-          if (response.getResult() == ResultCode.CANCEL) {
-            showMessage("User canceled the operation", Toast.LENGTH_SHORT);
-            try {
-              // Operation Not Supported in Clove Go
-              getCloverConnector().showWelcomeScreen();
-            }catch (UnsupportedOperationException e){
-              Log.e("Example POS", e.getMessage());
-            }
-          } else {
-            showMessage("Error capturing card: " + response.getResult(), Toast.LENGTH_LONG);
-            try {
-              // Operation not Supported in CLover Go
-              getCloverConnector().showMessage("Card was not saved");
-            }catch (UnsupportedOperationException e){
-              Log.e("EXAMPLE POS", e.getMessage());
-            }
-
-            SystemClock.sleep(4000); //wait 4 seconds
-            try {
-              // Operation Not Supported in Clove Go
-              getCloverConnector().showWelcomeScreen();
-            }catch (UnsupportedOperationException e){
-              Log.e("Example POS", e.getMessage());
-            }
-          }
-        }
       }
 
       @Override
       public void onPrintManualRefundReceipt(PrintManualRefundReceiptMessage pcm) {
-        showMessage("Print Request for ManualRefund", Toast.LENGTH_SHORT);
       }
 
       @Override
       public void onPrintManualRefundDeclineReceipt(PrintManualRefundDeclineReceiptMessage pcdrm) {
-        showMessage("Print Request for Declined ManualRefund", Toast.LENGTH_SHORT);
       }
 
       @Override
       public void onPrintPaymentReceipt(PrintPaymentReceiptMessage pprm) {
-        showMessage("Print Request for Payment Receipt", Toast.LENGTH_SHORT);
       }
 
       @Override
       public void onPrintPaymentDeclineReceipt(PrintPaymentDeclineReceiptMessage ppdrm) {
-        showMessage("Print Request for DeclinedPayment Receipt", Toast.LENGTH_SHORT);
       }
 
       @Override
       public void onPrintPaymentMerchantCopyReceipt(PrintPaymentMerchantCopyReceiptMessage ppmcrm) {
-        showMessage("Print Request for MerchantCopy of a Payment Receipt", Toast.LENGTH_SHORT);
       }
 
       @Override
       public void onPrintRefundPaymentReceipt(PrintRefundPaymentReceiptMessage pprrm) {
-        showMessage("Print Request for RefundPayment Receipt", Toast.LENGTH_SHORT);
       }
 
       @Override
       public void onCustomActivityResponse(CustomActivityResponse response) {
-        showMessage((response.isSuccess() ? "Success!" : "Failed!" ) + " Got: " + response.payload + " from CustomActivity: " + response.action + " reason: " + response.getReason(), 5000);
       }
 
     };
@@ -1680,7 +1464,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     updateComponentsWithNewCloverConnector();
   }
 
-  private void takeSignature(String paymentID) {
+  private void captureSignature(String paymentID) {
 
     FragmentManager fragmentManager = getFragmentManager();
     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -2004,19 +1788,24 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void connect450Click(View view){
-    if (cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP450) == null ) {
-      CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, CloverGoDeviceConfiguration.ENV.DEMO, apiKey, secret, "com.clover.examplepos:1.2").deviceType(ReaderInfo.ReaderType.RP450).allowAutoConnect(false).build();
-      ICloverGoConnector cloverGo450Connector = ConnectorFactory.createCloverGoConnector(config);
-      cloverGoConnectorMap.put(ReaderInfo.ReaderType.RP450,cloverGo450Connector);
-      cloverGo450Connector.addCloverGoConnectorListener(ccGoListener);
-    }
-    if (merchantInfoMap.get(ReaderInfo.ReaderType.RP450) == null){
-      cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP450).initializeConnection();
-      mArrayListReadersList = new ArrayList<>();
-      mArrayListReaderString = new ArrayList<>();
-      showBluetoothReaders();
+
+    if (isBluetoothEnabled() && isGPSEnabled()) {
+      if (cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP450) == null) {
+        CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, CloverGoDeviceConfiguration.ENV.DEMO, apiKey, secret, "com.clover.examplepos:1.2").deviceType(ReaderInfo.ReaderType.RP450).allowAutoConnect(false).build();
+        ICloverGoConnector cloverGo450Connector = ConnectorFactory.createCloverGoConnector(config);
+        cloverGoConnectorMap.put(ReaderInfo.ReaderType.RP450, cloverGo450Connector);
+        cloverGo450Connector.addCloverGoConnectorListener(ccGoListener);
+      }
+      if (merchantInfoMap.get(ReaderInfo.ReaderType.RP450) == null) {
+        cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP450).initializeConnection();
+        mArrayListReadersList = new ArrayList<>();
+        mArrayListReaderString = new ArrayList<>();
+        showBluetoothReaders();
+      } else {
+        showMessage("Reader 450 Already Connected", Toast.LENGTH_LONG);
+      }
     }else {
-      showMessage("Reader 450 Already Connected", Toast.LENGTH_LONG);
+      showMessage("Enable GPS and Bluetooth",Toast.LENGTH_LONG);
     }
 
   }
@@ -2124,8 +1913,12 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void onReadCardDataClick(View view) {
-
-    getCloverConnector().readCardData(new ReadCardDataRequest(store.getCardEntryMethods()));
+    try{
+      getCloverConnector().readCardData(new ReadCardDataRequest(store.getCardEntryMethods()));
+    }catch (UnsupportedOperationException e){
+      Log.e("EXAMPLE POS", e.getMessage());
+      Toast.makeText(ExamplePOSActivity.this, e.getMessage(),Toast.LENGTH_LONG).show();
+    }
   }
 
   private static final SecureRandom random = new SecureRandom();
@@ -2159,7 +1952,12 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     car.setPayload(payload);
     boolean nonBlocking = ((Switch)findViewById(R.id.customActivityBlocking)).isChecked();
     car.setNonBlocking(nonBlocking);
-    getCloverConnector().startCustomActivity(car);
+    try {
+      getCloverConnector().startCustomActivity(car);
+    }catch (UnsupportedOperationException e){
+      Log.e("EXAMPLE POS", e.getMessage());
+      Toast.makeText(ExamplePOSActivity.this, e.getMessage(),Toast.LENGTH_LONG).show();
+    }
   }
 
 
@@ -2247,5 +2045,20 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     if (progressDialog != null && progressDialog.isShowing()){
       progressDialog.dismiss();
     }
+  }
+
+  private boolean isBluetoothEnabled() {
+    BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    if (mBluetoothAdapter != null && !mBluetoothAdapter.isEnabled()) {
+      Toast.makeText(ExamplePOSActivity.this,"Turn on Bluetooth to connect 450 reader",Toast.LENGTH_SHORT).show();
+      return false;
+    }else {
+      return true;
+    }
+  }
+
+  private boolean isGPSEnabled(){
+    LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
   }
 }

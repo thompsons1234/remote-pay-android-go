@@ -50,4 +50,6 @@ package com.clover.remote.client.clovergo;
 
   void captureSignature(String paymentId,int[][] xy);
 
+  void sendReceipt(String email, String phoneNo, String orderId);
+
  }

@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
-import com.clover.remote.client.DefaultCloverConnector;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.CapturePreAuthRequest;
 import com.clover.remote.client.messages.CloseoutRequest;
@@ -26,42 +25,39 @@ import java.util.List;
  * Created by Akhani, Avdhesh on 4/18/17.
  */
 
-//TODO: Add POS support
 //TODO: Void Payment - order.setID() on null Order Object
-//TODO:  Auth Transaction -  (As Per Pivotal)If the merchant is not configured for Auth transactions on the payment gateway then the transaction should throw an exception. Right now if not configured, we do transaction as Sale.
-//TODO: Pre Auth -  If the merchant is not configured for PreAuth on the payment gateway then the transaction should throw an exception.
 public class CloverGoConnector extends DefaultCloverGoConnector {
 
     private static String TAG = "CloverGO";
 
     private CloverGoDeviceConfiguration mCloverGoConfiguration;
-    private static TransactionModule transactionModule;
+    private static CloverGoConnectorImpl cloverGoConnectorImpl;
 
 
-    public CloverGoConnector(CloverGoDeviceConfiguration mCloverGoConfiguration) {
+    public CloverGoConnector(CloverGoDeviceConfiguration mCloverGoConfiguration) throws InitializationFailedException {
         this.mCloverGoConfiguration = mCloverGoConfiguration;
-        if (transactionModule == null)
-            transactionModule = new TransactionModule(broadcaster,mCloverGoConfiguration);
+        if (cloverGoConnectorImpl == null)
+            cloverGoConnectorImpl = new CloverGoConnectorImpl(broadcaster,mCloverGoConfiguration);
     }
 
     @Override
     public void initializeConnection() {
-        transactionModule.initializeConnection(mCloverGoConfiguration.getReaderType());
+        cloverGoConnectorImpl.initializeConnection(mCloverGoConfiguration.getReaderType());
     }
 
     @Override
     public void connectToDevice(ReaderInfo readerInfo) {
-        transactionModule.connectToDevice(readerInfo);
+        cloverGoConnectorImpl.connectToDevice(readerInfo);
     }
 
     @Override
     public void disconnectDevice() {
-        transactionModule.disconnectDevice(mCloverGoConfiguration.getReaderType());
+        cloverGoConnectorImpl.disconnectDevice(mCloverGoConfiguration.getReaderType());
     }
 
     @Override
     public void stopDeviceScan() {
-        transactionModule.stopDeviceScan();
+        cloverGoConnectorImpl.stopDeviceScan();
     }
 
     @Override
@@ -71,7 +67,7 @@ public class CloverGoConnector extends DefaultCloverGoConnector {
 
     @Override
     public void sale(SaleRequest saleRequest) {
-        transactionModule.sale(saleRequest,mCloverGoConfiguration.getReaderType(),mCloverGoConfiguration.isAllowDuplicate());
+        cloverGoConnectorImpl.sale(saleRequest,mCloverGoConfiguration.getReaderType(),mCloverGoConfiguration.isAllowDuplicate());
     }
 
     @Override
@@ -82,65 +78,61 @@ public class CloverGoConnector extends DefaultCloverGoConnector {
     @Override
     public void rejectSignature(VerifySignatureRequest request) throws UnsupportedOperationException{
         throw new UnsupportedOperationException("Operation Not supported for cloverGo");
-
     }
 
     @Override
     public void acceptPayment(com.clover.sdk.v3.payments.Payment payment) {
-        transactionModule.acceptPayment(payment);
+        cloverGoConnectorImpl.acceptPayment(payment);
     }
 
     @Override
     public void rejectPayment(com.clover.sdk.v3.payments.Payment payment, Challenge challenge) {
-        transactionModule.rejectPayment(payment,challenge);
+        cloverGoConnectorImpl.rejectPayment(payment,challenge);
     }
 
     @Override
     public void auth(AuthRequest authRequest) {
-        transactionModule.auth(authRequest, mCloverGoConfiguration.getReaderType(),mCloverGoConfiguration.isAllowDuplicate());
+        cloverGoConnectorImpl.auth(authRequest, mCloverGoConfiguration.getReaderType(),mCloverGoConfiguration.isAllowDuplicate());
     }
 
     @Override
     public void preAuth(PreAuthRequest preAuthRequest) {
-        transactionModule.preAuth(preAuthRequest, mCloverGoConfiguration.getReaderType(),mCloverGoConfiguration.isAllowDuplicate());
+        cloverGoConnectorImpl.preAuth(preAuthRequest, mCloverGoConfiguration.getReaderType(),mCloverGoConfiguration.isAllowDuplicate());
     }
 
     @Override
     public void tipAdjustAuth(final TipAdjustAuthRequest authTipAdjustRequest) {
-        transactionModule.tipAdjustAuth(authTipAdjustRequest, mCloverGoConfiguration.getReaderType());
+        cloverGoConnectorImpl.tipAdjustAuth(authTipAdjustRequest, mCloverGoConfiguration.getReaderType());
     }
 
     @Override
     public void capturePreAuth(final CapturePreAuthRequest capturePreAuthRequest) {
-        transactionModule.capturePreAuth(capturePreAuthRequest);
+        cloverGoConnectorImpl.capturePreAuth(capturePreAuthRequest);
     }
 
     @Override
     public void voidPayment(final VoidPaymentRequest voidPaymentRequest) {
-        transactionModule.voidPayment(voidPaymentRequest, mCloverGoConfiguration.getReaderType());
+        cloverGoConnectorImpl.voidPayment(voidPaymentRequest);
     }
 
     @Override
     public void refundPayment(final RefundPaymentRequest refundPaymentRequest) {
-        transactionModule.refundPayment(refundPaymentRequest);
+        cloverGoConnectorImpl.refundPayment(refundPaymentRequest);
     }
 
     @Override
     public void manualRefund(ManualRefundRequest request) throws UnsupportedOperationException{
         throw new UnsupportedOperationException("Operation Not supported for cloverGo");
-
     }
 
     @Override
     public void vaultCard(Integer cardEntryMethods) throws UnsupportedOperationException{
         throw new UnsupportedOperationException("Operation Not supported for cloverGo");
-
     }
 
     @Override
     public void retrievePendingPayments() throws UnsupportedOperationException{
         throw new UnsupportedOperationException("Operation Not supported for cloverGo");
-
     }
 
     @Override
@@ -150,17 +142,22 @@ public class CloverGoConnector extends DefaultCloverGoConnector {
 
     @Override
     public void closeout(CloseoutRequest closeoutRequest){
-        transactionModule.closeout(closeoutRequest);
+        cloverGoConnectorImpl.closeout(closeoutRequest);
     }
 
     @Override
     public void captureSignature(String paymentId, int[][] xy) {
-        transactionModule.captureSignature(paymentId,xy);
+        cloverGoConnectorImpl.captureSignature(paymentId,xy);
+    }
+
+    @Override
+    public void sendReceipt(String email, String phoneNo, String orderId) {
+        cloverGoConnectorImpl.sendReceipt(email,phoneNo,orderId);
     }
 
     @Override
     public void cancel() {
-        transactionModule.cancel(mCloverGoConfiguration.getReaderType());
+        cloverGoConnectorImpl.cancel(mCloverGoConfiguration.getReaderType());
     }
 
     @Override

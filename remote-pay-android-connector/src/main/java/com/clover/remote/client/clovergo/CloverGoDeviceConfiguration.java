@@ -25,6 +25,7 @@ public class CloverGoDeviceConfiguration implements CloverDeviceConfiguration {
     private long scanPeriod = 30000;
     private boolean allowDuplicate = false;
     private boolean autoConnect = false;
+    //TODO: Device Type
     private ReaderInfo.ReaderType readerType = ReaderInfo.ReaderType.RP450;
 
     private CloverGoDeviceConfiguration(Context context, String accessToken, ENV env, String apiKey, String secret, String appId) {

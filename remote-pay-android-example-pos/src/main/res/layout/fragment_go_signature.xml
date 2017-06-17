@@ -18,7 +18,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white_FFFFFF"
+    android:background="?android:colorBackground"
     tools:context=".SignatureFragment">
 
   <Button android:layout_width="wrap_content"
@@ -39,7 +39,6 @@
       android:layout_above="@+id/AcceptButton"
       android:layout_alignParentStart="true"
       android:fadeOffset="2000"
-      android:gestureColor="#151515"
       android:gestureStrokeLengthThreshold="0.1"
       android:gestureStrokeType="multiple"
       android:gestureStrokeWidth="7"
@@ -51,7 +50,6 @@
       android:text="@string/signature_text"
       android:id="@+id/textHere"
       android:textSize="16dp"
-      android:textColor="#4A4A4A"
       android:layout_alignParentTop="true"
       android:layout_centerHorizontal="true" />
 

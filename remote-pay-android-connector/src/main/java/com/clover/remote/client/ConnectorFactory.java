@@ -17,7 +17,7 @@ public class ConnectorFactory {
     return createCloverConnector(configuration);
   }
 
-  //TODO:
+  //TODO: Merge Create connector method and Initialize SDK without Reader Type
   public static ICloverConnector createCloverConnector(CloverDeviceConfiguration configuration) {
     if (configuration instanceof CloverGoDeviceConfiguration) {
       if (cloverGoConnectorMap.get(((CloverGoDeviceConfiguration) configuration).getReaderType()) == null) {

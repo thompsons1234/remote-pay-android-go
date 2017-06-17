@@ -20,6 +20,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -33,6 +35,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 import com.clover.remote.PendingPaymentEntry;
 import com.clover.remote.client.ICloverConnector;
+import com.clover.remote.client.clovergo.ICloverGoConnector;
 import com.clover.remote.client.lib.example.adapter.ItemsListViewAdapter;
 import com.clover.remote.client.lib.example.adapter.OrdersListViewAdapter;
 import com.clover.remote.client.lib.example.adapter.PaymentsListViewAdapter;
@@ -136,86 +139,97 @@ public class OrdersFragment extends Fragment implements OrderObserver {
 
         if (posExchange instanceof POSPayment) {
           if (((POSPayment)posExchange).getPaymentStatus() == POSPayment.Status.AUTHORIZED) {
-              //TODO: Remove Receipt Option for CLover GO
+            //TODO: Remove Receipt Option for CLover GO
             options = new String[]{"Void Payment", "Refund Payment", "Tip Adjust Payment", "Receipt Options"};
           } else if (((POSPayment)posExchange).getPaymentStatus() == POSPayment.Status.PAID) {
-              //TODO: Remove Receipt Option for CLover GO
+            //TODO: Remove Receipt Option for CLover GO
             options = new String[]{"Void Payment", "Refund Payment", "Receipt Options"};
           } else {
             return;
           }
           final String[] finalPaymentOptions = options;
           builder.setTitle("Payment Actions").
-              setItems(finalPaymentOptions, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int index) {
-                  final ICloverConnector cloverConnector = cloverConnectorWeakReference.get();
-                  if (cloverConnector != null) {
-                    final String option = finalPaymentOptions[index];
-                    switch (option) {
-                      case "Void Payment": {
-                        VoidPaymentRequest vpr = new VoidPaymentRequest();
-                        vpr.setPaymentId(posExchange.getPaymentID());
-                        vpr.setOrderId(posExchange.getOrderId());
-                        vpr.setVoidReason(VoidReason.USER_CANCEL.name());
-                        cloverConnector.voidPayment(vpr);
-                        break;
-                      }
-                      case "Refund Payment": {
-                        RefundPaymentRequest rpr = new RefundPaymentRequest();
-                        rpr.setPaymentId(posExchange.getPaymentID());
-                        rpr.setOrderId(posExchange.orderID);
-                        rpr.setFullRefund(true);
-                        cloverConnector.refundPayment(rpr);
-                        break;
-                      }
-                      case "Tip Adjust Payment": {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                        final EditText input = new EditText(getActivity());
-                        input.setInputType(InputType.TYPE_CLASS_NUMBER);
-                        builder.setView(input);
-
-                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                          @Override
-                          public void onClick(DialogInterface dialog, int which) {
-                            double val = Double.parseDouble(input.getText().toString());
-                            long value = (long) val;
-
-                            TipAdjustAuthRequest taar = new TipAdjustAuthRequest();
-                            taar.setPaymentId(posExchange.getPaymentID());
-                            taar.setOrderId(posExchange.getOrderId());
-                            taar.setTipAmount(value);
-                            cloverConnector.tipAdjustAuth(taar);
-                            dialog.dismiss();
+                  setItems(finalPaymentOptions, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int index) {
+                      final ICloverConnector cloverConnector = cloverConnectorWeakReference.get();
+                      if (cloverConnector != null) {
+                        final String option = finalPaymentOptions[index];
+                        switch (option) {
+                          case "Void Payment": {
+                            VoidPaymentRequest vpr = new VoidPaymentRequest();
+                            vpr.setPaymentId(posExchange.getPaymentID());
+                            vpr.setOrderId(posExchange.getOrderId());
+                            vpr.setVoidReason(VoidReason.USER_CANCEL.name());
+                            cloverConnector.voidPayment(vpr);
+                            break;
                           }
-                        });
-                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                          @Override
-                          public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
+                          case "Refund Payment": {
+                            RefundPaymentRequest rpr = new RefundPaymentRequest();
+                            rpr.setPaymentId(posExchange.getPaymentID());
+                            rpr.setOrderId(posExchange.orderID);
+                            rpr.setFullRefund(true);
+                            cloverConnector.refundPayment(rpr);
+                            break;
                           }
-                        });
+                          case "Tip Adjust Payment": {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                            final EditText input = new EditText(getActivity());
+                            input.setInputType(InputType.TYPE_CLASS_NUMBER);
+                            builder.setView(input);
 
-                        builder.show();
-                        break;
-                      }
-                      case "Receipt Options": {
-                        try{
-                          // Operation not Supported in CloverGO
-                          cloverConnector.displayPaymentReceiptOptions(posExchange.orderID, posExchange.getPaymentID());
-                        }catch (UnsupportedOperationException e){
-                          Toast.makeText(getActivity(),e.getMessage(),Toast.LENGTH_LONG).show();
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                              @Override
+                              public void onClick(DialogInterface dialog, int which) {
+                                double val = Double.parseDouble(input.getText().toString());
+                                long value = (long) val;
+
+                                TipAdjustAuthRequest taar = new TipAdjustAuthRequest();
+                                taar.setPaymentId(posExchange.getPaymentID());
+                                taar.setOrderId(posExchange.getOrderId());
+                                taar.setTipAmount(value);
+                                cloverConnector.tipAdjustAuth(taar);
+                                dialog.dismiss();
+                              }
+                            });
+                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                              @Override
+                              public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                              }
+                            });
+
+                            builder.show();
+                            break;
+                          }
+                          case "Receipt Options": {
+
+                            if (cloverConnector instanceof ICloverGoConnector){
+                              FragmentManager fragmentManager = getFragmentManager();
+                              FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                              SendReceiptFragment fragment = SendReceiptFragment.newInstance(posExchange.getOrderId(),cloverConnector);
+                              fragmentTransaction.add(R.id.contentContainer, fragment);
+
+                              fragmentTransaction.commit();
+                            }else {
+                              try {
+                                // Operation not Supported in CloverGO
+                                cloverConnector.displayPaymentReceiptOptions(posExchange.orderID, posExchange.getPaymentID());
+                              } catch (UnsupportedOperationException e) {
+                                Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                              }
+                            }
+
+                            break;
+                          }
+
                         }
-
-                        break;
+                      } else {
+                        Toast.makeText(getActivity().getBaseContext(), "Clover Connector is null", Toast.LENGTH_LONG).show();
                       }
-
                     }
-                  } else {
-                    Toast.makeText(getActivity().getBaseContext(), "Clover Connector is null", Toast.LENGTH_LONG).show();
-                  }
-                }
-              });
+                  });
           final Dialog dlg = builder.create();
           dlg.show();
         }
@@ -265,7 +279,7 @@ public class OrdersFragment extends Fragment implements OrderObserver {
       mListener = (OnFragmentInteractionListener) activity;
     } catch (ClassCastException e) {
       throw new ClassCastException(activity.toString()
-          + " must implement OnFragmentInteractionListener");
+              + " must implement OnFragmentInteractionListener");
     }
   }
 

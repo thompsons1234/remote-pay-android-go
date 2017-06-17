@@ -1,7 +1,6 @@
 package com.clover.remote.client.clovergo;
 
 import com.clover.remote.client.ICloverConnectorListener;
-import com.clover.remote.client.clovergo.event.CardReaderEvent;
 import com.clover.remote.client.messages.CardApplicationIdentifier;
 import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.firstdata.clovergo.domain.model.ReaderInfo;
@@ -16,7 +15,7 @@ public interface ICloverGoConnectorListener extends ICloverConnectorListener {
 
 
     /**
-     * Called when the Clover device is Discovered to connect
+     * Called when the Clover Go Bluetooth device is Discovered to connect
      */
     public void onDeviceDiscovered(ReaderInfo readerInfo);
 

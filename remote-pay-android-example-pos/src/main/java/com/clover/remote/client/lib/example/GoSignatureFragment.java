@@ -68,8 +68,7 @@ public class GoSignatureFragment extends Fragment {
   }
 
   @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                           Bundle savedInstanceState) {
+  public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
     // Inflate the layout for this fragment
     final View view = inflater.inflate(R.layout.fragment_go_signature, container, false);
 
@@ -82,7 +81,6 @@ public class GoSignatureFragment extends Fragment {
       acceptButton.setOnClickListener(new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-
 
           if (signatureView.getGesture() != null) {
             int gestureCount = signatureView.getGesture().getStrokesCount();
@@ -100,12 +98,14 @@ public class GoSignatureFragment extends Fragment {
             }
 
             ((ICloverGoConnector)cloverConnector).captureSignature(paymentID,xy);
+
+            FragmentTransaction fragmentTransaction = getActivity().getFragmentManager().beginTransaction();
+            fragmentTransaction.hide(GoSignatureFragment.this);
+            fragmentTransaction.commit();
+
+          }else {
+            Toast.makeText(getActivity(),"Please Sign...",Toast.LENGTH_LONG).show();
           }
-
-          FragmentTransaction fragmentTransaction = getActivity().getFragmentManager().beginTransaction();
-          fragmentTransaction.hide(GoSignatureFragment.this);
-          fragmentTransaction.commit();
-
 
         }
       });
