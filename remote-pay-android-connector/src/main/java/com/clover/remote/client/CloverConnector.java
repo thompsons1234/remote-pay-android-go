@@ -1374,7 +1374,6 @@ public class CloverConnector implements ICloverConnector {
       device.setSupportsAcks(merchantInfo.deviceInfo.supportsAcks);
 
       if (drm.ready) {
-        cloverConnector.device.doShowWelcomeScreen();
         cloverConnector.broadcaster.notifyOnReady(merchantInfo);
       } else {
         cloverConnector.broadcaster.notifyOnConnect();
