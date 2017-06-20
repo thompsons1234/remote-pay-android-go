@@ -69,6 +69,7 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
   private RadioGroup approveOfflineNoPromptRG;
   private Switch printingSwitch;
   private Spinner tipModeSpinner;
+  private Spinner signatureEntryLocationSpinner;
   private EditText tipAmountText;
   private RadioGroup signatureEntryLocationRG;
   private Switch disableReceiptOptionsSwitch;
@@ -154,12 +155,12 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     forceOfflineRG = (RadioGroup) view.findViewById(R.id.ForceOfflinePaymentRG);
     approveOfflineNoPromptRG = (RadioGroup) view.findViewById(R.id.ApproveOfflineWithoutPromptRG);
     tipModeSpinner = ((Spinner) view.findViewById(R.id.TipModeSpinner));
+    signatureEntryLocationSpinner = ((Spinner) view.findViewById(R.id.SignatureEntryLocationSpinner));
     tipAmountText = ((EditText) view.findViewById(R.id.tipAmount));
     disableReceiptOptionsSwitch = ((Switch) view.findViewById(R.id.DisableReceiptOptionsSwitch));
     disableDuplicateCheckSwitch = ((Switch) view.findViewById(R.id.DisableDuplicateCheckSwitch));
     automaticSignatureConfirmationSwitch = ((Switch) view.findViewById(R.id.AutomaticSignatureConfirmationSwitch));
     automaticPaymentConfirmationSwitch = ((Switch) view.findViewById(R.id.AutomaticPaymentConfirmationSwitch));
-    signatureEntryLocationRG = ((RadioGroup) view.findViewById(R.id.SigEntryLocationRG));
     printingSwitch = ((Switch) view.findViewById(R.id.PrintingSwitch));
     signatureThresholdText = ((EditText) view.findViewById(R.id.signatureThreshold));
     startCustomActivityButton = ((Button) view.findViewById(R.id.startCustomActivityButton));
@@ -173,6 +174,7 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     customAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
     customActivityId.setAdapter(customAdapter);
     tipModeSpinner.setOnItemSelectedListener(this);
+    signatureEntryLocationSpinner.setOnItemSelectedListener(this);
 
     manualSwitch.setTag(CloverConnector.CARD_ENTRY_METHOD_MANUAL);
     swipeSwitch.setTag(CloverConnector.CARD_ENTRY_METHOD_MAG_STRIPE);
@@ -262,24 +264,6 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
               }
             }
             store.setApproveOfflinePaymentWithoutPrompt(approveWOPrompt);
-          } else if (group == signatureEntryLocationRG) {
-            int checkedRadioButtonId = group.getCheckedRadioButtonId();
-            DataEntryLocation sigEntryLocation = null;
-            switch (checkedRadioButtonId) {
-              case R.id.sigEntryLocationNone: {
-                sigEntryLocation = DataEntryLocation.NONE;
-                break;
-              }
-              case R.id.sigEntryLocationOnScreen: {
-                sigEntryLocation = DataEntryLocation.ON_SCREEN;
-                break;
-              }
-              case R.id.sigEntryLocationOnPaper: {
-                sigEntryLocation = DataEntryLocation.ON_PAPER;
-                break;
-              }
-            }
-            store.setSignatureEntryLocation(sigEntryLocation);
           }
         }
       }
@@ -335,7 +319,8 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
 
     ArrayList<String> values = new ArrayList<>();
 
-    int i = 0;
+    values.add(0, "DEFAULT");
+    int i = 1;
     for (SaleRequest.TipMode tipMode : SaleRequest.TipMode.values()) {
       values.add(i, tipMode.toString());
       i++;
@@ -347,7 +332,12 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     tipModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
       public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        store.setTipMode(getSelectedTipMode(position));
+        SaleRequest.TipMode tipMode = getSelectedTipMode(position);
+        if (tipMode != null) {
+          store.setTipMode(tipMode);
+        } else {
+          store.setTipMode(null);
+        }
       }
 
       @Override
@@ -357,7 +347,34 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     });
     tipAmountText.setOnFocusChangeListener(tipAmountChangeListener);
 
-    signatureEntryLocationRG.setOnCheckedChangeListener(radioGroupChangeListener);
+    ArrayList<String> sigValues = new ArrayList<>();
+
+    sigValues.add(0, "DEFAULT");
+    int x = 1;
+    for (DataEntryLocation sigLoc : DataEntryLocation.values()) {
+      sigValues.add(x, sigLoc.toString());
+      x++;
+    }
+
+    ArrayAdapter<String> sigAdapter = new ArrayAdapter<>(getActivity().getApplicationContext(),
+        android.R.layout.simple_spinner_dropdown_item, sigValues);
+    signatureEntryLocationSpinner.setAdapter(sigAdapter);
+    signatureEntryLocationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+      @Override
+      public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        DataEntryLocation dataEntryLocation = getSelectedSignatureEntryLocation(position);
+        if (dataEntryLocation != null) {
+          store.setSignatureEntryLocation(getSelectedSignatureEntryLocation(position));
+        } else {
+          store.setSignatureEntryLocation(null);
+        }
+      }
+
+      @Override
+      public void onNothingSelected(AdapterView<?> parent) {
+        store.setSignatureEntryLocation(null);
+      }
+    });
     disableReceiptOptionsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
       @Override
       public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -428,6 +445,29 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
   private int getTipModePositionFromString(String value) {
     for (int i = 0; i < tipModeSpinner.getAdapter().getCount(); i++) {
       if (tipModeSpinner.getItemAtPosition(i).toString().equals(value)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  private DataEntryLocation getSelectedSignatureEntryLocation(int position) {
+    String sigLocationEntryLocationString = signatureEntryLocationSpinner.getItemAtPosition(position).toString();
+    return getSignatureEntryLocationFromString(sigLocationEntryLocationString);
+  }
+
+  private DataEntryLocation getSignatureEntryLocationFromString(String sigEntryLocationString) {
+    for (DataEntryLocation dataEntryLocation : DataEntryLocation.values()) {
+      if (dataEntryLocation.toString().equals(sigEntryLocationString)) {
+        return dataEntryLocation;
+      }
+    }
+    return null;
+  }
+
+  private int getSignatureEntryLocationPositionFromString(String value) {
+    for (int i = 0; i < signatureEntryLocationSpinner.getAdapter().getCount(); i++) {
+      if (signatureEntryLocationSpinner.getItemAtPosition(i).toString().equals(value)) {
         return i;
       }
     }
@@ -508,6 +548,9 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
       if (store.getTipMode() != null && getTipModePositionFromString(store.getTipMode().toString()) != -1) {
         tipModeSpinner.setSelection(getTipModePositionFromString(store.getTipMode().toString()));
       }
+      if (store.getSignatureEntryLocation() != null && getSignatureEntryLocationPositionFromString(store.getSignatureEntryLocation().toString()) != -1) {
+        signatureEntryLocationSpinner.setSelection(getSignatureEntryLocationPositionFromString(store.getSignatureEntryLocation().toString()));
+      }
 
       Boolean allowOfflinePayment = store.getAllowOfflinePayment();
       ((RadioButton) view.findViewById(R.id.acceptOfflineDefault)).setChecked(allowOfflinePayment == null);
@@ -521,10 +564,6 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
       ((RadioButton) view.findViewById(R.id.approveOfflineWithoutPromptDefault)).setChecked(approveOfflinePaymentWithoutPrompt == null);
       ((RadioButton) view.findViewById(R.id.approveOfflineWithoutPromptTrue)).setChecked(approveOfflinePaymentWithoutPrompt != null && allowOfflinePayment);
       ((RadioButton) view.findViewById(R.id.approveOfflineWithoutPromptFalse)).setChecked(approveOfflinePaymentWithoutPrompt != null && !allowOfflinePayment);
-      DataEntryLocation sigEntryLocation = store.getSignatureEntryLocation();
-      ((RadioButton) view.findViewById(R.id.sigEntryLocationNone)).setChecked(sigEntryLocation != null ? sigEntryLocation.equals(DataEntryLocation.NONE) : false);
-      ((RadioButton) view.findViewById(R.id.sigEntryLocationOnScreen)).setChecked(sigEntryLocation != null ? sigEntryLocation.equals(DataEntryLocation.ON_SCREEN) : false);
-      ((RadioButton) view.findViewById(R.id.sigEntryLocationOnPaper)).setChecked(sigEntryLocation != null ? sigEntryLocation.equals(DataEntryLocation.ON_PAPER) : false);
       Long signatureThreshold = store.getSignatureThreshold();
       if (signatureThreshold != null) {
         ((EditText) view.findViewById(R.id.signatureThreshold)).setText(signatureThreshold.toString());

@@ -574,30 +574,11 @@
             android:paddingTop="6dp"
             android:paddingBottom="3dp"/>
 
-        <RadioGroup android:layout_width="wrap_content"
-                    android:layout_height="fill_parent"
-                    android:orientation="horizontal"
-                    android:id="@+id/SigEntryLocationRG">
-
-          <RadioButton
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="None"
-              android:id="@+id/sigEntryLocationNone"
-              android:checked="true"/>
-
-          <RadioButton
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="On Screen"
-              android:id="@+id/sigEntryLocationOnScreen"/>
-
-          <RadioButton
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="On Paper"
-              android:id="@+id/sigEntryLocationOnPaper"/>
-        </RadioGroup>
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/SignatureEntryLocationSpinner">
+        </Spinner>
       </LinearLayout>
 
       <LinearLayout
