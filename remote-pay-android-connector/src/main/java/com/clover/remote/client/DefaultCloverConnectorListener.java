@@ -16,7 +16,6 @@
 
 package com.clover.remote.client;
 
-import com.clover.remote.client.messages.ActivityMessage;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
 import com.clover.remote.client.messages.CloseoutResponse;
@@ -24,7 +23,6 @@ import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.CustomActivityResponse;
 import com.clover.remote.client.messages.MessageFromActivity;
-import com.clover.remote.client.messages.PairingCodeMessage;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.ManualRefundResponse;
 import com.clover.remote.client.messages.PreAuthResponse;
@@ -38,6 +36,7 @@ import com.clover.remote.client.messages.ReadCardDataResponse;
 import com.clover.remote.client.messages.RefundPaymentResponse;
 import com.clover.remote.client.messages.ResetDeviceResponse;
 import com.clover.remote.client.messages.RetrieveDeviceStatusResponse;
+import com.clover.remote.client.messages.RetrievePaymentResponse;
 import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
 import com.clover.remote.client.messages.SaleResponse;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
@@ -185,4 +184,7 @@ public abstract class DefaultCloverConnectorListener implements ICloverConnector
 
   }
 
+  @Override public void onGetPaymentResponse(RetrievePaymentResponse response){
+
+  }
 }
