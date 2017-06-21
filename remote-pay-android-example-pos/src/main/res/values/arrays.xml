@@ -9,5 +9,6 @@
     <string-array name="payment_type">
         <item>RP450</item>
         <item>RP350</item>
+        <item>KEYED</item>
     </string-array>
 </resources>

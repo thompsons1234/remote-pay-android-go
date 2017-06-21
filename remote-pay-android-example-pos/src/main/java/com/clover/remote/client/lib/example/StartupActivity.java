@@ -188,7 +188,7 @@ public class StartupActivity extends Activity {
   public void connectGoWithAuthMode(View view){
 
     String oAuthClientId = "1AST2ETARGG7C";
-    String mOauthURL = "https://stg1.dev.clover.com/oauth/authorize?client_id=" + oAuthClientId + "&response_type=code";
+    String mOauthURL = "https://dev14.dev.clover.com/oauth/authorize?client_id=" + oAuthClientId + "&response_type=code";
 
     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mOauthURL));
     startActivity(intent);
@@ -234,7 +234,7 @@ public class StartupActivity extends Activity {
 
     String apiKey = "byJiyq2GZNmS6LgtAhr2xGS6gz4dpBYX";
     String clientSecret  = "fea4a38b-9346-d75c-2f09-1670381a1499";
-    String env = "stg1.dev.clover.com";
+    String env = "dev14.dev.clover.com";
 
     final ProgressDialog progressDialog = new ProgressDialog(this);
     progressDialog.setTitle("Merchant account loading....");

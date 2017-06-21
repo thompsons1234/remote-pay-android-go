@@ -67,4 +67,8 @@
   <string name="send_receipt_btn_lbl">Send Receipt</string>
   <string name="no_receipt_btn_lbl">No Receipt</string>
 
+  <string name="filter_number">12345 67890</string>
+  <string name="start_transaction_btn">Start Transaction</string>
+
+
 </resources>

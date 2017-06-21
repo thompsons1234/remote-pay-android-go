@@ -1,4 +1,4 @@
-package com.clover.remote.client.clovergo;
+package com.clover.remote.client.clovergo.messages;
 
 
 import com.clover.sdk.v3.payments.Payment;

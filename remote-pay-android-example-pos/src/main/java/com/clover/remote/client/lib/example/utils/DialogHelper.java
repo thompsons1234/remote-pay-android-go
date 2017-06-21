@@ -48,8 +48,8 @@ public class DialogHelper {
         m_Dialog.setTitle(title);
         m_Dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         m_Dialog.setIndeterminate(true);
+        m_Dialog.setCancelable(false);
         if (isCancelable){
-            m_Dialog.setCancelable(isCancelable);
             m_Dialog.setButton(DialogInterface.BUTTON_NEGATIVE,btnName,listener);
         }
 

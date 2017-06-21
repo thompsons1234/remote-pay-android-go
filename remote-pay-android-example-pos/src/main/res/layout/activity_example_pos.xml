@@ -28,6 +28,11 @@
     tools:context="com.clover.remote.client.lib.example.ExamplePOSActivity"
     android:columnCount="1"
     android:rowCount="4">
+
+  <HorizontalScrollView
+      android:id="@+id/top_panel_scroll_vw"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
   <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/TopPanel">
 
     <Button android:layout_width="wrap_content"
@@ -79,7 +84,8 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true" android:visibility="visible" android:layout_gravity="right"/>
   </LinearLayout>
-  <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/devicePanel" android:orientation="horizontal" android:layout_below="@+id/TopPanel">
+  </HorizontalScrollView>
+  <LinearLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/devicePanel" android:orientation="horizontal" android:layout_below="@+id/top_panel_scroll_vw">
   <TextView
       android:id="@+id/ConnectionStatusLabel"
       android:layout_width="wrap_content"

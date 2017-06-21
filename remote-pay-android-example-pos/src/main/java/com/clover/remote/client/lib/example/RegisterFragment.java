@@ -17,7 +17,10 @@
 package com.clover.remote.client.lib.example;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,10 +28,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.Toast;
+
 import com.clover.remote.PendingPaymentEntry;
-import com.clover.sdk.v3.payments.TransactionSettings;
 import com.clover.remote.client.ICloverConnector;
+import com.clover.remote.client.clovergo.ICloverGoConnector;
+import com.clover.remote.client.clovergo.messages.KeyedAuthRequest;
+import com.clover.remote.client.clovergo.messages.KeyedSaleRequest;
 import com.clover.remote.client.lib.example.adapter.AvailableItemsAdapter;
 import com.clover.remote.client.lib.example.model.OrderObserver;
 import com.clover.remote.client.lib.example.model.POSCard;
@@ -48,6 +56,7 @@ import com.clover.remote.client.messages.SaleRequest;
 import com.clover.remote.order.DisplayDiscount;
 import com.clover.remote.order.DisplayLineItem;
 import com.clover.remote.order.DisplayOrder;
+import com.firstdata.clovergo.domain.utils.CreditCardUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,6 +72,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
   POSStore store;
   ICloverConnector cloverConnector;
   Map<POSItem, AvailableItem> itemToAvailableItem = new HashMap<POSItem, AvailableItem>();
+  private String paymentType;
 
   public static RegisterFragment newInstance(POSStore store, ICloverConnector cloverConnector) {
 
@@ -120,7 +130,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     } catch (ClassCastException e) {
 
       throw new ClassCastException(activity.toString()
-          + " must implement OnFragmentInteractionListener: " + activity.getClass().getName());
+              + " must implement OnFragmentInteractionListener: " + activity.getClass().getName());
     }
   }
 
@@ -128,6 +138,10 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
   public void onDetach() {
     super.onDetach();
     mListener = null;
+  }
+
+  public void setPaymentType(String paymentType) {
+    this.paymentType = paymentType;
   }
 
   public interface OnFragmentInteractionListener {
@@ -158,22 +172,31 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
   @Override
   public void onSaleClicked() {
-    SaleRequest request = new SaleRequest(store.getCurrentOrder().getTotal(), ExamplePOSActivity.getNextId());
-    request.setCardEntryMethods(store.getCardEntryMethods());
-    request.setAllowOfflinePayment(store.getAllowOfflinePayment());
-    request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
-    request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
-    request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
-    request.setDisablePrinting(store.getDisablePrinting());
-    request.setTipMode(store.getTipMode());
-    request.setSignatureEntryLocation(store.getSignatureEntryLocation());
-    request.setSignatureThreshold(store.getSignatureThreshold());
-    request.setDisableReceiptSelection(store.getDisableReceiptOptions());
-    request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
-    request.setTipAmount(store.getTipAmount());
-    request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
-    request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
-    cloverConnector.sale(request);
+
+    if ("KEYED".equals(paymentType)){
+      KeyedTransactionFragment keyedTransactionFragment = KeyedTransactionFragment.newInstance(store,cloverConnector,"sale");
+      FragmentManager fm = getFragmentManager();
+      keyedTransactionFragment.show(fm,"KEYED_FRAGMENT");
+    }else{
+      if (cloverConnector instanceof ICloverGoConnector)
+        ((ExamplePOSActivity)getActivity()).showProgressDialog("Sale Transaction","Swipe, Tap or Dip card for Payment",true);
+      SaleRequest request = new SaleRequest(store.getCurrentOrder().getTotal(), ExamplePOSActivity.getNextId());
+      request.setCardEntryMethods(store.getCardEntryMethods());
+      request.setAllowOfflinePayment(store.getAllowOfflinePayment());
+      request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
+      request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
+      request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
+      request.setDisablePrinting(store.getDisablePrinting());
+      request.setTipMode(store.getTipMode());
+      request.setSignatureEntryLocation(store.getSignatureEntryLocation());
+      request.setSignatureThreshold(store.getSignatureThreshold());
+      request.setDisableReceiptSelection(store.getDisableReceiptOptions());
+      request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
+      request.setTipAmount(store.getTipAmount());
+      request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
+      request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
+      cloverConnector.sale(request);
+    }
   }
 
   @Override
@@ -185,20 +208,30 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
   @Override
   public void onAuthClicked() {
-    AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), ExamplePOSActivity.getNextId());
-    request.setCardEntryMethods(store.getCardEntryMethods());
-    request.setAllowOfflinePayment(store.getAllowOfflinePayment());
-    request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
-    request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
-    request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
-    request.setDisablePrinting(store.getDisablePrinting());
-    request.setSignatureEntryLocation(store.getSignatureEntryLocation());
-    request.setSignatureThreshold(store.getSignatureThreshold());
-    request.setDisableReceiptSelection(store.getDisableReceiptOptions());
-    request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
-    request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
-    request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
-    cloverConnector.auth(request);
+
+
+    if ("KEYED".equals(paymentType)){
+      KeyedTransactionFragment keyedTransactionFragment = KeyedTransactionFragment.newInstance(store,cloverConnector,"auth");
+      FragmentManager fm = getFragmentManager();
+      keyedTransactionFragment.show(fm,"KEYED_FRAGMENT");
+    }else {
+      if (cloverConnector instanceof ICloverGoConnector)
+        ((ExamplePOSActivity) getActivity()).showProgressDialog("Auth Transaction", "Swipe, Tap or Dip card for Payment", true);
+      AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), ExamplePOSActivity.getNextId());
+      request.setCardEntryMethods(store.getCardEntryMethods());
+      request.setAllowOfflinePayment(store.getAllowOfflinePayment());
+      request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
+      request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
+      request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
+      request.setDisablePrinting(store.getDisablePrinting());
+      request.setSignatureEntryLocation(store.getSignatureEntryLocation());
+      request.setSignatureThreshold(store.getSignatureThreshold());
+      request.setDisableReceiptSelection(store.getDisableReceiptOptions());
+      request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
+      request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
+      request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
+      cloverConnector.auth(request);
+    }
   }
 
   @Override
@@ -236,7 +269,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
     }
 
-    @Override 
+    @Override
     public void cardAdded(POSCard card) {
 
     }

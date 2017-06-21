@@ -59,7 +59,7 @@ import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.ICloverConnectorListener;
 import com.clover.remote.client.MerchantInfo;
 import com.clover.remote.client.clovergo.CloverGoDeviceConfiguration;
-import com.clover.remote.client.clovergo.GoPayment;
+import com.clover.remote.client.clovergo.messages.GoPayment;
 import com.clover.remote.client.clovergo.ICloverGoConnector;
 import com.clover.remote.client.clovergo.ICloverGoConnectorListener;
 import com.clover.remote.client.device.CloverDeviceConfiguration;
@@ -145,6 +145,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public static final String EXTRA_CLOVER_GO_CONNECTOR_API_KEY = "EXTRA_CLOVER_GO_CONNECTOR_CONFIG_API_KEY";
   public static final String EXTRA_CLOVER_GO_CONNECTOR_SECRET = "EXTRA_CLOVER_GO_CONNECTOR_CONFIG_SECRET";
   public static String EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE = "EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE";
+  private String paymentType;
 
   Payment currentPayment = null;
   Challenge[] currentChallenges = null;
@@ -255,6 +256,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                 ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText(String.format(merchantInfo.getDeviceInfo().getModel()+" Connected: %s (%s)", merchantInfo.getDeviceInfo().getSerial(), merchantInfo.getMerchantName()));
               }
               break;
+            case "KEYED":
+              paymentType = "KEYED";
           }
           updateComponentsWithNewCloverConnector();
         }
@@ -1558,6 +1561,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     RegisterFragment refFragment = (RegisterFragment) fragmentManager.findFragmentByTag("REGISTER");
     if (refFragment != null) {
       refFragment.setCloverConnector(getCloverConnector());
+      refFragment.setPaymentType(paymentType);
     }
     OrdersFragment ordersFragment = (OrdersFragment) fragmentManager.findFragmentByTag("ORDERS");
     if (ordersFragment != null) {
@@ -1863,15 +1867,23 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void preauthCardClick(View view) {
-    PreAuthRequest request = new PreAuthRequest(5000L, getNextId());
-    request.setCardEntryMethods(store.getCardEntryMethods());
-    request.setDisablePrinting(store.getDisablePrinting());
-    request.setSignatureEntryLocation(store.getSignatureEntryLocation());
-    request.setSignatureThreshold(store.getSignatureThreshold());
-    request.setDisableReceiptSelection(store.getDisableReceiptOptions());
-    request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
-    getCloverConnector().preAuth(request);
-    showProgressDialog("PreAuth Transaction","Swipe, Tap or Dip card for Payment",true);
+    if ("KEYED".equals(paymentType)){
+      KeyedTransactionFragment keyedTransactionFragment = KeyedTransactionFragment.newInstance(store,getCloverConnector(),"preAuth");
+      FragmentManager fm = getFragmentManager();
+      keyedTransactionFragment.show(fm,"KEYED_FRAGMENT");
+    }else {
+      if (getCloverConnector() instanceof ICloverGoConnector)
+        showProgressDialog("PreAuth Transaction","Swipe, Tap or Dip card for Payment",true);
+      PreAuthRequest request = new PreAuthRequest(5000L, getNextId());
+      request.setCardEntryMethods(store.getCardEntryMethods());
+      request.setDisablePrinting(store.getDisablePrinting());
+      request.setSignatureEntryLocation(store.getSignatureEntryLocation());
+      request.setSignatureThreshold(store.getSignatureThreshold());
+      request.setDisableReceiptSelection(store.getDisableReceiptOptions());
+      request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
+      getCloverConnector().preAuth(request);
+
+    }
   }
 
   public void onClickCloseout(View view) {

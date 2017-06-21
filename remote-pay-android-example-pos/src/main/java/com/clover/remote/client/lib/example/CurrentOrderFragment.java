@@ -82,7 +82,6 @@ public class CurrentOrderFragment extends Fragment implements OrderObserver {
     saleButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        ((ExamplePOSActivity)getActivity()).showProgressDialog("Sale Transaction","Swipe, Tap or Dip card for Payment",true);
         onSaleClicked();
       }
     });
@@ -90,7 +89,6 @@ public class CurrentOrderFragment extends Fragment implements OrderObserver {
     authButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        ((ExamplePOSActivity)getActivity()).showProgressDialog("Auth Transaction","Swipe, Tap or Dip card for Payment",true);
         onAuthClicked();
       }
     });

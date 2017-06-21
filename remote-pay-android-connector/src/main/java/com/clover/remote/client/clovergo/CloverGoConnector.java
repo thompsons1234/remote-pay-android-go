@@ -25,8 +25,7 @@ import java.util.List;
  * Created by Akhani, Avdhesh on 4/18/17.
  */
 
-//TODO: Void Payment - order.setID() on null Order Object
-public class CloverGoConnector extends DefaultCloverGoConnector {
+public class CloverGoConnector extends DefaultCloverGoConnector{
 
     private static String TAG = "CloverGO";
 
@@ -34,10 +33,10 @@ public class CloverGoConnector extends DefaultCloverGoConnector {
     private static CloverGoConnectorImpl cloverGoConnectorImpl;
 
 
-    public CloverGoConnector(CloverGoDeviceConfiguration mCloverGoConfiguration) throws InitializationFailedException {
+    public CloverGoConnector(CloverGoDeviceConfiguration mCloverGoConfiguration){
         this.mCloverGoConfiguration = mCloverGoConfiguration;
         if (cloverGoConnectorImpl == null)
-            cloverGoConnectorImpl = new CloverGoConnectorImpl(broadcaster,mCloverGoConfiguration);
+                cloverGoConnectorImpl = new CloverGoConnectorImpl(broadcaster,mCloverGoConfiguration);
     }
 
     @Override
@@ -102,7 +101,7 @@ public class CloverGoConnector extends DefaultCloverGoConnector {
 
     @Override
     public void tipAdjustAuth(final TipAdjustAuthRequest authTipAdjustRequest) {
-        cloverGoConnectorImpl.tipAdjustAuth(authTipAdjustRequest, mCloverGoConfiguration.getReaderType());
+        cloverGoConnectorImpl.tipAdjustAuth(authTipAdjustRequest);
     }
 
     @Override

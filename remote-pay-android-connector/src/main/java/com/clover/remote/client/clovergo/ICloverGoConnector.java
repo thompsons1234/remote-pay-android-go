@@ -21,6 +21,10 @@ package com.clover.remote.client.clovergo;
  import com.clover.remote.client.IDeviceConnector;
  import com.clover.remote.client.IPaymentConnector;
  import com.clover.remote.client.IPrintConnector;
+ import com.clover.remote.client.messages.AuthRequest;
+ import com.clover.remote.client.messages.PreAuthRequest;
+ import com.clover.remote.client.messages.SaleRequest;
+ import com.firstdata.clovergo.domain.model.CreditCard;
  import com.firstdata.clovergo.domain.model.ReaderInfo;
 
  public interface ICloverGoConnector extends ICloverConnector {
@@ -41,7 +45,7 @@ package com.clover.remote.client.clovergo;
    *  return the Merchant object for the Merchant configured for the Clover Mini
    **/
 
-
+//TODO: Rename to connectToBluetoothDevice
   void connectToDevice(ReaderInfo readerInfo);
 
   void disconnectDevice();

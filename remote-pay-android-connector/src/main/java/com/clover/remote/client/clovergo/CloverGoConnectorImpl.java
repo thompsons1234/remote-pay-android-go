@@ -6,6 +6,11 @@ import android.util.Log;
 import com.clover.remote.Challenge;
 import com.clover.remote.client.MerchantInfo;
 import com.clover.remote.client.clovergo.di.DaggerApplicationComponent;
+import com.clover.remote.client.clovergo.messages.BillingAddress;
+import com.clover.remote.client.clovergo.messages.GoPayment;
+import com.clover.remote.client.clovergo.messages.KeyedAuthRequest;
+import com.clover.remote.client.clovergo.messages.KeyedPreAuthRequest;
+import com.clover.remote.client.clovergo.messages.KeyedSaleRequest;
 import com.clover.remote.client.lib.BuildConfig;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.AuthResponse;
@@ -37,6 +42,7 @@ import com.clover.sdk.v3.payments.Result;
 import com.firstdata.clovergo.data.DaggerSDKDataComponent;
 import com.firstdata.clovergo.data.module.NetworkModule;
 import com.firstdata.clovergo.data.module.UtilityModule;
+import com.firstdata.clovergo.domain.model.CreditCard;
 import com.firstdata.clovergo.domain.model.EmployeeMerchant;
 import com.firstdata.clovergo.domain.model.EmvCard;
 import com.firstdata.clovergo.domain.model.Error;
@@ -91,7 +97,6 @@ import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.firstdata.clovergo.domain.model.ReaderProgressEvent.EventType.CHIP_DATA;
-import static com.firstdata.clovergo.domain.model.ReaderProgressEvent.EventType.CONTACT_LESS_DATA;
 import static com.firstdata.clovergo.domain.model.ReaderProgressEvent.EventType.SWIPE_DATA;
 
 /**
@@ -129,7 +134,6 @@ public class CloverGoConnectorImpl {
 
     @Inject
     ScanForReaders mScanForReaders;
-
     @Inject
     ConnectToReader mConnectToReader;
     @Inject
@@ -146,12 +150,12 @@ public class CloverGoConnectorImpl {
     private Payment payment;
     private TransactionError transactionError;
     private Order mOrder;
-    private HashMap<ReaderInfo.ReaderType, MerchantInfo> merchantInfoMap = new HashMap<>();
     private Disposable scanDisposable;
     private EmployeeMerchant mEmployeeMerchant;
+    private CreditCard creditCard;
 
 
-    public CloverGoConnectorImpl(final CloverGoConnectorBroadcaster broadcaster, CloverGoDeviceConfiguration mCloverGoConfiguration) throws InitializationFailedException{
+    public CloverGoConnectorImpl(final CloverGoConnectorBroadcaster broadcaster, CloverGoDeviceConfiguration mCloverGoConfiguration){
         this.broadcaster = broadcaster;
 
         String environment = mCloverGoConfiguration.getEnv().name();
@@ -162,7 +166,7 @@ public class CloverGoConnectorImpl {
                 url = "https://api.payeezy.com/clovergosdk/v1/";
                 break;
             case "DEMO":
-                url = "https://api-int.payeezy.com/clovergosdk/v1/";
+                url = "https://api-cat.payeezy.com/clovergosdk/v1/";
                 break;
             case "SANDBOX":
                 url = "https://api-cert.payeezy.com/clovergosdk/v1/";
@@ -190,12 +194,10 @@ public class CloverGoConnectorImpl {
 
             @Override
             public void onError(Throwable e) {
-                throw new InitializationFailedException(e.getMessage());
             }
 
             @Override
             public void onComplete() {
-
             }
         });
 
@@ -285,41 +287,31 @@ public class CloverGoConnectorImpl {
                 Log.e(TAG,"ReaderInfo-Event onNext");
                 if (readerInfo.isConnected()){
 
-                    boolean supportsSales= false; boolean supportAuths= false; boolean supportsPreAuths= false; boolean supportsVaultCards= false; boolean supportsManualRefunds= false; boolean supportsVoids= false; boolean supportsTipAdjust = false;
-                    for (String feature: mEmployeeMerchant.getMerchant().getFeatures()){
-                        switch (feature){
-                            case "auths":
-                                supportAuths = true;
-                                break;
-                            case "manualRefunds":
-                                supportsManualRefunds = true;
-                                break;
-                            case "preAuths":
-                                supportsPreAuths = true;
-                                break;
-                            case "sales":
-                                supportsSales = true;
-                                break;
-                            case "tip_adjust":
-                                supportsTipAdjust = true;
-                                break;
-                            case "vaultCards":
-                                supportsVaultCards = true;
-                                break;
-                            case "voids":
-                                supportsVoids = true;
-                                break;
+                    if (mEmployeeMerchant == null){
+                        mGetMerchantsInfoOAuth.getCachedObservable().subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<EmployeeMerchant>() {
+                            @Override
+                            public void onSubscribe(Disposable d) {
+                            }
 
-                        }
+                            @Override
+                            public void onNext(EmployeeMerchant employeeMerchant) {
+                                mEmployeeMerchant = employeeMerchant;
+                                MerchantInfo merchantInfo = getMerchantInfo(readerInfo, employeeMerchant);
+                                broadcaster.notifyOnReady(merchantInfo);
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                disconnectDevice(readerInfo.getReaderType());
+                                broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR,0,e.getMessage()));
+                            }
+
+                            @Override
+                            public void onComplete() {
+                            }
+                        });
                     }
-
-                    MerchantInfo merchantInfo = new MerchantInfo(mEmployeeMerchant.getMerchant().getId(), mEmployeeMerchant.getMerchant().getName(), supportsSales, supportAuths, supportsPreAuths, supportsVaultCards, supportsManualRefunds, supportsVoids, supportsTipAdjust, readerInfo.getBluetoothName(), readerInfo.getSerialNo(), readerInfo.getReaderType().name());
-                    Log.e(TAG,"Get Merchant Info");
-                    merchantInfoMap.put(readerInfo.getReaderType(),merchantInfo);
-                    broadcaster.notifyOnReady(merchantInfo);
-
                 }else {
-                    merchantInfoMap.put(readerInfo.getReaderType(), null);
                     broadcaster.notifyOnDisconnect(readerInfo);
                 }
             }
@@ -495,8 +487,6 @@ public class CloverGoConnectorImpl {
                         emvCard = new EmvCard(chipData);
                         break;
                     case CONTACT_LESS_DATA:
-                        Map<String, String> contactLessData = readerProgressEvent.getData();
-                        emvCard = new EmvCard(contactLessData);
                         Log.e(TAG,"ReaderProgressEvent-Event onNext CONTACT_LESS_DATA");
                         Log.e(TAG,"Processing transaction");
                         deviceEvent = new CloverDeviceEvent();
@@ -533,7 +523,7 @@ public class CloverGoConnectorImpl {
                         break;
                 }
 
-                if (readerProgressEvent.getEventType() == SWIPE_DATA ||readerProgressEvent.getEventType() == CHIP_DATA || readerProgressEvent.getEventType() == CONTACT_LESS_DATA){
+                if (readerProgressEvent.getEventType() == SWIPE_DATA ||readerProgressEvent.getEventType() == CHIP_DATA){
                     payment = null;
                     transactionError = null;
                     CloverGoConnectorImpl.this.readerProgressEvent = readerProgressEvent;
@@ -558,6 +548,39 @@ public class CloverGoConnectorImpl {
         };
         EventBus.getObservable().ofType(ReaderProgressEvent.class).observeOn(AndroidSchedulers.mainThread()).subscribe(progressObserver);
 
+
+    }
+
+    private MerchantInfo getMerchantInfo(ReaderInfo readerInfo, EmployeeMerchant employeeMerchant) {
+        boolean supportsSales= false; boolean supportAuths= false; boolean supportsPreAuths= false; boolean supportsVaultCards= false; boolean supportsManualRefunds= false; boolean supportsVoids= false; boolean supportsTipAdjust = false;
+        for (String feature: mEmployeeMerchant.getMerchant().getFeatures()){
+            switch (feature){
+                case "auths":
+                    supportAuths = true;
+                    break;
+                case "manualRefunds":
+                    supportsManualRefunds = true;
+                    break;
+                case "preAuths":
+                    supportsPreAuths = true;
+                    break;
+                case "sales":
+                    supportsSales = true;
+                    break;
+                case "tip_adjust":
+                    supportsTipAdjust = true;
+                    break;
+                case "vaultCards":
+                    supportsVaultCards = true;
+                    break;
+                case "voids":
+                    supportsVoids = true;
+                    break;
+
+            }
+        }
+
+        return new MerchantInfo(mEmployeeMerchant.getMerchant().getId(), mEmployeeMerchant.getMerchant().getName(), supportsSales, supportAuths, supportsPreAuths, supportsVaultCards, supportsManualRefunds, supportsVoids, supportsTipAdjust, readerInfo.getBluetoothName(), readerInfo.getSerialNo(), readerInfo.getReaderType().name());
 
     }
 
@@ -599,25 +622,19 @@ public class CloverGoConnectorImpl {
     }
 
     public void stopDeviceScan() {
-        if (!scanDisposable.isDisposed())
+        if (scanDisposable != null && !scanDisposable.isDisposed())
             scanDisposable.dispose();
     }
 
     public void sale(SaleRequest saleRequest, final ReaderInfo.ReaderType readerType, boolean allowDuplicate) {
-        if (merchantInfoMap.get(readerType) == null ) {
-            SaleResponse saleResponse = new SaleResponse(false,ResultCode.CANCEL);
-            saleResponse.setMessage("Connect Reader");
-            saleResponse.setReason("Reader Not Connected");
-            broadcaster.notifyOnSaleResponse(saleResponse);
-            return;
-        }
-        if (!mEmployeeMerchant.getMerchant().getFeatures().contains("sales")){
+
+        if (mEmployeeMerchant != null && !mEmployeeMerchant.getMerchant().getFeatures().contains("sales")){
             broadcaster.notifyOnSaleResponse(new SaleResponse(false, ResultCode.UNSUPPORTED));
             return;
         }
 
         mLastTransactionRequest = saleRequest;
-
+        clearReferenceData();
         mOrder = new Order();
         TaxRate taxRate=null;
         mOrder.addCustomItem(new Order.CustomItem("item",((double)saleRequest.getAmount())/100,1, taxRate));
@@ -626,54 +643,28 @@ public class CloverGoConnectorImpl {
         mOrder.setExternalPaymentId(saleRequest.getExternalId());
         mOrder.allowDuplicates = allowDuplicate;
 
-        mGetConnectedReaders.getBlockingObservable().filter(new Predicate<ReaderInfo>() {
-            @Override
-            public boolean test(@NonNull ReaderInfo readerInfo) throws Exception {
-                return readerInfo.getReaderType() == readerType;
+        if (saleRequest instanceof KeyedSaleRequest){
+            creditCard = new CreditCard(((KeyedSaleRequest) saleRequest).getCardNumber(),((KeyedSaleRequest) saleRequest).getExpDate(),((KeyedSaleRequest) saleRequest).getCvv());
+            creditCard.setCardPresent(((KeyedSaleRequest) saleRequest).isCardPresent());
+            if (((KeyedSaleRequest) saleRequest).getBillingAddress() != null){
+                BillingAddress address =  ((KeyedSaleRequest) saleRequest).getBillingAddress();
+                creditCard.setBillingAddress(new CreditCard.BillingAddress(address.getStreet(),address.getZipPostalCode(),address.getCountry()));
             }
-        }).switchIfEmpty(Observable.<ReaderInfo>error(new Error("",""))).subscribe(new Observer<ReaderInfo>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-
-            }
-
-            @Override
-            public void onNext(ReaderInfo readerInfo) {
-                mLastTransactionReader = readerInfo;
-                mReadCard.getObservable(readerInfo, (int)(mOrder.getTotalAmount()*100)).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe();
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                SaleResponse saleResponse = new SaleResponse(false,ResultCode.CANCEL);
-                saleResponse.setMessage("Connect Reader");
-                saleResponse.setReason("Reader Not Connected");
-                broadcaster.notifyOnSaleResponse(saleResponse);
-            }
-
-            @Override
-            public void onComplete() {
-            }
-        });
-
+            mAuthOrSaleTransaction.getObservable(mOrder,creditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentResponseObserver);
+        }else {
+            startCardReaderTransaction(readerType);
+        }
     }
 
     public void preAuth(PreAuthRequest preAuthRequest, final ReaderInfo.ReaderType readerType, boolean allowDuplicate) {
 
-        if (merchantInfoMap.get(readerType) == null ) {
-            PreAuthResponse preAuthResponse = new PreAuthResponse(false,ResultCode.CANCEL);
-            preAuthResponse.setMessage("Connect Reader");
-            preAuthResponse.setReason("Reader Not Connected");
-            broadcaster.notifyOnPreAuthResponse(preAuthResponse);
-            return;
-        }
-        if (!mEmployeeMerchant.getMerchant().getFeatures().contains("preAuths")){
+        if (mEmployeeMerchant != null && !mEmployeeMerchant.getMerchant().getFeatures().contains("preAuths")){
             broadcaster.notifyOnPreAuthResponse(new PreAuthResponse(false,ResultCode.UNSUPPORTED));
             return;
         }
 
-
         mLastTransactionRequest = preAuthRequest;
+        clearReferenceData();
         mOrder = new Order();
         TaxRate taxRate=null;
         mOrder.addCustomItem(new Order.CustomItem("item",((double)preAuthRequest.getAmount())/100,1, taxRate));
@@ -682,52 +673,27 @@ public class CloverGoConnectorImpl {
         mOrder.allowDuplicates = allowDuplicate;
         //TODO: setTax amount in Order
 
-        mGetConnectedReaders.getBlockingObservable().filter(new Predicate<ReaderInfo>() {
-            @Override
-            public boolean test(@NonNull ReaderInfo readerInfo) throws Exception {
-                return readerInfo.getReaderType() == readerType;
+        if (preAuthRequest instanceof KeyedPreAuthRequest){
+            CreditCard creditCard = new CreditCard(((KeyedPreAuthRequest) preAuthRequest).getCardNumber(),((KeyedPreAuthRequest) preAuthRequest).getExpDate(),((KeyedPreAuthRequest) preAuthRequest).getCvv());
+            creditCard.setCardPresent(((KeyedPreAuthRequest) preAuthRequest).isCardPresent());
+            if (((KeyedPreAuthRequest) preAuthRequest).getBillingAddress() != null){
+                BillingAddress address =  ((KeyedPreAuthRequest) preAuthRequest).getBillingAddress();
+                creditCard.setBillingAddress(new CreditCard.BillingAddress(address.getStreet(),address.getZipPostalCode(),address.getCountry()));
             }
-        }).switchIfEmpty(Observable.<ReaderInfo>error(new Error("",""))).subscribe(new Observer<ReaderInfo>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-
-            }
-
-            @Override
-            public void onNext(ReaderInfo readerInfo) {
-                mLastTransactionReader = readerInfo;
-                mReadCard.getObservable(readerInfo, (int)(mOrder.getTotalAmount()*100)).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe();
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                PreAuthResponse preAuthResponse = new PreAuthResponse(false,ResultCode.CANCEL);
-                preAuthResponse.setMessage("Connect Reader");
-                preAuthResponse.setReason("Reader Not Connected");
-                broadcaster.notifyOnPreAuthResponse(preAuthResponse);
-            }
-
-            @Override
-            public void onComplete() {
-            }
-        });
+            mAuthOrSaleTransaction.getObservable(mOrder,creditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentResponseObserver);
+        }else {
+            startCardReaderTransaction(readerType);
+        }
     }
 
     public void auth(AuthRequest authRequest, final ReaderInfo.ReaderType readerType, boolean allowDuplicate) {
-
-        if (merchantInfoMap.get(readerType) == null ) {
-            AuthResponse authResponse = new AuthResponse(false,ResultCode.CANCEL);
-            authResponse.setMessage("Connect Reader");
-            authResponse.setReason("Reader Not Connected");
-            broadcaster.notifyOnAuthResponse(authResponse);
-            return;
-        }
-        if (!mEmployeeMerchant.getMerchant().getFeatures().contains("auths")){
+        if (mEmployeeMerchant != null &&  !mEmployeeMerchant.getMerchant().getFeatures().contains("auths")){
             broadcaster.notifyOnAuthResponse(new AuthResponse(false,ResultCode.UNSUPPORTED));
             return;
         }
 
         mLastTransactionRequest = authRequest;
+        clearReferenceData();
         mOrder = new Order();
         TaxRate taxRate=null;
         mOrder.addCustomItem(new Order.CustomItem("item",((double)authRequest.getAmount())/100,1, taxRate));
@@ -736,6 +702,20 @@ public class CloverGoConnectorImpl {
         mOrder.allowDuplicates = allowDuplicate;
         //TODO: setTax amount in Order
 
+        if (authRequest instanceof KeyedAuthRequest){
+            CreditCard creditCard = new CreditCard(((KeyedAuthRequest) authRequest).getCardNumber(),((KeyedAuthRequest) authRequest).getExpDate(),((KeyedAuthRequest) authRequest).getCvv());
+            creditCard.setCardPresent(((KeyedAuthRequest) authRequest).isCardPresent());
+            if (((KeyedAuthRequest) authRequest).getBillingAddress() != null){
+                BillingAddress address =  ((KeyedAuthRequest) authRequest).getBillingAddress();
+                creditCard.setBillingAddress(new CreditCard.BillingAddress(address.getStreet(),address.getZipPostalCode(),address.getCountry()));
+            }
+            mAuthOrSaleTransaction.getObservable(mOrder,creditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentResponseObserver);
+        }else {
+            startCardReaderTransaction(readerType);
+        }
+    }
+
+    private void startCardReaderTransaction(final ReaderInfo.ReaderType readerType) {
         mGetConnectedReaders.getBlockingObservable().filter(new Predicate<ReaderInfo>() {
             @Override
             public boolean test(@NonNull ReaderInfo readerInfo) throws Exception {
@@ -744,7 +724,6 @@ public class CloverGoConnectorImpl {
         }).switchIfEmpty(Observable.<ReaderInfo>error(new Error("",""))).subscribe(new Observer<ReaderInfo>() {
             @Override
             public void onSubscribe(Disposable d) {
-
             }
 
             @Override
@@ -755,29 +734,32 @@ public class CloverGoConnectorImpl {
 
             @Override
             public void onError(Throwable e) {
-                AuthResponse authResponse = new AuthResponse(false,ResultCode.CANCEL);
-                authResponse.setMessage("Connect Reader");
-                authResponse.setReason("Reader Not Connected");
-                broadcaster.notifyOnAuthResponse(authResponse);
+                if (mLastTransactionRequest instanceof SaleRequest){
+                    SaleResponse saleResponse = new SaleResponse(false,ResultCode.CANCEL);
+                    saleResponse.setMessage("Connect Reader");
+                    saleResponse.setReason("Reader Not Connected");
+                    broadcaster.notifyOnSaleResponse(saleResponse);
+                }else if (mLastTransactionRequest instanceof AuthRequest){
+                    AuthResponse authResponse = new AuthResponse(false,ResultCode.CANCEL);
+                    authResponse.setMessage("Connect Reader");
+                    authResponse.setReason("Reader Not Connected");
+                    broadcaster.notifyOnAuthResponse(authResponse);
+                }else if (mLastTransactionRequest instanceof PreAuthRequest){
+                    PreAuthResponse preAuthResponse = new PreAuthResponse(false, ResultCode.CANCEL);
+                    preAuthResponse.setMessage("Connect Reader");
+                    preAuthResponse.setReason("Reader Not Connected");
+                    broadcaster.notifyOnPreAuthResponse(preAuthResponse);
+                }
             }
 
             @Override
             public void onComplete() {
             }
         });
-
-        if (!mGetConnectedReaders.getBlockingObservable().isEmpty().blockingGet()) {
-            mReadCard.getObservable(mGetConnectedReaders.getBlockingObservable().blockingFirst(), (int)(mOrder.getTotalAmount()*100)).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe();
-        }else {
-            AuthResponse authResponse = new AuthResponse(false,ResultCode.CANCEL);
-            authResponse.setMessage("Connect Reader");
-            authResponse.setReason("Reader Not Connected");
-            broadcaster.notifyOnAuthResponse(authResponse);
-        }
     }
 
-    public void tipAdjustAuth(final TipAdjustAuthRequest authTipAdjustRequest, ReaderInfo.ReaderType readerType) {
-        if (mEmployeeMerchant.getMerchant().getFeatures().contains("tip_adjust")){
+    public void tipAdjustAuth(final TipAdjustAuthRequest authTipAdjustRequest) {
+        if (mEmployeeMerchant != null && mEmployeeMerchant.getMerchant().getFeatures().contains("tip_adjust")){
             mAddTips.getObservable(authTipAdjustRequest.getPaymentId(),((double)authTipAdjustRequest.getTipAmount()/100)).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new CompletableObserver() {
                 @Override
                 public void onSubscribe(Disposable d) {}
@@ -848,7 +830,7 @@ public class CloverGoConnectorImpl {
     }
 
     public void voidPayment(final VoidPaymentRequest voidPaymentRequest) {
-        if (mEmployeeMerchant.getMerchant().getFeatures().contains("voids")){
+        if ( mEmployeeMerchant != null && mEmployeeMerchant.getMerchant().getFeatures().contains("voids")){
             mVoidTransaction.getObservable(voidPaymentRequest.getOrderId(),voidPaymentRequest.getPaymentId()).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread()).subscribe(new CompletableObserver() {
                 @Override
@@ -957,7 +939,13 @@ public class CloverGoConnectorImpl {
 
     public void acceptPayment(com.clover.sdk.v3.payments.Payment payment) {
         mOrder.allowDuplicates = true;
-        EventBus.post(readerProgressEvent);
+        if (mLastTransactionRequest instanceof KeyedSaleRequest || mLastTransactionRequest instanceof KeyedAuthRequest){
+            mAuthOrSaleTransaction.getObservable(mOrder,creditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentResponseObserver);
+        }else if (mLastTransactionRequest instanceof KeyedPreAuthRequest){
+            mPreAuthTransaction.getObservable(mOrder,creditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentResponseObserver);
+        }else {
+            EventBus.post(readerProgressEvent);
+        }
     }
 
     public void rejectPayment(com.clover.sdk.v3.payments.Payment payment, Challenge challenge) {
@@ -1042,6 +1030,11 @@ public class CloverGoConnectorImpl {
         }
     }
 
+    private void clearReferenceData() {
+        readerProgressEvent= null;
+        creditCard = null;
+        mLastTransactionReader = null;
+    }
     private void notifyErrorResponse() {
         if (mLastTransactionRequest instanceof SaleRequest){
             Log.e(TAG,"Sale onError "+ transactionError.getMessage());

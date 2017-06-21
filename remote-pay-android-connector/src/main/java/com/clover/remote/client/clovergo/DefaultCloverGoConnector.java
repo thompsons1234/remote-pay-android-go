@@ -4,8 +4,6 @@ import android.graphics.Bitmap;
 
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
-import com.clover.remote.client.CloverConnectorBroadcaster;
-import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.ICloverConnectorListener;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.CapturePreAuthRequest;
