@@ -1,4 +1,4 @@
-package com.clover.remote.client.lib.example.model;
+package com.clover.remote.client.lib.example.messages;
 
 /**
  * Created by glennbedwell on 5/4/17.

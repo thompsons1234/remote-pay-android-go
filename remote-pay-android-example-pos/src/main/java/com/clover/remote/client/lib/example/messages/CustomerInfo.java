@@ -1,4 +1,4 @@
-package com.clover.remote.client.lib.example.model;
+package com.clover.remote.client.lib.example.messages;
 
 import android.os.Parcel;
 import android.os.Parcelable;

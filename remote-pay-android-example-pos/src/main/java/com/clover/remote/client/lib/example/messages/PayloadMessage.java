@@ -1,4 +1,4 @@
-package com.clover.remote.client.lib.example.model;
+package com.clover.remote.client.lib.example.messages;
 
 import com.clover.remote.message.ByteArrayToBase64TypeAdapter;
 import com.clover.remote.message.CloverJSONifiableTypeAdapter;

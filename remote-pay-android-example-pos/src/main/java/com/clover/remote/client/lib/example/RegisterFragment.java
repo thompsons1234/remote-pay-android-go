@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import com.clover.remote.PendingPaymentEntry;
+import com.clover.remote.client.lib.example.utils.IdUtils;
 import com.clover.sdk.v3.payments.TransactionSettings;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.lib.example.adapter.AvailableItemsAdapter;
@@ -157,7 +158,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
   @Override
   public void onSaleClicked() {
-    SaleRequest request = new SaleRequest(store.getCurrentOrder().getTotal(), ExamplePOSActivity.getNextId());
+    SaleRequest request = new SaleRequest(store.getCurrentOrder().getTotal(), IdUtils.getNextId());
     request.setCardEntryMethods(store.getCardEntryMethods());
     request.setAllowOfflinePayment(store.getAllowOfflinePayment());
     request.setForceOfflinePayment(store.getForceOfflinePayment());
@@ -185,7 +186,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
   @Override
   public void onAuthClicked() {
-    AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), ExamplePOSActivity.getNextId());
+    AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), IdUtils.getNextId());
     request.setCardEntryMethods(store.getCardEntryMethods());
     request.setAllowOfflinePayment(store.getAllowOfflinePayment());
     request.setForceOfflinePayment(store.getForceOfflinePayment());
