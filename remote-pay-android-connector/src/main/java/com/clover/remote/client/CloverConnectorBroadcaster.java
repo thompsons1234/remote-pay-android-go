@@ -237,7 +237,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
   }
   public void notifyOnRetrievePaymentResponse(RetrievePaymentResponse gpr) {
     for (ICloverConnectorListener listener : this) {
-      listener.onGetPaymentResponse(gpr);
+      listener.onRetrievePaymentResponse(gpr);
     }
   }
 
