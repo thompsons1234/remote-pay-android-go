@@ -179,7 +179,10 @@ public interface ICloverConnector extends Serializable {
    * Print an image on the Clover Mini printer
    *
    * @param image -
+   *
+   * NOTE:  This method is not implemented for the Java SDK.
    **/
+  @Deprecated
   void printImage(Bitmap image);
 
   /**
