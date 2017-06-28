@@ -945,7 +945,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       }
 
       @Override
-      public void onRetrievePaymentResponse(RetrievePaymentResponse response) {
+      public void onGetPaymentResponse(RetrievePaymentResponse response) {
         showMessage("GetPayment: " + (response.isSuccess() ? "Success!" : "Failed!")
                     + "QueryStatus: " + response.getQueryStatus() + " for id " + response.getExternalPaymentId()
                     + " Payment: " + response.getPayment()

@@ -267,6 +267,6 @@ public interface ICloverConnectorListener {
   void onResetDeviceResponse(ResetDeviceResponse response);
 
   /** * Called in response to a doRetrievePayment(...) request */
-  void onRetrievePaymentResponse(RetrievePaymentResponse response);
+  void onGetPaymentResponse(RetrievePaymentResponse response);
   
 }

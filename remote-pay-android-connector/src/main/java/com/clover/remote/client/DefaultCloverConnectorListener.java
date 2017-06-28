@@ -184,7 +184,7 @@ public abstract class DefaultCloverConnectorListener implements ICloverConnector
 
   }
 
-  @Override public void onRetrievePaymentResponse(RetrievePaymentResponse response){
+  @Override public void onGetPaymentResponse(RetrievePaymentResponse response){
 
   }
 }
