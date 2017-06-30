@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,7 +59,7 @@ import java.util.Map;
 
 public class RegisterFragment extends Fragment implements CurrentOrderFragmentListener, AvailableItemListener {
   private OnFragmentInteractionListener mListener;
-
+  private static final String TAG = RegisterFragment.class.getSimpleName();
   POSStore store;
   ICloverConnector cloverConnector;
   Map<POSItem, AvailableItem> itemToAvailableItem = new HashMap<POSItem, AvailableItem>();
@@ -157,6 +158,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
   @Override
   public void onSaleClicked() {
+    Log.d(TAG, "onSaleClicked ");
     SaleRequest request = new SaleRequest(store.getCurrentOrder().getTotal(), ExamplePOSActivity.getNextId());
     request.setCardEntryMethods(store.getCardEntryMethods());
     request.setAllowOfflinePayment(store.getAllowOfflinePayment());
@@ -178,6 +180,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
   @Override
   public void onNewOrderClicked() {
+    Log.d(TAG, "onNewOrderClicked");
     store.createOrder(true);
     CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
     currentOrderFragment.setOrder(store.getCurrentOrder());
@@ -185,6 +188,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
   @Override
   public void onAuthClicked() {
+    Log.d(TAG, "onAuthClicked ");
     AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), ExamplePOSActivity.getNextId());
     request.setCardEntryMethods(store.getCardEntryMethods());
     request.setAllowOfflinePayment(store.getAllowOfflinePayment());

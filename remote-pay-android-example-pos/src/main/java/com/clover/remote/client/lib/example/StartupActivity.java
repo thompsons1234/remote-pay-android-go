@@ -39,7 +39,7 @@ import java.security.KeyStore;
 
 public class StartupActivity extends Activity {
 
-  public static final String TAG = StartupActivity.class.getName();
+  public static final String TAG = StartupActivity.class.getSimpleName();
   public static final String EXAMPLE_APP_NAME = "EXAMPLE_APP";
   public static final String LAN_PAY_DISPLAY_URL = "LAN_PAY_DISPLAY_URL";
   public static final String CONNECTION_MODE = "CONNECTION_MODE";

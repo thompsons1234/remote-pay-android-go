@@ -37,12 +37,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="2"
-        android:hint="wss://192.168.1.101:12345/remote_pay"/>
+        android:hint="@string/lan_pay_address"/>
     <Button
         android:id="@+id/testButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/test_settings_button_label"
+        android:text="@string/test"
+        android:background="@drawable/button_border_padding"
         android:onClick="onTestClicked"/>
     <TextView
         android:id="@+id/testResult"
@@ -59,13 +60,19 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Cancel"
+        android:background="@drawable/button_border_padding"
+        android:text="@string/cancel"
         android:onClick="onCancelSetting"
+        android:layout_marginRight="10sp"
     />
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ok"
+        android:text="@string/ok"
+        android:background="@drawable/button_green"
+        android:textColor="@color/white"
+        android:paddingRight="15sp"
+        android:paddingLeft="15sp"
         android:onClick="onAcceptSetting"
     />
   </LinearLayout>
