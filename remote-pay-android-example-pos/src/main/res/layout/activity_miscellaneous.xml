@@ -25,8 +25,7 @@
                 tools:context="com.clover.remote.client.lib.example.MiscellaneousActivity">
 
   <Button
-      android:text="@string/capture_card"
-      android:background="@drawable/button_border_padding"
+      android:text="Capture Card"
       android:onClick="captureCardClick"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"/>

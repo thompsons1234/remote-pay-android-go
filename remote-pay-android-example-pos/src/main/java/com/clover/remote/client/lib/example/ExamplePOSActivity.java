@@ -163,14 +163,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     @Override
     public void onAcceptClicked(final int challengeIndex) {
-      Log.d(TAG, "onAcceptClicked) challengeIndex: " + challengeIndex);
       if (challengeIndex == currentChallenges.length - 1) { // no more challenges, so accept the payment
-        Log.d(TAG, "onAcceptClicked: if");
         cloverConnector.acceptPayment(currentPayment);
         currentChallenges = null;
         currentPayment = null;
       } else { // show the next challenge
-        Log.d(TAG, "onAcceptClicked: else");
         runOnUiThread(new Runnable() {
           @Override
           public void run() {
@@ -256,7 +253,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     initialize();
 
-//    FrameLayout frameLayout = (FrameLayout) findViewById(R.id.contentContainer);
+    FrameLayout frameLayout = (FrameLayout) findViewById(R.id.contentContainer);
 
     FragmentManager fragmentManager = getFragmentManager();
     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -725,12 +722,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       @Override
       public void onConfirmPaymentRequest(ConfirmPaymentRequest request) {
-        Log.d(TAG, "onConfirmPaymentRequest) request:" +request.toString());
         if (request.getPayment() == null || request.getChallenges() == null) {
-          Log.d(TAG, "onConfirmPaymentRequest: if");
           showMessage("Error: The ConfirmPaymentRequest was missing the payment and/or challenges.", Toast.LENGTH_LONG);
         } else {
-          Log.d(TAG, "onConfirmPaymentRequest: if");
           currentPayment = request.getPayment();
           currentChallenges = request.getChallenges();
           runOnUiThread(new Runnable() {
@@ -1005,7 +999,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   private void showPaymentConfirmation(PaymentConfirmationListener listenerIn, Challenge challengeIn, int challengeIndexIn) {
-    Log.d(TAG, "showPaymentConfirmation) challenge: "+challengeIn.toString()+ " challengeIndex: "+challengeIndexIn);
     final int challengeIndex = challengeIndexIn;
     final Challenge challenge = challengeIn;
     final PaymentConfirmationListener listener = listenerIn;

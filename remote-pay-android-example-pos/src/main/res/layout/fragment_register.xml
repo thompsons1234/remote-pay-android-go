@@ -43,8 +43,7 @@
       android:id="@+id/AvailableItems"
       android:stretchMode="columnWidth"
       android:columnWidth="195dp"
-      android:layout_marginLeft="20dp"
-      android:gravity="right"
+      android:layout_marginLeft="10dp"
       android:numColumns="auto_fit">
   </GridView>
 </LinearLayout>
