@@ -15,15 +15,15 @@
   ~ limitations under the License.
   -->
 <ScrollView xmlns:tools="http://schemas.android.com/tools"
-            android:layout_height="fill_parent"
-            android:layout_width="fill_parent"
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:fillViewport="false"
-            android:id="@+id/MiscParentScrollView">
+    android:layout_height="fill_parent"
+    android:layout_width="fill_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:fillViewport="false"
+    android:id="@+id/MiscParentScrollView">
 
   <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent">
+      android:layout_width="match_parent"
+      android:layout_height="match_parent">
 
     <LinearLayout
         android:orientation="vertical"
@@ -109,12 +109,12 @@
         android:layout_alignRight="@+id/QueryPaymentButton">
 
       <Button android:layout_width="100dp"
-              android:layout_height="match_parent"
-              android:text="Show Welcome Message"
-              android:layout_weight=".5"
-              android:id="@+id/button3"
-              android:onClick="showWelcomeMessageClick"
-              android:layout_alignParentLeft="true"/>
+          android:layout_height="match_parent"
+          android:text="@string/show_welcome_message"
+          android:layout_weight=".5"
+          android:id="@+id/button3"
+          android:onClick="showWelcomeMessageClick"
+          android:layout_alignParentLeft="true"/>
 
       <Button
           android:layout_width="100dp"
@@ -177,11 +177,11 @@
           android:layout_alignRight="@+id/button3"/>
 
       <Button android:layout_width="0dp"
-              android:layout_height="match_parent"
-              android:layout_weight=".5"
-              android:text="Print Image"
-              android:onClick="printImageClick"
-              android:id="@+id/PrintImageButton"
+          android:layout_height="match_parent"
+          android:layout_weight=".5"
+          android:text="@string/print_image"
+          android:onClick="printImageClick"
+          android:id="@+id/PrintImageButton"
           />
     </LinearLayout>
 
@@ -206,11 +206,11 @@
           android:layout_alignRight="@+id/button3"/>
 
       <Button android:layout_width="0dp"
-              android:layout_height="match_parent"
-              android:layout_weight=".5"
-              android:text="Get Device Status"
-              android:onClick="onGetDeviceStatusClick"
-              android:id="@+id/GetDeviceStatusButton"
+          android:layout_height="match_parent"
+          android:layout_weight=".5"
+          android:text="@string/get_device_status"
+          android:onClick="onGetDeviceStatusClick"
+          android:id="@+id/GetDeviceStatusButton"
           />
     </LinearLayout>
 
@@ -224,11 +224,11 @@
         android:layout_alignRight="@+id/WelcomeThankYouBox">
 
       <Button android:layout_width="0dp"
-              android:layout_height="match_parent"
-              android:layout_weight=".5"
-              android:text="Read Card Data"
-              android:onClick="onReadCardDataClick"
-              android:id="@+id/ReadCardDataButton"
+          android:layout_height="match_parent"
+          android:layout_weight=".5"
+          android:text="@string/read_card_data"
+          android:onClick="onReadCardDataClick"
+          android:id="@+id/ReadCardDataButton"
           />
 
       <Button
@@ -245,20 +245,20 @@
     </LinearLayout>
 
     <LinearLayout android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:id="@+id/CustomActivityBox"
-                  android:orientation="vertical"
-                  android:layout_below="@id/ReadCardDataBox"
-                  android:layout_alignRight="@+id/WelcomeThankYouBox"
-                  android:padding="10dip"
-                  android:background="@drawable/border">
+        android:layout_height="wrap_content"
+        android:id="@+id/CustomActivityBox"
+        android:orientation="vertical"
+        android:layout_below="@id/ReadCardDataBox"
+        android:layout_alignRight="@+id/WelcomeThankYouBox"
+        android:padding="10dip"
+        android:background="@drawable/border">
 
       <LinearLayout android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:id="@+id/CustomActivityEntry"
-                    android:orientation="vertical"
-                    android:outlineProvider="paddedBounds"
-                    android:visibility="visible"
+          android:layout_height="match_parent"
+          android:id="@+id/CustomActivityEntry"
+          android:orientation="vertical"
+          android:outlineProvider="paddedBounds"
+          android:visibility="visible"
           >
 
         <TextView
@@ -280,14 +280,14 @@
             android:layout_weight=".5"/>
 
         <Spinner android:layout_width="match_parent"
-                 android:layout_height="fill_parent"
-                 android:layout_weight=".5"
-                 android:id="@+id/activity_id"
-                 android:background="@android:drawable/btn_dropdown"
-                 android:spinnerMode="dropdown"
-                 android:dropDownWidth="match_parent"
-                 android:minHeight="17dp"
-                 android:padding="0dp"/>
+            android:layout_height="fill_parent"
+            android:layout_weight=".5"
+            android:id="@+id/activity_id"
+            android:background="@android:drawable/btn_dropdown"
+            android:spinnerMode="dropdown"
+            android:dropDownWidth="match_parent"
+            android:minHeight="17dp"
+            android:padding="0dp"/>
 
         <EditText
             android:layout_width="match_parent"
@@ -306,19 +306,19 @@
             >
 
           <Button android:id="@+id/startCustomActivityButton"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_weight="1"
-                  android:text="Start"
-                  android:onClick="startActivity"/>
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:text="@string/start"
+              android:onClick="startActivity"/>
 
           <Button android:id="@+id/sendMessageToActivityButton"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:layout_weight="1"
-                  android:text="Send Message"
-                  android:onClick="sendMessageToActivity"
-                  android:visibility="invisible"/>
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:text="@string/send_message"
+              android:onClick="sendMessageToActivity"
+              android:visibility="invisible"/>
 
         </LinearLayout>
 
@@ -398,9 +398,9 @@
               android:paddingBottom="3dp"/>
 
           <RadioGroup android:layout_width="wrap_content"
-                      android:layout_height="fill_parent"
-                      android:orientation="horizontal"
-                      android:id="@+id/ForceOfflinePaymentRG">
+              android:layout_height="fill_parent"
+              android:orientation="horizontal"
+              android:id="@+id/ForceOfflinePaymentRG">
 
             <RadioButton
                 android:layout_width="wrap_content"
@@ -442,9 +442,9 @@
             android:paddingBottom="3dp"/>
 
         <RadioGroup android:layout_width="wrap_content"
-                    android:layout_height="fill_parent"
-                    android:orientation="horizontal"
-                    android:id="@+id/AcceptOfflinePaymentRG">
+            android:layout_height="fill_parent"
+            android:orientation="horizontal"
+            android:id="@+id/AcceptOfflinePaymentRG">
 
           <RadioButton
               android:layout_width="wrap_content"
@@ -485,9 +485,9 @@
             android:paddingBottom="3dp"/>
 
         <RadioGroup android:layout_width="wrap_content"
-                    android:layout_height="fill_parent"
-                    android:orientation="horizontal"
-                    android:id="@+id/ApproveOfflineWithoutPromptRG">
+            android:layout_height="fill_parent"
+            android:orientation="horizontal"
+            android:id="@+id/ApproveOfflineWithoutPromptRG">
 
           <RadioButton
               android:layout_width="wrap_content"

@@ -87,14 +87,13 @@
 
 
   <FrameLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-               android:id="@+id/contentContainer" android:layout_below="@+id/TopPanel"
-               android:layout_above="@+id/Divider">
-
-  </FrameLayout>
-
-  <View android:layout_width="match_parent" android:layout_height="2dp"
-        android:background="@android:color/holo_blue_light" android:layout_above="@+id/BottomPanel"
-        android:id="@+id/Divider"></View>
+      android:id="@+id/contentContainer" android:layout_below="@+id/TopPanel"
+      android:layout_above="@+id/Divider"/>
+  <View android:layout_width="match_parent"
+      android:layout_height="2dp"
+      android:background="@android:color/holo_blue_light"
+      android:layout_above="@+id/BottomPanel"
+      android:id="@+id/Divider"></View>
   <LinearLayout
       android:orientation="horizontal"
       android:layout_width="match_parent"
@@ -120,5 +119,4 @@
         android:text="Unknown"
         android:textSize="@dimen/text_size_status"/>
   </LinearLayout>
-
 </RelativeLayout>
