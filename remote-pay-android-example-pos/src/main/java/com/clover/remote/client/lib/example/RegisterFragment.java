@@ -119,7 +119,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     } catch (ClassCastException e) {
 
       throw new ClassCastException(activity.toString()
-          + " must implement OnFragmentInteractionListener: " + activity.getClass().getName());
+                                   + " must implement OnFragmentInteractionListener: " + activity.getClass().getName());
     }
   }
 
@@ -232,7 +232,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
     }
 
-    @Override 
+    @Override
     public void cardAdded(POSCard card) {
 
     }
