@@ -133,10 +133,6 @@
   <string name="_void">Void</string>
   <string name="yes">Yes</string>
 
-  <string name="pref_title_protocol">Protocol</string>
-  <string name="pref_default_protocol">ws</string>
-  <string name="activity_message_payload">{&quot;Question&quot;:&quot;Why did the Storm Trooper buy an iPhone?&quot;}</string>
-
   <string-array name="pref_protocol_list_titles">
     <item>WS</item>
     <item>WSS</item>
@@ -146,37 +142,9 @@
     <item>wss</item>
   </string-array>
 
-  <string name="unknown_payload">The payload received in a message from the calling system is not a known class.  messageType = </string>
-
-  <string name="pref_label_server">Device Endpoint</string>
-  <string name="device_endpoint_settings_label">Device Endpoint</string>
-  <string name="test_settings_button_label">Test</string>
 
   <item type="id" name="button_exit"/>
 
-  <string name="address">start service to see listen address</string>
-
-
-  <string name="lan_terminal_notification_title">Web Socket payment device connected</string>
-  <string name="lan_terminal_notification_text">Tap to start Local Network Pay Display.</string>
-
-  <string name="checking_kiosk">Checking for kiosk application...</string>
-  <string name="kiosk_not_installed">Please install the kiosk application</string>
-
-  <string name="header_title">Configuration</string>
-  <string name="header_summary">Configure the adapter protocol and port.</string>
-
-  <string name="preferences_title">Preferences</string>
-
-  <item type="id" name="button_exit"/>
-  <string name="title_activity_example_pos">Clover Example POS</string>
-  <string name="accept_button_text">Accept</string>
-  <string name="reject_button_text">Reject</string>
-
-
-  <string name="title_activity_orders">OrdersActivity</string>
-  <string name="title_activity_miscellaneous">MiscellaneousActivity</string>
-  <string name="title_activity_startup">StartupActivity</string>
 
 
 </resources>
