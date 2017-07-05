@@ -115,6 +115,7 @@
           android:id="@+id/button3"
           android:onClick="showWelcomeMessageClick"
           android:layout_alignParentLeft="true"/>
+
       <Button
           android:layout_width="100dp"
           android:layout_height="match_parent"
