@@ -133,8 +133,6 @@
   <string name="_void">Void</string>
   <string name="yes">Yes</string>
 
-
-
   <string-array name="pref_protocol_list_titles">
     <item>WS</item>
     <item>WSS</item>
@@ -146,6 +144,7 @@
 
 
   <item type="id" name="button_exit"/>
+
 
 
 </resources>
