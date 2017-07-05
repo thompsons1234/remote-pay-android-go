@@ -13,7 +13,6 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -43,7 +42,8 @@
       android:id="@+id/AvailableItems"
       android:stretchMode="columnWidth"
       android:columnWidth="195dp"
-      android:layout_marginLeft="10dp"
+      android:layout_marginLeft="20dp"
+      android:gravity="right"
       android:numColumns="auto_fit">
   </GridView>
 </LinearLayout>

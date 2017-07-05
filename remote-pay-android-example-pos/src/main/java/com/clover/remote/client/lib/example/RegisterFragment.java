@@ -58,6 +58,7 @@ import java.util.Map;
 
 public class RegisterFragment extends Fragment implements CurrentOrderFragmentListener, AvailableItemListener {
   private OnFragmentInteractionListener mListener;
+  private static final String TAG = RegisterFragment.class.getSimpleName();
 
   POSStore store;
   ICloverConnector cloverConnector;
