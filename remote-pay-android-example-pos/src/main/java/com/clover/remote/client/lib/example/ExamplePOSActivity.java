@@ -618,6 +618,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       public void onRetrievePendingPaymentsResponse(RetrievePendingPaymentsResponse response) {
         if (!response.isSuccess()) {
           store.setPendingPayments(null);
+          showMessage("Retrieve Pending Payments: " + response.getResult(), Toast.LENGTH_LONG);
         } else {
           store.setPendingPayments(response.getPendingPayments());
         }

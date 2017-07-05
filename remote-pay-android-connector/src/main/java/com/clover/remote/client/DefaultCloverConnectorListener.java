@@ -101,9 +101,6 @@ public abstract class DefaultCloverConnectorListener implements ICloverConnector
     }
   }
 
-  @Override
-  public abstract void onConfirmPaymentRequest(ConfirmPaymentRequest request);
-
   @Override public void onCloseoutResponse(CloseoutResponse response) {
 
   }

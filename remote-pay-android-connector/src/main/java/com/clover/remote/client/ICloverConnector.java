@@ -180,7 +180,7 @@ public interface ICloverConnector extends Serializable {
    *
    * @param image -
    *
-   * NOTE:  This method is not implemented for the Java SDK.
+   * NOTE:  This method is not implemented for the Java SDK.  Use {@link #printImageFromURL(String)} instead.
    **/
   @Deprecated
   void printImage(Bitmap image);
