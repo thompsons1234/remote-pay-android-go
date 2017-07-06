@@ -26,10 +26,10 @@ import com.clover.remote.client.MerchantInfo;
 import com.clover.remote.client.device.CloverDeviceConfiguration;
 import com.clover.remote.client.device.USBCloverDeviceConfiguration;
 import com.clover.remote.client.device.WebSocketCloverDeviceConfiguration;
-import com.clover.remote.client.lib.example.model.ConversationQuestionMessage;
-import com.clover.remote.client.lib.example.model.ConversationResponseMessage;
-import com.clover.remote.client.lib.example.model.CustomerInfo;
-import com.clover.remote.client.lib.example.model.CustomerInfoMessage;
+import com.clover.remote.client.lib.example.messages.ConversationQuestionMessage;
+import com.clover.remote.client.lib.example.messages.ConversationResponseMessage;
+import com.clover.remote.client.lib.example.messages.CustomerInfo;
+import com.clover.remote.client.lib.example.messages.CustomerInfoMessage;
 import com.clover.remote.client.lib.example.model.POSCard;
 import com.clover.remote.client.lib.example.model.POSDiscount;
 import com.clover.remote.client.lib.example.model.POSExchange;
@@ -39,11 +39,12 @@ import com.clover.remote.client.lib.example.model.POSOrder;
 import com.clover.remote.client.lib.example.model.POSPayment;
 import com.clover.remote.client.lib.example.model.POSRefund;
 import com.clover.remote.client.lib.example.model.POSStore;
-import com.clover.remote.client.lib.example.model.PayloadMessage;
-import com.clover.remote.client.lib.example.model.PhoneNumberMessage;
-import com.clover.remote.client.lib.example.model.Rating;
-import com.clover.remote.client.lib.example.model.RatingsMessage;
+import com.clover.remote.client.lib.example.messages.PayloadMessage;
+import com.clover.remote.client.lib.example.messages.PhoneNumberMessage;
+import com.clover.remote.client.lib.example.messages.Rating;
+import com.clover.remote.client.lib.example.messages.RatingsMessage;
 import com.clover.remote.client.lib.example.utils.CurrencyUtils;
+import com.clover.remote.client.lib.example.utils.IdUtils;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
 import com.clover.remote.client.messages.CloseoutRequest;
@@ -143,6 +144,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public static final int SVR_ACTIVITY = 456;
   public static final String EXTRA_CLOVER_CONNECTOR_CONFIG = "EXTRA_CLOVER_CONNECTOR_CONFIG";
   public static final String EXTRA_WS_ENDPOINT = "WS_ENDPOINT";
+  private static final String DEFAULT_EID = "DFLTEMPLYEE";
 
   // Package name for example custom activities
   public static final String CUSTOM_ACTIVITY_PACKAGE = "com.clover.cfp.examples.";
@@ -566,7 +568,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
             @Override
             public void run() {
               Payment _payment = response.getPayment();
-              POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), "DFLTEMPLYEE", _payment.getAmount(), _payment.getTipAmount() != null ? _payment.getTipAmount() : 0, _payment.getCashbackAmount() != null ? _payment.getCashbackAmount() : 0);
+              long cashback = _payment.getCashbackAmount() == null ? 0 : _payment.getCashbackAmount();
+              long tip = _payment.getTipAmount() == null ? 0 : _payment.getTipAmount();
+              POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), DEFAULT_EID, _payment.getAmount(), tip, cashback);
               setPaymentStatus(payment, response);
               store.addPaymentToOrder(payment, store.getCurrentOrder());
               showMessage("Auth successfully processed.", Toast.LENGTH_SHORT);
@@ -594,8 +598,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           public void run() {
             if (response.isSuccess()) {
               Payment _payment = response.getPayment();
-              POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), "DFLTEMPLYEE", _payment.getAmount(), _payment.getTipAmount() != null ? _payment.getTipAmount() : 0,
-                  _payment.getCashbackAmount() != null ? _payment.getCashbackAmount() : 0);
+              long cashback = _payment.getCashbackAmount() == null ? 0 : _payment.getCashbackAmount();
+              long tip = _payment.getTipAmount() == null ? 0 : _payment.getTipAmount();
+              POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), DEFAULT_EID, _payment.getAmount(), tip, cashback);
               setPaymentStatus(payment, response);
               store.addPreAuth(payment);
               showMessage("PreAuth successfully processed.", Toast.LENGTH_SHORT);
@@ -610,11 +615,12 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       }
 
       @Override
-      public void onRetrievePendingPaymentsResponse(RetrievePendingPaymentsResponse retrievePendingPaymentResponse) {
-        if (!retrievePendingPaymentResponse.isSuccess()) {
+      public void onRetrievePendingPaymentsResponse(RetrievePendingPaymentsResponse response) {
+        if (!response.isSuccess()) {
           store.setPendingPayments(null);
+          showMessage("Retrieve Pending Payments: " + response.getResult(), Toast.LENGTH_LONG);
         } else {
-          store.setPendingPayments(retrievePendingPaymentResponse.getPendingPayments());
+          store.setPendingPayments(response.getPendingPayments());
         }
       }
 
@@ -751,7 +757,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           if (response.isSuccess()) { // Handle cancel response
             if (response.getPayment() != null) {
               Payment _payment = response.getPayment();
-              POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), "DFLTEMPLYEE", _payment.getAmount(), _payment.getTipAmount() != null ? _payment.getTipAmount() : 0, _payment.getCashbackAmount() != null ? _payment.getCashbackAmount() : 0);
+              long cashback = _payment.getCashbackAmount() == null ? 0 : _payment.getCashbackAmount();
+              long tip = _payment.getTipAmount() == null ? 0 : _payment.getTipAmount();
+              POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), DEFAULT_EID, _payment.getAmount(), tip, cashback);
               setPaymentStatus(payment, response);
 
               store.addPaymentToOrder(payment, store.getCurrentOrder());
@@ -947,7 +955,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       @Override
       public void onRetrievePaymentResponse(RetrievePaymentResponse response) {
         showMessage("RetrievePayment: " + (response.isSuccess() ? "Success!" : "Failed!")
-                    + "QueryStatus: " + response.getQueryStatus() + " for id " + response.getExternalPaymentId()
+                    + " QueryStatus: " + response.getQueryStatus() + " for id " + response.getExternalPaymentId()
                     + " Payment: " + response.getPayment()
                     + " reason: " + response.getReason(), Toast.LENGTH_LONG);
       }
@@ -1297,7 +1305,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     CharSequence val = ((TextView) findViewById(R.id.ManualRefundTextView)).getText();
     try {
       long refundAmount = Long.parseLong(val.toString());
-      ManualRefundRequest request = new ManualRefundRequest(refundAmount, getNextId());
+      ManualRefundRequest request = new ManualRefundRequest(refundAmount, IdUtils.getNextId());
       request.setAmount(refundAmount);
       request.setCardEntryMethods(store.getCardEntryMethods());
       request.setDisablePrinting(store.getDisablePrinting());
@@ -1337,7 +1345,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void preauthCardClick(View view) {
-    PreAuthRequest request = new PreAuthRequest(5000L, getNextId());
+    PreAuthRequest request = new PreAuthRequest(5000L, IdUtils.getNextId());
     request.setCardEntryMethods(store.getCardEntryMethods());
     request.setDisablePrinting(store.getDisablePrinting());
     request.setSignatureEntryLocation(store.getSignatureEntryLocation());
@@ -1389,19 +1397,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   public void onGetDeviceStatusCBClick(View view) {
     cloverConnector.retrieveDeviceStatus(new RetrieveDeviceStatusRequest(true));
-  }
-
-  private static final SecureRandom random = new SecureRandom();
-  private static final char[] vals = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'}; // Crockford's base 32 chars
-
-  // providing a simplified version so we don't have a dependency on common's Ids
-  public static String getNextId() {
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < 13; i++) {
-      int idx = random.nextInt(vals.length);
-      sb.append(vals[idx]);
-    }
-    return sb.toString();
   }
 
   public void refreshPendingPayments(View view) {

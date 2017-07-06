@@ -39,6 +39,7 @@ import com.clover.remote.client.lib.example.model.POSOrder;
 import com.clover.remote.client.lib.example.model.POSPayment;
 import com.clover.remote.client.lib.example.model.POSStore;
 import com.clover.remote.client.lib.example.model.StoreObserver;
+import com.clover.remote.client.lib.example.utils.IdUtils;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.SaleRequest;
 import com.clover.sdk.v3.payments.VaultedCard;
@@ -146,7 +147,7 @@ public class CardsFragment extends Fragment {
 
                                 switch(index) {
                                     case 0: {
-                                        SaleRequest request = new SaleRequest(store.getCurrentOrder().getTotal(), ExamplePOSActivity.getNextId());
+                                        SaleRequest request = new SaleRequest(store.getCurrentOrder().getTotal(), IdUtils.getNextId());
                                         request.setCardEntryMethods(store.getCardEntryMethods());
                                         request.setAllowOfflinePayment(store.getAllowOfflinePayment());
                                         request.setForceOfflinePayment(store.getForceOfflinePayment());
@@ -168,7 +169,7 @@ public class CardsFragment extends Fragment {
                                         break;
                                     }
                                     case 1: {
-                                        AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), ExamplePOSActivity.getNextId());
+                                        AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), IdUtils.getNextId());
                                         request.setCardEntryMethods(store.getCardEntryMethods());
                                         request.setAllowOfflinePayment(store.getAllowOfflinePayment());
                                         request.setForceOfflinePayment(store.getForceOfflinePayment());
