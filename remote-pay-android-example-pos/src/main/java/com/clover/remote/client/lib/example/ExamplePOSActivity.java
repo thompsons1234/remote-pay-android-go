@@ -757,22 +757,36 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           if (response.isSuccess()) { // Handle cancel response
             if (response.getPayment() != null) {
               Payment _payment = response.getPayment();
-              long cashback = _payment.getCashbackAmount() == null ? 0 : _payment.getCashbackAmount();
-              long tip = _payment.getTipAmount() == null ? 0 : _payment.getTipAmount();
-              POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), DEFAULT_EID, _payment.getAmount(), tip, cashback);
-              setPaymentStatus(payment, response);
+              Log.d(TAG, "payment external: "+_payment.getExternalPaymentId());
+              if(_payment.getExternalPaymentId().equals(store.getCurrentOrder().getPendingPaymentId())) {
+                POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), "DFLTEMPLYEE", _payment.getAmount(), _payment.getTipAmount() != null ? _payment.getTipAmount() : 0, _payment.getCashbackAmount() != null ? _payment.getCashbackAmount() : 0);
+                setPaymentStatus(payment, response);
 
-              store.addPaymentToOrder(payment, store.getCurrentOrder());
-              showMessage("Sale successfully processed", Toast.LENGTH_SHORT);
-              runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                  store.createOrder(false);
-                  CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
-                  currentOrderFragment.setOrder(store.getCurrentOrder());
-                  showRegister(null);
-                }
-              });
+                store.addPaymentToOrder(payment, store.getCurrentOrder());
+                showMessage("Sale successfully processed", Toast.LENGTH_SHORT);
+                runOnUiThread(new Runnable() {
+                  @Override
+                  public void run() {
+                    store.createOrder(false);
+                    CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
+                    currentOrderFragment.setOrder(store.getCurrentOrder());
+                    showRegister(null);
+                  }
+                });
+              }
+              else{
+                runOnUiThread(new Runnable() {
+                  @Override
+                  public void run() {
+                    AlertDialog externalIDMismatch;
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
+                    builder.setTitle("Error");
+                    builder.setMessage("External Payment Id's do not match");
+                    externalIDMismatch = builder.create();
+                    externalIDMismatch.show();
+                  }
+                });
+              }
             } else { // Handle null payment
               showMessage("Error: Sale response was missing the payment", Toast.LENGTH_LONG);
             }
@@ -1305,7 +1319,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     CharSequence val = ((TextView) findViewById(R.id.ManualRefundTextView)).getText();
     try {
       long refundAmount = Long.parseLong(val.toString());
-      ManualRefundRequest request = new ManualRefundRequest(refundAmount, IdUtils.getNextId());
+      ManualRefundRequest request = new ManualRefundRequest(refundAmount, getNextId());
       request.setAmount(refundAmount);
       request.setCardEntryMethods(store.getCardEntryMethods());
       request.setDisablePrinting(store.getDisablePrinting());
@@ -1345,7 +1359,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void preauthCardClick(View view) {
-    PreAuthRequest request = new PreAuthRequest(5000L, IdUtils.getNextId());
+    PreAuthRequest request = new PreAuthRequest(5000L, getNextId());
     request.setCardEntryMethods(store.getCardEntryMethods());
     request.setDisablePrinting(store.getDisablePrinting());
     request.setSignatureEntryLocation(store.getSignatureEntryLocation());
@@ -1444,5 +1458,18 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public void sendMessageToActivity(String activityId, String payload) {
     MessageToActivity messageRequest = new MessageToActivity(activityId, payload);
     cloverConnector.sendMessageToActivity(messageRequest);
+  }
+
+  private static final SecureRandom random = new SecureRandom();
+  private static final char[] vals = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'}; // Crockford's base 32 chars
+
+  // providing a simplified version so we don't have a dependency on common's Ids
+  public static String getNextId() {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < 13; i++) {
+      int idx = random.nextInt(vals.length);
+      sb.append(vals[idx]);
+    }
+    return sb.toString();
   }
 }
