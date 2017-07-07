@@ -191,7 +191,10 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
   @Override
   public void onAuthClicked() {
-    AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), IdUtils.getNextId());
+    String externalPaymentID = ExamplePOSActivity.getNextId();
+    Log.d(TAG, "ExternalPaymentID:" + externalPaymentID);
+    store.getCurrentOrder().setPendingPaymentId(externalPaymentID);
+    AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), externalPaymentID);
     request.setCardEntryMethods(store.getCardEntryMethods());
     request.setAllowOfflinePayment(store.getAllowOfflinePayment());
     request.setForceOfflinePayment(store.getForceOfflinePayment());

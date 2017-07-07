@@ -568,20 +568,35 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
             @Override
             public void run() {
               Payment _payment = response.getPayment();
-              long cashback = _payment.getCashbackAmount() == null ? 0 : _payment.getCashbackAmount();
-              long tip = _payment.getTipAmount() == null ? 0 : _payment.getTipAmount();
-              POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), DEFAULT_EID, _payment.getAmount(), tip, cashback);
-              setPaymentStatus(payment, response);
-              store.addPaymentToOrder(payment, store.getCurrentOrder());
-              showMessage("Auth successfully processed.", Toast.LENGTH_SHORT);
+              if(_payment.getExternalPaymentId().equals(store.getCurrentOrder().getPendingPaymentId())) {
+                long cashback = _payment.getCashbackAmount() == null ? 0 : _payment.getCashbackAmount();
+                long tip = _payment.getTipAmount() == null ? 0 : _payment.getTipAmount();
+                POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), DEFAULT_EID, _payment.getAmount(), tip, cashback);
+                setPaymentStatus(payment, response);
+                store.addPaymentToOrder(payment, store.getCurrentOrder());
+                showMessage("Auth successfully processed.", Toast.LENGTH_SHORT);
 
-              store.createOrder(false);
-              CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
-              currentOrderFragment.setOrder(store.getCurrentOrder());
+                store.createOrder(false);
+                CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
+                currentOrderFragment.setOrder(store.getCurrentOrder());
 
-              showRegister(null);
-              SystemClock.sleep(3000);
-              cloverConnector.showWelcomeScreen();
+                showRegister(null);
+                SystemClock.sleep(3000);
+                cloverConnector.showWelcomeScreen();
+              }
+              else{
+                runOnUiThread(new Runnable() {
+                  @Override
+                  public void run() {
+                    AlertDialog externalIDMismatch;
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
+                    builder.setTitle("Error");
+                    builder.setMessage("External Payment Id's do not match");
+                    externalIDMismatch = builder.create();
+                    externalIDMismatch.show();
+                  }
+                });
+              }
             }
           });
         } else {
@@ -598,13 +613,28 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           public void run() {
             if (response.isSuccess()) {
               Payment _payment = response.getPayment();
-              long cashback = _payment.getCashbackAmount() == null ? 0 : _payment.getCashbackAmount();
-              long tip = _payment.getTipAmount() == null ? 0 : _payment.getTipAmount();
-              POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), DEFAULT_EID, _payment.getAmount(), tip, cashback);
-              setPaymentStatus(payment, response);
-              store.addPreAuth(payment);
-              showMessage("PreAuth successfully processed.", Toast.LENGTH_SHORT);
-              showPreAuths(null);
+              if(_payment.getExternalPaymentId().equals(store.getCurrentOrder().getPendingPaymentId())) {
+                long cashback = _payment.getCashbackAmount() == null ? 0 : _payment.getCashbackAmount();
+                long tip = _payment.getTipAmount() == null ? 0 : _payment.getTipAmount();
+                POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), DEFAULT_EID, _payment.getAmount(), tip, cashback);
+                setPaymentStatus(payment, response);
+                store.addPreAuth(payment);
+                showMessage("PreAuth successfully processed.", Toast.LENGTH_SHORT);
+                showPreAuths(null);
+              }
+              else{
+                runOnUiThread(new Runnable() {
+                  @Override
+                  public void run() {
+                    AlertDialog externalIDMismatch;
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
+                    builder.setTitle("Error");
+                    builder.setMessage("External Payment Id's do not match");
+                    externalIDMismatch = builder.create();
+                    externalIDMismatch.show();
+                  }
+                });
+              }
             } else {
               showMessage("PreAuth: " + response.getResult(), Toast.LENGTH_LONG);
             }
@@ -1359,7 +1389,10 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void preauthCardClick(View view) {
-    PreAuthRequest request = new PreAuthRequest(5000L, getNextId());
+    String externalPaymentID = ExamplePOSActivity.getNextId();
+    Log.d(TAG, "ExternalPaymentID:" + externalPaymentID);
+    store.getCurrentOrder().setPendingPaymentId(externalPaymentID);
+    PreAuthRequest request = new PreAuthRequest(5000L, externalPaymentID);
     request.setCardEntryMethods(store.getCardEntryMethods());
     request.setDisablePrinting(store.getDisablePrinting());
     request.setSignatureEntryLocation(store.getSignatureEntryLocation());
