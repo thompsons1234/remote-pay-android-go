@@ -32,16 +32,12 @@ import java.io.Serializable;
  */
 public class USBCloverDeviceConfiguration implements CloverDeviceConfiguration, Serializable {
   public static final String TAG = USBCloverDeviceConfiguration.class.getSimpleName();
-  Context context;
-  String appId;
+  private final Context context;
+  private final String appId;
 
   public USBCloverDeviceConfiguration(Context ctx, String appId) {
     context = ctx;
     this.appId = appId;
-  }
-
-  public void setContext(Context context) {
-    this.context = context;
   }
 
   @Override
@@ -71,10 +67,10 @@ public class USBCloverDeviceConfiguration implements CloverDeviceConfiguration, 
       context.sendBroadcast(disableIntent);
     } catch (PackageManager.NameNotFoundException nnfe) {
       // com.clover.remote.protocol.usb isn't installed, so we don't have to disable the USB Pay Display components
-      Log.d(TAG, "USB Pay Display not, found");
+      Log.d(TAG, "USB Pay Display not found");
     } catch (Exception e) {
       // just to prevent some unforeseen exception from preventing the transport from initializing
-      Log.e(TAG, "Unexpected error trying to check for, and disable, USB Pay Display: ", e);
+      Log.e(TAG, "Unexpected error trying to check for and disable USB Pay Display: ", e);
     }
 
     return new USBCloverTransport(context);

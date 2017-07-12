@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.clover.remote.client;
+package com.clover.remote.client.device;
 
 import com.clover.common2.Signature2;
 import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
 import com.clover.remote.ExternalDeviceState;
 import com.clover.remote.ExternalDeviceStateData;
-import com.clover.remote.ExternalDeviceSubState;
 import com.clover.remote.InputOption;
 import com.clover.remote.KeyPress;
 import com.clover.remote.PendingPaymentEntry;
@@ -30,7 +29,6 @@ import com.clover.remote.ResultStatus;
 import com.clover.remote.TxStartResponseResult;
 import com.clover.remote.TxState;
 import com.clover.remote.UiState;
-import com.clover.remote.client.device.CloverDevice;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.ResultCode;
 import com.clover.remote.message.DiscoveryResponseMessage;

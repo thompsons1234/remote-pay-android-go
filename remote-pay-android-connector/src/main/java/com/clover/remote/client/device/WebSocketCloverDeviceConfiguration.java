@@ -16,7 +16,6 @@
 
 package com.clover.remote.client.device;
 
-import com.clover.remote.client.messages.PairingCodeMessage;
 import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.client.transport.PairingDeviceConfiguration;
 import com.clover.remote.client.transport.websocket.WebSocketCloverTransport;
@@ -32,26 +31,8 @@ public abstract class WebSocketCloverDeviceConfiguration implements PairingDevic
   private final String posName;
   private final String serialNumber;
   private final String authToken;
-  private URI uri = null;
-  /**
-   * ping heartbeat interval in milliseconds
-   */
-  private long heartbeatInterval = 1000L;
-
-  /**
-   * delay before attempting a reconnect in milliseconds, so after a disconnect, the client will
-   * try to establish a connection every <i>reconnectDelay</i> milliseconds
-   */
-  private long reconnectDelay = 3000L;
-
-  /**
-   * the number of missed pong response periods before a reconnect is executed.
-   * Effectively, it will timeout after pingRetryCountBeforeReconnect * heartbeatInterval
-   */
-  private int pingRetryCountBeforeReconnect = 4;
-
-  KeyStore trustStore;
-
+  private final URI uri;
+  private final KeyStore trustStore;
   private final String appId;
 
   public WebSocketCloverDeviceConfiguration(URI endpoint, String applicationId, KeyStore trustStore, String posName, String serialNumber, String authToken) {
@@ -63,39 +44,8 @@ public abstract class WebSocketCloverDeviceConfiguration implements PairingDevic
     this.authToken = authToken;
   }
 
-  public WebSocketCloverDeviceConfiguration(URI endpoint, long heartbeatInterval, long reconnectDelay, String applicationId, KeyStore trustStore, String posName, String serialNumber, String authToken) {
-    this(endpoint, applicationId, trustStore, posName, serialNumber, authToken);
-    this.heartbeatInterval = Math.max(100, heartbeatInterval);
-    this.reconnectDelay = Math.max(0, reconnectDelay);
-
-  }
-
   @Override public String getApplicationId() {
     return appId;
-  }
-
-  public Long getHeartbeatInterval() {
-    return heartbeatInterval;
-  }
-
-  public void setHeartbeatInterval(Long heartbeatInterval) {
-    this.heartbeatInterval = heartbeatInterval;
-  }
-
-  public Long getReconnectDelay() {
-    return reconnectDelay;
-  }
-
-  public void setReconnectDelay(Long reconnectDelay) {
-    this.reconnectDelay = reconnectDelay;
-  }
-
-  public int getPingRetryCountBeforeReconnect() {
-    return pingRetryCountBeforeReconnect;
-  }
-
-  public void setPingRetryCountBeforeReconnect(int pingRetryCountBeforeReconnect) {
-    this.pingRetryCountBeforeReconnect = pingRetryCountBeforeReconnect;
   }
 
   @Override
@@ -105,7 +55,6 @@ public abstract class WebSocketCloverDeviceConfiguration implements PairingDevic
 
   @Override
   public String getMessagePackageName() {
-    //return "com.clover.remote.protocol.lan";
     return "com.clover.remote_protocol_broadcast.app";
   }
 
@@ -116,9 +65,6 @@ public abstract class WebSocketCloverDeviceConfiguration implements PairingDevic
 
   @Override
   public CloverTransport getCloverTransport() {
-    WebSocketCloverTransport transport = new WebSocketCloverTransport(uri, heartbeatInterval, reconnectDelay, pingRetryCountBeforeReconnect, trustStore, posName, serialNumber, authToken);
-    transport.setPairingDeviceConfiguration(this);
-    return transport;
+    return new WebSocketCloverTransport(uri, this, trustStore, posName, serialNumber, authToken);
   }
-
 }
