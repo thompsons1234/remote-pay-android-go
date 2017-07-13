@@ -160,7 +160,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
   @Override
   public void onSaleClicked() {
-    String externalPaymentID = ExamplePOSActivity.getNextId();
+    String externalPaymentID = IdUtils.getNextId();
     Log.d(TAG, "ExternalPaymentID:" + externalPaymentID);
     store.getCurrentOrder().setPendingPaymentId(externalPaymentID);
     SaleRequest request = new SaleRequest(store.getCurrentOrder().getTotal(), externalPaymentID);
@@ -191,7 +191,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
   @Override
   public void onAuthClicked() {
-    String externalPaymentID = ExamplePOSActivity.getNextId();
+    String externalPaymentID = IdUtils.getNextId();
     Log.d(TAG, "ExternalPaymentID:" + externalPaymentID);
     store.getCurrentOrder().setPendingPaymentId(externalPaymentID);
     AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), externalPaymentID);
