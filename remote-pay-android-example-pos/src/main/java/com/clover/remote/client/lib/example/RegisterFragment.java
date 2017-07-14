@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -159,7 +160,10 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
   @Override
   public void onSaleClicked() {
-    SaleRequest request = new SaleRequest(store.getCurrentOrder().getTotal(), IdUtils.getNextId());
+    String externalPaymentID = IdUtils.getNextId();
+    Log.d(TAG, "ExternalPaymentID:" + externalPaymentID);
+    store.getCurrentOrder().setPendingPaymentId(externalPaymentID);
+    SaleRequest request = new SaleRequest(store.getCurrentOrder().getTotal(), externalPaymentID);
     request.setCardEntryMethods(store.getCardEntryMethods());
     request.setAllowOfflinePayment(store.getAllowOfflinePayment());
     request.setForceOfflinePayment(store.getForceOfflinePayment());
@@ -187,7 +191,10 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
   @Override
   public void onAuthClicked() {
-    AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), IdUtils.getNextId());
+    String externalPaymentID = IdUtils.getNextId();
+    Log.d(TAG, "ExternalPaymentID:" + externalPaymentID);
+    store.getCurrentOrder().setPendingPaymentId(externalPaymentID);
+    AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), externalPaymentID);
     request.setCardEntryMethods(store.getCardEntryMethods());
     request.setAllowOfflinePayment(store.getAllowOfflinePayment());
     request.setForceOfflinePayment(store.getForceOfflinePayment());
