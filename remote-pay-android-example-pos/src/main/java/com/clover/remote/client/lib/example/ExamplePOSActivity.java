@@ -585,17 +585,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                 cloverConnector.showWelcomeScreen();
               }
               else{
-                runOnUiThread(new Runnable() {
-                  @Override
-                  public void run() {
-                    AlertDialog externalIDMismatch;
-                    AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
-                    builder.setTitle("Error");
-                    builder.setMessage("External Payment Id's do not match");
-                    externalIDMismatch = builder.create();
-                    externalIDMismatch.show();
-                  }
-                });
+               externalMismatch();
               }
             }
           });
@@ -623,17 +613,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                 showPreAuths(null);
               }
               else{
-                runOnUiThread(new Runnable() {
-                  @Override
-                  public void run() {
-                    AlertDialog externalIDMismatch;
-                    AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
-                    builder.setTitle("Error");
-                    builder.setMessage("External Payment Id's do not match");
-                    externalIDMismatch = builder.create();
-                    externalIDMismatch.show();
-                  }
-                });
+               externalMismatch();
               }
             } else {
               showMessage("PreAuth: " + response.getResult(), Toast.LENGTH_LONG);
@@ -805,17 +785,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                 });
               }
               else{
-                runOnUiThread(new Runnable() {
-                  @Override
-                  public void run() {
-                    AlertDialog externalIDMismatch;
-                    AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
-                    builder.setTitle("Error");
-                    builder.setMessage("External Payment Id's do not match");
-                    externalIDMismatch = builder.create();
-                    externalIDMismatch.show();
-                  }
-                });
+              externalMismatch();
               }
             } else { // Handle null payment
               showMessage("Error: Sale response was missing the payment", Toast.LENGTH_LONG);
@@ -1491,5 +1461,19 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public void sendMessageToActivity(String activityId, String payload) {
     MessageToActivity messageRequest = new MessageToActivity(activityId, payload);
     cloverConnector.sendMessageToActivity(messageRequest);
+  }
+
+  public void externalMismatch(){
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        AlertDialog externalIDMismatch;
+        AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
+        builder.setTitle("Error");
+        builder.setMessage("External Payment Id's do not match");
+        externalIDMismatch = builder.create();
+        externalIDMismatch.show();
+      }
+    });
   }
 }
