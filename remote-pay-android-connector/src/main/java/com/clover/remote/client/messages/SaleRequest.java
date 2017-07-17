@@ -17,7 +17,6 @@
 package com.clover.remote.client.messages;
 
 import com.clover.common2.payments.PayIntent;
-import com.clover.sdk.v3.payments.TipMode;
 
 /**
  * Request object for requesting a sale transaction
