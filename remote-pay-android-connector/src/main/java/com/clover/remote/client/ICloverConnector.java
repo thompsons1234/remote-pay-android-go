@@ -41,214 +41,217 @@ import android.graphics.Bitmap;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Interface to define the available methods to send requests to a connected Clover device.
+ */
+@SuppressWarnings("unused")
 public interface ICloverConnector extends Serializable {
 
   /**
-   * Initialize the CloverConnector's connection. Must be called before calling any other method other than to add or remove listeners
+   * Initialize the CloverConnector's connection and start communication with the device.
+   * Must be called before calling any other method other than to add or remove listeners
    */
   void initializeConnection();
 
   /**
-   * add an ICloverConnectorListener to receive callbacks
+   * Adds a clover connection listener.
    *
-   * @param listener
+   * @param listener The connection listener.
    */
-  public void addCloverConnectorListener(ICloverConnectorListener listener);
+  void addCloverConnectorListener(ICloverConnectorListener listener);
 
   /**
-   * remove an ICloverConnectorListener from receiving callbacks
+   * Removes a clover connector listener.
    *
-   * @param listener
+   * @param listener The connection listener.
    */
-  public void removeCloverConnectorListener(ICloverConnectorListener listener);
+  void removeCloverConnectorListener(ICloverConnectorListener listener);
 
   /**
    * Sale method, aka "purchase"
    *
-   * @param request - A SaleRequest object containing basic information needed for the transaction
+   * @param request A SaleRequest object containing basic information needed for the transaction
    */
   void sale(SaleRequest request);
 
   /**
    * If signature is captured during a Sale, this method accepts the signature as entered
    *
-   * @param request -
-   **/
+   * @param request Accepted request
+   */
   void acceptSignature(VerifySignatureRequest request);
 
   /**
    * If signature is captured during a Sale, this method rejects the signature as entered
    *
-   * @param request -
-   **/
+   * @param request Rejected request
+   */
   void rejectSignature(VerifySignatureRequest request);
 
   /**
    * If payment confirmation is required during a Sale, this method accepts the payment
    *
-   * @param payment -
-   **/
+   * @param payment Payment to accept
+   */
   void acceptPayment(Payment payment);
 
   /**
    * If payment confirmation is required during a Sale, this method rejects the payment
    *
-   * @param payment   -
-   * @param challenge -
-   **/
+   * @param payment Payment to reject
+   * @param challenge The challenge which resulted in payment rejection
+   */
   void rejectPayment(Payment payment, Challenge challenge);
 
   /**
    * Auth method to obtain an Auth payment that can be used as the payment
    * to call tipAdjust
    *
-   * @param request -
-   **/
+   * @param request The request details
+   */
   void auth(AuthRequest request);
 
   /**
    * PreAuth method to obtain a Pre-Auth for a card
    *
-   * @param request -
-   **/
+   * @param request The request details
+   */
   void preAuth(PreAuthRequest request);
 
   /**
    * Capture a previous Auth. Note: Should only be called if request's PaymentID is from an AuthResponse
    *
-   * @param request -
-   **/
+   * @param request The request details
+   */
   void capturePreAuth(CapturePreAuthRequest request);
 
   /**
    * Adjust the tip for a previous Auth. Note: Should only be called if request's PaymentID is from an AuthResponse
    *
-   * @param request -
-   **/
+   * @param request The request details
+   */
   void tipAdjustAuth(TipAdjustAuthRequest request);
 
   /**
    * Void a transaction, given a previously used order ID and/or payment ID
    *
-   * @param request - A VoidRequest object containing basic information needed to void the transaction
-   **/
+   * @param request The request details
+   */
   void voidPayment(VoidPaymentRequest request);
 
   /**
    * Refund a specific payment
    *
-   * @param request -
-   **/
+   * @param request The request details
+   */
   void refundPayment(RefundPaymentRequest request);
 
   /**
    * Manual refund method, aka "naked credit"
    *
-   * @param request - A ManualRefundRequest object
-   **/
-  void manualRefund(ManualRefundRequest request); // NakedRefund is a Transaction, with just negative amount
+   * @param request The request details
+   */
+  void manualRefund(ManualRefundRequest request);
 
   /**
    * Vault card information. Requests the mini capture card information and request a payment token from the payment gateway.
    * The value returned in the response is a card, with all the information necessary to use for payment in a SaleRequest or AuthRequest
    *
-   * @param cardEntryMethods - The card entry methods allowed to capture the payment token. null will provide default values
-   **/
+   * @param cardEntryMethods The card entry methods allowed to capture the payment token. null will provide default values
+   */
   void vaultCard(Integer cardEntryMethods);
 
   /**
-   * used to cancel the current user action on the device.
+   * Cancels the current user action on the device.
    */
   void cancel();
 
   /**
    * Request a closeout of all orders.
    *
-   * @param request -
+   * @param request The request details
    */
   void closeout(CloseoutRequest request);
 
   /**
    * Print simple lines of text to the Clover Mini printer
    *
-   * @param messages -
-   **/
+   * @param messages A list of text to print
+   */
   void printText(List<String> messages);
 
   /**
    * Print an image on the Clover Mini printer
    *
-   * @param image -
+   * @param image An image to print
    *
    * NOTE:  This method is not implemented for the Java SDK.  Use {@link #printImageFromURL(String)} instead.
-   **/
+   */
   @Deprecated
   void printImage(Bitmap image);
 
   /**
    * Print an image on the Clover Mini printer
    *
-   * @param url
+   * @param url The url of an image to print
    */
   void printImageFromURL(String url);
 
   /**
    * Show a message on the Clover Mini screen
    *
-   * @param message -
-   **/
+   * @param message The message to display
+   */
   void showMessage(String message);
 
   /**
    * Return the device to the Welcome Screen
-   **/
+   */
   void showWelcomeScreen();
 
   /**
    * Show the thank you screen on the device
-   **/
+   */
   void showThankYouScreen();
 
   /**
-   * display the payment receipt screen for the orderId/paymentId combination.
+   * Display the payment receipt screen for the orderId/paymentId combination.
    *
-   * @param paymentId
-   * @param orderId
+   * @param paymentId The ID of the payment to print a receipt for
+   * @param orderId The ID of the order to print a receipt for
    */
   void displayPaymentReceiptOptions(String orderId, String paymentId);
 
   /**
    * Will trigger cash drawer to open that is connected to Clover Mini
-   **/
+   *
+   * @param reason Reason for opening the cash drawer
+   */
   void openCashDrawer(String reason);
 
   /**
    * Show the DisplayOrder on the device. Replaces the existing DisplayOrder on the device.
    *
-   * @param order -
-   **/
+   * @param order The order to display
+   */
   void showDisplayOrder(DisplayOrder order);
 
   /**
    * Remove the DisplayOrder from the device.
    *
-   * @param order -
-   **/
+   * @param order The order to remove
+   */
   void removeDisplayOrder(DisplayOrder order);
 
   /**
-   *  return the Merchant object for the Merchant configured for the Clover Mini
-   **/
-
-  /**
-   * will dispose of the underlying connection to the device
+   * Will dispose of the underlying connection to the device
    */
   void dispose();
 
   /**
    * Used to invoke user options on the mini such as "OK", "CANCEL", "DONE", etc.
    *
-   * @param io
+   * @param io The option to invoke
    */
   void invokeInputOption(InputOption io);
 
@@ -261,36 +264,43 @@ public interface ICloverConnector extends Serializable {
 
   /**
    * Used to request a list of pending payments that have been taken offline, but
-   * haven't processed yet. will trigger an onRetrievePendingPaymentsResponse callback
+   * haven't processed yet.  Will trigger an onRetrievePendingPaymentsResponse callback.
    */
   void retrievePendingPayments();
 
   /**
    * Used to request card information. Specifically track1 and track2 information
    *
-   * @param request - The card entry methods allowed to request track information. null will provide default values
+   * @param request The request details
    */
   void readCardData(ReadCardDataRequest request);
 
   /**
-   * @param request
+   * Send a message to a running custom activity on the Clover device
+   *
+   * @param request The request details
    */
   void sendMessageToActivity(MessageToActivity request);
 
   /**
-   * start an custom activity on the device
+   * Request to start a Custom Activity on the Clover device
+   *
+   * @param request The request details
    */
   void startCustomActivity(CustomActivityRequest request);
 
-
   /**
-   * retrieve the status of the device, and conditionally re-send the last response
+   * Send a message requesting the current status of the device.
+   *
+   * @param request The request details
    */
   void retrieveDeviceStatus(RetrieveDeviceStatusRequest request);
 
   /**
    * Sends a request to get a payment.
-   * Only valid for payments made in the past 24 hours on the device queried
+   * Only valid for payments made in the past 24 hours on the device queried.
+   *
+   * @param request The request details
    */
   void retrievePayment(RetrievePaymentRequest request);
 

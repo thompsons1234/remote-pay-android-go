@@ -1,7 +1,5 @@
 package com.clover.remote.client.messages;
 
-import java.util.HashMap;
-
 public class CustomActivityResponse extends BaseResponse {
   public final String payload;
   public final String action;

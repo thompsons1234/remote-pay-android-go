@@ -18,8 +18,6 @@
 package com.clover.remote.client.messages;
 
 import com.clover.remote.ExternalDeviceState;
-import com.clover.remote.client.messages.BaseResponse;
-import com.clover.remote.client.messages.ResultCode;
 
 public class ResetDeviceResponse extends BaseResponse {
 

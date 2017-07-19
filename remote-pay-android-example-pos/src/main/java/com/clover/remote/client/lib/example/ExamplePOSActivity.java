@@ -208,7 +208,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       SharedPreferences prefs = this.getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE);
 
       String authToken = sharedPreferences.getString("AUTH_TOKEN", null);
-      config = new WebSocketCloverDeviceConfiguration(uri, 10000, 2000, "Clover Example POS:1.2", trustStore, "Clover Example POS", "Aisle 3", authToken) {
+      config = new WebSocketCloverDeviceConfiguration(uri, "Clover Example POS:1.2", trustStore, "Clover Example POS", "Aisle 3", authToken) {
 
 
         @Override

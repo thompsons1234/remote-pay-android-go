@@ -18,8 +18,6 @@ package com.clover.remote.client.messages;
 
 import com.clover.common2.payments.PayIntent;
 import com.clover.sdk.v3.payments.DataEntryLocation;
-import com.clover.sdk.v3.payments.TipMode;
-import com.clover.sdk.v3.payments.TransactionSettings;
 
 /**
  * base class used by all transaction requests

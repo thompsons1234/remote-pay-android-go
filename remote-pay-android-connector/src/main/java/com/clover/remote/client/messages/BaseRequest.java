@@ -16,8 +16,6 @@
 
 package com.clover.remote.client.messages;
 
-import java.util.UUID;
-
 public class BaseRequest {
 
   private String requestId = null;
