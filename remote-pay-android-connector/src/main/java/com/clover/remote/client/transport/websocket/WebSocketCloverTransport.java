@@ -18,7 +18,7 @@ package com.clover.remote.client.transport.websocket;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import com.clover.remote.client.messages.PairingCodeMessage;
+import com.clover.remote.client.messages.remote.PairingCodeMessage;
 import com.clover.remote.client.messages.remote.PairingCodeRemoteMessage;
 import com.clover.remote.client.messages.remote.PairingRequest;
 import com.clover.remote.client.messages.remote.PairingRequestMessage;

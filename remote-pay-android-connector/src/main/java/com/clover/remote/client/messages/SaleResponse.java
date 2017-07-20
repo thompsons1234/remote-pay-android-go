@@ -17,12 +17,18 @@
 package com.clover.remote.client.messages;
 
 /**
- * Response to a Sale request
+ * Response object for a sale request
  */
+@SuppressWarnings(value="unused")
 public class SaleResponse extends PaymentResponse {
 
+  /**
+   * Constructor
+   *
+   * @param success If true then the requested operation succeeded
+   * @param result The result of the requested operation
+   */
   public SaleResponse(boolean success, ResultCode result) {
     super(success, result);
   }
-
 }

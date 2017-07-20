@@ -19,7 +19,7 @@ package com.clover.remote.client.device;
 import com.clover.common2.payments.PayIntent;
 import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
-import com.clover.remote.client.transport.CloverTransport;
+import com.clover.remote.client.transport.ICloverTransport;
 import com.clover.remote.order.DisplayOrder;
 import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.order.VoidReason;
@@ -34,12 +34,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public abstract class CloverDevice {
   protected final List<CloverDeviceObserver> deviceObservers = new CopyOnWriteArrayList<>();
 
-  private final CloverTransport transport;
+  private final ICloverTransport transport;
   protected final String packageName;
   private final String applicationId;
   private boolean supportsAcks;
 
-  public CloverDevice(String packageName, CloverTransport transport, String applicationId) {
+  public CloverDevice(String packageName, ICloverTransport transport, String applicationId) {
     this.transport = transport;
     this.packageName = packageName;
     this.applicationId = applicationId;

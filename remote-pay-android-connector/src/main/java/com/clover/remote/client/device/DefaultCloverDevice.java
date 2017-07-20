@@ -20,13 +20,14 @@ import com.clover.common2.payments.PayIntent;
 import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
+import com.clover.remote.client.CloverDeviceConfiguration;
 import com.clover.remote.client.messages.ResultCode;
+import com.clover.remote.client.transport.ICloverTransport;
+import com.clover.remote.client.transport.ICloverTransportObserver;
 import com.clover.remote.message.FinishCancelMessage;
 import com.clover.remote.message.ResetDeviceResponseMessage;
 import com.clover.remote.message.RetrieveDeviceStatusRequestMessage;
 import com.clover.remote.message.RetrieveDeviceStatusResponseMessage;
-import com.clover.remote.client.transport.CloverTransport;
-import com.clover.remote.client.transport.CloverTransportObserver;
 import com.clover.remote.message.AcknowledgementMessage;
 import com.clover.remote.message.ActivityMessageFromActivity;
 import com.clover.remote.message.ActivityMessageToActivity;
@@ -102,7 +103,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DefaultCloverDevice extends CloverDevice implements CloverTransportObserver {
+public class DefaultCloverDevice extends CloverDevice implements ICloverTransportObserver {
   private static final String TAG = DefaultCloverDevice.class.getName();
   private static final String REMOTE_SDK = "com.clover.cloverconnector.android:1.3.1";
 
@@ -118,25 +119,25 @@ public class DefaultCloverDevice extends CloverDevice implements CloverTransport
     this(configuration.getMessagePackageName(), configuration.getCloverTransport(), configuration.getApplicationId());
   }
 
-  public DefaultCloverDevice(String packageName, CloverTransport transport, String applicationId) {
+  public DefaultCloverDevice(String packageName, ICloverTransport transport, String applicationId) {
     super(packageName, transport, applicationId);
-    transport.subscribe(this);
+    transport.addObserver(this);
   }
 
   @Override
-  public void onDeviceConnected(CloverTransport transport) {
+  public void onDeviceConnected(ICloverTransport transport) {
     notifyObserversConnected();
   }
 
 
   @Override
-  public void onDeviceDisconnected(CloverTransport transport) {
+  public void onDeviceDisconnected(ICloverTransport transport) {
     notifyObserversDisconnected();
   }
 
 
   @Override
-  public void onDeviceReady(CloverTransport transport) {
+  public void onDeviceReady(ICloverTransport transport) {
     // now that the device is ready, let's send it a discovery request. the discovery response should trigger
     // the callback for the device observer that it is connected and able to communicate
     Log.d(getClass().getSimpleName(), "Sending Discovery Request");

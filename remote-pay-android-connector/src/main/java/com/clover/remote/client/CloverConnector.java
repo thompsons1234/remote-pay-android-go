@@ -31,7 +31,6 @@ import com.clover.remote.TxStartResponseResult;
 import com.clover.remote.TxState;
 import com.clover.remote.UiState;
 import com.clover.remote.client.device.CloverDevice;
-import com.clover.remote.client.device.CloverDeviceConfiguration;
 import com.clover.remote.client.device.CloverDeviceFactory;
 import com.clover.remote.client.device.CloverDeviceObserver;
 import com.clover.remote.client.messages.AuthRequest;
@@ -101,6 +100,11 @@ import java.io.StringWriter;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Provides the default implementation of the {@link ICloverConnector} interface, connecting to the device specified
+ * in the constructor.  This implementation supports the registration of one or more {@link ICloverConnectorListener}
+ * interfaces that are notified asynchronously of events and responses from the underlying connected Clover device.
+ */
 public class CloverConnector implements ICloverConnector {
 
   private static final int KIOSK_CARD_ENTRY_METHODS = 1 << 15;
@@ -133,17 +137,29 @@ public class CloverConnector implements ICloverConnector {
   /**
    * CloverConnector constructor
    *
-   * @param config - A CloverDeviceConfiguration object containing the configuration for the device
+   * @param config A CloverDeviceConfiguration object containing the configuration for the device
    */
   public CloverConnector(CloverDeviceConfiguration config) {
     this.configuration = config;
     deviceObserver = new InnerDeviceObserver(this);
   }
 
+  /**
+   * Registers the provided listener to receive callbacks and events from the underlying device connection.  Note that
+   * listeners MUST be registered prior to calling {@link #initializeConnection()} to guarantee notification of all
+   * connection related callbacks.
+   *
+   * @param connectorListener The listener to register
+   */
   public void addCloverConnectorListener(ICloverConnectorListener connectorListener) {
     broadcaster.add(connectorListener);
   }
 
+  /**
+   * Remove a previously added listener.  If the provided listener is not registered, this call has no effect.
+   *
+   * @param connectorListener The listener to remove
+   */
   public void removeCloverConnectorListener(ICloverConnectorListener connectorListener) {
     broadcaster.remove(connectorListener);
   }
@@ -442,7 +458,7 @@ public class CloverConnector implements ICloverConnector {
       deviceObserver.onCapturePreAuth(ResultCode.FAIL, "Request Validation Error", "In capturePreAuth: CapturePreAuth - The request amount must be greater than zero and the tip must be greater than or equal to zero. Original Request = " + request);
     } else {
       try {
-        device.doCaptureAuth(request.paymentID, request.amount, request.tipAmount);
+        device.doCaptureAuth(request.getPaymentID(), request.getAmount(), request.getTipAmount());
       } catch (Exception e) {
         CapturePreAuthResponse response = new CapturePreAuthResponse(false, ResultCode.UNSUPPORTED);
         response.setReason("Pre Auths unsupported");
@@ -621,7 +637,7 @@ public class CloverConnector implements ICloverConnector {
     } else if (request == null) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, "In sendMessageToActivity: Invalid argument. Null is not allowed."));
     } else {
-      device.doSendMessageToActivity(request.action, request.payload);
+      device.doSendMessageToActivity(request.getAction(), request.getPayload());
     }
   }
 
@@ -808,7 +824,7 @@ public class CloverConnector implements ICloverConnector {
     if (device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In startCustomActivity: The Clover device is not connected."));
     } else {
-      device.doStartActivity(request.action, request.getPayload(), request.isNonBlocking());
+      device.doStartActivity(request.getAction(), request.getPayload(), request.isNonBlocking());
     }
   }
 
@@ -1021,7 +1037,6 @@ public class CloverConnector implements ICloverConnector {
       taar.setTipAmount(0);
       taar.setReason(reason);
       taar.setMessage(message);
-
       cloverConnector.broadcaster.notifyOnTipAdjustAuthResponse(taar);
     }
 

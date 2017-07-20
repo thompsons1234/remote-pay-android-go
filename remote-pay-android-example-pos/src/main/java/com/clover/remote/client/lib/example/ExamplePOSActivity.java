@@ -23,9 +23,9 @@ import com.clover.remote.client.CloverConnector;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.ICloverConnectorListener;
 import com.clover.remote.client.MerchantInfo;
-import com.clover.remote.client.device.CloverDeviceConfiguration;
-import com.clover.remote.client.device.USBCloverDeviceConfiguration;
-import com.clover.remote.client.device.WebSocketCloverDeviceConfiguration;
+import com.clover.remote.client.CloverDeviceConfiguration;
+import com.clover.remote.client.USBCloverDeviceConfiguration;
+import com.clover.remote.client.WebSocketCloverDeviceConfiguration;
 import com.clover.remote.client.lib.example.messages.ConversationQuestionMessage;
 import com.clover.remote.client.lib.example.messages.ConversationResponseMessage;
 import com.clover.remote.client.lib.example.messages.CustomerInfo;
@@ -124,7 +124,6 @@ import com.google.gson.Gson;
 import java.io.InputStream;
 import java.net.URI;
 import java.security.KeyStore;
-import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -717,19 +716,19 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       @Override
       public void onMessageFromActivity(MessageFromActivity message) {
         //showMessage("Custom Activity Message Received for actionId: " + message.actionId + " with payload: " + message.payload, Toast.LENGTH_LONG);
-        PayloadMessage payloadMessage = new Gson().fromJson(message.payload, PayloadMessage.class);
+        PayloadMessage payloadMessage = new Gson().fromJson(message.getPayload(), PayloadMessage.class);
         switch (payloadMessage.messageType) {
           case REQUEST_RATINGS:
             handleRequestRatings();
             break;
           case RATINGS:
-            handleRatings(message.payload);
+            handleRatings(message.getPayload());
             break;
           case PHONE_NUMBER:
-            handleCustomerLookup(message.payload);
+            handleCustomerLookup(message.getPayload());
             break;
           case CONVERSATION_RESPONSE:
-            handleJokeResponse(message.payload);
+            handleJokeResponse(message.getPayload());
             break;
           default:
             Toast.makeText(getApplicationContext(), R.string.unknown_payload + payloadMessage.messageType.name(), Toast.LENGTH_LONG).show();
@@ -943,12 +942,12 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       public void onCustomActivityResponse(CustomActivityResponse response) {
         boolean success = response.isSuccess();
         if (success) {
-          showMessage("Success! Got: " + response.payload + " from CustomActivity: " + response.action, 5000);
+          showMessage("Success! Got: " + response.getPayload() + " from CustomActivity: " + response.getAction(), 5000);
         } else {
           if (response.getResult().equals(ResultCode.CANCEL)) {
-            showMessage("Custom activity: " + response.action + " was canceled.  Reason: " + response.getReason(), 5000);
+            showMessage("Custom activity: " + response.getAction() + " was canceled.  Reason: " + response.getReason(), 5000);
           } else {
-            showMessage("Failure! Custom activity: " + response.action + " failed.  Reason: " + response.getReason(), 5000);
+            showMessage("Failure! Custom activity: " + response.getAction() + " failed.  Reason: " + response.getReason(), 5000);
           }
         }
       }

@@ -17,22 +17,32 @@
 
 package com.clover.remote.client.messages;
 
-public class RetrievePaymentRequest extends BaseRequest {
+/**
+ * Request object for requesting information on a specific payment
+ */
+@SuppressWarnings(value="unused")
+public class RetrievePaymentRequest {
   private String externalPaymentId;
 
   public RetrievePaymentRequest(String externalPaymentId) {
     this.externalPaymentId = externalPaymentId;
   }
 
+  /**
+   * Get the field value
+   *
+   * @return The externalPaymentId used when a payment was created
+   */
   public String getExternalPaymentId() {
     return externalPaymentId;
   }
 
+  /**
+   * Set the field value
+   *
+   * @param externalPaymentId The externalPaymentId used when a payment was created
+   */
   public void setExternalPaymentId(String externalPaymentId) {
-    this.externalPaymentId = externalPaymentId;
-  }
-
-  public void setExternalId(String externalPaymentId) {
     this.externalPaymentId = externalPaymentId;
   }
 }

@@ -20,23 +20,43 @@ package com.clover.remote.client.messages;
 import com.clover.remote.ExternalDeviceState;
 import com.clover.remote.ExternalDeviceStateData;
 
+/**
+ * Response object for a retrieve device status request
+ */
+@SuppressWarnings(value="unused")
 public class RetrieveDeviceStatusResponse extends BaseResponse {
+  private final ExternalDeviceState state;
+  private final ExternalDeviceStateData data;
 
-  private ExternalDeviceState state;
+  /**
+   * Constructor
+   *
+   * @param result If true then the requested operation succeeded
+   * @param code The result of the requested operation
+   * @param state The state of the device
+   * @param data Additional optional relevant information for the state
+   */
+  public RetrieveDeviceStatusResponse(boolean result, ResultCode code, ExternalDeviceState state, ExternalDeviceStateData data) {
+    super(result, code);
+    this.state = state;
+    this.data = data;
+  }
 
-  private ExternalDeviceStateData data;
-
+  /**
+   * Get the field value
+   *
+   * @return the state of the device
+   */
   public ExternalDeviceState getState() {
     return state;
   }
 
+  /**
+   * Get the field value
+   *
+   * @return optionally contains relevant information for the state
+   */
   public ExternalDeviceStateData getData() {
     return data;
-  }
-
-  public RetrieveDeviceStatusResponse(boolean result, ResultCode code, ExternalDeviceState state, ExternalDeviceStateData data) {
-    super(code == ResultCode.SUCCESS, code);
-    this.state = state;
-    this.data = data;
   }
 }
