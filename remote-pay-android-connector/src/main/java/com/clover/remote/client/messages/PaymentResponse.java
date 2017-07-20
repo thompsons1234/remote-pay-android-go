@@ -22,8 +22,7 @@ import com.clover.sdk.v3.payments.Payment;
 import com.clover.sdk.v3.payments.Result;
 
 /**
- * Base response use for callbacks that contain
- * payments. Sale, Auth & PreAuth
+ * Base response use for callbacks that contain payments - Sale, Auth, and PreAuth
  */
 @SuppressWarnings(value="unused")
 public class PaymentResponse extends BaseResponse {
