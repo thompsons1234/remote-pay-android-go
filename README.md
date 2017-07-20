@@ -1,6 +1,6 @@
 # Clover SDK for Android PoS Integration
 
-Current version: 1.2
+Current version: 1.3.1
 
 ## Overview
 
@@ -16,14 +16,21 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
 For more developer documentation and information about the Semi-Integration program, please visit our [semi-integration developer documents](https://docs.clover.com/build/integration-overview-requirements/). 
 
 ## Release Notes
-# Version 1.3.0-b
+# Version 1.3.1
 * Added support for Custom Activities
+* Device status queries to determine the state of the device and payments processed by the device
   * ICloverConnector
     * Added
-      * startCustomActivity
+      * startCustomActivity - start a custom activity on the Clover device and receive a callback when it is done (onCustumActivityResponse)
+      * sendMessageToActivity - send and receive messages to a custom activity running on the Clover device (onMessageFromActivity)
+      * retrievePayment - query and receive the status of a payment on the device by its external id (onRetrievePaymentResponse)
+      * retrieveDeviceStatus - query and receive the status of the device (onRetrieveDeviceStatusResponse)
   * ICloverConnectorListener
     * Added
       * onCustomActivityResponse
+      * onMessageFromActivity
+      * onRetrievePaymentResponse
+      * onRetrieveDeviceStatusResponse
       
   * CustomActivity
     * apk must be approved and then installed via the Clover App Market
@@ -39,6 +46,8 @@ For more developer documentation and information about the Semi-Integration prog
                * For example: Don't want a Sale request to interrupt Collect Customer Information Custom Activity
             * A non-blocking CustomActivity will finish when a new request is made
                * For example: Want a Sale request to interrupt showing Ads Custom Activity
+
+  * ResetDevice now calls back to onResetDeviceResponse with the current status
 
 # Version 1.2
 
