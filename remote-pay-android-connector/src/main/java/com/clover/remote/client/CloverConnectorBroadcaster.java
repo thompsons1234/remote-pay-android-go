@@ -49,9 +49,9 @@ import android.util.Log;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConnectorListener> {
+class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConnectorListener> {
 
-  public void notifyOnTipAdded(long tip) {
+  void notifyOnTipAdded(long tip) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onTipAdded(new TipAddedMessage(tip));
@@ -61,7 +61,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnRefundPaymentResponse(RefundPaymentResponse refundPaymentResponse) {
+  void notifyOnRefundPaymentResponse(RefundPaymentResponse refundPaymentResponse) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onRefundPaymentResponse(refundPaymentResponse);
@@ -71,7 +71,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyCloseout(CloseoutResponse closeoutResponse) {
+  void notifyCloseout(CloseoutResponse closeoutResponse) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onCloseoutResponse(closeoutResponse);
@@ -81,7 +81,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnDeviceActivityStart(CloverDeviceEvent deviceEvent) {
+  void notifyOnDeviceActivityStart(CloverDeviceEvent deviceEvent) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onDeviceActivityStart(deviceEvent);
@@ -91,7 +91,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnDeviceActivityEnd(CloverDeviceEvent deviceEvent) {
+  void notifyOnDeviceActivityEnd(CloverDeviceEvent deviceEvent) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onDeviceActivityEnd(deviceEvent);
@@ -101,7 +101,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnSaleResponse(SaleResponse response) {
+  void notifyOnSaleResponse(SaleResponse response) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onSaleResponse(response);
@@ -111,7 +111,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnAuthResponse(AuthResponse response) {
+  void notifyOnAuthResponse(AuthResponse response) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onAuthResponse(response);
@@ -121,7 +121,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnManualRefundResponse(ManualRefundResponse response) {
+  void notifyOnManualRefundResponse(ManualRefundResponse response) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onManualRefundResponse(response);
@@ -131,7 +131,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnVerifySignatureRequest(VerifySignatureRequest request) {
+  void notifyOnVerifySignatureRequest(VerifySignatureRequest request) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onVerifySignatureRequest(request);
@@ -141,7 +141,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnVoidPaymentResponse(VoidPaymentResponse response) {
+  void notifyOnVoidPaymentResponse(VoidPaymentResponse response) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onVoidPaymentResponse(response);
@@ -151,7 +151,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnConnect() {
+  void notifyOnConnect() {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onDeviceConnected();
@@ -161,7 +161,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnDisconnect() {
+  void notifyOnDisconnect() {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onDeviceDisconnected();
@@ -171,7 +171,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnReady(MerchantInfo merchantInfo) {
+  void notifyOnReady(MerchantInfo merchantInfo) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onDeviceReady(merchantInfo);
@@ -181,7 +181,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnTipAdjustAuthResponse(TipAdjustAuthResponse response) {
+  void notifyOnTipAdjustAuthResponse(TipAdjustAuthResponse response) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onTipAdjustAuthResponse(response);
@@ -191,7 +191,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnVaultCardRespose(VaultCardResponse ccr) {
+  void notifyOnVaultCardRespose(VaultCardResponse ccr) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onVaultCardResponse(ccr);
@@ -201,7 +201,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnPreAuthResponse(PreAuthResponse response) {
+  void notifyOnPreAuthResponse(PreAuthResponse response) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onPreAuthResponse(response);
@@ -211,7 +211,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnCapturePreAuth(CapturePreAuthResponse response) {
+  void notifyOnCapturePreAuth(CapturePreAuthResponse response) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onCapturePreAuthResponse(response);
@@ -221,7 +221,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnDeviceError(CloverDeviceErrorEvent errorEvent) {
+  void notifyOnDeviceError(CloverDeviceErrorEvent errorEvent) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onDeviceError(errorEvent);
@@ -231,7 +231,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnPrintRefundPaymentReceipt(PrintRefundPaymentReceiptMessage printRefundPaymentReceiptMessage) {
+  void notifyOnPrintRefundPaymentReceipt(PrintRefundPaymentReceiptMessage printRefundPaymentReceiptMessage) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onPrintRefundPaymentReceipt(printRefundPaymentReceiptMessage);
@@ -241,7 +241,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnPrintPaymentMerchantCopyReceipt(PrintPaymentMerchantCopyReceiptMessage printPaymentMerchantCopyReceiptMessage) {
+  void notifyOnPrintPaymentMerchantCopyReceipt(PrintPaymentMerchantCopyReceiptMessage printPaymentMerchantCopyReceiptMessage) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onPrintPaymentMerchantCopyReceipt(printPaymentMerchantCopyReceiptMessage);
@@ -251,7 +251,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnPrintPaymentDeclineReceipt(PrintPaymentDeclineReceiptMessage printPaymentDeclineReceiptMessage) {
+  void notifyOnPrintPaymentDeclineReceipt(PrintPaymentDeclineReceiptMessage printPaymentDeclineReceiptMessage) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onPrintPaymentDeclineReceipt(printPaymentDeclineReceiptMessage);
@@ -261,7 +261,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnPrintPaymentReceipt(PrintPaymentReceiptMessage printPaymentReceiptMessage) {
+  void notifyOnPrintPaymentReceipt(PrintPaymentReceiptMessage printPaymentReceiptMessage) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onPrintPaymentReceipt(printPaymentReceiptMessage);
@@ -271,7 +271,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnPrintCreditReceipt(PrintManualRefundReceiptMessage printManualRefundReceiptMessage) {
+  void notifyOnPrintCreditReceipt(PrintManualRefundReceiptMessage printManualRefundReceiptMessage) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onPrintManualRefundReceipt(printManualRefundReceiptMessage);
@@ -281,7 +281,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnPrintCreditDeclineReceipt(PrintManualRefundDeclineReceiptMessage printManualRefundDeclineReceiptMessage) {
+  void notifyOnPrintCreditDeclineReceipt(PrintManualRefundDeclineReceiptMessage printManualRefundDeclineReceiptMessage) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onPrintManualRefundDeclineReceipt(printManualRefundDeclineReceiptMessage);
@@ -291,7 +291,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnConfirmPaymentRequest(ConfirmPaymentRequest confirmPaymentRequest) {
+  void notifyOnConfirmPaymentRequest(ConfirmPaymentRequest confirmPaymentRequest) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onConfirmPaymentRequest(confirmPaymentRequest);
@@ -301,7 +301,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnRetrievePendingPaymentResponse(RetrievePendingPaymentsResponse rppr) {
+  void notifyOnRetrievePendingPaymentResponse(RetrievePendingPaymentsResponse rppr) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onRetrievePendingPaymentsResponse(rppr);
@@ -311,7 +311,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnReadCardDataResponse(ReadCardDataResponse rcdr) {
+  void notifyOnReadCardDataResponse(ReadCardDataResponse rcdr) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onReadCardDataResponse(rcdr);
@@ -321,7 +321,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnActivityMessage(MessageFromActivity msg) {
+  void notifyOnActivityMessage(MessageFromActivity msg) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onMessageFromActivity(msg);
@@ -331,7 +331,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnActivityResponse(CustomActivityResponse car) {
+  void notifyOnActivityResponse(CustomActivityResponse car) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onCustomActivityResponse(car);
@@ -341,7 +341,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnRetrieveDeviceStatusResponse(RetrieveDeviceStatusResponse rdsr) {
+  void notifyOnRetrieveDeviceStatusResponse(RetrieveDeviceStatusResponse rdsr) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onRetrieveDeviceStatusResponse(rdsr);
@@ -351,7 +351,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnResetDeviceResponse(ResetDeviceResponse rdr) {
+  void notifyOnResetDeviceResponse(ResetDeviceResponse rdr) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onResetDeviceResponse(rdr);
@@ -361,7 +361,7 @@ public class CloverConnectorBroadcaster extends CopyOnWriteArrayList<ICloverConn
     }
   }
 
-  public void notifyOnRetrievePaymentResponse(RetrievePaymentResponse gpr) {
+  void notifyOnRetrievePaymentResponse(RetrievePaymentResponse gpr) {
     for (ICloverConnectorListener listener : this) {
       try {
         listener.onRetrievePaymentResponse(gpr);

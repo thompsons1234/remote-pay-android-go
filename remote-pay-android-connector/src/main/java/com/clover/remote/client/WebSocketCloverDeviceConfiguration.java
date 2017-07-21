@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.clover.remote.client.device;
+package com.clover.remote.client;
 
+import com.clover.remote.client.device.DefaultCloverDevice;
 import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.client.transport.PairingDeviceConfiguration;
 import com.clover.remote.client.transport.websocket.WebSocketCloverTransport;
@@ -35,6 +36,16 @@ public abstract class WebSocketCloverDeviceConfiguration implements PairingDevic
   private final KeyStore trustStore;
   private final String appId;
 
+  /**
+   * Constructor
+   *
+   * @param endpoint network endpoint of the device to connect to
+   * @param applicationId remote application ID
+   * @param trustStore certificate keystore used to support the secure websockets protocol (wss)
+   * @param posName point of sale name
+   * @param serialNumber serial number of the POS terminal/device attaching to the clover device
+   * @param authToken cached authentication token provided from a previous {@link PairingDeviceConfiguration#onPairingSuccess(String)} call
+   */
   public WebSocketCloverDeviceConfiguration(URI endpoint, String applicationId, KeyStore trustStore, String posName, String serialNumber, String authToken) {
     this.uri = endpoint;
     this.appId = applicationId;
@@ -44,7 +55,8 @@ public abstract class WebSocketCloverDeviceConfiguration implements PairingDevic
     this.authToken = authToken;
   }
 
-  @Override public String getApplicationId() {
+  @Override
+  public String getApplicationId() {
     return appId;
   }
 

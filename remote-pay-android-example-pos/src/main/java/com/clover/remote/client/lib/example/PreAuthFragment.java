@@ -143,9 +143,9 @@ public class PreAuthFragment extends Fragment {
                   switch (index) {
                     case 0: {
                       CapturePreAuthRequest car = new CapturePreAuthRequest();
-                      car.paymentID = posPayment.getPaymentID();
-                      car.amount = store.getCurrentOrder().getTotal();
-                      car.tipAmount = store.getCurrentOrder().getTips();
+                      car.setPaymentID(posPayment.getPaymentID());
+                      car.setAmount(store.getCurrentOrder().getTotal());
+                      car.setTipAmount(store.getCurrentOrder().getTips());
                       cloverConnector.capturePreAuth(car);
                       dialog.dismiss();
                       break;

@@ -20,11 +20,24 @@ package com.clover.remote.client.messages;
 import com.clover.remote.QueryStatus;
 import com.clover.sdk.v3.payments.Payment;
 
+/**
+ * Response object for a retrieve payment request
+ */
+@SuppressWarnings(value="unused")
 public class RetrievePaymentResponse extends BaseResponse {
-  private String externalPaymentId;
-  private Payment payment;
-  private QueryStatus queryStatus;
+  private final String externalPaymentId;
+  private final Payment payment;
+  private final QueryStatus queryStatus;
 
+  /**
+   * Constructor
+   *
+   * @param code The result of the requested operation
+   * @param message Detailed information about result
+   * @param externalPaymentId the request external payment id
+   * @param queryStatus the status of the payment
+   * @param payment the payment object, if found
+   */
   public RetrievePaymentResponse(ResultCode code, String message, String externalPaymentId, QueryStatus queryStatus, Payment payment) {
     super(code == ResultCode.SUCCESS, code);
     this.setMessage(message);
@@ -33,28 +46,30 @@ public class RetrievePaymentResponse extends BaseResponse {
     this.queryStatus = queryStatus;
   }
 
+  /**
+   * Get the field value
+   *
+   * @return the request external payment id
+   */
   public String getExternalPaymentId(){
     return externalPaymentId;
   }
 
-  public void setExternalId(String externalPaymentId) {
-    this.externalPaymentId = externalPaymentId;
-  }
-
+  /**
+   * Get the field value
+   *
+   * @return the payment object, if found
+   */
   public Payment getPayment() {
     return payment;
   }
 
-  public void setPayment(Payment payment) {
-    this.payment = payment;
-  }
-
+  /**
+   * Get the field value
+   *
+   * @return the status of the payment
+   */
   public QueryStatus getQueryStatus() {
     return queryStatus;
   }
-
-  public void setQueryStatus(QueryStatus queryStatus) {
-    this.queryStatus = queryStatus;
-  }
-
 }

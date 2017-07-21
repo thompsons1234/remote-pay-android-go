@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package com.clover.remote.client.device;
+package com.clover.remote.client;
 
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.util.Log;
+
+import com.clover.remote.client.device.DefaultCloverDevice;
 import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.client.transport.usb.USBCloverTransport;
 
@@ -31,10 +33,17 @@ import java.io.Serializable;
  * Default configuration to communicate with the Mini via USB connection
  */
 public class USBCloverDeviceConfiguration implements CloverDeviceConfiguration, Serializable {
-  public static final String TAG = USBCloverDeviceConfiguration.class.getSimpleName();
+  private static final String TAG = USBCloverDeviceConfiguration.class.getSimpleName();
+
   private final Context context;
   private final String appId;
 
+  /**
+   * Constructor
+   *
+   * @param ctx the application context
+   * @param appId the remote application ID
+   */
   public USBCloverDeviceConfiguration(Context ctx, String appId) {
     context = ctx;
     this.appId = appId;
@@ -76,7 +85,8 @@ public class USBCloverDeviceConfiguration implements CloverDeviceConfiguration, 
     return new USBCloverTransport(context);
   }
 
-  @Override public String getApplicationId() {
+  @Override
+  public String getApplicationId() {
     return this.appId;
   }
 }

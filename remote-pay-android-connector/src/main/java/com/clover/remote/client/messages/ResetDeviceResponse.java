@@ -19,16 +19,31 @@ package com.clover.remote.client.messages;
 
 import com.clover.remote.ExternalDeviceState;
 
+/**
+ * Response object for a reset device request
+ */
+@SuppressWarnings(value="unused")
 public class ResetDeviceResponse extends BaseResponse {
+  private final ExternalDeviceState state;
 
-  private ExternalDeviceState state;
-
-  public ExternalDeviceState getState() {
-    return state;
+  /**
+   * Constructor
+   *
+   * @param result If true then the requested operation succeeded
+   * @param code The result of the requested operation
+   * @param state The state of the device
+   */
+  public ResetDeviceResponse(boolean result, ResultCode code, ExternalDeviceState state) {
+    super(result, code);
+    this.state = state;
   }
 
-  public ResetDeviceResponse(boolean result, ResultCode code, ExternalDeviceState state) {
-    super(code == ResultCode.SUCCESS, code);
-    this.state = state;
+  /**
+   * Get the field value
+   *
+   * @return state of the device
+   */
+  public ExternalDeviceState getState() {
+    return state;
   }
 }
