@@ -21,7 +21,7 @@ package com.clover.remote.client.messages;
  * can be used for future transaction requests
  */
 @SuppressWarnings(value="unused")
-public class VaultCardRequest {
+public class VaultCardRequest extends BaseRequest {
   private final Integer cardEntryMethods;
 
   /**

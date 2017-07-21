@@ -24,7 +24,7 @@ import com.clover.sdk.v3.payments.VaultedCard;
  * Base class used by all transaction request objects like {@link SaleRequest}, {@link AuthRequest}, etc.
  */
 @SuppressWarnings(value="unused")
-public abstract class TransactionRequest {
+public abstract class TransactionRequest extends BaseRequest {
 
   private Boolean disablePrinting = null;
   private Boolean cardNotPresent = null;

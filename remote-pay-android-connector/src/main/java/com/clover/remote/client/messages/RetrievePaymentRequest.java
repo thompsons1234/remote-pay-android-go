@@ -21,7 +21,7 @@ package com.clover.remote.client.messages;
  * Request object for requesting information on a specific payment
  */
 @SuppressWarnings(value="unused")
-public class RetrievePaymentRequest {
+public class RetrievePaymentRequest extends BaseRequest {
   private String externalPaymentId;
 
   public RetrievePaymentRequest(String externalPaymentId) {

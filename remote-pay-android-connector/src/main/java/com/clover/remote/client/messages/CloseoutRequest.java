@@ -16,8 +16,11 @@
 
 package com.clover.remote.client.messages;
 
+/**
+ * Request object for closeout request
+ */
 @SuppressWarnings(value="unused")
-public class CloseoutRequest {
+public class CloseoutRequest extends BaseRequest {
   private boolean allowOpenTabs;
   private String batchId;
 

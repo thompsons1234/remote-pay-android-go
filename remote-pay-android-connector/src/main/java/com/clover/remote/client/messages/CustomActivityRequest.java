@@ -1,7 +1,7 @@
 package com.clover.remote.client.messages;
 
 @SuppressWarnings(value="unused")
-public class CustomActivityRequest {
+public class CustomActivityRequest extends BaseRequest {
   private final String action;
   private String payload;
   private boolean nonBlocking;

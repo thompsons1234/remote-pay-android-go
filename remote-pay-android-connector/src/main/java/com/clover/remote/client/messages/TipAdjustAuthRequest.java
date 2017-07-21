@@ -20,7 +20,7 @@ package com.clover.remote.client.messages;
  * Request object for requesting to adjust the tip amount of a payment acquired from a previous auth
  */
 @SuppressWarnings(value="unused")
-public class TipAdjustAuthRequest {
+public class TipAdjustAuthRequest extends BaseRequest {
   private String paymentId;
   private String orderId;
   private long tipAmount;

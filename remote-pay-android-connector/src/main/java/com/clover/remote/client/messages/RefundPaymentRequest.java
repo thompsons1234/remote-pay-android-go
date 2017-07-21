@@ -20,7 +20,7 @@ package com.clover.remote.client.messages;
  * Request object to refund a payment, either partially or fully
  */
 @SuppressWarnings(value="unused")
-public class RefundPaymentRequest {
+public class RefundPaymentRequest extends BaseRequest {
   private String orderId;
   private String paymentId;
   private long amount; // optional

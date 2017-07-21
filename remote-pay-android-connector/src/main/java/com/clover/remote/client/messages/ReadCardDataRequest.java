@@ -21,7 +21,7 @@ package com.clover.remote.client.messages;
  * Request object for requesting to read card data
  */
 @SuppressWarnings(value="unused")
-public class ReadCardDataRequest {
+public class ReadCardDataRequest extends BaseRequest {
 
   private Integer cardEntryMethods;
   private boolean isForceSwipePinEntry;

@@ -6,7 +6,7 @@ package com.clover.remote.client.messages;
  * send the last request it is waiting for a response to such as a signature or payment confirmation request
  */
 @SuppressWarnings(value="unused")
-public class RetrieveDeviceStatusRequest {
+public class RetrieveDeviceStatusRequest extends BaseRequest {
 
   private boolean sendLastMessage;
 

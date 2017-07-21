@@ -21,7 +21,7 @@ package com.clover.remote.client.messages;
  * obtained from a preAuth(PreAuthRequest request) call
  */
 @SuppressWarnings("unused")
-public class CapturePreAuthRequest {
+public class CapturePreAuthRequest extends BaseRequest {
   private String paymentID;
   private long amount;
   private long tipAmount;

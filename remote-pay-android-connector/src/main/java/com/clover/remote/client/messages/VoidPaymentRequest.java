@@ -20,7 +20,7 @@ package com.clover.remote.client.messages;
  * Request object for requesting to void a payment
  */
 @SuppressWarnings(value="unused")
-public class VoidPaymentRequest {
+public class VoidPaymentRequest extends BaseRequest {
   private String paymentId;
   private String voidReason;
 
