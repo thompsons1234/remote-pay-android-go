@@ -44,11 +44,6 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
   private static final String METHOD = "method";
   private static final String PAYLOAD = "payload";
 
-  private static final long RECONNECT_DELAY = 2000;
-  private static final long PING_FREQUENCY = 3000;
-  private static final long PONG_TIMEOUT = 6000;
-  private static final long REPORT_CONNECTION_PROBLEM_AFTER = 6000;
-
   private long reconnectDelay; // delay before attempting reconnect
   private final Runnable reconnectThread = new Runnable() {
     @Override
@@ -97,10 +92,6 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
    */
   private final ScheduledThreadPoolExecutor reconnectPool = new ScheduledThreadPoolExecutor(1);
   private TimerTask disconnectTimerTask;
-
-  public WebSocketCloverTransport(URI endpoint, PairingDeviceConfiguration pairingConfig, KeyStore trustStore, String posName, String serialNumber, String authToken) {
-    this(endpoint, pairingConfig, trustStore, posName, serialNumber, authToken, PONG_TIMEOUT, PING_FREQUENCY, RECONNECT_DELAY, REPORT_CONNECTION_PROBLEM_AFTER);
-  }
 
   public WebSocketCloverTransport(URI endpoint, PairingDeviceConfiguration pairingConfig, KeyStore trustStore, String posName, String serialNumber, String authToken,
                                   long pongTimeout, long pingFrequency, long reconnectDelay, long reportConnectionProblemAfter) {
