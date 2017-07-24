@@ -336,6 +336,7 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
       @Override
       protected Void doInBackground(Void[] params) {
         Log.w(getClass().getSimpleName(), "Notifying of disconnect");
+        // This is equivalent to !ready
         notifyDeviceConnected();
         return null;
       }
