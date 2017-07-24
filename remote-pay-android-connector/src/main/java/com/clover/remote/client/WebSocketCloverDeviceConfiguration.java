@@ -70,6 +70,11 @@ public abstract class WebSocketCloverDeviceConfiguration implements PairingDevic
    * @param posName point of sale name
    * @param serialNumber serial number of the POS terminal/device attaching to the clover device
    * @param authToken cached authentication token provided from a previous {@link PairingDeviceConfiguration#onPairingSuccess(String)} call
+   * @param pongTimeout amount of time, in milliseconds, before closing the connection, but still wait
+   * @param pingFrequency amount of time, in milliseconds, between pings
+   * @param reconnectDelay cached authentication token provided from a previous
+   * @param reportConnectionProblemAfter amount of time, in milliseconds, in which a disconnected client is reported if a pong hasn't come back,
+   *                                     before it is actually disconnected
    */
   public WebSocketCloverDeviceConfiguration(URI endpoint, String applicationId, KeyStore trustStore, String posName, String serialNumber, String authToken,
                                             long pongTimeout, long pingFrequency, long reconnectDelay, long reportConnectionProblemAfter) {
