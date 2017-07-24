@@ -58,6 +58,7 @@
         android:text="@string/connect"
         android:background="@drawable/button_border_padding"
         android:onClick="connect"
+        android:longClickable="true"
         android:id="@+id/connectButton"
         android:layout_below="@+id/radioGroup"
         android:layout_centerHorizontal="true"/>
