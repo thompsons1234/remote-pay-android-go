@@ -194,11 +194,13 @@ public class CurrentOrderFragment extends Fragment implements OrderObserver {
   }
 
   public void setOrder(POSOrder order) {
-    this.order.removeObserver(this);
-    this.order = order;
-    this.order.addOrderObserver(this);
-    updateCurrentOrder();
-    updateTotals();
+    if (order != null) {
+      this.order.removeObserver(this);
+      this.order = order;
+      this.order.addOrderObserver(this);
+      updateCurrentOrder();
+      updateTotals();
+    }
   }
 
   @Override public void lineItemAdded(POSOrder posOrder, POSLineItem lineItem) {

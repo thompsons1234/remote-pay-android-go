@@ -16,9 +16,10 @@
 
 package com.clover.example.model;
 
+import java.io.Serializable;
 import java.util.Collection;
 
-public interface ObservableListListener<T> {
+public interface ObservableListListener<T> extends Serializable {
   public void itemAdded(T item, int index);
 
   public void itemRemoved(T item, int index);

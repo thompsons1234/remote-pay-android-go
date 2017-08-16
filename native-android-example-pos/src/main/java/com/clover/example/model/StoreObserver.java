@@ -18,9 +18,10 @@ package com.clover.example.model;
 
 import com.clover.sdk.v3.base.PendingPaymentEntry;
 
+import java.io.Serializable;
 import java.util.List;
 
-public interface StoreObserver {
+public interface StoreObserver extends Serializable{
   public abstract void newOrderCreated(POSOrder order, boolean userInitiated);
   public abstract void cardAdded(POSCard card);
   public abstract void refundAdded(POSNakedRefund refund);

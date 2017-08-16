@@ -16,7 +16,9 @@
 
 package com.clover.example.model;
 
-public interface OrderObserver {
+import java.io.Serializable;
+
+public interface OrderObserver extends Serializable{
   public void lineItemAdded(POSOrder posOrder, POSLineItem lineItem);
 
   public void lineItemRemoved(POSOrder posOrder, POSLineItem lineItem);

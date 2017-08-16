@@ -33,7 +33,7 @@ public class ExamplePOSSettingsActivity extends PreferenceActivity implements Sh
 
     initSummary(getPreferenceScreen());
 
-    CustomEditTextPreference prefDialog = (CustomEditTextPreference) findPreference(ExamplePOSActivity.EXAMPLE_POS_SERVER_KEY);
+    CustomEditTextPreference prefDialog = (CustomEditTextPreference) findPreference(NativePOSActivity.EXAMPLE_POS_SERVER_KEY);
     prefDialog.show(null);
   }
 

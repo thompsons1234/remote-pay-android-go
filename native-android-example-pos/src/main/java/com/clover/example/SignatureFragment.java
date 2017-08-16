@@ -81,7 +81,7 @@ public class SignatureFragment extends Fragment {
           FragmentTransaction fragmentTransaction = getActivity().getFragmentManager().beginTransaction();
           fragmentTransaction.hide(SignatureFragment.this);
           fragmentTransaction.commit();
-          cloverConnector.acceptSignature(getActivity(), verifySignatureRequest);
+          cloverConnector.acceptSignature(verifySignatureRequest);
         }
       });
       rejectButton.setOnClickListener(new View.OnClickListener() {
@@ -90,7 +90,7 @@ public class SignatureFragment extends Fragment {
           FragmentTransaction fragmentTransaction = getActivity().getFragmentManager().beginTransaction();
           fragmentTransaction.hide(SignatureFragment.this);
           fragmentTransaction.commit();
-          cloverConnector.rejectSignature(getActivity(), verifySignatureRequest);
+          cloverConnector.rejectSignature(verifySignatureRequest);
         }
       });
     }

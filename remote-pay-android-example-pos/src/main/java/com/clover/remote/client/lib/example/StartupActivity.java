@@ -42,7 +42,6 @@ public class StartupActivity extends Activity {
   public static final String USB = "USB";
   public static final String LAN = "LAN";
   public static final String WS_CONFIG = "WS";
-  public static final String NATIVE = "NATIVE";
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -119,10 +118,6 @@ public class StartupActivity extends Activity {
       config = USB;
       editor.putString(CONNECTION_MODE, USB);
       editor.commit();
-    } else if(group.getCheckedRadioButtonId() == R.id.nativeRadioButton) {
-        config = NATIVE;
-        editor.putString(CONNECTION_MODE, NATIVE);
-        editor.commit();
     } else { // (group.getCheckedRadioButtonId() == R.id.lanRadioButton)
       String uriStr = ((TextView)findViewById(R.id.lanPayDisplayAddress)).getText().toString();
       config = WS_CONFIG;
@@ -139,7 +134,7 @@ public class StartupActivity extends Activity {
       }
     }
 
-    if(config.equals(USB) || (config.equals(WS_CONFIG) && uri != null) || config.equals(NATIVE)) {
+    if(config.equals(USB) || (config.equals(WS_CONFIG) && uri != null)) {
       intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
       intent.putExtra(ExamplePOSActivity.EXTRA_WS_ENDPOINT, uri);
       if(clearToken) {

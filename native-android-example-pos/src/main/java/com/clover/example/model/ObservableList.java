@@ -16,11 +16,12 @@
 
 package com.clover.example.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class ObservableList<T> extends ArrayList<T> {
+public class ObservableList<T> extends ArrayList<T> implements Serializable{
   List<ObservableListListener<T>> observers = new ArrayList<ObservableListListener<T>>();
 
   public void addObserver(ObservableListListener<T> listener) {

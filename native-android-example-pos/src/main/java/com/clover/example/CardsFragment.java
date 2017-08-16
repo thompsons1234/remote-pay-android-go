@@ -159,8 +159,8 @@ public class CardsFragment extends Fragment {
                                         request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
                                         request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
                                         request.setDisablePrinting(store.getDisablePrinting());
-                                        TipMode tipMode = TipMode.valueOf(store.getTipMode().toString());
-                                        request.setTipMode(tipMode);
+                                        TipMode tipMode = store.getTipMode() != null ? TipMode.valueOf(store.getTipMode().toString()) : null;
+                                        request.setTipMode(tipMode != null ? tipMode : null);
                                         request.setSignatureEntryLocation(store.getSignatureEntryLocation());
                                         request.setSignatureThreshold(store.getSignatureThreshold());
                                         request.setDisableReceiptSelection(store.getDisableReceiptOptions());
@@ -169,7 +169,7 @@ public class CardsFragment extends Fragment {
                                         request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
                                         request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
                                         request.setVaultedCard(vaultedCard);
-                                        cloverConnector.sale(getActivity(), request);
+                                        cloverConnector.sale(request);
                                         dialog.dismiss();
                                         break;
                                     }
@@ -191,7 +191,7 @@ public class CardsFragment extends Fragment {
                                         request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
                                         request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
                                         request.setVaultedCard(vaultedCard);
-                                        cloverConnector.auth(getActivity(), request);
+                                        cloverConnector.auth(request);
                                         dialog.dismiss();
                                         break;
                                     }

@@ -181,7 +181,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     request.setTipAmount(store.getTipAmount());
     request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
     request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
-    cloverConnector.sale(getActivity(), request);
+    cloverConnector.sale(request);
   }
 
   @Override
@@ -209,7 +209,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
     request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
     request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
-    cloverConnector.auth(getActivity(), request);
+    cloverConnector.auth(request);
   }
 
   @Override

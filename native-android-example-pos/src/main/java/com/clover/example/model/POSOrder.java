@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-public class POSOrder {
+public class POSOrder implements Serializable{
 
   public enum OrderStatus implements Serializable{
     OPEN, CLOSED, LOCKED, PAID, INITIAL, PARTIALLY_PAID {
