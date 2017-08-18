@@ -50,7 +50,7 @@ import android.widget.Switch;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
-public class MiscellaneousFragment extends Fragment implements AdapterView.OnItemSelectedListener {
+public class MiscellaneousFragment extends Fragment {
   private static final String ARG_STORE = "store";
 
   private POSStore store;
@@ -77,9 +77,6 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
   private Switch disableDuplicateCheckSwitch;
   private Switch automaticSignatureConfirmationSwitch;
   private Switch automaticPaymentConfirmationSwitch;
-  private Button startCustomActivityButton;
-  private Button sendMessageToActivityButton;
-  private Spinner customActivityId;
 
   public static MiscellaneousFragment newInstance(POSStore store, IPaymentConnector cloverConnector) {
     MiscellaneousFragment fragment = new MiscellaneousFragment();
@@ -163,19 +160,6 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     automaticPaymentConfirmationSwitch = ((Switch) view.findViewById(R.id.AutomaticPaymentConfirmationSwitch));
     printingSwitch = ((Switch) view.findViewById(R.id.PrintingSwitch));
     signatureThresholdText = ((EditText) view.findViewById(R.id.signatureThreshold));
-    startCustomActivityButton = ((Button) view.findViewById(R.id.startCustomActivityButton));
-    sendMessageToActivityButton = ((Button) view.findViewById(R.id.startCustomActivityButton));
-
-    customActivityId = ((Spinner) view.findViewById(R.id.activity_id));
-
-    // Get a reference to the AutoCompleteTextView in the layout and assign the auto-complete choices.
-    String[] samples = getResources().getStringArray(R.array.customIds);
-    ArrayAdapter<String> customAdapter = new ArrayAdapter<String>(this.getActivity().getBaseContext(), android.R.layout.simple_spinner_item, samples);
-    customAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-    customActivityId.setAdapter(customAdapter);
-    tipModeSpinner.setOnItemSelectedListener(this);
-    signatureEntryLocationSpinner.setOnItemSelectedListener(this);
-
     manualSwitch.setTag(POSStore.CARD_ENTRY_METHOD_MANUAL);
     swipeSwitch.setTag(POSStore.CARD_ENTRY_METHOD_MAG_STRIPE);
     chipSwitch.setTag(POSStore.CARD_ENTRY_METHOD_ICC_CONTACT);
@@ -502,20 +486,6 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
 
   public void setStore(POSStore store) {
     this.store = store;
-  }
-
-  @Override
-  public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-    startCustomActivityButton.setEnabled(true);
-    startCustomActivityButton.setVisibility(View.VISIBLE);
-  }
-
-  @Override
-  public void onNothingSelected(AdapterView<?> parent) {
-    sendMessageToActivityButton.setVisibility(View.INVISIBLE);
-    sendMessageToActivityButton.setEnabled(false);
-    startCustomActivityButton.setVisibility(View.INVISIBLE);
-    startCustomActivityButton.setEnabled(false);
   }
 
   public interface OnFragmentInteractionListener {

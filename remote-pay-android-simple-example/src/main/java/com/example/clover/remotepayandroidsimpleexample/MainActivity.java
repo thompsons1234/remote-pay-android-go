@@ -4,6 +4,7 @@ import com.clover.remote.client.DefaultCloverConnectorListener;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.MerchantInfo;
 import com.clover.remote.client.device.CloverDeviceConfiguration;
+import com.clover.remote.client.device.USBCloverDeviceConfiguration;
 import com.clover.remote.client.device.WebSocketCloverDeviceConfiguration;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
 
@@ -50,7 +51,7 @@ public class MainActivity extends Activity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    textConnect = findViewById(R.id.connector_text);
+    textConnect = (TextView)findViewById(R.id.connector_text);
     cloverConnector = null;
   }
 
@@ -70,7 +71,8 @@ public class MainActivity extends Activity {
 
   private void connect(){
     Log.d(TAG, "connecting.....");
-    cloverConnector = new CloverConnector(getNetworkConfiguration("192.168.0.123",12345));
+    cloverConnector = new CloverConnector(getUSBConfiguration());
+//    cloverConnector = new CloverConnector(getNetworkConfiguration("192.168.0.123",12345));
     cloverConnector.addCloverConnectorListener(new TestListener(cloverConnector));
     cloverConnector.initializeConnection();
   }
@@ -109,6 +111,10 @@ public class MainActivity extends Activity {
       Log.d(TAG, "device ready");
       connected();
     }
+  }
+
+  public CloverDeviceConfiguration getUSBConfiguration() {
+    return new USBCloverDeviceConfiguration(this, APP_ID);
   }
 
   public CloverDeviceConfiguration getNetworkConfiguration(String ip) {

@@ -22,7 +22,7 @@
   <string name="address">start service to see listen address</string>
   <string name="allow_offline_payments">Allow Offline Payments</string>
   <string name="amount">Amount:</string>
-  <string name="app_name">Clover Example POS</string>
+  <string name="app_name">Native Clover Example POS</string>
   <string name="auth">Auth</string>
   <string name="automatically_confirm_payment_challenges">Automatically Confirm Payment Challenges</string>
   <string name='automatically_confirm_signature'>Automatically Confirm Signature</string>
@@ -120,7 +120,7 @@
   <string name="tip">Tip:</string>
   <string name="tip_adjust">Tip Adjust</string>
   <string name="tip_mode">Tip Mode</string>
-  <string name="title_activity_example_pos">Clover Example POS</string>
+  <string name="title_activity_example_pos">Native Clover Example POS</string>
   <string name="title_activity_miscellaneous">MiscellaneousActivity</string>
   <string name="title_activity_orders">OrdersActivity</string>
   <string name="title_activity_startup">StartupActivity</string>

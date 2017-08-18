@@ -33,6 +33,7 @@ import com.clover.sdk.v3.payments.CardTransactionState;
 import com.clover.sdk.v3.payments.CardTransactionType;
 import com.clover.sdk.v3.remotepay.AuthResponse;
 import com.clover.sdk.v3.remotepay.CapturePreAuthResponse;
+import com.clover.sdk.v3.remotepay.CloseoutRequest;
 import com.clover.sdk.v3.remotepay.CloseoutResponse;
 import com.clover.sdk.v3.remotepay.ConfirmPaymentRequest;
 import com.clover.sdk.v3.remotepay.ManualRefundRequest;
@@ -44,6 +45,7 @@ import com.clover.sdk.v3.remotepay.ReadCardDataRequest;
 import com.clover.sdk.v3.remotepay.ReadCardDataResponse;
 import com.clover.sdk.v3.remotepay.RefundPaymentResponse;
 import com.clover.sdk.v3.remotepay.ResponseCode;
+import com.clover.sdk.v3.remotepay.RetrievePaymentRequest;
 import com.clover.sdk.v3.remotepay.RetrievePaymentResponse;
 import com.clover.sdk.v3.remotepay.RetrievePendingPaymentsResponse;
 import com.clover.sdk.v3.remotepay.SaleResponse;
@@ -260,7 +262,12 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
      */
     @Override
     public void onCloseoutResponse(CloseoutResponse response) {
+      if (response.getSuccess()) {
+        showMessage("Closeout successful for Batch ID: " + response.getBatch().getId(), Toast.LENGTH_LONG);
 
+      } else {
+        showMessage("Closeout error: " + response.getResult(), Toast.LENGTH_LONG);
+      }
     }
 
     /**
@@ -270,6 +277,11 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
      */
     @Override
     public void onRetrievePaymentResponse(RetrievePaymentResponse response) {
+      if (response.getSuccess()) {
+        showMessage("Retrieve Payment successful for Payment ID: " + response.getExternalPaymentId(), Toast.LENGTH_LONG);
+      } else {
+        showMessage("Retrieve Payment error: " + response.getResult(), Toast.LENGTH_LONG);
+      }
 
     }
 
@@ -1024,6 +1036,13 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
     cloverConnector.vaultCard(store.getCardEntryMethods());
   }
 
+  public void onClickCloseout(View view) {
+    CloseoutRequest request = new CloseoutRequest();
+    request.setAllowOpenTabs(false);
+    request.setBatchId(null);
+    cloverConnector.closeout(request);
+  }
+
   public void onManualRefundClick(View view) {
     CharSequence val = ((TextView) findViewById(R.id.ManualRefundTextView)).getText();
     try {
@@ -1038,6 +1057,11 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
     } catch (NumberFormatException nfe) {
       showMessage("Invalid value. Must be an integer.", Toast.LENGTH_LONG);
     }
+  }
+
+  public void queryPaymentClick(View view) {
+    String externalPaymentId = ((TextView) findViewById(R.id.QueryPaymentText)).getText().toString();
+    cloverConnector.retrievePayment(new RetrievePaymentRequest().setExternalPaymentId(externalPaymentId));
   }
 
   public void preauthCardClick(View view) {

@@ -23,7 +23,7 @@ public class ShowMessageActivity extends Activity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_show_message);
-    TextView showMessageText = findViewById(R.id.show_message_text);
+    TextView showMessageText = (TextView)findViewById(R.id.show_message_text);
     showMessageText.setText("Calling Show Message...");
     cloverConnector = MainActivity.getCloverConnector();
     Log.d(TAG, "About to call show message");

@@ -138,9 +138,9 @@ public class OrdersFragment extends Fragment implements OrderObserver {
 
         if (posExchange instanceof POSPayment) {
           if (((POSPayment)posExchange).getPaymentStatus() == POSPayment.Status.AUTHORIZED) {
-            options = new String[]{"Void Payment", "Refund Payment", "Tip Adjust Payment", "Receipt Options"};
+            options = new String[]{"Void Payment", "Refund Payment", "Tip Adjust Payment"};
           } else if (((POSPayment)posExchange).getPaymentStatus() == POSPayment.Status.PAID) {
-            options = new String[]{"Void Payment", "Refund Payment", "Receipt Options"};
+            options = new String[]{"Void Payment", "Refund Payment"};
           } else {
             return;
           }
