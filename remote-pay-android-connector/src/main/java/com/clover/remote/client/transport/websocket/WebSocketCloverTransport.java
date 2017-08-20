@@ -27,8 +27,6 @@ import com.clover.remote.client.transport.CloverTransport;
 import com.clover.remote.client.transport.PairingDeviceConfiguration;
 import com.clover.remote.message.Method;
 
-import android.os.AsyncTask;
-import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -79,6 +77,7 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
   private TimerTask reportDisconnectTimerTask;
 
   private CloverNVWebSocketClient webSocket;
+  private final Object webSocketLock = new Object();
 
   /**
    * prevent reconnects if shutdown was requested
@@ -129,26 +128,36 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
     return -1;
   }
 
-  private synchronized void clearWebsocket() {
-    if (webSocket != null) {
-      webSocket.clearListener();
+  private void clearWebsocket() {
+    synchronized (webSocketLock) {
+      if (webSocket != null) {
+        webSocket.clearListener();
+        webSocket = null;
+      }
     }
-    webSocket = null;
   }
 
   @Override
-  public synchronized void initializeConnection() {
-    if (webSocket != null) {
-      if (webSocket.isOpen() || webSocket.isConnecting()) {
-        return;
-      } else {
-        clearWebsocket();
+  public void initializeConnection() {
+    synchronized (webSocketLock) {
+      if (webSocket != null) {
+        if (webSocket.isOpen() || webSocket.isConnecting()) {
+          return;
+        } else {
+          clearWebsocket();
+        }
       }
+      webSocket = new CloverNVWebSocketClient(endpoint, this, trustStore);
     }
-    webSocket = new CloverNVWebSocketClient(endpoint, this, trustStore);
 
-    webSocket.connect();
-    Log.d(getClass().getSimpleName(), "connection attempt done.");
+    // This connect call is outside the synchronized block intentionally because this is a blocking call
+    try {
+      webSocket.connect();
+      Log.d(getClass().getSimpleName(), "connection attempt done.");
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      reconnect();
+    }
   }
 
   @Override
@@ -164,7 +173,6 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
       }
     }
     clearWebsocket();
-
   }
 
   private void reconnect() {
@@ -345,7 +353,7 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
   }
 
   private void disconnectMissedPong() {
-    if (webSocket != null && endpoint != null) {
+    if (webSocket != null) {
       Log.w(getClass().getSimpleName(), "forcing disconnect");
       webSocket.disconnect();
     } else {
