@@ -31,7 +31,7 @@ public class MakeSaleActivity extends Activity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_make_sale);
-    makeSaleText = findViewById(R.id.make_sale_text);
+    makeSaleText = (TextView)findViewById(R.id.make_sale_text);
 
     cloverConnector = MainActivity.getCloverConnector();
     cloverConnector.addCloverConnectorListener(new TestListener(cloverConnector));

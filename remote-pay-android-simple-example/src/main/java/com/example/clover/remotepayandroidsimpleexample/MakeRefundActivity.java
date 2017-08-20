@@ -33,7 +33,7 @@ public class MakeRefundActivity extends Activity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_make_refund);
-    makeRefundText = findViewById(R.id.make_refund_text);
+    makeRefundText = (TextView)findViewById(R.id.make_refund_text);
 
     cloverConnector = MainActivity.getCloverConnector();
     cloverConnector.addCloverConnectorListener(new MakeRefundActivity.TestListener(cloverConnector));
@@ -49,6 +49,7 @@ public class MakeRefundActivity extends Activity {
       Log.d(TAG,"sale info:" + saleInfo);
       cloverConnector.sale(pendingSale);
     } catch (Exception ex) {
+      addText("Error submitting sale request");
       Log.d(TAG,"Error submitting sale request");
       ex.printStackTrace();
       exit();
@@ -167,6 +168,12 @@ public class MakeRefundActivity extends Activity {
           addText(responseInfo);
           Log.d(TAG,"Response: "+responseInfo);
         } else {
+          String responseInfo = "Refund Request Unsuccessful\n";
+          responseInfo += ("  Result: " + response.getResult().toString()+"\n");
+          responseInfo += ("  Reason: " + response.getReason()+"\n");
+          responseInfo += ("  Order ID: " + response.getOrderId()+"\n");
+          responseInfo += ("  Payment ID: " + response.getPaymentId());
+          addText(responseInfo);
           System.err.println("Refund Request Failed - " + response.getReason());
         }
 
