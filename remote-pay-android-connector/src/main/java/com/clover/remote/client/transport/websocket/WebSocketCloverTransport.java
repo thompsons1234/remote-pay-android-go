@@ -119,10 +119,10 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
       if (webSocket != null && webSocket.isOpen()) {
         try {
           webSocket.send(message);
-        } catch(Exception e){
-          reconnect();
+          return 0;
+        } catch(Exception e) {
+          e.printStackTrace();
         }
-        return 0;
       }
     }
     reconnect();
