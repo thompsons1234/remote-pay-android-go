@@ -53,8 +53,11 @@ public class StartupActivity extends Activity {
   public static final String LAN = "LAN";
   private static final int BARCODE_READER_REQUEST_CODE = 1;
   public static final String WS_CONFIG = "WS";
-  private BarcodeScanner cloverBarcodeScanner;
 
+  // Clover devices do not always support the custom Barcode scanner implemented here.
+  // They DO have a different capability to scan barcodes.
+  // We do a switch based on the platform to allow the example app to run on station.
+  private BarcodeScanner cloverBarcodeScanner;
   private BroadcastReceiver cloverBarcodeReceiver = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -107,6 +110,7 @@ public class StartupActivity extends Activity {
     ((RadioButton)findViewById(R.id.lanRadioButton)).setChecked(LAN.equals(mode));
     ((RadioButton)findViewById(R.id.usbRadioButton)).setChecked(!LAN.equals(mode));
 
+    // Switch out the barcode scanner for the Clover Devices
     if (Platform.isClover()) {
       cloverBarcodeScanner = new BarcodeScanner(this);
     }
@@ -130,6 +134,7 @@ public class StartupActivity extends Activity {
       Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
       startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
     } else {
+      // It is a Clover device, use the Clover version
       Bundle extras = new Bundle();
       extras.putBoolean(Intents.EXTRA_LED_ON, false);
       extras.putBoolean(Intents.EXTRA_SCAN_QR_CODE, true);
@@ -140,24 +145,24 @@ public class StartupActivity extends Activity {
   @Override
   protected void onResume() {
     super.onResume();
+    // If this is a clover device register the listener
     if (cloverBarcodeScanner != null) {
-      registerBarcodeScanner();
+      registerCloverBarcodeScanner();
     }
   }
 
   @Override
   protected void onPause() {
     super.onPause();
+    // If this is a clover device unregister the listener
     if (cloverBarcodeScanner != null) {
-      unregisterBarcodeScanner();
+      unregisterCloverBarcodeScanner();
     }
   }
-
-  private void registerBarcodeScanner() {
+  private void registerCloverBarcodeScanner() {
     registerReceiver(cloverBarcodeReceiver, new IntentFilter(BarcodeResult.INTENT_ACTION));
   }
-
-  private void unregisterBarcodeScanner() {
+  private void unregisterCloverBarcodeScanner() {
     unregisterReceiver(cloverBarcodeReceiver);
   }
 
@@ -223,6 +228,8 @@ public class StartupActivity extends Activity {
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // For non-clover devices this is how the generic barcode scanner
+    // returns the scanned barcode
     if (requestCode == BARCODE_READER_REQUEST_CODE) {
       if (resultCode == CommonStatusCodes.SUCCESS) {
         if (data != null) {
