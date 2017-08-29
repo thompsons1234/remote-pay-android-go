@@ -78,6 +78,10 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
   private TimerTask disconnectTimerTask;
 
   private CloverNVWebSocketClient webSocket;
+
+  // NOTE:  We are using this library to synchronize the websocket and the timer tasks to eliminate lock ordering issues
+  // Synchronization on the tasks must be done to prevent a race condition where a thread can cancel a newly created
+  // task PRIOR to actually scheduling it.
   private final Object webSocketLock = new Object();
 
   /**
@@ -112,6 +116,13 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
     this.pingTimer = new Timer("Remote-Pay Ping Timer");
   }
 
+  /**
+   * Sends the provided encoded message.  If a connection does not exist or an error occurs during transmission,
+   * the message is NOT resent and a negative value is returned.
+   *
+   * @param message encoded message to send
+   * @return 0 if the message was sent successfully, -1 if the send fails
+   */
   @Override
   public int sendMessage(final String message) {
     // let's see if we have connectivity
@@ -185,6 +196,7 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
         notify = false;
       }
 
+      // Timer task cancel occurs in synchronization block to prevent canceling a newly created task prior to schedul
       if (disconnectTimerTask != null) {
         disconnectTimerTask.cancel();
       }
@@ -267,6 +279,7 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
 
   private void resetPong() {
     synchronized (webSocketLock) {
+      // Timer task cancel occurs in synchronization block to prevent canceling a newly created task prior to scheduling
       if (disconnectTimerTask != null) {
         disconnectTimerTask.cancel(); //Subsequent calls have no effect.
       }
@@ -295,6 +308,7 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
       @Override
       protected Void doInBackground(Void[] params) {
         synchronized (webSocketLock) {
+          // Timer task creation/cancel occurs in synchronization block to prevent canceling a newly created task prior to scheduling
           if (pingTimerTask != null) {
             pingTimerTask.cancel();
           }
@@ -327,6 +341,7 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
         @Override
         protected Void doInBackground(Void[] params) {
           synchronized (webSocketLock) {
+            // Timer task creation/cancel occurs in synchronization block to prevent canceling a newly created task prior to scheduling
             if (reportDisconnectTimerTask != null) {
               reportDisconnectTimerTask.cancel();
             }
@@ -347,6 +362,7 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
       @Override
       protected Void doInBackground(Void[] params) {
         synchronized (webSocketLock) {
+          // Timer task creation/cancel occurs in synchronization block to prevent canceling a newly created task prior to scheduling
           if (disconnectTimerTask != null) {
             disconnectTimerTask.cancel();
           }
