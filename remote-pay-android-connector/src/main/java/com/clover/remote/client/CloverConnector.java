@@ -1168,7 +1168,24 @@ public class CloverConnector implements ICloverConnector {
           Log.e(this.getClass().getName(), "The last PaymentRefundResponse has a different refund than this refund in finishOk");
         }
       } else {
-        Log.e(this.getClass().getName(), "Shouldn't get an onFinishOk with having gotten an onPaymentRefund!");
+        Log.w(this.getClass().getName(), "Shouldn't get an onFinishOk without having gotten an onPaymentRefund unless recovering!");
+
+        String orderId = null;
+        String paymentId = null;
+        if (refund != null) {
+          if (refund.getOrderRef() != null) {
+            orderId = refund.getOrderRef().getId();
+          }
+          if (refund.getPayment() != null) {
+            paymentId = refund.getPayment().getId();
+          }
+        }
+
+        RefundPaymentResponse rpr = new RefundPaymentResponse(true, ResultCode.SUCCESS);
+        rpr.setRefund(refund);
+        rpr.setOrderId(orderId);
+        rpr.setPaymentId(paymentId);
+        cloverConnector.broadcaster.notifyOnRefundPaymentResponse(rpr);
       }
     }
 
