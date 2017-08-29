@@ -27,6 +27,9 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
     <application
         android:icon="@mipmap/clover_logo"
         android:label="@string/app_name"
@@ -43,6 +46,12 @@
         </activity>
         <activity
             android:name=".ExamplePOSActivity"
+            android:label="@string/title_activity_example_pos"
+            android:screenOrientation="sensor" >
+        </activity>
+
+        <activity
+            android:name="com.clover.remote.client.lib.example.qrCode.barcode.BarcodeCaptureActivity"
             android:label="@string/title_activity_example_pos"
             android:screenOrientation="sensor" >
         </activity>

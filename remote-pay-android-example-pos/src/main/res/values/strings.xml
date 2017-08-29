@@ -27,6 +27,7 @@
   <string name="automatically_confirm_payment_challenges">Automatically Confirm Payment Challenges</string>
   <string name='automatically_confirm_signature'>Automatically Confirm Signature</string>
   <string name="authorized">AUTHORIZED</string>
+  <string name="barcode_error_format">Error obtaining barcode: %s</string>
   <string name="cancel">Cancel</string>
   <string name="capture_card">Capture Card</string>
   <string name="card_exp_date_placeholder">12/22</string>
@@ -67,6 +68,7 @@
   <string name="native_display">Native App Integration</string>
   <string name="lan_terminal_notification_text">Tap to start Local Network Pay Display.</string>
   <string name="lan_terminal_notification_title">Web Socket payment device connected</string>
+  <string name="low_storage_error">Device is low on storage space</string>
   <string name="manual">Manual</string>
   <string name="misc">Misc.</string>
   <string name="_new">New</string>
@@ -105,6 +107,7 @@
   <string name="reset_device">Reset Device</string>
   <string name="sale">Sale</string>
   <string name="sale_tip_amount">Sale Tip Amount</string>
+  <string name="scan_qr_code">Scan QRCode</string>
   <string name="send_message">Send Message</string>
   <string name="show_message">Show Message</string>
   <string name="show_thank_you">Show Thank You</string>
@@ -143,9 +146,6 @@
     <item>wss</item>
   </string-array>
 
-
   <item type="id" name="button_exit"/>
-
-
 
 </resources>
