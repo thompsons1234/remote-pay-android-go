@@ -75,8 +75,13 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
   private Timer pingTimer;
   private TimerTask pingTimerTask;
   private TimerTask reportDisconnectTimerTask;
+  private TimerTask disconnectTimerTask;
 
   private CloverNVWebSocketClient webSocket;
+
+  // NOTE:  We are using this library to synchronize the websocket and the timer tasks to eliminate lock ordering issues
+  // Synchronization on the tasks must be done to prevent a race condition where a thread can cancel a newly created
+  // task PRIOR to actually scheduling it.
   private final Object webSocketLock = new Object();
 
   /**
@@ -90,7 +95,6 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
    * A single thread/queue to process reconnect requests
    */
   private final ScheduledThreadPoolExecutor reconnectPool = new ScheduledThreadPoolExecutor(1);
-  private TimerTask disconnectTimerTask;
 
   public WebSocketCloverTransport(URI endpoint, PairingDeviceConfiguration pairingConfig, KeyStore trustStore, String posName, String serialNumber, String authToken,
                                   long pongTimeout, long pingFrequency, long reconnectDelay, long reportConnectionProblemAfter) {
@@ -112,19 +116,27 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
     this.pingTimer = new Timer("Remote-Pay Ping Timer");
   }
 
+  /**
+   * Sends the provided encoded message.  If a connection does not exist or an error occurs during transmission,
+   * the message is NOT resent and a negative value is returned.
+   *
+   * @param message encoded message to send
+   * @return 0 if the message was sent successfully, -1 if the send fails
+   */
   @Override
   public int sendMessage(final String message) {
     // let's see if we have connectivity
-    if(webSocket != null && webSocket.isOpen()) {
-      try {
-        webSocket.send(message);
-      } catch(Exception e){
-        reconnect();
+    synchronized (webSocketLock) {
+      if (webSocket != null && webSocket.isOpen()) {
+        try {
+          webSocket.send(message);
+          return 0;
+        } catch(Exception e) {
+          e.printStackTrace();
+        }
       }
-      return 0;
-    } else {
-      reconnect();
     }
+    reconnect();
     return -1;
   }
 
@@ -143,14 +155,14 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
       if (webSocket != null) {
         if (webSocket.isOpen() || webSocket.isConnecting()) {
           return;
-        } else {
-          clearWebsocket();
         }
+        clearWebsocket();
       }
       webSocket = new CloverNVWebSocketClient(endpoint, this, trustStore);
     }
 
     // This connect call is outside the synchronized block intentionally because this is a blocking call
+    // Potential race condition is handled by try/catch
     try {
       webSocket.connect();
       Log.d(getClass().getSimpleName(), "connection attempt done.");
@@ -164,15 +176,38 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
   public void dispose() {
     super.dispose();
     shutdown = true;
-    if (webSocket != null) {
-      notifyDeviceDisconnected();
-      try {
-        webSocket.close();
-      } catch (Exception e) {
-        e.printStackTrace();
+    close();
+  }
+
+  private void close() {
+    boolean notify = true;
+    synchronized (webSocketLock) {
+      if (webSocket != null) {
+        if (!webSocket.isClosing()) {
+          try {
+            webSocket.close();
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+
+        clearWebsocket();
+      } else {
+        notify = false;
+      }
+
+      // Timer task cancel occurs in synchronization block to prevent canceling a newly created task prior to schedul
+      if (disconnectTimerTask != null) {
+        disconnectTimerTask.cancel();
+      }
+      if (reportDisconnectTimerTask != null) {
+        reportDisconnectTimerTask.cancel();
       }
     }
-    clearWebsocket();
+
+    if (notify) {
+      notifyDeviceDisconnected();
+    }
   }
 
   private void reconnect() {
@@ -223,8 +258,11 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
     isPairing = true;
     PairingRequest pr = new PairingRequest(posName, serialNumber, authToken);
     PairingRequestMessage prm = new PairingRequestMessage(pr);
+    String message = new Gson().toJson(prm);
 
-    webSocket.send(new Gson().toJson(prm));
+    synchronized (webSocketLock) {
+      webSocket.send(message);
+    }
   }
 
   @Override
@@ -232,31 +270,24 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
     Log.d(getClass().getSimpleName(), "onClose: " + reason + ", remote? " + remote);
 
     if (webSocket == ws) {
-      if(!webSocket.isClosing()) {
-        webSocket.clearListener();
-        webSocket.close();
-      }
-      if (disconnectTimerTask != null) {
-        disconnectTimerTask.cancel();
-      }
-      if (reportDisconnectTimerTask != null) {
-        reportDisconnectTimerTask.cancel();
-      }
-      clearWebsocket();
-      notifyDeviceDisconnected();
-      if(!shutdown) {
+      close();
+      if (!shutdown) {
         reconnect();
       }
     }
   }
 
   private void resetPong() {
-    if (disconnectTimerTask != null) {
-      disconnectTimerTask.cancel(); //Subsequent calls have no effect.
+    synchronized (webSocketLock) {
+      // Timer task cancel occurs in synchronization block to prevent canceling a newly created task prior to scheduling
+      if (disconnectTimerTask != null) {
+        disconnectTimerTask.cancel(); //Subsequent calls have no effect.
+      }
+      if (reportDisconnectTimerTask != null) {
+        reportDisconnectTimerTask.cancel();//Subsequent calls have no effect.
+      }
     }
-    if (reportDisconnectTimerTask != null) {
-      reportDisconnectTimerTask.cancel();//Subsequent calls have no effect.
-    }
+
     if (reportedDisconnect) {
       AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
         @Override
@@ -276,16 +307,19 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
     AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
       @Override
       protected Void doInBackground(Void[] params) {
-        if (pingTimerTask != null) {
-          pingTimerTask.cancel();
-        }
-        pingTimerTask = new TimerTask() {
-          @Override
-          public void run() {
-            sendPing();
+        synchronized (webSocketLock) {
+          // Timer task creation/cancel occurs in synchronization block to prevent canceling a newly created task prior to scheduling
+          if (pingTimerTask != null) {
+            pingTimerTask.cancel();
           }
-        };
-        pingTimer.schedule(pingTimerTask, pingFrequency);
+          pingTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+              sendPing();
+            }
+          };
+          pingTimer.schedule(pingTimerTask, pingFrequency);
+        }
         return null;
       }
     };
@@ -293,9 +327,11 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
   }
 
   private void sendPing() {
-    if (webSocket != null) {
-      webSocket.sendPing();
-      scheduleDisconnect();
+    synchronized (webSocketLock) {
+      if (webSocket != null) {
+        webSocket.sendPing();
+        scheduleDisconnect();
+      }
     }
   }
 
@@ -304,34 +340,40 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
       AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
         @Override
         protected Void doInBackground(Void[] params) {
-          if (reportDisconnectTimerTask != null) {
-            reportDisconnectTimerTask.cancel();
-          }
-          reportDisconnectTimerTask = new TimerTask() {
-            @Override
-            public void run() {
-              reportDisconnect();
+          synchronized (webSocketLock) {
+            // Timer task creation/cancel occurs in synchronization block to prevent canceling a newly created task prior to scheduling
+            if (reportDisconnectTimerTask != null) {
+              reportDisconnectTimerTask.cancel();
             }
-          };
-          pingTimer.schedule(reportDisconnectTimerTask, reportConnectionProblemAfter);
+            reportDisconnectTimerTask = new TimerTask() {
+              @Override
+              public void run() {
+                reportDisconnect();
+              }
+            };
+            pingTimer.schedule(reportDisconnectTimerTask, reportConnectionProblemAfter);
+          }
           return null;
         }
       };
       task.execute();
     }
-    AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
+    final AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
       @Override
       protected Void doInBackground(Void[] params) {
-        if (disconnectTimerTask != null) {
-          disconnectTimerTask.cancel();
-        }
-        disconnectTimerTask = new TimerTask() {
-          @Override
-          public void run() {
-            disconnectMissedPong();
+        synchronized (webSocketLock) {
+          // Timer task creation/cancel occurs in synchronization block to prevent canceling a newly created task prior to scheduling
+          if (disconnectTimerTask != null) {
+            disconnectTimerTask.cancel();
           }
-        };
-        pingTimer.schedule(disconnectTimerTask, pongTimeout);
+          disconnectTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+              disconnectMissedPong();
+            }
+          };
+          pingTimer.schedule(disconnectTimerTask, pongTimeout);
+        }
         return null;
       }
     };
@@ -353,10 +395,17 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
   }
 
   private void disconnectMissedPong() {
-    if (webSocket != null) {
-      Log.w(getClass().getSimpleName(), "forcing disconnect");
-      webSocket.disconnect();
-    } else {
+    boolean dispose = false;
+    synchronized (webSocketLock) {
+      if (webSocket != null) {
+        Log.w(getClass().getSimpleName(), "forcing disconnect");
+        webSocket.disconnect();
+      } else {
+        dispose = true;
+      }
+    }
+
+    if (dispose) {
       dispose();
     }
   }

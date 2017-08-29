@@ -740,7 +740,7 @@ public class CloverConnector implements ICloverConnector {
   @Override
   public void openCashDrawer(String reason) {
     if (device == null || !isReady) {
-      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In displayPaymentReceiptOptions: The Clover device is not connected."));
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In openCashDrawer: The Clover device is not connected."));
     } else {
       device.doOpenCashDrawer(reason);
     }
@@ -800,7 +800,7 @@ public class CloverConnector implements ICloverConnector {
   @Override
   public void retrieveDeviceStatus(RetrieveDeviceStatusRequest request) {
     if (device == null || !isReady) {
-      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In resetDevice: The Clover device is not connected."));
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In retrieveDeviceStatus: The Clover device is not connected."));
     } else {
       device.doRetrieveDeviceStatus(request.isSendLastMessage());
     }
@@ -809,7 +809,7 @@ public class CloverConnector implements ICloverConnector {
   @Override
   public void retrievePayment(RetrievePaymentRequest request) {
     if (device == null || !isReady) {
-      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In resetDevice: The Clover device is not connected."));
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, "In retrievePayment: The Clover device is not connected."));
     } else {
       device.doRetrievePayment(request.getExternalPaymentId());
     }
