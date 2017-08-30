@@ -235,7 +235,10 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       KeyStore trustStore = createTrustStore();
 
       if(authToken == null) {
-        authToken = sharedPreferences.getString("AUTH_TOKEN", null);
+        boolean clearToken = getIntent().getBooleanExtra(EXTRA_CLEAR_TOKEN, false);
+        if (!clearToken) {
+          authToken = sharedPreferences.getString("AUTH_TOKEN", null);
+        }
       }
       config = new WebSocketCloverDeviceConfiguration(uri, applicationId, trustStore, posName, serialNumber, authToken) {
         @Override
