@@ -20,16 +20,20 @@ import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
 import com.clover.remote.client.CloverConnector;
+import com.clover.remote.client.CloverDeviceConfiguration;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.ICloverConnectorListener;
 import com.clover.remote.client.MerchantInfo;
-import com.clover.remote.client.CloverDeviceConfiguration;
 import com.clover.remote.client.USBCloverDeviceConfiguration;
 import com.clover.remote.client.WebSocketCloverDeviceConfiguration;
 import com.clover.remote.client.lib.example.messages.ConversationQuestionMessage;
 import com.clover.remote.client.lib.example.messages.ConversationResponseMessage;
 import com.clover.remote.client.lib.example.messages.CustomerInfo;
 import com.clover.remote.client.lib.example.messages.CustomerInfoMessage;
+import com.clover.remote.client.lib.example.messages.PayloadMessage;
+import com.clover.remote.client.lib.example.messages.PhoneNumberMessage;
+import com.clover.remote.client.lib.example.messages.Rating;
+import com.clover.remote.client.lib.example.messages.RatingsMessage;
 import com.clover.remote.client.lib.example.model.POSCard;
 import com.clover.remote.client.lib.example.model.POSDiscount;
 import com.clover.remote.client.lib.example.model.POSExchange;
@@ -39,10 +43,6 @@ import com.clover.remote.client.lib.example.model.POSOrder;
 import com.clover.remote.client.lib.example.model.POSPayment;
 import com.clover.remote.client.lib.example.model.POSRefund;
 import com.clover.remote.client.lib.example.model.POSStore;
-import com.clover.remote.client.lib.example.messages.PayloadMessage;
-import com.clover.remote.client.lib.example.messages.PhoneNumberMessage;
-import com.clover.remote.client.lib.example.messages.Rating;
-import com.clover.remote.client.lib.example.messages.RatingsMessage;
 import com.clover.remote.client.lib.example.utils.CurrencyUtils;
 import com.clover.remote.client.lib.example.utils.IdUtils;
 import com.clover.remote.client.messages.AuthResponse;
@@ -54,8 +54,6 @@ import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.CustomActivityRequest;
 import com.clover.remote.client.messages.CustomActivityResponse;
-import com.clover.remote.client.messages.RetrievePaymentRequest;
-import com.clover.remote.client.messages.RetrievePaymentResponse;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.ManualRefundResponse;
 import com.clover.remote.client.messages.MessageFromActivity;
@@ -76,6 +74,8 @@ import com.clover.remote.client.messages.ResetDeviceResponse;
 import com.clover.remote.client.messages.ResultCode;
 import com.clover.remote.client.messages.RetrieveDeviceStatusRequest;
 import com.clover.remote.client.messages.RetrieveDeviceStatusResponse;
+import com.clover.remote.client.messages.RetrievePaymentRequest;
+import com.clover.remote.client.messages.RetrievePaymentResponse;
 import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
 import com.clover.remote.client.messages.SaleResponse;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
@@ -92,15 +92,11 @@ import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -123,16 +119,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.google.gson.Gson;
 
-
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.security.KeyStore;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.prefs.Preferences;
-
-import static com.clover.remote.client.lib.example.StartupActivity.EXAMPLE_APP_NAME;
 
 public class ExamplePOSActivity extends Activity implements CurrentOrderFragment.OnFragmentInteractionListener,
     AvailableItem.OnFragmentInteractionListener, OrdersFragment.OnFragmentInteractionListener,
@@ -200,21 +194,50 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     initStore();
 
+    String posName = "Clover Example POS";
+    String applicationId = posName + ":1.4";
     CloverDeviceConfiguration config;
 
     String configType = getIntent().getStringExtra(EXTRA_CLOVER_CONNECTOR_CONFIG);
     if ("USB".equals(configType)) {
-      config = new USBCloverDeviceConfiguration(this, "Clover Example POS:1.2");
+      config = new USBCloverDeviceConfiguration(this, applicationId);
     } else if ("WS".equals(configType)) {
+
+      String serialNumber = "Aisle 3";
+      String authToken = null;
+
       URI uri = (URI) getIntent().getSerializableExtra(EXTRA_WS_ENDPOINT);
+
+      String query = uri.getRawQuery();
+      if (query != null) {
+        try {
+          String[] nameValuePairs = query.split("&");
+          for (String nameValuePair : nameValuePairs) {
+            String[] nameAndValue = nameValuePair.split("=", 2);
+            String name = URLDecoder.decode(nameAndValue[0], "UTF-8");
+            String value = URLDecoder.decode(nameAndValue[1], "UTF-8");
+
+            if("authenticationToken".equals(name)) {
+              authToken = value;
+            } else {
+              Log.w(TAG, String.format("Found query parameter \"%s\" with value \"%s\"",
+                name, value));
+            }
+          }
+          uri = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(),uri.getPort(), uri.getPath(), null,uri.getFragment());
+        } catch (Exception e) {
+          Log.e(TAG, "Error extracting query information from uri.", e);
+          setResult(RESULT_CANCELED);
+          finish();
+          return;
+        }
+      }
       KeyStore trustStore = createTrustStore();
-      SharedPreferences prefs = this.getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE);
 
-      boolean clearToken = getIntent().getBooleanExtra(EXTRA_CLEAR_TOKEN, false);
-      String authToken = clearToken ? null : sharedPreferences.getString("AUTH_TOKEN", null);
-
-      config = new WebSocketCloverDeviceConfiguration(uri, "Clover Example POS:1.2", trustStore, "Clover Example POS", "Aisle 3", authToken) {
-
+      if(authToken == null) {
+        authToken = sharedPreferences.getString("AUTH_TOKEN", null);
+      }
+      config = new WebSocketCloverDeviceConfiguration(uri, applicationId, trustStore, posName, serialNumber, authToken) {
         @Override
         public void onPairingCode(final String pairingCode) {
           runOnUiThread(new Runnable() {
