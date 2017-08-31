@@ -124,7 +124,7 @@ public class PreAuthFragment extends Fragment {
     });
 
     preAuthsListView = (ListView) view.findViewById(R.id.PreAuthListView);
-    final CardsListViewAdapter cardsListViewAdapter = new CardsListViewAdapter(view.getContext(), R.id.PreAuthListView, store.getCards());
+    final PreAuthListViewAdapter cardsListViewAdapter = new PreAuthListViewAdapter(view.getContext(), R.id.PreAuthListView, store.getPreAuths());
     preAuthsListView.setAdapter(cardsListViewAdapter);
 
     preAuthsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
