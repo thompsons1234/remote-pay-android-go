@@ -152,7 +152,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   private Dialog ratingsDialog;
   private ListView ratingsList;
   private ArrayAdapter<String> ratingsAdapter;
-  String imgDecodableString;
+  private String imgDecodableString;
 
   Payment currentPayment = null;
   Challenge[] currentChallenges = null;
