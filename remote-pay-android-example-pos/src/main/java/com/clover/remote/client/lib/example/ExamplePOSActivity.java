@@ -152,7 +152,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   private Dialog ratingsDialog;
   private ListView ratingsList;
   private ArrayAdapter<String> ratingsAdapter;
-  private String imgDecodableString;
 
   Payment currentPayment = null;
   Challenge[] currentChallenges = null;
@@ -386,8 +385,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       cursor.moveToFirst();
 
       int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-      imgDecodableString = cursor.getString(columnIndex);
-      printImage();
+      String imgDecodableString = cursor.getString(columnIndex);
+      printImage(imgDecodableString);
     }
   }
 
@@ -1433,7 +1432,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     startActivityForResult(galleryIntent, RESULT_LOAD_IMG);
   }
 
-  private void printImage(){
+  private void printImage(String imgDecodableString){
     Bitmap bitmap = BitmapFactory.decodeFile(imgDecodableString);
     cloverConnector.printImage(bitmap);
   }
