@@ -95,12 +95,14 @@ import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -142,6 +144,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public static final String EXTRA_WS_ENDPOINT = "WS_ENDPOINT";
   public static final String EXTRA_CLEAR_TOKEN = "CLEAR_TOKEN";
   private static final String DEFAULT_EID = "DFLTEMPLYEE";
+  private static int RESULT_LOAD_IMG = 1;
 
   // Package name for example custom activities
   public static final String CUSTOM_ACTIVITY_PACKAGE = "com.clover.cfp.examples.";
@@ -149,6 +152,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   private Dialog ratingsDialog;
   private ListView ratingsList;
   private ArrayAdapter<String> ratingsAdapter;
+  String imgDecodableString;
 
   Payment currentPayment = null;
   Challenge[] currentChallenges = null;
@@ -367,6 +371,23 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       if (!usb) {
         initialize();
       }
+    }
+    if (requestCode == RESULT_LOAD_IMG && resultCode == RESULT_OK
+        && null != data) {
+      // Get the Image from data
+
+      Uri selectedImage = data.getData();
+      String[] filePathColumn = {MediaStore.Images.Media.DATA};
+
+      // Get the cursor
+      Cursor cursor = getContentResolver().query(selectedImage,
+          filePathColumn, null, null, null);
+      // Move to first row
+      cursor.moveToFirst();
+
+      int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+      imgDecodableString = cursor.getString(columnIndex);
+      printImage();
     }
   }
 
@@ -1408,9 +1429,16 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
 
   public void printImageClick(View view) {
-    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.clover_horizontal);
+    Intent galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+    startActivityForResult(galleryIntent, RESULT_LOAD_IMG);
+  }
+
+  private void printImage(){
+    Bitmap bitmap = BitmapFactory.decodeFile(imgDecodableString);
     cloverConnector.printImage(bitmap);
   }
+
+
 
   public void onResetDeviceClick(View view) {
     runOnUiThread(new Runnable() {
