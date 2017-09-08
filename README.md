@@ -1,6 +1,6 @@
 # Clover SDK for Android PoS Integration
 
-Current version: 1.3.1
+Current version: 1.3.2
 
 ## Overview
 
@@ -16,6 +16,11 @@ To complete a transaction end to end, we recommend getting a [Clover Mini Dev Ki
 For more developer documentation and information about the Semi-Integration program, please visit our [semi-integration developer documents](https://docs.clover.com/build/integration-overview-requirements/). 
 
 ## Release Notes
+# Version 1.3.2
+* QRCode scanning support
+* Fixed several synchronization issues with Web Socket heartbeats and reconnects
+* Miscellaneous bug fixes
+
 # Version 1.3.1
 * Added support for Custom Activities
 * Device status queries to determine the state of the device and payments processed by the device
