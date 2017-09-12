@@ -1514,6 +1514,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   public void sendMessageToActivity(String activityId, String payload) {
     MessageToActivity messageRequest = new MessageToActivity(activityId, payload);
+    Log.d("MESSAGEREQUESTTTTT", messageRequest.getAction());
+    Log.d("MESSAGEREQUESTTTTT", messageRequest.getPayload());
     cloverConnector.sendMessageToActivity(messageRequest);
   }
 

@@ -22,6 +22,7 @@ import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.CustomActivityResponse;
+import com.clover.remote.client.messages.PrintJobStatusResponse;
 import com.clover.remote.client.messages.RetrievePaymentResponse;
 import com.clover.remote.client.messages.MessageFromActivity;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
@@ -180,6 +181,14 @@ public interface ICloverConnectorListener {
    * @param response The response
    */
   void onVaultCardResponse(VaultCardResponse response);
+
+  /**
+   * Called to update the status of a print job
+   *
+   * @param response The response contains the print job identifier and that job's status
+   */
+    void onPrintJobStatusResponse(PrintJobStatusResponse response);
+
 
   /**
    * Will only be called if disablePrinting = true on the Sale, Auth, PreAuth or ManualRefund Request

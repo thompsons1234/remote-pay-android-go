@@ -661,6 +661,7 @@ public class CloverConnector implements ICloverConnector {
     }
   }
 
+
   @Override
   public void printText(List<String> messages) {
     if (device == null || !isReady) {
