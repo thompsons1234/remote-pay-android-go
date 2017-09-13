@@ -24,6 +24,7 @@ import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +50,7 @@ import java.util.List;
 
 public class CardsFragment extends Fragment {
     private static final String ARG_STORE = "store";
+    private static final String TAG = CardsFragment.class.getSimpleName();
 
     private POSStore store;
 
@@ -145,9 +147,13 @@ public class CardsFragment extends Fragment {
                                 vaultedCard.setExpirationDate(posCard.getMonth() + posCard.getYear());
                                 vaultedCard.setToken(posCard.getToken());
 
+                                String externalPaymentID = IdUtils.getNextId();
+                                Log.d(TAG, "ExternalPaymentID:" + externalPaymentID);
+                                store.getCurrentOrder().setPendingPaymentId(externalPaymentID);
+
                                 switch(index) {
                                     case 0: {
-                                        SaleRequest request = new SaleRequest(store.getCurrentOrder().getTotal(), IdUtils.getNextId());
+                                        SaleRequest request = new SaleRequest(store.getCurrentOrder().getTotal(), externalPaymentID);
                                         request.setCardEntryMethods(store.getCardEntryMethods());
                                         request.setAllowOfflinePayment(store.getAllowOfflinePayment());
                                         request.setForceOfflinePayment(store.getForceOfflinePayment());
@@ -169,7 +175,7 @@ public class CardsFragment extends Fragment {
                                         break;
                                     }
                                     case 1: {
-                                        AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), IdUtils.getNextId());
+                                        AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), externalPaymentID);
                                         request.setCardEntryMethods(store.getCardEntryMethods());
                                         request.setAllowOfflinePayment(store.getAllowOfflinePayment());
                                         request.setForceOfflinePayment(store.getForceOfflinePayment());
