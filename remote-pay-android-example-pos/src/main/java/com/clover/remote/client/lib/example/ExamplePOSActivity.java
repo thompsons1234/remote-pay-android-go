@@ -61,6 +61,7 @@ import com.clover.remote.client.messages.MessageToActivity;
 import com.clover.remote.client.messages.PaymentResponse;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.PreAuthResponse;
+import com.clover.remote.client.messages.PrintJobStatusResponse;
 import com.clover.remote.client.messages.PrintManualRefundDeclineReceiptMessage;
 import com.clover.remote.client.messages.PrintManualRefundReceiptMessage;
 import com.clover.remote.client.messages.PrintPaymentDeclineReceiptMessage;
@@ -77,6 +78,7 @@ import com.clover.remote.client.messages.RetrieveDeviceStatusResponse;
 import com.clover.remote.client.messages.RetrievePaymentRequest;
 import com.clover.remote.client.messages.RetrievePaymentResponse;
 import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
+import com.clover.remote.client.messages.RetrievePrintersResponse;
 import com.clover.remote.client.messages.SaleResponse;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
 import com.clover.remote.client.messages.VaultCardResponse;
@@ -241,6 +243,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         authToken = sharedPreferences.getString("AUTH_TOKEN", null);
       }
       config = new WebSocketCloverDeviceConfiguration(uri, applicationId, trustStore, posName, serialNumber, authToken) {
+        @Override
+        public int getMaxMessageCharacters() {
+          return 0;
+        }
+
         @Override
         public void onPairingCode(final String pairingCode) {
           runOnUiThread(new Runnable() {
@@ -954,6 +961,16 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
             cloverConnector.showWelcomeScreen();
           }
         }
+      }
+
+      @Override
+      public void onPrintJobStatusResponse(PrintJobStatusResponse response) {
+
+      }
+
+      @Override
+      public void onRetrievePrintersResponse(RetrievePrintersResponse response) {
+
       }
 
       @Override

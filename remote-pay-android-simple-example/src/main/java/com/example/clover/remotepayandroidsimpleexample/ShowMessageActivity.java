@@ -17,7 +17,7 @@ import static android.content.ContentValues.TAG;
 public class ShowMessageActivity extends Activity {
 
   private static ICloverConnector cloverConnector;
-  private final String TAG = MainActivity.class.getSimpleName();
+  private final String TAG = ShowMessageActivity.class.getSimpleName();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {

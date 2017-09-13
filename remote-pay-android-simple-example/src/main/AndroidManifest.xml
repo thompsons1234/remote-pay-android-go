@@ -27,6 +27,9 @@
     <activity android:name=".MakeRefundActivity"
         android:label="Make Refund"
         android:screenOrientation="sensor"></activity>
+    <activity android:name=".TestPrintingActivity"
+      android:label="Test Printing"
+      android:screenOrientation="sensor"></activity>
   </application>
 
 </manifest>

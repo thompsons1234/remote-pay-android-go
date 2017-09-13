@@ -44,6 +44,9 @@ import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.CustomActivityRequest;
 import com.clover.remote.client.messages.CustomActivityResponse;
+import com.clover.remote.client.messages.OpenCashDrawerRequest;
+import com.clover.remote.client.messages.PrintJobStatusRequest;
+import com.clover.remote.client.messages.PrintRequest;
 import com.clover.remote.client.messages.RetrievePaymentRequest;
 import com.clover.remote.client.messages.RetrievePaymentResponse;
 import com.clover.remote.client.messages.ManualRefundRequest;
@@ -67,6 +70,7 @@ import com.clover.remote.client.messages.ResultCode;
 import com.clover.remote.client.messages.RetrieveDeviceStatusRequest;
 import com.clover.remote.client.messages.RetrieveDeviceStatusResponse;
 import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
+import com.clover.remote.client.messages.RetrievePrintersRequest;
 import com.clover.remote.client.messages.SaleRequest;
 import com.clover.remote.client.messages.SaleResponse;
 import com.clover.remote.client.messages.TipAdjustAuthRequest;
@@ -112,6 +116,7 @@ public class CloverConnector implements ICloverConnector {
   public static final int CARD_ENTRY_METHOD_ICC_CONTACT = 0b0010 | 0b0010_00000000 | KIOSK_CARD_ENTRY_METHODS; // 33282
   public static final int CARD_ENTRY_METHOD_NFC_CONTACTLESS = 0b0100 | 0b0100_00000000 | KIOSK_CARD_ENTRY_METHODS; // 33796
   public static final int CARD_ENTRY_METHOD_MANUAL = 0b1000 | 0b1000_00000000 | KIOSK_CARD_ENTRY_METHODS; // 34824
+  public static final int MAX_PAYLOAD_SIZE = 10000000; // maximum size of the payload of a full message.  if the payload exceeds this, the message will not be sent.
 
   public static final InputOption CANCEL_INPUT_OPTION = new InputOption(KeyPress.ESC, "Cancel");
 
@@ -133,6 +138,7 @@ public class CloverConnector implements ICloverConnector {
   private CloverDeviceConfiguration configuration;
 
   boolean isReady = false;
+
 
   /**
    * CloverConnector constructor
@@ -651,6 +657,35 @@ public class CloverConnector implements ICloverConnector {
       device.doCloseout(request.isAllowOpenTabs(), request.getBatchId());
     }
   }
+
+
+
+
+
+  @Override
+  public void print(PrintRequest request) {
+
+  }
+
+  @Override
+  public void retrievePrinters(RetrievePrintersRequest request) {
+
+  }
+
+  @Override
+  public void retrievePrintJobStatus(PrintJobStatusRequest request) {
+
+  }
+
+  @Override
+  public void openCashDrawer(OpenCashDrawerRequest request) {
+
+  }
+
+
+
+
+
 
   @Override
   public void cancel() {

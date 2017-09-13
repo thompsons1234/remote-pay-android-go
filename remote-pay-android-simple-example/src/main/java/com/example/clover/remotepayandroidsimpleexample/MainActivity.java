@@ -203,6 +203,13 @@ public class MainActivity extends Activity {
     startActivity(intent);
   }
 
+  public void testPrinting(View view){
+    Log.d(TAG, "test printing called");
+    Intent intent = new Intent();
+    intent.setClass(this, TestPrintingActivity.class);
+    startActivity(intent);
+  }
+
   public static ICloverConnector getCloverConnector (){
     return cloverConnector;
   }

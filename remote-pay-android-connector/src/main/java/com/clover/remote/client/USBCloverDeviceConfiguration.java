@@ -65,6 +65,11 @@ public class USBCloverDeviceConfiguration implements CloverDeviceConfiguration, 
   }
 
   @Override
+  public int getMaxMessageCharacters() {
+    return 0;
+  }
+
+  @Override
   public CloverTransport getCloverTransport() {
     PackageManager pm = context.getPackageManager();
     try {

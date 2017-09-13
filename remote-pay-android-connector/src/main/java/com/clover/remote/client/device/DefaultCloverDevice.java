@@ -21,6 +21,7 @@ import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
 import com.clover.remote.client.CloverDeviceConfiguration;
+import com.clover.remote.client.messages.PrintRequest;
 import com.clover.remote.client.messages.ResultCode;
 import com.clover.remote.client.transport.ICloverTransport;
 import com.clover.remote.client.transport.ICloverTransportObserver;
@@ -110,6 +111,8 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   private Gson gson = new Gson();
   private static int id = 0;
   private RefundResponseMessage refRespMsg;
+  private int remoteMessageVersion = 1;
+  public int maxMessageSizeInChars;
 
   private final Map<String, AsyncTask<Object, Object, Object>> msgIdToTask = new HashMap<>();
 
@@ -117,6 +120,10 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
 
   public DefaultCloverDevice(CloverDeviceConfiguration configuration) {
     this(configuration.getMessagePackageName(), configuration.getCloverTransport(), configuration.getApplicationId());
+    if(configuration.getMaxMessageCharacters() < 1000) {
+      Log.d(TAG, "Message size is too small, reverting to 1000");
+    }
+    maxMessageSizeInChars = Math.max(1000,configuration.getMaxMessageCharacters());
   }
 
   public DefaultCloverDevice(String packageName, ICloverTransport transport, String applicationId) {
@@ -160,6 +167,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
       if (msgType == RemoteMessage.Type.PING) {
         sendPong();
       } else if (msgType == RemoteMessage.Type.COMMAND) {
+//        remoteMessageVersion = Math.max(remoteMessageVersion, rMessage.version);
         onCommand(rMessage);
       } else {
         Log.e(TAG, "Don't support messages of type: " + rMessage.type.toString());
@@ -1054,10 +1062,24 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   }
 
   @Override
-  public void doPrintImage(Bitmap bitmap) {
-    ImagePrintMessage ipm = new ImagePrintMessage(bitmap);
+  public void doPrintImage(final Bitmap bitmap) {
+    final ImagePrintMessage ipm = new ImagePrintMessage((byte[])null);
+    if (remoteMessageVersion > 1){
+      // Base 64 Attachment processing, the attachment is already base64 encoded before chunking
+      String msgJson = gson.toJson(ipm);
+      if(msgJson != null){
+        Runnable r = new Runnable() {
+          @Override
+          public void run() {
+            sendObjectMessage(ipm, 2);
+          }
+        };
+      }
+
+    }
     sendObjectMessage(ipm);
   }
+
 
   @Override
   public void doPrintImage(String url) {

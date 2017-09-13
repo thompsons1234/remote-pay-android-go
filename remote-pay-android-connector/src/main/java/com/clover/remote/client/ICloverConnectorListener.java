@@ -39,6 +39,7 @@ import com.clover.remote.client.messages.RefundPaymentResponse;
 import com.clover.remote.client.messages.ResetDeviceResponse;
 import com.clover.remote.client.messages.RetrieveDeviceStatusResponse;
 import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
+import com.clover.remote.client.messages.RetrievePrintersResponse;
 import com.clover.remote.client.messages.SaleResponse;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
 import com.clover.remote.client.messages.VaultCardResponse;
@@ -189,6 +190,12 @@ public interface ICloverConnectorListener {
    */
     void onPrintJobStatusResponse(PrintJobStatusResponse response);
 
+  /**
+   * Called in response to a retrievePrinters() request
+   *
+   * @param response Response object containing an array of the printers being passed back
+   */
+  void onRetrievePrintersResponse(RetrievePrintersResponse response);
 
   /**
    * Will only be called if disablePrinting = true on the Sale, Auth, PreAuth or ManualRefund Request
