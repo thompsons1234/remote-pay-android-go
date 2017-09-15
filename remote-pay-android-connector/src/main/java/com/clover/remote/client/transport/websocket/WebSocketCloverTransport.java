@@ -161,15 +161,22 @@ public class WebSocketCloverTransport extends CloverTransport implements CloverN
       webSocket = new CloverNVWebSocketClient(endpoint, this, trustStore);
     }
 
-    // This connect call is outside the synchronized block intentionally because this is a blocking call
-    // Potential race condition is handled by try/catch
-    try {
-      webSocket.connect();
-      Log.d(getClass().getSimpleName(), "connection attempt done.");
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      reconnect();
-    }
+    // network access, so needs to be off UI thread
+    new AsyncTask<Object, Object, Object>() {
+      @Override
+      protected Object doInBackground(Object[] params) {
+        // This connect call is outside the synchronized block intentionally because this is a blocking call
+        // Potential race condition is handled by try/catch
+        try {
+          webSocket.connect();
+          Log.d(getClass().getSimpleName(), "connection attempt done.");
+        } catch (Exception ex) {
+          Log.w(WebSocketCloverTransport.class.getSimpleName(), "connection attempt failed.");
+          reconnect();
+        }
+        return null;
+      }
+    }.execute();
   }
 
   @Override
