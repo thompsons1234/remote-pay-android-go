@@ -92,7 +92,6 @@ import com.clover.sdk.v3.payments.TransactionSettings;
 import com.clover.sdk.v3.payments.VaultedCard;
 
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.PrintWriter;
@@ -171,13 +170,7 @@ public class CloverConnector implements ICloverConnector {
       device.subscribe(deviceObserver);
     }
 
-    new AsyncTask<Object, Object, Object>() {
-      @Override
-      protected Object doInBackground(Object[] params) {
-        device.initializeConnection(); // network access, so needs to be off UI thread
-        return null;
-      }
-    }.execute();
+    device.initializeConnection();
   }
 
   @Override
