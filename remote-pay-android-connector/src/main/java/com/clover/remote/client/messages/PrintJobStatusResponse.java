@@ -1,5 +1,7 @@
 package com.clover.remote.client.messages;
 
+import com.clover.sdk.v3.printer.PrintJobStatus;
+
 import java.util.ArrayList;
 import java.util.List;
 

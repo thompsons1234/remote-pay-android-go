@@ -1,6 +1,8 @@
 package com.clover.remote.client.messages;
 
 
+import com.clover.sdk.v3.printer.PrintCategory;
+
 /**
  * Request to retrieve all available printers
  */

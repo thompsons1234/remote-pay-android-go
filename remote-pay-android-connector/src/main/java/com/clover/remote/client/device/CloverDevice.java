@@ -19,6 +19,9 @@ package com.clover.remote.client.device;
 import com.clover.common2.payments.PayIntent;
 import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
+import com.clover.remote.client.messages.PrintJobStatusRequest;
+import com.clover.remote.client.messages.PrintRequest;
+import com.clover.remote.client.messages.RetrievePrintersRequest;
 import com.clover.remote.client.transport.ICloverTransport;
 import com.clover.remote.order.DisplayOrder;
 import com.clover.sdk.v3.order.Order;
@@ -101,7 +104,7 @@ public abstract class CloverDevice {
 
   public abstract void doTipAdjustAuth(String orderId, String paymentId, long amount);
 
-  public abstract void doPrintText(List<String> textLines);
+  public abstract void doPrintText(List<String> textLines, String printRequestId, String printDeviceId);
 
   public abstract void doShowWelcomeScreen();
 
@@ -109,11 +112,17 @@ public abstract class CloverDevice {
 
   public abstract void doShowThankYouScreen();
 
-  public abstract void doOpenCashDrawer(String reason);
+  public abstract void doOpenCashDrawer(String reason, String deviceId);
 
-  public abstract void doPrintImage(Bitmap bitmap);
+  public abstract void doPrintImage(Bitmap bitmap, String printRequestId, String printDeviceId);
 
-  public abstract void doPrintImage(String url);
+  public abstract void doPrintImage(String url, String printRequestId, String printDeviceId);
+
+  public abstract void doPrint(PrintRequest request);
+
+  public abstract void doRetrievePrinters(RetrievePrintersRequest request);
+
+  public abstract void doRetrievePrintJobStatus(PrintJobStatusRequest request);
 
   public abstract void doCloseout(boolean allowOpenTabs, String batchId);
 
