@@ -66,7 +66,7 @@ public class USBCloverDeviceConfiguration implements CloverDeviceConfiguration, 
 
   @Override
   public int getMaxMessageCharacters() {
-    return 0;
+    return 1000;
   }
 
   @Override

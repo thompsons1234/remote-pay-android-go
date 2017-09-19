@@ -1142,14 +1142,17 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
 
   @Override
   public void doPrintImage(Bitmap bitmap, String printRequestId, String printDeviceId) {
-//    Printer printer = new Printer();
-//    printer.setId(printDeviceId);
+    Printer printer = new Printer();
+    printer.setId(printDeviceId);
+    if(printDeviceId == null){
+      printer = null;
+    }
 
     if(remoteMessageVersion > 1){
       // Base 64 Attachment processing, the attachment is already base64 encoded before chunking
 
       // Does Base 64 Fragment processing, the attachment is a bitmap that will be chunked, then encoded
-      ImagePrintMessage ipm = new ImagePrintMessage((Bitmap)null,printRequestId, null);
+      ImagePrintMessage ipm = new ImagePrintMessage((Bitmap)null,printRequestId, printer);
       String message = ipm.toJsonString();
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
       bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
@@ -1363,12 +1366,10 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
       Log.d(getClass().getName(), "Message is null");
       return null;
     }
-    Log.d(getClass().getName(), message.toString());
     if (method == null) {
       Log.e(getClass().getName(), "Invalid message", new IllegalArgumentException("Invalid message: " + message.toString()));
       return null;
     }
-
     String applicationId = getApplicationId();
     if (applicationId == null) {
       Log.e(getClass().getName(), "ApplicationId is null");
@@ -1376,7 +1377,6 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
     }
 
     String messageId = (++id) + "";
-//    RemoteMessage remoteMessage = new RemoteMessage(messageId, RemoteMessage.Type.COMMAND, this.packageName, method.toString(), message, REMOTE_SDK, applicationId);
     RemoteMessage.Builder remoteMessage = new RemoteMessage.Builder();
     remoteMessage.setId(messageId);
     remoteMessage.setType(RemoteMessage.Type.COMMAND);
@@ -1490,7 +1490,9 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
       }
       finally {
         try{
-          input.close();
+          if(input != null) {
+            input.close();
+          }
         }
         catch (IOException e){
           e.printStackTrace();
