@@ -1086,7 +1086,8 @@ public class CloverConnector implements ICloverConnector {
 
     @Override
     public void onRetrievePrinterResponse(List<Printer> printers) {
-
+      RetrievePrintersResponse response = new RetrievePrintersResponse(printers);
+      cloverConnector.broadcaster.notifyOnRetrievePrinters(response);
     }
 
     @Override
@@ -1491,15 +1492,10 @@ public class CloverConnector implements ICloverConnector {
       // TODO: for future use
     }
 
+    @Override
     public void onRetrievePrintJobStatus(String printRequestId, PrintJobStatus status){
       PrintJobStatusResponse response = new PrintJobStatusResponse(printRequestId, status);
       cloverConnector.broadcaster.notifyOnPrintJobStatusResponse(response);
     }
-
-    public void onRetrievePrintersResponse(Printer[] printers){
-      RetrievePrintersResponse response = new RetrievePrintersResponse(printers);
-      cloverConnector.broadcaster.notifyOnRetrievePrinters(response);
-    }
-
   }
 }

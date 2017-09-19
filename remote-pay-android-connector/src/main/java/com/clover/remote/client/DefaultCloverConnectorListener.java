@@ -187,11 +187,11 @@ public abstract class DefaultCloverConnectorListener implements ICloverConnector
 
   }
 
-  public void onRetrievePrinters(RetrievePrintersResponse response){
+   @Override public void onRetrievePrintersResponse(RetrievePrintersResponse response){
 
   }
 
-  public void onPrintJobStatusResponse(PrintJobStatusResponse response){
+  @Override public void onPrintJobStatusResponse(PrintJobStatusResponse response){
 
   }
 }

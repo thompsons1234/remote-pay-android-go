@@ -17,10 +17,8 @@ public class RetrievePrintersResponse {
    *
    * @param printers a list of printers being passed back
    */
-  public RetrievePrintersResponse(Printer[] printers){
-    for( Printer printer : printers){
-      this.printers.add(printer);
-    }
+  public RetrievePrintersResponse(List<Printer> printers){
+    this.printers = printers;
   }
 
   /**

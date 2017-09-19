@@ -25,6 +25,7 @@ import com.clover.remote.client.CloverDeviceConfiguration;
 import com.clover.remote.client.messages.PrintJobStatusRequest;
 import com.clover.remote.client.messages.PrintRequest;
 import com.clover.remote.client.messages.ResultCode;
+import com.clover.remote.client.messages.RetrieveDeviceStatusResponse;
 import com.clover.remote.client.messages.RetrievePrintersRequest;
 import com.clover.remote.client.transport.ICloverTransport;
 import com.clover.remote.client.transport.ICloverTransportObserver;
@@ -49,6 +50,7 @@ import com.clover.remote.message.DiscoveryRequestMessage;
 import com.clover.remote.message.DiscoveryResponseMessage;
 import com.clover.remote.message.FinishCancelMessage;
 import com.clover.remote.message.FinishOkMessage;
+import com.clover.remote.message.GetPrintersResponseMessage;
 import com.clover.remote.message.ImagePrintMessage;
 import com.clover.remote.message.KeyPressMessage;
 import com.clover.remote.message.Message;
@@ -334,6 +336,11 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
         case PRINT_IMAGE:
           //Outbound no-op
           break;
+        case GET_PRINTERS_REQUEST:
+          break;
+        case GET_PRINTERS_RESPONSE:
+          GetPrintersResponseMessage rpr = (GetPrintersResponseMessage) Message.fromJsonString(rMessage.payload);
+          notifyObserversRetrievePrinterResponse(rpr);
         case PRINT_JOB_STATUS_REQUEST:
           //Outbound no-op
           break;
@@ -561,13 +568,13 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
     }.execute();
   }
 
-  private void notifyObserversRetrievePrinterResponse(final RetrievePrintersResponseMessage response) {
+  private void notifyObserversRetrievePrinterResponse(final GetPrintersResponseMessage response) {
     new AsyncTask<Object, Object, Object>() {
       @Override
       protected Object doInBackground(Object[] params) {
         for (CloverDeviceObserver observer : deviceObservers) {
           try {
-            observer.onRetrievePrinterResponse(response.getPrinters());
+            observer.onRetrievePrinterResponse(response.printers);
           } catch (Exception ex) {
             Log.w(getClass().getSimpleName(), "Error processing RetrievePrintersResponse for observer: " + ex);
           }
@@ -1093,6 +1100,9 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   public void doOpenCashDrawer(String reason, String deviceId) {
     Printer printer = new Printer();
     printer.setId(deviceId);
+    if(deviceId == null){
+      printer = null;
+    }
     OpenCashDrawerMessage message = new OpenCashDrawerMessage(reason, printer);
     sendObjectMessage(message);
   }
