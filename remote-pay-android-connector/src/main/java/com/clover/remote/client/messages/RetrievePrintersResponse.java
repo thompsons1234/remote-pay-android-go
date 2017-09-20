@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Response object for retrieving the printers
  */
-public class RetrievePrintersResponse {
+public class RetrievePrintersResponse extends BaseResponse {
 
   private List<Printer> printers = new ArrayList<>();
 

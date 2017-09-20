@@ -25,7 +25,6 @@ import com.clover.remote.client.CloverDeviceConfiguration;
 import com.clover.remote.client.messages.PrintJobStatusRequest;
 import com.clover.remote.client.messages.PrintRequest;
 import com.clover.remote.client.messages.ResultCode;
-import com.clover.remote.client.messages.RetrieveDeviceStatusResponse;
 import com.clover.remote.client.messages.RetrievePrintersRequest;
 import com.clover.remote.client.transport.ICloverTransport;
 import com.clover.remote.client.transport.ICloverTransportObserver;
@@ -76,7 +75,6 @@ import com.clover.remote.message.RetrievePaymentResponseMessage;
 import com.clover.remote.message.RetrievePendingPaymentsMessage;
 import com.clover.remote.message.RetrievePendingPaymentsResponseMessage;
 import com.clover.remote.message.RetrievePrintersRequestMessage;
-import com.clover.remote.message.RetrievePrintersResponseMessage;
 import com.clover.remote.message.ShowPaymentReceiptOptionsMessage;
 import com.clover.remote.message.SignatureVerifiedMessage;
 import com.clover.remote.message.TerminalMessage;
@@ -109,15 +107,11 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
-import android.webkit.URLUtil;
 import com.google.gson.Gson;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -133,7 +127,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   private static int id = 0;
   private RefundResponseMessage refRespMsg;
   private int remoteMessageVersion = 1;
-  public int maxMessageSizeInChars;
+  private int maxMessageSizeInChars;
 
   private final Map<String, AsyncTask<Object, Object, Object>> msgIdToTask = new HashMap<>();
 
@@ -1057,14 +1051,6 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
     sendObjectMessage(new ShowPaymentReceiptOptionsMessage(orderId, paymentId, 2));
   }
 
-//  public void doShowRefundReceiptScreen(String orderId, String refundId) {
-//    sendObjectMessage(new ShowRefundReceiptOptionsMessage(orderId, refundId));
-//  }
-
-//  public void doShowManualRefundReceiptScreen(String orderId, String creditId) {
-//    sendObjectMessage(new ShowManualRefundReceiptOptionsMessage(orderId, creditId));
-//  }
-
   @Override
   public void doKeyPress(KeyPress keyPress) {
     sendObjectMessage(new KeyPressMessage(keyPress));
@@ -1168,14 +1154,11 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
 
   @Override
   public void doPrintImage(String url, String printRequestId, String printDeviceId) {
-//    Printer printer = new Printer();
-//    printer.setId(printDeviceId);
-    if(remoteMessageVersion > 1){
+    if (remoteMessageVersion > 1) {
       ImagePrintMessage ipm = new ImagePrintMessage((String)null, printRequestId, null);
       String message = ipm.toJsonString();
       sendObjectMessage(message, Method.PRINT_IMAGE, 2, url);
-    }
-    else {
+    } else {
       ImagePrintMessage ipm = new ImagePrintMessage(url, printRequestId, null);
       sendObjectMessage(ipm);
     }
@@ -1183,15 +1166,17 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
 
   @Override
   public void doPrint(PrintRequest request) {
-    if(request.getText().size() > 0){
+    if (request.getText().size() > 0) {
       doPrintText(request.getText(), request.getPrintRequestId(), request.getPrintDeviceId());
-    }
-    else if(request.getImages().size() > 0){
+    } else if (request.getImages().size() > 0) {
       doPrintImage(request.getImages().get(0), request.getPrintRequestId(), request.getPrintDeviceId());
-    }
-    else if(request.getImageURLs().size() > 0){
-      if(URLUtil.isValidUrl(request.getImageURLs().get(0))){
+    } else if (request.getImageURLs().size() > 0) {
+      try {
+        // Make sure URL is well-formed
+        new URL(request.getImageURLs().get(0));
         doPrintImage(request.getImageURLs().get(0), request.getPrintRequestId(), request.getPrintDeviceId());
+      } catch (MalformedURLException ex) {
+        Log.d(TAG, "In doPrint: PrintRequest had malformed image URL");
       }
     }
     else{
@@ -1336,9 +1321,9 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
       Log.d(getClass().getName(), "Message is null");
       return null;
     }
-    Log.d(getClass().getName(), message.toString());
+    Log.d(getClass().getName(), message);
     if (method == null) {
-      Log.e(getClass().getName(), "Invalid message", new IllegalArgumentException("Invalid message: " + message.toString()));
+      Log.e(getClass().getName(), "Invalid message", new IllegalArgumentException("Invalid message: " + message));
       return null;
     }
 
@@ -1367,7 +1352,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
       return null;
     }
     if (method == null) {
-      Log.e(getClass().getName(), "Invalid message", new IllegalArgumentException("Invalid message: " + message.toString()));
+      Log.e(getClass().getName(), "Invalid message", new IllegalArgumentException("Invalid message: " + message));
       return null;
     }
     String applicationId = getApplicationId();
@@ -1464,9 +1449,6 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   }
 
   class RetrieveUrlTask extends AsyncTask<Object, Void, Void> {
-
-
-
     protected Void doInBackground(Object... params) {
       InputStream input = null;
       int fragmentIndex = (int)params[2];
@@ -1516,6 +1498,5 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
 
     String message = gson.toJson(rm);
     sendRemoteMessage(message);
-
   }
 }

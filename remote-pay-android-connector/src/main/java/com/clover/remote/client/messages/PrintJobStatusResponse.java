@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Response object, called to update status of print job
  */
-public class PrintJobStatusResponse {
+public class PrintJobStatusResponse extends BaseResponse {
 
   private List<String> printRequestId = new ArrayList<>();
   private PrintJobStatus status = null;
