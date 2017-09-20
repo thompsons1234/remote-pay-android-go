@@ -1,15 +1,13 @@
 package com.clover.remote.client.messages;
 
 import android.graphics.Bitmap;
-import android.media.Image;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Request object for requesting a print job.
  */
-public class PrintRequest {
+public class PrintRequest extends BaseRequest {
 
   public List<Bitmap> images = new ArrayList<>();
   public List<String> imageURLs = new ArrayList<>();

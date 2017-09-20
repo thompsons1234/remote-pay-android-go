@@ -16,7 +16,6 @@
 
 package com.clover.remote.client;
 
-import com.clover.remote.client.CloverConnector;
 import com.clover.remote.client.transport.ICloverTransport;
 
 import java.io.Serializable;

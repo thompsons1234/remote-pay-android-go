@@ -6,7 +6,7 @@ import com.clover.sdk.v3.printer.PrintCategory;
 /**
  * Request to retrieve all available printers
  */
-public class RetrievePrintersRequest {
+public class RetrievePrintersRequest extends BaseRequest {
   private PrintCategory category = null;
 
   /**

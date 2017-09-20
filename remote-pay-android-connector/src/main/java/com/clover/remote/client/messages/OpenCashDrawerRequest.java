@@ -4,7 +4,7 @@ package com.clover.remote.client.messages;
 /**
  * Request object to open cash drawer
  */
-public class OpenCashDrawerRequest {
+public class OpenCashDrawerRequest extends BaseRequest {
 
   private String reason = null;
 

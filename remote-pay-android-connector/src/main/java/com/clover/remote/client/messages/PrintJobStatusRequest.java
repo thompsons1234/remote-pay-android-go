@@ -1,14 +1,11 @@
 package com.clover.remote.client.messages;
 
 /**
- * Created by rachel.antion on 9/12/17.
- */
-
-/**
  * Request for status of print job
  */
-public class PrintJobStatusRequest {
-private String printRequestId = null;
+public class PrintJobStatusRequest extends BaseRequest {
+
+  private String printRequestId = null;
 
   /**
    * Constructor
