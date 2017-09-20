@@ -48,6 +48,14 @@ public interface CloverDeviceConfiguration extends Serializable {
   String getName();
 
   /**
+   * Retrieve the max message characters
+   *
+   * @return max numner characters
+   */
+  int getMaxMessageCharacters();
+
+
+  /**
    * Retrieve the configuration specified transport (e.g. network, etc.) associated with this configuration.  Note
    * that the underlying connection for the transport is not made as a part of this call.
    *

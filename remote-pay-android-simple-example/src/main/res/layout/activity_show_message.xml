@@ -18,6 +18,21 @@
       android:text="@string/show_message"
       android:padding="10sp"/>
 
+  <Button android:layout_height="wrap_content"
+      android:layout_width="wrap_content"
+      android:text="Cash Drawer"
+      android:onClick="cashdrawer"/>
+
+  <Button android:layout_height="wrap_content"
+      android:layout_width="wrap_content"
+      android:text="Print"
+      android:onClick="print"/>
+
+  <Button android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:text="Get Status"
+      android:onClick="getStatus"/>
+
 
 
 </LinearLayout>
