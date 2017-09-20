@@ -1495,7 +1495,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
           }
         }
         catch (IOException e){
-          e.printStackTrace();
+          //ignore
         }
 
       }
