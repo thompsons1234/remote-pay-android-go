@@ -749,7 +749,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
       protected Object doInBackground(Object[] params) {
         for (CloverDeviceObserver observer : deviceObservers) {
           try {
-            observer.onPaymentRefundResponse(rrm.orderId, rrm.paymentId, rrm.refund, rrm.code);
+            observer.onPaymentRefundResponse(rrm.orderId, rrm.paymentId, rrm.refund, rrm.code, rrm.reason, rrm.message);
           } catch (Exception ex) {
             Log.w(getClass().getSimpleName(), "Error processing RefundResponseMessage for observer: " + message, ex);
           }
@@ -1239,8 +1239,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
      * Need this to get a V2 of refund request
      */
     RefundRequestMessage refundRequestMessage = new RefundRequestMessage(orderId, paymentId, amount, fullAmount);
-
-    sendObjectMessage(gson.toJson(refundRequestMessage), null, 2, (String)null);
+    sendObjectMessage(gson.toJson(refundRequestMessage), Method.REFUND_REQUEST, 2, (String)null);
   }
 
   @Override

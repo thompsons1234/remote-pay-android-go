@@ -20,6 +20,7 @@ import com.clover.common2.Signature2;
 import com.clover.common2.payments.PayIntent;
 import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
+import com.clover.remote.ErrorCode;
 import com.clover.remote.ExternalDeviceState;
 import com.clover.remote.ExternalDeviceStateData;
 import com.clover.remote.InputOption;
@@ -1126,13 +1127,15 @@ public class CloverConnector implements ICloverConnector {
     }
 
     @Override
-    public void onPaymentRefundResponse(String orderId, String paymentId, Refund refund, TxState code) {
+    public void onPaymentRefundResponse(String orderId, String paymentId, Refund refund, TxState code, ErrorCode reason, String message) {
       // hold the response for finishOk for the refund. See comments in onFinishOk(Refund)
       boolean success = code == TxState.SUCCESS;
       RefundPaymentResponse prr = new RefundPaymentResponse(success, success ? ResultCode.SUCCESS : ResultCode.FAIL);
       prr.setOrderId(orderId);
       prr.setPaymentId(paymentId);
       prr.setRefund(refund);
+      prr.setReason(reason.toString());
+      prr.setMessage(message);
       lastPRR = prr; // set this so we have the appropriate information for when onFinish(Refund) is called
     }
 
