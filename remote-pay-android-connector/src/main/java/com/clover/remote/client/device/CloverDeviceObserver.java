@@ -19,6 +19,7 @@ package com.clover.remote.client.device;
 import com.clover.common2.Signature2;
 import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
+import com.clover.remote.ErrorCode;
 import com.clover.remote.ExternalDeviceState;
 import com.clover.remote.ExternalDeviceStateData;
 import com.clover.remote.InputOption;
@@ -76,7 +77,7 @@ public interface CloverDeviceObserver {
 
   void onKeyPressed(KeyPress keyPress);
 
-  void onPaymentRefundResponse(String orderId, String paymentId, Refund refund, TxState code);
+  void onPaymentRefundResponse(String orderId, String paymentId, Refund refund, TxState code, ErrorCode reason, String message);
 
   void onVaultCardResponse(VaultedCard vaultedCard, String code, String reason);
 
