@@ -15,8 +15,6 @@
  */
 
 package com.clover.remote.client.messages;
-
-import com.clover.sdk.v3.pay.ErrorCode;
 import com.clover.sdk.v3.payments.Refund;
 
 /**

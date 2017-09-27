@@ -1134,7 +1134,9 @@ public class CloverConnector implements ICloverConnector {
       prr.setOrderId(orderId);
       prr.setPaymentId(paymentId);
       prr.setRefund(refund);
-      prr.setReason(reason.toString());
+      if(reason != null) {
+        prr.setReason(reason.toString());
+      }
       prr.setMessage(message);
       lastPRR = prr; // set this so we have the appropriate information for when onFinish(Refund) is called
     }
