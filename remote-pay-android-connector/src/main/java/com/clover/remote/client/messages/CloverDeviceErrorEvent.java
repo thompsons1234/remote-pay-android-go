@@ -33,7 +33,7 @@ public class CloverDeviceErrorEvent {
   }
 
   private final CloverDeviceErrorType errorType;
-  private final int code;
+  private final Integer code;
   private final Throwable cause;
   private final String message;
 
@@ -44,7 +44,7 @@ public class CloverDeviceErrorEvent {
    * @param devCode error code
    * @param msg description of the error
    */
-  public CloverDeviceErrorEvent(CloverDeviceErrorType errorType, int devCode, Throwable cause, String msg) {
+  public CloverDeviceErrorEvent(CloverDeviceErrorType errorType, Integer devCode, Throwable cause, String msg) {
     this.errorType = errorType;
     this.code = devCode;
     this.message = msg;
@@ -65,7 +65,7 @@ public class CloverDeviceErrorEvent {
    *
    * @return error code
    */
-  public int getCode() {
+  public Integer getCode() {
     return code;
   }
 
