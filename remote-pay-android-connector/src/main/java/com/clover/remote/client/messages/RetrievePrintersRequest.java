@@ -12,6 +12,14 @@ public class RetrievePrintersRequest extends BaseRequest {
   /**
    * Constructor
    *
+   *
+   */
+  public RetrievePrintersRequest(){
+  }
+
+  /**
+   * Constructor
+   *
    * @param printCategory category of printers to retrieve
    */
   public RetrievePrintersRequest(PrintCategory printCategory){
