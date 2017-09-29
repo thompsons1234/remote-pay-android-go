@@ -1113,7 +1113,9 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   public void doPrintText(List<String> textLines, String printRequestId, String printDeviceId) {
     Printer printer = new Printer();
     printer.setId(printDeviceId);
-
+    if(printRequestId == null){
+      printer = null;
+    }
     TextPrintMessage message = new TextPrintMessage(printDeviceId, printer, textLines);
     sendObjectMessage(message);
 

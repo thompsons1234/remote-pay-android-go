@@ -51,7 +51,7 @@ public class PrintRequest extends BaseRequest {
    * @param printRequestId identifier to give to the print job, so it can be later queried
    * @param printDeviceId identifier to specify printer to use
    */
-  public PrintRequest(String[] text, String printRequestId, String printDeviceId){
+  public PrintRequest(List<String> text, String printRequestId, String printDeviceId){
     for (String line: text) {
       this.text.add(line);
     }
@@ -84,7 +84,7 @@ public class PrintRequest extends BaseRequest {
    * Create a PrintRequest to print a given image
    * @param text Array of strings to be printed
    */
-  public PrintRequest(String[] text){
+  public PrintRequest(List<String> text){
     this(text, null, null);
   }
 
