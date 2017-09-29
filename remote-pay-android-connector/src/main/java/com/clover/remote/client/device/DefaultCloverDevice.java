@@ -1116,7 +1116,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
     if(printDeviceId == null){
       printer = null;
     }
-    TextPrintMessage message = new TextPrintMessage(printDeviceId, printer, textLines);
+    TextPrintMessage message = new TextPrintMessage(printRequestId, printer, textLines);
     sendObjectMessage(message);
 
   }
