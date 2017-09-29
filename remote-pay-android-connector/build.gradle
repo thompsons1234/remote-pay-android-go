@@ -39,6 +39,7 @@ dependencies {
 }
 
 apply plugin: 'signing'
+apply plugin: 'io.codearte.nexus-staging'
 
 uploadArchives {
     repositories {
@@ -94,4 +95,8 @@ artifacts {
 signing {
     required = { gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
+}
+
+nexusStaging {
+  packageGroup = "com.clover" //optional if packageGroup == project.getGroup() ------>  NOTE: project.getGroup() returns com.clover.sdk
 }
