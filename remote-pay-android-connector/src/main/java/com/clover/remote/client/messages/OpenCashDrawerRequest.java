@@ -9,7 +9,7 @@ import com.clover.sdk.v3.printer.Printer;
 public class OpenCashDrawerRequest extends BaseRequest {
 
   private String reason = null;
-  private Printer printer = null;
+  private String deviceId = null;
 
   /**
    * Constructor
@@ -19,18 +19,6 @@ public class OpenCashDrawerRequest extends BaseRequest {
   public OpenCashDrawerRequest(String reason){
     this.reason = reason;
   }
-
-  /**
-   * Constructor
-   *
-   * @param reason String describing the reason to open the drawer
-   */
-  public OpenCashDrawerRequest(String reason, Printer printer){
-    this.reason = reason;
-    this.printer = printer;
-  }
-
-
 
   /**
    * Get the field value
@@ -46,8 +34,8 @@ public class OpenCashDrawerRequest extends BaseRequest {
    *
    * @return Printer to use
    */
-  public Printer getPrinter() {
-    return printer;
+  public String setDeviceId() {
+    return deviceId;
   }
 
   /**
@@ -62,9 +50,9 @@ public class OpenCashDrawerRequest extends BaseRequest {
   /**
    * Set the field value
    *
-   * @param printer printer to use
+   * @param deviceId printer to use
    */
-  public void setPrinter(Printer printer) {
-    this.printer = printer;
+  public void setDeviceId(String deviceId) {
+    this.deviceId = deviceId;
   }
 }
