@@ -1,8 +1,5 @@
 package com.clover.remote.client.messages;
 
-
-import com.clover.sdk.v3.printer.Printer;
-
 /**
  * Request object to open cash drawer
  */
@@ -34,7 +31,7 @@ public class OpenCashDrawerRequest extends BaseRequest {
    *
    * @return Printer to use
    */
-  public String setDeviceId() {
+  public String getDeviceId() {
     return deviceId;
   }
 
