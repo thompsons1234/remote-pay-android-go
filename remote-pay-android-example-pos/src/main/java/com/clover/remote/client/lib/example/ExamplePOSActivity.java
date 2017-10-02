@@ -1447,6 +1447,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   public void onOpenCashDrawerClick(View view) {
     OpenCashDrawerRequest ocdr = new OpenCashDrawerRequest("Test");
+    if(printer != null){
+      ocdr = new OpenCashDrawerRequest("Test", printer);
+    }
     cloverConnector.openCashDrawer(ocdr);
   }
 

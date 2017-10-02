@@ -50,6 +50,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Switch;
+import org.java_websocket.WebSocket;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -197,6 +198,8 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     registerForContextMenu(printTextButton);
     Button printImageUrlButton = ((Button) view.findViewById(R.id.PrintImageURLButton));
     registerForContextMenu(printImageUrlButton);
+    Button openCashDrawer = ((Button) view.findViewById(R.id.CashDrawerButton));
+    registerForContextMenu(openCashDrawer);
 
     EditText.OnFocusChangeListener signatureThresholdChangeListener = new EditText.OnFocusChangeListener() {
 
@@ -451,6 +454,9 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     else if(v == getView().findViewById(R.id.PrintImageURLButton)){
       printCommand = "URL";
     }
+    else if(v == getView().findViewById(R.id.CashDrawerButton)){
+      printCommand = "CASH";
+    }
     for(int i = 0; i < printers.size(); i++){
       menu.add(Menu.NONE, i , Menu.NONE, printers.get(i).getName()+ " - "+ printers.get(i).getId());
     }
@@ -469,6 +475,9 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     }
     else if (printCommand == "URL"){
       activity.printImageURLClick(null);
+    }
+    else if(printCommand == "CASH"){
+      activity.onOpenCashDrawerClick(null);
     }
     return super.onContextItemSelected(item);
   }
