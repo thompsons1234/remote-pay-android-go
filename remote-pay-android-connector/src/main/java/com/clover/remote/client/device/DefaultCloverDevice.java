@@ -1084,10 +1084,9 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
 
   @Override
   public void doOpenCashDrawer(String reason, String deviceId) {
-    Printer printer = new Printer();
-    printer.setId(deviceId);
-    if(deviceId == null){
-      printer = null;
+    Printer printer = null;
+    if(deviceId != null){
+      printer = new Printer(deviceId);
     }
     OpenCashDrawerMessage message = new OpenCashDrawerMessage(reason, printer);
     sendObjectMessage(message);
@@ -1111,12 +1110,11 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
 
   @Override
   public void doPrintText(List<String> textLines, String printRequestId, String printDeviceId) {
-    Printer printer = new Printer();
-    printer.setId(printDeviceId);
-    if(printRequestId == null){
-      printer = null;
+    Printer printer = null;
+    if(printDeviceId != null){
+      printer = new Printer(printDeviceId);
     }
-    TextPrintMessage message = new TextPrintMessage(printDeviceId, printer, textLines);
+    TextPrintMessage message = new TextPrintMessage(printRequestId, printer, textLines);
     sendObjectMessage(message);
 
   }
@@ -1130,10 +1128,9 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
 
   @Override
   public void doPrintImage(Bitmap bitmap, String printRequestId, String printDeviceId) {
-    Printer printer = new Printer();
-    printer.setId(printDeviceId);
-    if(printDeviceId == null){
-      printer = null;
+    Printer printer = null;
+    if(printDeviceId != null){
+      printer = new Printer(printDeviceId);
     }
 
     if(remoteMessageVersion > 1){
@@ -1157,7 +1154,11 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   @Override
   public void doPrintImage(String url, String printRequestId, String printDeviceId) {
     if (remoteMessageVersion > 1) {
-      ImagePrintMessage ipm = new ImagePrintMessage((String)null, printRequestId, null);
+      Printer printer = null;
+      if(printDeviceId != null){
+        printer = new Printer(printDeviceId);
+      }
+      ImagePrintMessage ipm = new ImagePrintMessage((String)null, printRequestId, printer);
       String message = ipm.toJsonString();
       sendObjectMessage(message, Method.PRINT_IMAGE, 2, url);
     } else {
