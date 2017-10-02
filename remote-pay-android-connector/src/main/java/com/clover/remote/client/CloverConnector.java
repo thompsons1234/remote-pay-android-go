@@ -713,7 +713,7 @@ public class CloverConnector implements ICloverConnector {
         broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR,0, null, "OpenCashDrawer: The Clover Device is not ready"));
       }
       else{
-        device.doOpenCashDrawer(request.getReason(), null);
+        device.doOpenCashDrawer(request.getReason(), request.getDeviceId());
       }
     }
     else{

@@ -29,7 +29,7 @@ public class OpenCashDrawerRequest extends BaseRequest {
   /**
    * Get the field value
    *
-   * @return Printer to use
+   * @return deviceId to use
    */
   public String getDeviceId() {
     return deviceId;
