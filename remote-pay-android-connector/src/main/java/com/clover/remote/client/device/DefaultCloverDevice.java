@@ -1157,7 +1157,11 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   @Override
   public void doPrintImage(String url, String printRequestId, String printDeviceId) {
     if (remoteMessageVersion > 1) {
-      ImagePrintMessage ipm = new ImagePrintMessage((String)null, printRequestId, null);
+      Printer printer = new Printer(printDeviceId);
+      if(printDeviceId == null){
+        printer = null;
+      }
+      ImagePrintMessage ipm = new ImagePrintMessage((String)null, printRequestId, printer);
       String message = ipm.toJsonString();
       sendObjectMessage(message, Method.PRINT_IMAGE, 2, url);
     } else {
