@@ -1086,7 +1086,8 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   public void doOpenCashDrawer(String reason, String deviceId) {
     Printer printer = null;
     if(deviceId != null){
-      printer = new Printer(deviceId);
+      printer = new Printer();
+      printer.setId(deviceId);
     }
     OpenCashDrawerMessage message = new OpenCashDrawerMessage(reason, printer);
     sendObjectMessage(message);
@@ -1112,7 +1113,8 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   public void doPrintText(List<String> textLines, String printRequestId, String printDeviceId) {
     Printer printer = null;
     if(printDeviceId != null){
-      printer = new Printer(printDeviceId);
+      printer = new Printer();
+      printer.setId(printDeviceId);
     }
     TextPrintMessage message = new TextPrintMessage(printRequestId, printer, textLines);
     sendObjectMessage(message);
@@ -1130,7 +1132,8 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   public void doPrintImage(Bitmap bitmap, String printRequestId, String printDeviceId) {
     Printer printer = null;
     if(printDeviceId != null){
-      printer = new Printer(printDeviceId);
+      printer = new Printer();
+      printer.setId(printDeviceId);
     }
 
     if(remoteMessageVersion > 1){
@@ -1156,7 +1159,8 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
     if (remoteMessageVersion > 1) {
       Printer printer = null;
       if(printDeviceId != null){
-        printer = new Printer(printDeviceId);
+        printer = new Printer();
+        printer.setId(printDeviceId);
       }
       ImagePrintMessage ipm = new ImagePrintMessage((String)null, printRequestId, printer);
       String message = ipm.toJsonString();
