@@ -9,11 +9,11 @@ import java.util.List;
  */
 public class PrintRequest extends BaseRequest {
 
-  public List<Bitmap> images = new ArrayList<>();
-  public List<String> imageURLs = new ArrayList<>();
-  public List<String> text = new ArrayList<>();
-  public String printRequestId = null;
-  public String printDeviceId = null;
+  private List<Bitmap> images = new ArrayList<>();
+  private List<String> imageURLs = new ArrayList<>();
+  private List<String> text = new ArrayList<>();
+  private String printRequestId = null;
+  private String printDeviceId = null;
 
   /**
    * Constructor
@@ -133,4 +133,22 @@ public class PrintRequest extends BaseRequest {
     return printDeviceId;
   }
 
+
+  /**
+   * Set the field value
+   *
+   * @param printRequestId id of print job
+   */
+  public void setPrintRequestId(String printRequestId) {
+    this.printRequestId = printRequestId;
+  }
+
+  /**
+   * Set the field value
+   *
+   * @param printDeviceId id of the printer
+   */
+  public void setPrintDeviceId(String printDeviceId) {
+    this.printDeviceId = printDeviceId;
+  }
 }
