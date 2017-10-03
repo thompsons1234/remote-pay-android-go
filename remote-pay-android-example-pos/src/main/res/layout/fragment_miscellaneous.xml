@@ -125,6 +125,27 @@
             android:onClick="queryPaymentClick"/>
 
       </LinearLayout>
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal">
+        <EditText
+            android:layout_weight="1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine"
+            android:ems="10"
+            android:id="@+id/QueryPrintStatusText"/>
+
+        <Button
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="@string/get_print_status"
+            android:id="@+id/QueryPrintStatus"
+            android:onClick="queryPrintStatusClick"/>
+
+      </LinearLayout>
+
 
 
     </LinearLayout>

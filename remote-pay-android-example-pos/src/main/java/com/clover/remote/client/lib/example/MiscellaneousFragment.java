@@ -87,6 +87,7 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
   private Button sendMessageToActivityButton;
   private Spinner customActivityId;
   private List<Printer> printers;
+  private String lastPrintRequestId;
   private String printCommand;
 
   public static MiscellaneousFragment newInstance(POSStore store, ICloverConnector cloverConnector) {
@@ -185,6 +186,10 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     signatureEntryLocationSpinner.setOnItemSelectedListener(this);
 
     printers = ExamplePOSActivity.printers;
+    lastPrintRequestId = ExamplePOSActivity.lastPrintRequestId;
+
+    EditText printStatusId = ((EditText) view.findViewById(R.id.QueryPrintStatusText));
+    printStatusId.setText(lastPrintRequestId);
 
 
     manualSwitch.setTag(CloverConnector.CARD_ENTRY_METHOD_MANUAL);
