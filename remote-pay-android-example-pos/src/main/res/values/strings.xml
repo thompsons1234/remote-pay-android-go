@@ -139,6 +139,7 @@
   <string name="id">Id:</string>
   <string name="name">Name:</string>
   <string name="type">Type:</string>
+  <string name="get_print_status">Get Print Status</string>
 
   <string-array name="pref_protocol_list_titles">
     <item>WS</item>

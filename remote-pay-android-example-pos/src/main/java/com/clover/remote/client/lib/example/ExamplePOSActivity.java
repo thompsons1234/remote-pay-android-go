@@ -62,6 +62,7 @@ import com.clover.remote.client.messages.OpenCashDrawerRequest;
 import com.clover.remote.client.messages.PaymentResponse;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.PreAuthResponse;
+import com.clover.remote.client.messages.PrintJobStatusRequest;
 import com.clover.remote.client.messages.PrintJobStatusResponse;
 import com.clover.remote.client.messages.PrintManualRefundDeclineReceiptMessage;
 import com.clover.remote.client.messages.PrintManualRefundReceiptMessage;
@@ -90,6 +91,7 @@ import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.message.TipAddedMessage;
 import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.Payment;
+import com.clover.sdk.v3.printer.PrintJobStatus;
 import com.clover.sdk.v3.printer.Printer;
 
 import android.app.Activity;
@@ -153,6 +155,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   private static int RESULT_LOAD_IMG = 1;
   public static List<Printer> printers;
   private Printer printer;
+  public static String lastPrintRequestId;
+  private int printRequestId = 0;
 
   // Package name for example custom activities
   public static final String CUSTOM_ACTIVITY_PACKAGE = "com.clover.cfp.examples.";
@@ -921,6 +925,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         }
       }
 
+
       @Override
       public void onTipAdded(TipAddedMessage message) {
         if (message.tipAmount > 0) {
@@ -979,7 +984,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       @Override
       public void onPrintJobStatusResponse(PrintJobStatusResponse response) {
-
+        showMessage("PrintJobStatus: " + response.getStatus(), Toast.LENGTH_SHORT);
       }
 
       @Override
@@ -1389,6 +1394,10 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     }
   }
 
+  private int getNextPrintRequestId(){
+    return ++printRequestId;
+  }
+
   public void captureCardClick(View view) {
     cloverConnector.vaultCard(store.getCardEntryMethods());
   }
@@ -1418,19 +1427,35 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     String[] textLines = ((TextView) findViewById(R.id.PrintTextText)).getText().toString().split("\n");
     List<String> lines = Arrays.asList(textLines);
     PrintRequest pr = new PrintRequest(lines);
+    lastPrintRequestId = String.valueOf(getNextPrintRequestId());
+    pr.setPrintRequestId(lastPrintRequestId);
     if(printer != null){
-      pr = new PrintRequest(lines, null, printer.getId());
+      pr = new PrintRequest(lines, lastPrintRequestId, printer.getId());
     }
     cloverConnector.print(pr);
+    updatePrintStatusText();
   }
 
   public void printImageURLClick(View view) {
     String URL = ((TextView) findViewById(R.id.PrintImageURLText)).getText().toString();
     PrintRequest pr = new PrintRequest(URL);
+    lastPrintRequestId = String.valueOf(getNextPrintRequestId());
+    pr.setPrintRequestId(lastPrintRequestId);
     if(printer != null){
-      pr = new PrintRequest(URL, null, printer.getId());
+      pr = new PrintRequest(URL, lastPrintRequestId, printer.getId());
     }
     cloverConnector.print(pr);
+    updatePrintStatusText();
+  }
+
+  public void queryPrintStatusClick(View view){
+    PrintJobStatusRequest pjsr = new PrintJobStatusRequest(lastPrintRequestId);
+    cloverConnector.retrievePrintJobStatus(pjsr);
+  }
+
+  private void updatePrintStatusText(){
+    EditText printStatusId = ((EditText) findViewById(R.id.QueryPrintStatusText));
+    printStatusId.setText(lastPrintRequestId);
   }
 
   public void showMessageClick(View view) {
@@ -1487,10 +1512,13 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public void printImage(String imgDecodableString){
     Bitmap bitmap = BitmapFactory.decodeFile(imgDecodableString);
     PrintRequest pr = new PrintRequest(bitmap);
+    lastPrintRequestId = String.valueOf(getNextPrintRequestId());
+    pr.setPrintRequestId(lastPrintRequestId);
     if(this.printer != null){
-      pr = new PrintRequest(bitmap, null, printer.getId());
+      pr = new PrintRequest(bitmap, lastPrintRequestId, printer.getId());
     }
     cloverConnector.print(pr);
+    updatePrintStatusText();
   }
 
 
