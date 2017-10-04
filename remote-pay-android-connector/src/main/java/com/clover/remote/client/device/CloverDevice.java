@@ -16,46 +16,77 @@
 
 package com.clover.remote.client.device;
 
-import android.graphics.Bitmap;
 import com.clover.common2.payments.PayIntent;
 import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
-import com.clover.remote.client.CloverDeviceObserver;
-import com.clover.remote.client.transport.CloverTransport;
+import com.clover.remote.client.messages.PrintJobStatusRequest;
+import com.clover.remote.client.messages.PrintRequest;
+import com.clover.remote.client.messages.RetrievePrintersRequest;
+import com.clover.remote.client.transport.ICloverTransport;
 import com.clover.remote.order.DisplayOrder;
 import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Payment;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import android.graphics.Bitmap;
+import android.util.Log;
+
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class CloverDevice {
-  protected List<CloverDeviceObserver> deviceObservers = new ArrayList<CloverDeviceObserver>();
+  protected final List<CloverDeviceObserver> deviceObservers = new CopyOnWriteArrayList<>();
 
-  protected CloverTransport transport;
-  protected String packageName;
+  private final ICloverTransport transport;
+  protected final String packageName;
   private final String applicationId;
   private boolean supportsAcks;
 
-  public CloverDevice(String packageName, CloverTransport transport, String applicationId) {
+  public CloverDevice(String packageName, ICloverTransport transport, String applicationId) {
     this.transport = transport;
     this.packageName = packageName;
     this.applicationId = applicationId;
   }
 
-  public void Subscribe(CloverDeviceObserver observer) {
+  public void subscribe(CloverDeviceObserver observer) {
     deviceObservers.add(observer);
   }
 
-  public void Unsubscribe(CloverDeviceObserver observer) {
+  public void unsubscribe(CloverDeviceObserver observer) {
     deviceObservers.remove(observer);
+  }
+
+  public String getApplicationId() {
+    return applicationId;
+  }
+
+  public void setSupportsAcks(boolean supportsAcks) {
+    this.supportsAcks = supportsAcks;
+  }
+
+  protected boolean supportsAcks() {
+    return this.supportsAcks;
+  }
+
+  public void initializeConnection() {
+    transport.initializeConnection();
+  }
+
+  public void dispose() {
+    deviceObservers.clear();
+    if (transport != null) {
+      transport.dispose();
+    }
+  }
+
+  protected void sendRemoteMessage(String message) {
+    Log.d(getClass().getSimpleName(), "Sending: " + message);
+    transport.sendMessage(message);
   }
 
   public abstract void doDiscoveryRequest();
 
-  public abstract void doTxStart(PayIntent payIntent, Order order);
+  public abstract void doTxStart(PayIntent payIntent, Order order, String messageInfo);
 
   public abstract void doKeyPress(KeyPress keyPress);
 
@@ -73,7 +104,7 @@ public abstract class CloverDevice {
 
   public abstract void doTipAdjustAuth(String orderId, String paymentId, long amount);
 
-  public abstract void doPrintText(List<String> textLines);
+  public abstract void doPrintText(List<String> textLines, String printRequestId, String printDeviceId);
 
   public abstract void doShowWelcomeScreen();
 
@@ -81,27 +112,23 @@ public abstract class CloverDevice {
 
   public abstract void doShowThankYouScreen();
 
-  public abstract void doOpenCashDrawer(String reason);
+  public abstract void doOpenCashDrawer(String reason, String deviceId);
 
-  public abstract void doPrintImage(Bitmap bitmap);
+  public abstract void doPrintImage(Bitmap bitmap, String printRequestId, String printDeviceId);
 
-  public abstract void doPrintImage(String url);
+  public abstract void doPrintImage(String url, String printRequestId, String printDeviceId);
 
-  public abstract void dispose();
+  public abstract void doPrint(PrintRequest request);
+
+  public abstract void doRetrievePrinters(RetrievePrintersRequest request);
+
+  public abstract void doRetrievePrintJobStatus(PrintJobStatusRequest request);
 
   public abstract void doCloseout(boolean allowOpenTabs, String batchId);
 
   public abstract void doVaultCard(int cardEntryMethods);
 
   public abstract void doResetDevice();
-
-  public void setSupportsAcks(boolean supportsAcks) {
-    this.supportsAcks = supportsAcks;
-  }
-
-  protected boolean supportsAcks() {
-    return this.supportsAcks;
-  }
 
   public abstract void doAcceptPayment(Payment payment);
 
@@ -111,5 +138,11 @@ public abstract class CloverDevice {
 
   public abstract void doReadCardData(PayIntent payment);
 
+  public abstract void doSendMessageToActivity(String actionId, String payload);
+
   public abstract void doStartActivity(String action, String payload, boolean nonBlocking);
+
+  public abstract void doRetrieveDeviceStatus(boolean sendLastResponse);
+
+  public abstract void doRetrievePayment(String externalPaymentId);
 }

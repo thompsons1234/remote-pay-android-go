@@ -1,15 +1,39 @@
 package com.clover.remote.client.messages;
 
-import com.clover.remote.message.Method;
-
-import java.util.Map;
-
+/**
+ * Base class for custom activity message communication
+ */
+@SuppressWarnings(value="unused")
 public class ActivityMessage {
-  public final String actionId;
-  public final String payload;
+  private final String action;
+  private final String payload;
 
-  public ActivityMessage(String actionId, String payload) {
-    this.actionId = actionId;
+  /**
+   * Constructor
+   *
+   * @param action the custom activity action
+   * @param payload the custom activity payload
+   */
+  public ActivityMessage(String action, String payload) {
+    this.action = action;
     this.payload = payload;
+  }
+
+  /**
+   * Get the field value
+   *
+   * @return the custom activity action
+   */
+  public String getAction() {
+    return this.action;
+  }
+
+  /**
+   * Get the field value
+   *
+   * @return the custom activity payload
+   */
+  public String getPayload() {
+    return this.payload;
   }
 }

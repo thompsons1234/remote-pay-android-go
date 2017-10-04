@@ -1,10 +1,11 @@
 <resources>
     <string-array name="customIds">
-        <item>com.clover.cfp.activities.BasicExample</item>
-        <item>com.clover.cfp.activities.WebViewExample</item>
-        <item>com.clover.cfp.activities.CarouselExample</item>
-        <item>com.clover.cfp.activities.RatingsExample</item>
-        <item>com.clover.cfp.activities.NFCExample</item>
+        <item>BasicExample</item>
+        <item>BasicConversationalExample</item>
+        <item>WebViewExample</item>
+        <item>CarouselExample</item>
+        <item>RatingsExample</item>
+        <item>NFCExample</item>
     </string-array>
     <string-array name="payment_type">
         <item>RP450</item>
