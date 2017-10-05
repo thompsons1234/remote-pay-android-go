@@ -16,6 +16,8 @@ apply plugin: 'io.fabric'
 
 repositories {
 
+  mavenLocal()
+  maven { url "http://artifactory.corp.clover.com:8081/artifactory/repo" }
   mavenCentral()
   maven { url 'https://maven.fabric.io/public' }
 }

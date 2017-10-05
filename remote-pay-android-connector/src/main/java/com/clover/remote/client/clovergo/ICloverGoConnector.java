@@ -46,7 +46,7 @@ package com.clover.remote.client.clovergo;
    **/
 
 //TODO: Rename to connectToBluetoothDevice
-  void connectToDevice(ReaderInfo readerInfo);
+  void connectToBluetoothDevice(ReaderInfo readerInfo);
 
   void disconnectDevice();
 

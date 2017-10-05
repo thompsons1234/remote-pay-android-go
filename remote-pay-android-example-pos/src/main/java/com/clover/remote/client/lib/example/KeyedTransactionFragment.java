@@ -14,6 +14,7 @@ import com.clover.remote.client.clovergo.messages.KeyedAuthRequest;
 import com.clover.remote.client.clovergo.messages.KeyedPreAuthRequest;
 import com.clover.remote.client.clovergo.messages.KeyedSaleRequest;
 import com.clover.remote.client.lib.example.model.POSStore;
+import com.clover.remote.client.lib.example.utils.IdUtils;
 import com.firstdata.clovergo.domain.utils.CreditCardUtil;
 
 /**
@@ -72,16 +73,16 @@ public class KeyedTransactionFragment extends DialogFragment {
                 ((ExamplePOSActivity)getActivity()).showProgressDialog("Keyed Transaction","Processing Transaction",false);
                 getDialog().dismiss();
                 if (txType.equals("sale")){
-                    KeyedSaleRequest request = new KeyedSaleRequest(store.getCurrentOrder().getTotal(), ExamplePOSActivity.getNextId(),cardNumber,expiration,cvv);
+                    KeyedSaleRequest request = new KeyedSaleRequest(store.getCurrentOrder().getTotal(), IdUtils.getNextId(),cardNumber,expiration,cvv);
                     request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
                     request.setTipAmount(store.getTipAmount());
                     cloverConnector.sale(request);
                 }else if (txType.equals("auth")){
-                    KeyedAuthRequest request = new KeyedAuthRequest(store.getCurrentOrder().getTotal(), ExamplePOSActivity.getNextId(),cardNumber,expiration,cvv);
+                    KeyedAuthRequest request = new KeyedAuthRequest(store.getCurrentOrder().getTotal(), IdUtils.getNextId(),cardNumber,expiration,cvv);
                     request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
                     cloverConnector.auth(request);
                 }else if (txType.equals("preAuth")){
-                    KeyedPreAuthRequest request = new KeyedPreAuthRequest(5000L, ExamplePOSActivity.getNextId(),cardNumber,expiration,cvv);
+                    KeyedPreAuthRequest request = new KeyedPreAuthRequest(5000L, IdUtils.getNextId(),cardNumber,expiration,cvv);
                     cloverConnector.preAuth(request);
                 }
             }

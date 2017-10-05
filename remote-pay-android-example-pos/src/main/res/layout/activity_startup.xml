@@ -1,129 +1,155 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="com.clover.remote.client.lib.example.StartupActivity">
-    <RadioGroup android:layout_width="wrap_content"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                tools:context="com.clover.remote.client.lib.example.StartupActivity">
+
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:id="@+id/radioGroup">
+        android:layout_centerVertical="true">
+
         <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="@string/usb_clover_connector"
             android:id="@+id/usbRadioButton"
-            android:layout_centerVertical="true"
-            android:layout_alignLeft="@+id/lanRadioButton"/>
-        <RadioButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="Clover Go"
-            android:id="@+id/goRadioButton" android:layout_centerVertical="true" android:layout_alignLeft="@+id/lanRadioButton"/>
-        <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="false"
-            android:text="@string/lan_pay_display"
-            android:id="@+id/lanRadioButton"
-            android:layout_below="@+id/usbRadioButton"
-            android:layout_centerHorizontal="true"/>
-        <EditText
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/lanPayDisplayAddress"
-            android:layout_below="@+id/lanRadioButton"
             android:layout_alignLeft="@+id/lanRadioButton"
-            android:layout_marginLeft="31dp"
+            android:layout_centerVertical="true"
+            android:checked="true"
+            android:text="@string/usb_clover_connector"/>
+
+        <RadioButton
+            android:id="@+id/goRadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/lanRadioButton"
+            android:layout_centerVertical="true"
+            android:checked="true"
+            android:text="Clover Go"/>
+
+        <RadioButton
+            android:id="@+id/lanRadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/usbRadioButton"
+            android:layout_centerHorizontal="true"
+            android:checked="false"
+            android:text="@string/lan_pay_display"/>
+
+        <EditText
+            android:id="@+id/lanPayDisplayAddress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/lanRadioButton"
             android:layout_alignRight="@+id/lanRadioButton"
-            android:text="@string/lan_pay_address"
+            android:layout_below="@+id/lanRadioButton"
+            android:layout_marginBottom="15sp"
+            android:layout_marginLeft="31dp"
+            android:inputType="textUri"
             android:maxLines="1"
             android:nestedScrollingEnabled="true"
-            android:layout_marginBottom="15sp"
-            android:inputType="textUri"/>
-        <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="false"
-            android:text="@string/native_display"
-            android:id="@+id/nativeRadioButton"
-            android:layout_below="@+id/lanPayDisplayAddress"
-            android:layout_centerHorizontal="true"/>
-    </RadioGroup>
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/logoView"
-        android:src="@mipmap/clover_horizontal"
-        android:layout_above="@+id/radioGroup"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentTop="true"
-        android:scaleType="fitCenter"/>
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/connect"
-        android:background="@drawable/button_border_padding"
-        android:onClick="connect"
-        android:longClickable="true"
-        android:id="@+id/connectButton"
-        android:layout_below="@+id/radioGroup"
-        android:layout_centerHorizontal="true"/>
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/scan_qr_code"
-        android:onClick="scanQRCode"
-        android:id="@+id/scanQRCode"
-        android:layout_below="@+id/connectButton"
-        android:layout_centerHorizontal="true"/>
+            android:text="@string/lan_pay_address"/>
 
-    <RadioGroup android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/radioGroup"
-        android:visibility="gone"
-        android:orientation="horizontal"
-        android:id="@+id/readerRadioGroup">
         <RadioButton
+            android:id="@+id/nativeRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="Contactless RP450 Reader"
-            android:id="@+id/rp450RadioButton" android:layout_centerVertical="true" android:layout_alignLeft="@+id/goRadioButton"/>
-        <RadioButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_below="@+id/lanPayDisplayAddress"
+            android:layout_centerHorizontal="true"
             android:checked="false"
-            android:text="Contact RP350 Reader"
-            android:id="@+id/rp350RadioButton" android:layout_centerVertical="true" android:layout_alignLeft="@+id/lanRadioButton"/>
+            android:text="@string/native_display"/>
     </RadioGroup>
+
+    <ImageView
+        android:id="@+id/logoView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/radioGroup"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:scaleType="fitCenter"
+        android:src="@mipmap/clover_horizontal"/>
+
+    <Button
+        android:id="@+id/connectButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/radioGroup"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/button_border_padding"
+        android:longClickable="true"
+        android:onClick="connect"
+        android:text="@string/connect"/>
+
+    <Button
+        android:id="@+id/scanQRCode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/connectButton"
+        android:layout_centerHorizontal="true"
+        android:onClick="scanQRCode"
+        android:text="@string/scan_qr_code"/>
+
+    <RadioGroup
+        android:id="@+id/readerRadioGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/radioGroup"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <RadioButton
+            android:id="@+id/rp450RadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/goRadioButton"
+            android:layout_centerVertical="true"
+            android:checked="true"
+            android:text="RP450 Reader"/>
+
+        <RadioButton
+            android:id="@+id/rp350RadioButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/lanRadioButton"
+            android:layout_centerVertical="true"
+            android:checked="false"
+            android:text="RP350 Reader"/>
+    </RadioGroup>
+
     <LinearLayout
         android:id="@+id/llGoModes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:layout_below="@+id/readerRadioGroup"
-        android:visibility="gone"
-        android:layout_centerHorizontal="true">
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Demo Mode"
-            android:onClick="connect"
-            android:id="@+id/demoButton" android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <Button
+            android:id="@+id/demoButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Get OAUTH Token"
-            android:onClick="connectGoWithAuthMode"
+            android:layout_centerHorizontal="true"
+            android:onClick="connect"
+            android:text="Demo Mode"/>
+
+        <Button
+            android:id="@+id/oAuthButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/radioGroup"
+            android:layout_centerHorizontal="true"
             android:layout_toRightOf="@+id/connectButton"
-            android:id="@+id/oAuthButton" android:layout_below="@+id/radioGroup" android:layout_centerHorizontal="true"/>
+            android:onClick="connectGoWithAuthMode"
+            android:text="Get OAUTH Token"/>
     </LinearLayout>
 </RelativeLayout>

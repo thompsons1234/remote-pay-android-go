@@ -15,42 +15,47 @@
   -->
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?android:colorBackground"
-    tools:context=".SignatureFragment">
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?android:colorBackground"
+                tools:context=".SignatureFragment">
 
-  <Button android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:id="@+id/AcceptButton"
-      android:text="@string/accept_button_text"
-      android:onClick="acceptSignature"
-      android:layout_alignParentBottom="true" android:layout_alignParentRight="true"/>
+    <Button
+        android:id="@+id/AcceptButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="22dp"
+        android:layout_marginRight="22dp"
+        android:onClick="acceptSignature"
+        android:padding="11dp"
+        android:text="Accept"/>
 
-  <android.gesture.GestureOverlayView
-      android:id="@+id/SignatureView"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:layout_centerInParent="true"
-      android:layout_marginTop="10dp"
-      android:eventsInterceptionEnabled="true"
-      android:fadeEnabled="false"
-      android:layout_above="@+id/AcceptButton"
-      android:layout_alignParentStart="true"
-      android:fadeOffset="2000"
-      android:gestureStrokeLengthThreshold="0.1"
-      android:gestureStrokeType="multiple"
-      android:gestureStrokeWidth="7"
-      android:orientation="vertical"/>
+    <android.gesture.GestureOverlayView
+        android:id="@+id/SignatureView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/AcceptButton"
+        android:layout_alignParentStart="true"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="10dp"
+        android:eventsInterceptionEnabled="true"
+        android:fadeEnabled="false"
+        android:fadeOffset="2000"
+        android:gestureStrokeLengthThreshold="0.1"
+        android:gestureStrokeType="multiple"
+        android:gestureStrokeWidth="7"
+        android:orientation="vertical"/>
 
-  <TextView
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:text="@string/signature_text"
-      android:id="@+id/textHere"
-      android:textSize="16dp"
-      android:layout_alignParentTop="true"
-      android:layout_centerHorizontal="true" />
-
+    <TextView
+        android:id="@+id/textHere"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="22dp"
+        android:text="@string/signature_text"
+        android:textSize="22sp"/>
 </RelativeLayout>

@@ -17,6 +17,7 @@
 package com.clover.remote.client.lib.example;
 
 import com.clover.remote.client.CloverConnector;
+import com.clover.remote.client.Constants;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.lib.example.model.OrderObserver;
 import com.clover.remote.client.lib.example.model.POSDiscount;
@@ -32,6 +33,7 @@ import com.clover.sdk.v3.printer.Printer;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -55,6 +57,9 @@ import org.java_websocket.WebSocket;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.clover.remote.client.lib.example.StartupActivity.CONNECTION_MODE;
+import static com.clover.remote.client.lib.example.StartupActivity.EXAMPLE_APP_NAME;
 
 public class MiscellaneousFragment extends Fragment implements AdapterView.OnItemSelectedListener {
   private static final String ARG_STORE = "store";
@@ -155,6 +160,8 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     // Inflate the layout for this fragment
     View view = inflater.inflate(R.layout.fragment_miscellaneous, container, false);
+
+    String mode = getActivity().getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).getString(CONNECTION_MODE, "");
 
     manualSwitch = ((Switch) view.findViewById(R.id.ManualSwitch));
     swipeSwitch = ((Switch) view.findViewById(R.id.SwipeSwitch));
@@ -443,9 +450,42 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
         }
       }
     });
-    updateSwitches(view);
+    if (!mode.equalsIgnoreCase("go")) {
+      updateSwitches(view);
+    } else {
+      view.findViewById(R.id.connectReaderBox).setVisibility(View.VISIBLE);
+
+      view.findViewById(R.id.miscContainer1).setVisibility(View.GONE);
+      view.findViewById(R.id.WelcomeThankYouBox).setVisibility(View.GONE);
+      view.findViewById(R.id.CancelCashBox).setVisibility(View.GONE);
+      view.findViewById(R.id.PrintImageButton).setVisibility(View.GONE);
+      view.findViewById(R.id.ResetBox).setVisibility(View.GONE);
+      view.findViewById(R.id.CustomActivityBox).setVisibility(View.GONE);
+
+      view.findViewById(R.id.ManualSwitch).setVisibility(View.GONE);
+      view.findViewById(R.id.SwipeSwitch).setVisibility(View.GONE);
+      view.findViewById(R.id.ChipSwitch).setVisibility(View.GONE);
+      view.findViewById(R.id.ContactlessSwitch).setVisibility(View.GONE);
+
+      view.findViewById(R.id.forceOfflinePayBox).setVisibility(View.GONE);
+      view.findViewById(R.id.allowOfflinePayBox).setVisibility(View.GONE);
+      view.findViewById(R.id.WelcomeThankYouBox).setVisibility(View.GONE);
+      view.findViewById(R.id.acceptOfflinePayBox).setVisibility(View.GONE);
+
+      view.findViewById(R.id.DisableDuplicateCheckSwitch).setVisibility(View.GONE);
+      view.findViewById(R.id.DisableReceiptOptionsSwitch).setVisibility(View.GONE);
+      view.findViewById(R.id.PrintingSwitch).setVisibility(View.GONE);
+      view.findViewById(R.id.AutomaticSignatureConfirmationSwitch).setVisibility(View.GONE);
+      view.findViewById(R.id.AutomaticPaymentConfirmationSwitch).setVisibility(View.GONE);
+
+//      view.findViewById(R.id.WelcomeThankYouBox).setVisibility(View.GONE);
+//      view.findViewById(R.id.WelcomeThankYouBox).setVisibility(View.GONE);
+//      view.findViewById(R.id.WelcomeThankYouBox).setVisibility(View.GONE);
+//      view.findViewById(R.id.WelcomeThankYouBox).setVisibility(View.GONE);
+    }
     return view;
   }
+//onCreateView end
 
   @Override
   public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo){

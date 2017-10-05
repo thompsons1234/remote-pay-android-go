@@ -32,7 +32,4 @@ public class Validator {
         NetworkInfo ni = cm.getActiveNetworkInfo();
         return ni != null && ni.isConnectedOrConnecting();
     }
-
-    //TODO: how to send inventory item to order summary? Previoulsy we used orderItem object, but right now we are not
-    //generating any orderItem, we are directly passing Inventory item to SDK.
 }

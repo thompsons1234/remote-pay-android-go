@@ -44,4 +44,8 @@ public interface ICloverGoConnectorListener extends ICloverConnectorListener {
 
     void onCloverGoDeviceActivity(CloverDeviceEvent deviceEvent );
 
+    void onGetMerchantInfo();
+
+    void onGetMerchantInfoResponse(boolean isSuccess);
+
 }

@@ -31,18 +31,20 @@ public class CloverDeviceErrorEvent {
     VALIDATION_ERROR,
     EXCEPTION,
 
-    // Clover Go Device ERROR Events
-    READER_ERROR,
-    CARD_ERROR,
-    READER_TIMEOUT,
-    MULTIPLE_CONTACT_LESS_CARD_DETECTED_ERROR,
-    CONTACT_LESS_FAILED_TRY_CONTACT_ERROR,
-    EMV_CARD_SWIPED_ERROR,
-    DIP_FAILED_ALL_ATTEMPTS_ERROR,
-    DIP_FAILED_ERROR,
-    SWIPE_FAILED_ERROR
+        // Clover Go Device ERROR Events
+        READER_ERROR,
+        CARD_ERROR,
+        READER_TIMEOUT,
+        MULTIPLE_CONTACT_LESS_CARD_DETECTED_ERROR,
+        CONTACT_LESS_FAILED_TRY_CONTACT_ERROR,
+        EMV_CARD_SWIPED_ERROR,
+        DIP_FAILED_ALL_ATTEMPTS_ERROR,
+        DIP_FAILED_ERROR,
+        SWIPE_FAILED_ERROR,
+        LOW_BATTERY,
+        READER_NOT_CONNECTED
 
-  }
+    }
 
   private final CloverDeviceErrorType errorType;
   private final Integer code;

@@ -1,6 +1,5 @@
 package com.clover.remote.client.clovergo;
 
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.clover.remote.Challenge;
@@ -21,7 +20,6 @@ import com.clover.remote.client.messages.CloseoutRequest;
 import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.CloverDeviceEvent;
-import com.clover.remote.client.messages.ConfirmPaymentRequest;
 import com.clover.remote.client.messages.PreAuthRequest;
 import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.RefundPaymentRequest;
@@ -31,10 +29,10 @@ import com.clover.remote.client.messages.SaleRequest;
 import com.clover.remote.client.messages.SaleResponse;
 import com.clover.remote.client.messages.TipAdjustAuthRequest;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
+import com.clover.remote.client.messages.TransactionRequest;
 import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.sdk.v3.base.Reference;
-import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.CardTransaction;
 import com.clover.sdk.v3.payments.CardTransactionType;
 import com.clover.sdk.v3.payments.CardType;
@@ -51,10 +49,11 @@ import com.firstdata.clovergo.domain.model.Payment;
 import com.firstdata.clovergo.domain.model.ReaderError;
 import com.firstdata.clovergo.domain.model.ReaderInfo;
 import com.firstdata.clovergo.domain.model.ReaderProgressEvent;
-import com.firstdata.clovergo.domain.model.Refund;
+import com.firstdata.clovergo.domain.model.RefundSuccess;
 import com.firstdata.clovergo.domain.model.TaxRate;
 import com.firstdata.clovergo.domain.model.TransactionError;
 import com.firstdata.clovergo.domain.rx.EventBus;
+import com.firstdata.clovergo.domain.rx.ReusableObserver;
 import com.firstdata.clovergo.domain.usecase.AddTips;
 import com.firstdata.clovergo.domain.usecase.AuthOrSaleTransaction;
 import com.firstdata.clovergo.domain.usecase.CancelCardRead;
@@ -78,6 +77,7 @@ import com.roam.roamreaderunifiedapi.utils.HexUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -96,20 +96,27 @@ import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.firstdata.clovergo.domain.model.ReaderProgressEvent.EventType.CHIP_DATA;
+import static com.firstdata.clovergo.domain.model.ReaderProgressEvent.EventType.EMV_DATA;
 import static com.firstdata.clovergo.domain.model.ReaderProgressEvent.EventType.SWIPE_DATA;
 
 /**
  * Created by Akhani, Avdhesh on 5/22/17.
  */
 public class CloverGoConnectorImpl {
-    private final Observer<ReaderProgressEvent> progressObserver;
-    private final CloverGoConnectorBroadcaster broadcaster;
-    private final Observer<Payment> mPaymentResponseObserver;
+    private final static String TAG = "CloverGO ConnectorImpl";
+
+    private final CloverGoConnectorBroadcaster mBroadcaster;
+    private Disposable mScanDisposable;
+
+    private ReusableObserver<EmployeeMerchant> mNewEmployeeMerchantObserver;
+    private ReusableObserver<ReaderProgressEvent> mNewProgressObserver;
+    private ReusableObserver<Payment> mNewPaymentObserver;
+    private ReusableObserver<ReaderError> mNewReaderErrorObserver;
+    private ReusableObserver<ReaderInfo> mNewReaderInfoObserver;
+
     private ReaderProgressEvent readerProgressEvent;
-    private static String TAG = "CloverGO";
-    private Object mLastTransactionRequest;
     private ReaderInfo mLastTransactionReader;
+    private TransactionRequest mLastTransactionRequest;
 
     @Inject
     AuthOrSaleTransaction mAuthOrSaleTransaction;
@@ -126,9 +133,9 @@ public class CloverGoConnectorImpl {
     @Inject
     RefundTransaction mRefundTransaction;
     @Inject
-    CaptureSignature captureSignature;
+    CaptureSignature mCaptureSignature;
     @Inject
-    SendReceipt sendReceipt;
+    SendReceipt mSendReceipt;
     @Inject
     GetMerchantsInfoOAuth mGetMerchantsInfoOAuth;
 
@@ -147,147 +154,145 @@ public class CloverGoConnectorImpl {
     @Inject
     CancelCardRead cancelCardRead;
 
-    private Payment payment;
-    private TransactionError transactionError;
     private Order mOrder;
-    private Disposable scanDisposable;
+    private Payment mPayment;
+    private CreditCard mCreditCard;
+
+    private TransactionError mTransactionError;
     private EmployeeMerchant mEmployeeMerchant;
-    private CreditCard creditCard;
 
 
-    public CloverGoConnectorImpl(final CloverGoConnectorBroadcaster broadcaster, CloverGoDeviceConfiguration mCloverGoConfiguration){
-        this.broadcaster = broadcaster;
+    public CloverGoConnectorImpl(final CloverGoConnectorBroadcaster broadcaster, CloverGoDeviceConfiguration configuration) {
+        Log.e(TAG, "CloverGoConnectorImpl env=" + configuration.getEnv());
+        mBroadcaster = broadcaster;
 
-        String environment = mCloverGoConfiguration.getEnv().name();
-
+        CloverGoDeviceConfiguration.ENV env = configuration.getEnv();
         String url;
-        switch (environment){
-            case "LIVE":
-                url = "https://api.payeezy.com/clovergosdk/v1/";
+        switch (env) {
+            case LIVE:
+                url = "https://api.payeezy.com/clovergosdk/v2/";
                 break;
-            case "DEMO":
-                url = "https://api-cat.payeezy.com/clovergosdk/v1/";
+            case SANDBOX:
+                url = "https://api-cert.payeezy.com/clovergosdk/v2/";
                 break;
-            case "SANDBOX":
-                url = "https://api-cert.payeezy.com/clovergosdk/v1/";
+            case SANDBOX_DEV:
+                url = "https://api-cert.payeezy.com/clovergosdk/v2/";
                 break;
-            case "SANDBOX_DEV":
-                url = "https://api-cert.payeezy.com/clovergosdk/v1/";
-                break;
-            default:
-                url = "https://api-cat.payeezy.com/clovergosdk/v1/";
+            default: // DEMO is default
+                url = "https://api-cat.payeezy.com/clovergosdk/v2/";
         }
 
-        DaggerApplicationComponent.builder().sDKDataComponent(DaggerSDKDataComponent.builder().readerModule(new ReaderModule(mCloverGoConfiguration.getContext())).
-                networkModule(new NetworkModule(url, mCloverGoConfiguration.getApiKey(), mCloverGoConfiguration.getSecret(), mCloverGoConfiguration.getAccessToken(), InstanceID.getInstance(mCloverGoConfiguration.getContext()).getId(), BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME)).
-                utilityModule(new UtilityModule(mCloverGoConfiguration.getContext())).build()).build().inject(this);
+        DaggerApplicationComponent.builder().sDKDataComponent(DaggerSDKDataComponent.builder().readerModule(new ReaderModule(configuration.getContext())).
+                networkModule(new NetworkModule(url, configuration.getApiKey(), configuration.getSecret(), configuration.getAccessToken(), InstanceID.getInstance(configuration.getContext()).getId(), BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME)).
+                utilityModule(new UtilityModule(configuration.getContext())).build()).build().inject(this);
 
-        mGetMerchantsInfoOAuth.getCachedObservable().subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<EmployeeMerchant>() {
+        initObservers();
+
+        // Pull merchant details from the backend if it's not already in the cache
+        mGetMerchantsInfoOAuth.getCachedObservable().subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mNewEmployeeMerchantObserver);
+
+        EventBus.getObservable().ofType(ReaderInfo.class).subscribe(mNewReaderInfoObserver);
+        EventBus.getObservable().ofType(ReaderError.class).subscribe(mNewReaderErrorObserver);
+        EventBus.getObservable().ofType(ReaderProgressEvent.class).observeOn(AndroidSchedulers.mainThread()).subscribe(mNewProgressObserver);
+    }
+
+    private void initObservers() {
+        Log.e(TAG, "initObservers");
+        mNewEmployeeMerchantObserver = new ReusableObserver<EmployeeMerchant>() {
             @Override
             public void onSubscribe(Disposable d) {
+                Log.e(TAG, "mNewEmployeeMerchantObserver subscribe");
+                super.onSubscribe(d);
+                mBroadcaster.notifyOnGetMerchantInfo();
             }
 
             @Override
             public void onNext(EmployeeMerchant employeeMerchant) {
+                Log.e(TAG, "mNewEmployeeMerchantObserver next");
                 mEmployeeMerchant = employeeMerchant;
+                mBroadcaster.notifyOnGetMerchantInfoResponse(true);
             }
 
             @Override
             public void onError(Throwable e) {
-            }
-
-            @Override
-            public void onComplete() {
-            }
-        });
-
-
-        mPaymentResponseObserver =  new Observer<Payment>() {
-
-            @Override
-            public void onSubscribe(Disposable d) {
-                Log.e(TAG,"Sale onSubscribe");
-            }
-
-            @Override
-            public void onNext(final Payment _payment) {
-                payment = _payment;
-
-                if ("EMV_CONTACT".equals(payment.getCard().getMode())) {
-
-                    Map<String, String> data = new HashMap<>();
-                    if (payment.getCard().getExtra() != null) {
-                        data.put("Authorization_Response", payment.getCard().getExtra().getAuthResponseCode().equals("3130") ? "3030" : payment.getCard().getExtra().getAuthResponseCode());
-                        data.put("Issuer_Auth_Data", payment.getCard().getExtra().getIssuerAuthData());
-                        data.put("Auth_Code", HexUtils.convertASCII2HexaDecimal(payment.getCard().getExtra().getAuthCode()));
-                        data.put("Result", "01");
-                        data.put("issuer_script_template1", payment.getCard().getExtra().getIssuerScriptTemplate1());
-                        data.put("issuer_script_template2", payment.getCard().getExtra().getIssuerScriptTemplate2());
-                    } else {
-                        data.put("Result", "01");
-                        data.put("Auth_Code", HexUtils.convertASCII2HexaDecimal(payment.getAuthCode()));
-                        data.put("Authorization_Response", "3030");
-                    }
-                    mWriteToCard.getObservable(mLastTransactionReader, data).subscribe();
-
-                }else {
-                    notifyPaymentResponse();
-                }
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                transactionError = TransactionError.convertToError(e);
-
-                if ("duplicate_transaction".equals(transactionError.getCode())){
-                    ConfirmPaymentRequest confirmPaymentRequest = new ConfirmPaymentRequest();
-                    Challenge[] challenge = {new Challenge(transactionError.getMessage(), Challenge.ChallengeType.DUPLICATE_CHALLENGE, VoidReason.REJECT_DUPLICATE)};
-                    confirmPaymentRequest.setChallenges(challenge);
-                    broadcaster.notifyOnConfirmPaymentRequest(confirmPaymentRequest);
-                    return;
-                }else if (("charge_declined".equals(transactionError.getCode()) || "charge_declined_referral".equals(transactionError.getCode())) && readerProgressEvent != null && readerProgressEvent.getEventType() == ReaderProgressEvent.EventType.CHIP_DATA) {
-                    mGetConnectedReaders.getBlockingObservable().subscribe(new Consumer<ReaderInfo>() {
-                        @Override
-                        public void accept(@NonNull ReaderInfo readerInfo) throws Exception {
-                            final Map<String, String> completeEmvData = new HashMap<>();
-                            if (transactionError.getClientData() != null && transactionError.getClientData().getAuthResponseCode() != null && !transactionError.getClientData().getAuthResponseCode().isEmpty()) {
-                                completeEmvData.put("Result", "01");
-                                completeEmvData.put("Authorization_Response", transactionError.getClientData().getAuthResponseCode());
-                                completeEmvData.put("Issuer_Auth_Data", transactionError.getClientData().getIssuerAuthData());
-                                completeEmvData.put("Auth_Code", HexUtils.convertASCII2HexaDecimal(TextUtils.isEmpty(transactionError.getClientData().getAuthCode()) ? "123456" : transactionError.getClientData().getAuthCode()));
-                                completeEmvData.put("issuer_script_template1", transactionError.getClientData().getIssuerScriptTemplate1());
-                                completeEmvData.put("issuer_script_template2", transactionError.getClientData().getIssuerScriptTemplate2());
-                            } else {
-                                completeEmvData.put("Result", "01");
-                                completeEmvData.put("Authorization_Response", "3035");
-                                completeEmvData.put("Auth_Code", HexUtils.convertASCII2HexaDecimal("123456"));
-                            }
-                            mWriteToCard.getObservable(readerInfo, completeEmvData).subscribe();
-                        }
-                    });
-                    return;
-                }
-                notifyErrorResponse();
-            }
-
-            @Override
-            public void onComplete() {
-                Log.e(TAG,"Sale onComplete");
+                Log.e(TAG, "mNewEmployeeMerchantObserver error");
+                super.onError(e);
+                mBroadcaster.notifyOnGetMerchantInfoResponse(false);
             }
         };
 
-        EventBus.getObservable().ofType(ReaderInfo.class).subscribe(new Observer<ReaderInfo>() {
+        // Observer for handling sale/transaction success & error response
+        mNewPaymentObserver = new ReusableObserver<Payment>() {
             @Override
-            public void onSubscribe(Disposable d) {
-                Log.e(TAG,"ReaderInfo-Event onSubscribe");
+            public void onNext(Payment payment) {
+                Log.e(TAG, "mNewPaymentObserver next");
+                mPayment = payment;
+
+                if ("EMV_CONTACT".equalsIgnoreCase(mPayment.getCard().getMode())) {
+                    Log.e(TAG, "mNewPaymentObserver next EMV_CONTACT");
+                    Map<String, String> data = new HashMap<>();
+
+                    if (mPayment.getCard().getExtra() != null) {
+                        Log.e(TAG, "mNewPaymentObserver next EMV_CONTACT extra");
+                        data.put("Authorization_Response", "3130".equalsIgnoreCase(mPayment.getCard().getExtra().getAuthResponseCode()) ? "3030" : mPayment.getCard().getExtra().getAuthResponseCode());
+                        data.put("Issuer_Auth_Data", mPayment.getCard().getExtra().getIssuerAuthData());
+                        data.put("Auth_Code", HexUtils.convertASCII2HexaDecimal(mPayment.getCard().getExtra().getAuthCode()));
+                        data.put("Result", "01");
+                        data.put("issuer_script_template1", mPayment.getCard().getExtra().getIssuerScriptTemplate1());
+                        data.put("issuer_script_template2", mPayment.getCard().getExtra().getIssuerScriptTemplate2());
+
+                    } else {
+                        Log.e(TAG, "mNewPaymentObserver next EMV_CONTACT non-extra");
+                        data.put("Result", "01");
+                        data.put("Auth_Code", HexUtils.convertASCII2HexaDecimal(mPayment.getAuthCode()));
+                        data.put("Authorization_Response", "3030");
+
+                    }
+                    mWriteToCard.getObservable(mLastTransactionReader, data).subscribe();
+
+                } else {
+                    Log.e(TAG, "mNewPaymentObserver next non-EMV_CONTACT");
+                    notifyPaymentResponse();
+
+                }
             }
 
             @Override
-            public void onNext(final ReaderInfo readerInfo) {
-                Log.e(TAG,"ReaderInfo-Event onNext");
-                if (readerInfo.isConnected()){
+            public void onError(Throwable e) {
+                Log.e(TAG, "mNewPaymentObserver error");
+                Error error = Error.convertToError(e);
+                if (mLastTransactionRequest instanceof SaleRequest) {
+                    Log.e(TAG, "mNewPaymentObserver error SaleRequest");
+                    SaleResponse saleResponse = new SaleResponse(false, ResultCode.FAIL);
+                    saleResponse.setReason(error.getCode());
+                    saleResponse.setMessage(error.getMessage());
+                    mBroadcaster.notifyOnSaleResponse(saleResponse);
 
-                    if (mEmployeeMerchant == null){
+                } else if (mLastTransactionRequest instanceof AuthRequest) {
+                    Log.e(TAG, "mNewPaymentObserver error AuthRequest");
+                    AuthResponse authResponse = new AuthResponse(false, ResultCode.FAIL);
+                    authResponse.setReason(error.getCode());
+                    authResponse.setMessage(error.getMessage());
+                    mBroadcaster.notifyOnAuthResponse(authResponse);
+
+                } else if (mLastTransactionRequest instanceof PreAuthRequest) {
+                    Log.e(TAG, "mNewPaymentObserver error PreAuthRequest");
+                    PreAuthResponse preAuthResponse = new PreAuthResponse(false, ResultCode.FAIL);
+                    preAuthResponse.setReason(error.getCode());
+                    preAuthResponse.setMessage(error.getMessage());
+                    mBroadcaster.notifyOnPreAuthResponse(preAuthResponse);
+                }
+            }
+        };
+
+        mNewReaderInfoObserver = new ReusableObserver<ReaderInfo>() {
+            @Override
+            public void onNext(final ReaderInfo readerInfo) {
+                Log.e(TAG, "mNewReaderInfoObserver next");
+                if (readerInfo.isConnected()) {
+                    Log.e(TAG, "mNewReaderInfoObserver next connected " + String.valueOf(mEmployeeMerchant == null));
+
+                    if (mEmployeeMerchant == null) {
                         mGetMerchantsInfoOAuth.getCachedObservable().subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<EmployeeMerchant>() {
                             @Override
                             public void onSubscribe(Disposable d) {
@@ -295,216 +300,101 @@ public class CloverGoConnectorImpl {
 
                             @Override
                             public void onNext(EmployeeMerchant employeeMerchant) {
+                                mBroadcaster.notifyOnGetMerchantInfoResponse(true);
                                 mEmployeeMerchant = employeeMerchant;
-                                MerchantInfo merchantInfo = getMerchantInfo(readerInfo, employeeMerchant);
-                                broadcaster.notifyOnReady(merchantInfo);
+                                mBroadcaster.notifyOnReady(getMerchantInfo(readerInfo, employeeMerchant));
                             }
 
                             @Override
                             public void onError(Throwable e) {
+                                mBroadcaster.notifyOnGetMerchantInfoResponse(false);
                                 disconnectDevice(readerInfo.getReaderType());
-                                broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR,0,e.getMessage()));
+                                mBroadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, null, e.getMessage()));
                             }
 
                             @Override
                             public void onComplete() {
                             }
                         });
+                    } else {
+                        mBroadcaster.notifyOnReady(getMerchantInfo(readerInfo, mEmployeeMerchant));
                     }
-                }else {
-                    broadcaster.notifyOnDisconnect(readerInfo);
+                } else {
+                    Log.e(TAG, "mNewReaderInfoObserver next not connected");
+                    mBroadcaster.notifyOnDisconnect(readerInfo);
                 }
             }
+        };
 
-            @Override
-            public void onError(Throwable e) {
-                Log.e(TAG,"ReaderInfo-Event onError");
-            }
-
-            @Override
-            public void onComplete() {
-                Log.e(TAG,"ReaderInfo-Event onComplete");
-            }
-        });
-
-        EventBus.getObservable().ofType(ReaderError.class).subscribe(new Observer<ReaderError>() {
-
-            @Override
-            public void onSubscribe(Disposable d) {
-                Log.e(TAG,"ReaderError-Event onSubscribe");
-            }
-
-            @Override
-            public void onNext(ReaderError readerError) {
-                readerProgressEvent = null;
-                CloverDeviceErrorEvent deviceErrorEvent = null;
-
-                switch (readerError.getErrorType()) {
-                    case EMV_CARD_SWIPED_ERROR:
-                        Log.e(TAG,"Chip Card "+ "Please insert card");
-                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.EMV_CARD_SWIPED_ERROR,0,"Please insert card");
-                        broadcaster.notifyOnDeviceError(deviceErrorEvent);
-                        break;
-                    case CONTACT_LESS_FAILED_TRY_CONTACT_ERROR:
-                        Log.e(TAG,"Contactless failed "+ "Please insert/swipe card");
-                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.CONTACT_LESS_FAILED_TRY_CONTACT_ERROR,0,"Contactless failed "+ "Please insert/swipe card");
-                        broadcaster.notifyOnDeviceError(deviceErrorEvent);
-                        break;
-                    case MULTIPLE_CONTACT_LESS_CARD_DETECTED_ERROR:
-                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.MULTIPLE_CONTACT_LESS_CARD_DETECTED_ERROR,0,"Multiple Contactless card Detected");
-                        broadcaster.notifyOnDeviceError(deviceErrorEvent);
-                        Log.e("Multiple Contactless", "Multiple Contactless card Detected");
-                        break;
-                    case DIP_FAILED_ALL_ATTEMPTS_ERROR:
-                        Log.e(TAG,"Chip read failed" + "Please swipe card");
-                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.DIP_FAILED_ALL_ATTEMPTS_ERROR,0,readerError.getMessage());
-                        broadcaster.notifyOnDeviceError(deviceErrorEvent);
-                        break;
-                    case DIP_FAILED_ERROR:
-                        Log.e(TAG,"Chip read failed "+"Please remove and insert card");
-                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.DIP_FAILED_ERROR,0,readerError.getMessage());
-                        broadcaster.notifyOnDeviceError(deviceErrorEvent);
-                        break;
-                    case SWIPE_FAILED_ERROR:
-                        Log.e(TAG,"Swipe failed "+ "Please swipe again");
-                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.SWIPE_FAILED_ERROR,0,"Please swipe again");
-                        broadcaster.notifyOnDeviceError(deviceErrorEvent);
-                        break;
-                    case READER_ERROR:
-                        Log.e(TAG,"Reader error "+"Reader error");
-                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.READER_ERROR,0,readerError.getMessage());
-                        broadcaster.notifyOnDeviceError(deviceErrorEvent);
-                        break;
-                    case CARD_ERROR:
-                        Log.e("Card error", "Card error");
-                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.CARD_ERROR,0,readerError.getMessage());
-                        broadcaster.notifyOnDeviceError(deviceErrorEvent);
-                        break;
-                    case READER_TIMEOUT:
-                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.READER_TIMEOUT,0,"Reader Transaction Time Out, Start Transaction Again");
-                        broadcaster.notifyOnDeviceError(deviceErrorEvent);
-                        Log.e("Reader Time OUT","Reader Time OUT" );
-                        break;
-                }
-
-            }
-            @Override
-            public void onError(Throwable e) {
-                Log.e(TAG,"ReaderError-Event onError");
-            }
-            @Override
-            public void onComplete() {
-                Log.e(TAG,"ReaderError-Event onComplete");
-            }
-        });
-
-
-        progressObserver = new Observer<ReaderProgressEvent>() {
-
-            @Override
-            public void onSubscribe(Disposable d) {
-                Log.e(TAG,"ReaderProgressEvent-Event onSubscribe");
-            }
-
+        mNewProgressObserver = new ReusableObserver<ReaderProgressEvent>() {
             @Override
             public void onNext(ReaderProgressEvent readerProgressEvent) {
-
                 EmvCard emvCard = null;
                 CloverDeviceEvent deviceEvent;
 
-                switch (readerProgressEvent.getEventType()){
-                    case CANCEL_CARD_READ:
-                        Log.e(TAG,"ReaderProgressEvent-Event onNext CANCEL_CARD_READ");
-                        deviceEvent = new CloverDeviceEvent();
-                        deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.CANCEL_CARD_READ);
-                        deviceEvent.setMessage("Card Reader Transaction Cancelled");
-                        broadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
-                        break;
-                    case EMV_COMPLETE_DATA:
-                        Log.e(TAG,"Please remove card");
-                        deviceEvent = new CloverDeviceEvent();
-                        deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.EMV_COMPLETE_DATA);
-                        deviceEvent.setMessage("Please remove card");
-                        broadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
+                Log.e(TAG, "mNewProgressObserver next " + readerProgressEvent.getEventType() + " " + readerProgressEvent.getMessage());
 
-                        if (!(readerProgressEvent.getData().get("status").equals("Success") && "TC".equals(readerProgressEvent.getData().get("cryptogram_information_data")))) {
-
-                            if (payment != null){
-                                mVoidTransaction.getObservable(payment.getOrderId(), payment.getId()).subscribeOn(Schedulers.io()).subscribe();
-                                payment = null;
-                                transactionError = new TransactionError("chip_decline", "Transaction declined - Chip Decline");
-                            }
-                        }
-
-                        break;
-                    case CARD_INSERTED_MSG:
-                        Log.e(TAG,"Leave card inserted");
+                switch (readerProgressEvent.getEventType()) {
+                    case CARD_INSERTED:
                         deviceEvent = new CloverDeviceEvent();
                         deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.CARD_INSERTED_MSG);
                         deviceEvent.setMessage("Processing Transaction, Leave card inserted");
-                        broadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
+                        mBroadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
                         break;
-                    case LOW_BATTERY:
-                        Log.e(TAG,"ReaderProgressEvent-Event onNext LOW_BATTERY");
-                        deviceEvent = new CloverDeviceEvent();
-                        deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.LOW_BATTERY);
-                        deviceEvent.setMessage("Reader Battery low");
-                        broadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
-
-                        break;
-                    case CARD_REMOVED_MSG:
-                        Log.e(TAG,"ReaderProgressEvent-Event onNext CARD_REMOVED_MSG");
-                        deviceEvent = new CloverDeviceEvent();
-                        deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.CARD_REMOVED_MSG);
-                        deviceEvent.setMessage("Card Removed");
-                        broadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
-
-                        if (payment != null)
-                            notifyPaymentResponse();
-                        else if (transactionError !=null)
-                            notifyErrorResponse();
-                        else {
-                            transactionError = new TransactionError("unknown_error", "unknown_error");
-                            notifyErrorResponse();
-                        }
-                        break;
-                    case PLEASE_SEE_PHONE_MSG:
-                        Log.e(TAG,"ReaderProgressEvent-Event onNext PLEASE_SEE_PHONE_MSG");
-                        break;
-                    case READER_READY:
-                        Log.e(TAG,"ReaderProgressEvent-Event onNext READER_READY");
-                        break;
-                    case SWIPE_DATA:
-                        Map<String, String> swipeData = readerProgressEvent.getData();
-                        emvCard = new EmvCard(swipeData.get("ksn"),swipeData.get("encryptedTrack"),swipeData.get("track1"),swipeData.get("track2"),swipeData.get("pan"));
-                        deviceEvent = new CloverDeviceEvent();
-                        deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.CARD_SWIPED);
-                        deviceEvent.setMessage("Processing transaction");
-                        broadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
-                        break;
-                    case CHIP_DATA:
-                        Map<String, String> chipData = readerProgressEvent.getData();
-                        emvCard = new EmvCard(chipData);
-                        break;
-                    case CONTACT_LESS_DATA:
-                        Log.e(TAG,"ReaderProgressEvent-Event onNext CONTACT_LESS_DATA");
-                        Log.e(TAG,"Processing transaction");
+                    case CARD_TAPPED:
                         deviceEvent = new CloverDeviceEvent();
                         deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.CARD_TAPPED);
                         deviceEvent.setMessage("Processing transaction");
-                        broadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
+                        mBroadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
                         break;
-                    case APPLICATION_IDENTIFIERS:
-                        Log.e(TAG,"APPLICATION_IDENTIFIERS "+readerProgressEvent.getData());
+                    case EMV_COMPLETE:
+                        deviceEvent = new CloverDeviceEvent();
+                        deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.EMV_COMPLETE_DATA);
+                        deviceEvent.setMessage("Please remove card");
+                        mBroadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
+
+                        if (!(readerProgressEvent.getData().get("status").equalsIgnoreCase("Success") && "TC".equalsIgnoreCase(readerProgressEvent.getData().get("cryptogram_information_data")))) {
+                            Log.e(TAG, "mNewProgressObserver next " + readerProgressEvent.getEventType() + " success and tc crypto");
+
+                            if (mPayment != null) {
+                                Log.e(TAG, "mNewProgressObserver next " + readerProgressEvent.getEventType() + " success and tc crypto and payment not null");
+                                mVoidTransaction.getObservable(mPayment.getOrderId(), mPayment.getPaymentId()).subscribeOn(Schedulers.io()).subscribe();
+                                mPayment = null;
+                                mTransactionError = new TransactionError("chip_decline", "Transaction declined - Chip Decline");
+                            }
+                        }
+                        break;
+                    case CARD_REMOVED:
+                        deviceEvent = new CloverDeviceEvent();
+                        deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.CARD_REMOVED_MSG);
+                        deviceEvent.setMessage("Card Removed");
+                        mBroadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
+
+                        if (mPayment != null) {
+                            Log.e(TAG, "mNewProgressObserver next " + readerProgressEvent.getEventType() + " payment not null");
+                            notifyPaymentResponse();
+                        } else if (mTransactionError != null) {
+                            Log.e(TAG, "mNewProgressObserver next " + readerProgressEvent.getEventType() + " transaction error not null");
+                            notifyErrorResponse();
+                        } else {
+                            Log.e(TAG, "mNewProgressObserver next " + readerProgressEvent.getEventType() + " error");
+                            mTransactionError = new TransactionError("unknown_error", "unknown_error");
+                            notifyErrorResponse();
+                        }
+                        break;
+                    case LIST_APPLICATION_IDENTIFIERS:
+                        Log.e(TAG, "mNewProgressObserver next " + readerProgressEvent.getEventType() + " " + readerProgressEvent.getData());
                         Set<String> keySet = readerProgressEvent.getData().keySet();
                         List<CardApplicationIdentifier> applicationIdentifiers = new ArrayList<CardApplicationIdentifier>();
+
+                        Log.e(TAG, "mNewProgressObserver next " + readerProgressEvent.getEventType() + " keyset size=" + keySet.size());
                         for (String key : keySet) {
-                            CardApplicationIdentifier cardApplicationIdentifier  = new CardApplicationIdentifier();
+                            CardApplicationIdentifier cardApplicationIdentifier = new CardApplicationIdentifier();
                             cardApplicationIdentifier.setApplicationLabel(key);
                             cardApplicationIdentifier.setApplicationIdentifier(readerProgressEvent.getData().get(key));
                             applicationIdentifiers.add(cardApplicationIdentifier);
                         }
-                        broadcaster.notifyOnAidMatch(applicationIdentifiers, new ICloverGoConnectorListener.AidSelection(){
+                        mBroadcaster.notifyOnAidMatch(applicationIdentifiers, new ICloverGoConnectorListener.AidSelection() {
                             @Override
                             public void selectApplicationIdentifier(final CardApplicationIdentifier selectedCardApplicationIdentifier) {
                                 mGetConnectedReaders.getBlockingObservable().filter(new Predicate<ReaderInfo>() {
@@ -515,46 +405,140 @@ public class CloverGoConnectorImpl {
                                 }).flatMapCompletable(new Function<ReaderInfo, CompletableSource>() {
                                     @Override
                                     public CompletableSource apply(@NonNull ReaderInfo readerInfo) throws Exception {
-                                        return mReadCard.getObservable(readerInfo, selectedCardApplicationIdentifier.getApplicationIdentifier());
+                                        Log.e(TAG, "mNewProgressObserver next LIST_APPLICATION_IDENTIFIERS readerCard");
+                                        return mReadCard.getObservable(readerInfo, selectedCardApplicationIdentifier.getApplicationIdentifier(), 0);
                                     }
                                 }).onErrorComplete().subscribe();
                             }
                         });
                         break;
+                    case COMMON_APPLICATION_IDENTIFIER:
+                        Iterator<String> it = readerProgressEvent.getData().keySet().iterator();
+                        String aid = null;
+                        if (it.hasNext())
+                            aid = readerProgressEvent.getData().get(it.next());
+
+                        Log.e(TAG, "mNewProgressObserver next " + readerProgressEvent.getEventType() + " aid=" + aid);
+                        mReadCard.getObservable(mLastTransactionReader, aid, 0).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe();
+                        break;
+
+                    case CUSTOMER_VALIDATION_REQ:
+                        // TODO:IAN look into this...
+//                        deviceEvent = new CloverDeviceEvent();
+//                        deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.PLEASE_SEE_PHONE_MSG); // check if correct event state used
+//                        deviceEvent.setMessage("Card Removed");
+//                        mBroadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
+                        break;
+
+                    case SWIPE_DATA:
+                        Map<String, String> swipeData = readerProgressEvent.getData();
+                        emvCard = new EmvCard(swipeData.get("ksn"), swipeData.get("encryptedTrack"), swipeData.get("track1"), swipeData.get("track2"), swipeData.get("pan"));
+                        deviceEvent = new CloverDeviceEvent();
+                        deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.CARD_SWIPED);
+                        deviceEvent.setMessage("Processing transaction");
+                        mBroadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
+                        break;
+
+                    case EMV_DATA:
+                        Map<String, String> chipData = readerProgressEvent.getData();
+                        emvCard = new EmvCard(chipData);
+                        break;
+
+                    case CANCEL_CARD_READ:
+                        deviceEvent = new CloverDeviceEvent();
+                        deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.CANCEL_CARD_READ);
+                        deviceEvent.setMessage("Card Reader Transaction Cancelled");
+                        mBroadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
+                        break;
                 }
 
-                if (readerProgressEvent.getEventType() == SWIPE_DATA ||readerProgressEvent.getEventType() == CHIP_DATA){
-                    payment = null;
-                    transactionError = null;
+                if (readerProgressEvent.getEventType() == SWIPE_DATA || readerProgressEvent.getEventType() == EMV_DATA) {
+                    Log.e(TAG, "mNewProgressObserver next SWIPE_DATA/EMV_DATE confirmed");
+                    mPayment = null;
+                    mTransactionError = null;
                     CloverGoConnectorImpl.this.readerProgressEvent = readerProgressEvent;
-                    if (mLastTransactionRequest instanceof SaleRequest){
-                        mAuthOrSaleTransaction.getObservable(mOrder,emvCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentResponseObserver);
-                    }else if (mLastTransactionRequest instanceof AuthRequest){
-                        mAuthOrSaleTransaction.getObservable(mOrder,emvCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentResponseObserver);
-                    }else if (mLastTransactionRequest instanceof PreAuthRequest){
-                        mPreAuthTransaction.getObservable(mOrder,emvCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentResponseObserver);
+
+                    if (mLastTransactionRequest instanceof SaleRequest) {
+                        Log.e(TAG, "mNewProgressObserver next SWIPE_DATA/EMV_DATE SaleRequest");
+                        mAuthOrSaleTransaction.getObservable(mOrder, emvCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mNewPaymentObserver);
+                    } else if (mLastTransactionRequest instanceof AuthRequest) {
+                        Log.e(TAG, "mNewProgressObserver next SWIPE_DATA/EMV_DATE AuthRequest");
+                        mAuthOrSaleTransaction.getObservable(mOrder, emvCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mNewPaymentObserver);
+                    } else if (mLastTransactionRequest instanceof PreAuthRequest) {
+                        Log.e(TAG, "mNewProgressObserver next SWIPE_DATA/EMV_DATE PreAuthRequest");
+                        mPreAuthTransaction.getObservable(mOrder, emvCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mNewPaymentObserver);
                     }
                 }
-
-            }
-            @Override
-            public void onError(Throwable t) {
-                Log.e(TAG,"ReaderProgressEvent-Event onError");
-            }
-            @Override
-            public void onComplete() {
-                Log.e(TAG,"ReaderProgressEvent-Event onComplete");
             }
         };
-        EventBus.getObservable().ofType(ReaderProgressEvent.class).observeOn(AndroidSchedulers.mainThread()).subscribe(progressObserver);
 
+        mNewReaderErrorObserver = new ReusableObserver<ReaderError>() {
+            @Override
+            public void onNext(ReaderError readerError) {
+                Log.e(TAG, "mNewReaderErrorObserver next " + readerError.getErrorType() + " " + readerError.getMessage());
+                readerProgressEvent = null;
+                CloverDeviceErrorEvent deviceErrorEvent = null;
 
+                switch (readerError.getErrorType()) {
+                    case EMV_CARD_SWIPED_ERROR:
+                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.EMV_CARD_SWIPED_ERROR, 0, null, "Please insert card");
+                        mBroadcaster.notifyOnDeviceError(deviceErrorEvent);
+                        break;
+                    case CONTACT_LESS_FAILED_TRY_CONTACT_ERROR:
+                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.CONTACT_LESS_FAILED_TRY_CONTACT_ERROR, 0, null, "Contactless failed " + "Please insert/swipe card");
+                        mBroadcaster.notifyOnDeviceError(deviceErrorEvent);
+                        break;
+                    case DIP_FAILED_ALL_ATTEMPTS_ERROR:
+                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.DIP_FAILED_ALL_ATTEMPTS_ERROR, 0, null, readerError.getMessage());
+                        mBroadcaster.notifyOnDeviceError(deviceErrorEvent);
+                        break;
+                    case DIP_FAILED_ERROR:
+                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.DIP_FAILED_ERROR, 0, null, readerError.getMessage());
+                        mBroadcaster.notifyOnDeviceError(deviceErrorEvent);
+                        break;
+                    case SWIPE_FAILED_ERROR:
+                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.SWIPE_FAILED_ERROR, 0, null, "Please swipe again");
+                        mBroadcaster.notifyOnDeviceError(deviceErrorEvent);
+                        break;
+                    case READER_NOT_CONNECTED:
+                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.READER_NOT_CONNECTED, 0, null, "Reader not connected");
+                        mBroadcaster.notifyOnDeviceError(deviceErrorEvent);
+                        break;
+                    case MULTIPLE_CONTACT_LESS_CARD_DETECTED_ERROR:
+                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.MULTIPLE_CONTACT_LESS_CARD_DETECTED_ERROR, 0, null, "Multiple Contactless card Detected");
+                        mBroadcaster.notifyOnDeviceError(deviceErrorEvent);
+                        break;
+                    case READER_ERROR:
+                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.READER_ERROR, 0, null, readerError.getMessage());
+                        mBroadcaster.notifyOnDeviceError(deviceErrorEvent);
+                        break;
+                    case READER_TIMEOUT:
+                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.READER_TIMEOUT, 0, null, "Reader Transaction Time Out, Start Transaction Again");
+                        mBroadcaster.notifyOnDeviceError(deviceErrorEvent);
+                        break;
+                    case CARD_ERROR:
+                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.CARD_ERROR, 0, null, readerError.getMessage());
+                        mBroadcaster.notifyOnDeviceError(deviceErrorEvent);
+                        break;
+                    case LOW_BATTERY:
+                        deviceErrorEvent = new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.LOW_BATTERY, 0, null, "Reader Battery low");
+                        mBroadcaster.notifyOnDeviceError(deviceErrorEvent);
+                        break;
+                }
+            }
+        };
     }
 
     private MerchantInfo getMerchantInfo(ReaderInfo readerInfo, EmployeeMerchant employeeMerchant) {
-        boolean supportsSales= false; boolean supportAuths= false; boolean supportsPreAuths= false; boolean supportsVaultCards= false; boolean supportsManualRefunds= false; boolean supportsVoids= false; boolean supportsTipAdjust = false;
-        for (String feature: mEmployeeMerchant.getMerchant().getFeatures()){
-            switch (feature){
+        boolean supportsSales = false;
+        boolean supportAuths = false;
+        boolean supportsPreAuths = false;
+        boolean supportsVaultCards = false;
+        boolean supportsManualRefunds = false;
+        boolean supportsVoids = false;
+        boolean supportsTipAdjust = false;
+        for (String feature : mEmployeeMerchant.getMerchant().getFeatures()) {
+            switch (feature) {
                 case "auths":
                     supportAuths = true;
                     break;
@@ -585,242 +569,327 @@ public class CloverGoConnectorImpl {
     }
 
     public void initializeConnection(ReaderInfo.ReaderType readerType) {
-        if (readerType == ReaderInfo.ReaderType.RP450){
-            mScanForReaders.getObservable(null,15000).subscribe(new Observer<ReaderInfo>() {
+        Log.e(TAG, "initializeConnection " + readerType.name());
+        if (readerType == ReaderInfo.ReaderType.RP450) {
+            mScanForReaders.getObservable(null, 15000).subscribe(new Observer<ReaderInfo>() {
                 @Override
                 public void onSubscribe(Disposable d) {
-                    scanDisposable = d;
+                    mScanDisposable = d;
+                    Log.e(TAG, "initializeConnection subscribe");
                 }
 
                 @Override
                 public void onNext(ReaderInfo readerInfo) {
-                    Log.e(TAG,"Scan-Reader onNext");
-                    broadcaster.notifyOnDiscovered(readerInfo);
+                    Log.e(TAG, "initializeConnection next");
+                    mBroadcaster.notifyOnDiscovered(readerInfo);
                 }
 
                 @Override
                 public void onError(Throwable e) {
+                    Log.e(TAG, "initializeConnection error");
+                }
+
+                @Override
+                public void onComplete() {
+                    Log.e(TAG, "initializeConnection complete");
+                }
+            });
+        } else if (readerType == ReaderInfo.ReaderType.RP350) {
+            ReaderInfo readerInfo = ReaderInfo.createRP350ReaderType();
+            mConnectToReader.getObservable(readerInfo.getReaderType(), readerInfo.getBluetoothName(), readerInfo.getBluetoothIdentifier()).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe();
+        }
+    }
+
+    public void connectToDevice(ReaderInfo readerInfo) {
+        Log.e(TAG, "connectToBluetoothDevice");
+        stopDeviceScan();
+        mConnectToReader.getObservable(readerInfo.getReaderType(), readerInfo.getBluetoothName(), readerInfo.getBluetoothIdentifier()).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe();
+    }
+
+    public void disconnectDevice(ReaderInfo.ReaderType readerType) {
+        Log.e(TAG, "disconnectDevice");
+        disconnectReader.getObservable(readerType).onErrorComplete().subscribe();
+    }
+
+    public void stopDeviceScan() {
+        Log.e(TAG, "stopDeviceScan");
+        if (mScanDisposable != null && !mScanDisposable.isDisposed())
+            mScanDisposable.dispose();
+    }
+
+    public void keyedSaled(final SaleRequest saleRequest, final ReaderInfo.ReaderType readerType, final boolean allowDuplicate) {
+        if (mEmployeeMerchant == null) {
+            mGetMerchantsInfoOAuth.getCachedObservable().subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<EmployeeMerchant>() {
+                @Override
+                public void onSubscribe(Disposable d) {
+                }
+
+                @Override
+                public void onNext(EmployeeMerchant employeeMerchant) {
+                    mBroadcaster.notifyOnGetMerchantInfoResponse(true);
+                    mEmployeeMerchant = employeeMerchant;
+                    sale(saleRequest, readerType, allowDuplicate);
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    mBroadcaster.notifyOnGetMerchantInfoResponse(false);
                 }
 
                 @Override
                 public void onComplete() {
                 }
             });
-        }else if (readerType == ReaderInfo.ReaderType.RP350){
-            ReaderInfo readerInfo =  ReaderInfo.createRP350ReaderType();
-            mConnectToReader.getObservable(readerInfo.getReaderType(),readerInfo.getBluetoothName(),readerInfo.getBluetoothIdentifier()).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe();
+        } else {
+            sale(saleRequest, readerType, allowDuplicate);
         }
-    }
-
-    public void connectToDevice(ReaderInfo readerInfo) {
-        stopDeviceScan();
-        mConnectToReader.getObservable(readerInfo.getReaderType(),readerInfo.getBluetoothName(),readerInfo.getBluetoothIdentifier()).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe();
-    }
-
-    public void disconnectDevice(ReaderInfo.ReaderType readerType) {
-        disconnectReader.getObservable(readerType).onErrorComplete().subscribe();
-    }
-
-    public void stopDeviceScan() {
-        if (scanDisposable != null && !scanDisposable.isDisposed())
-            scanDisposable.dispose();
     }
 
     public void sale(SaleRequest saleRequest, final ReaderInfo.ReaderType readerType, boolean allowDuplicate) {
+        Log.e(TAG, "sale");
 
-        if (mEmployeeMerchant != null && !mEmployeeMerchant.getMerchant().getFeatures().contains("sales")){
-            broadcaster.notifyOnSaleResponse(new SaleResponse(false, ResultCode.UNSUPPORTED));
+        if (mEmployeeMerchant != null && !mEmployeeMerchant.getMerchant().getFeatures().contains("sales")) {
+            Log.e(TAG, "sale not supported");
+            mBroadcaster.notifyOnSaleResponse(new SaleResponse(false, ResultCode.UNSUPPORTED));
             return;
         }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////
+
+        // try to fix the problem of employeemerchant is null at this point for keyed transactions...
+
+//        if (mEmployeeMerchant == null) {
+//            mGetMerchantsInfoOAuth.getCachedObservable().subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<EmployeeMerchant>() {
+//                @Override
+//                public void onSubscribe(Disposable d) {
+//                }
+//
+//                @Override
+//                public void onNext(EmployeeMerchant employeeMerchant) {
+//                    mBroadcaster.notifyOnGetMerchantInfoResponse(true);
+//                    mEmployeeMerchant = employeeMerchant;
+//                    mBroadcaster.notifyOnReady(getMerchantInfo(readerInfo, employeeMerchant));
+//                }
+//
+//                @Override
+//                public void onError(Throwable e) {
+//                    mBroadcaster.notifyOnGetMerchantInfoResponse(false);
+//                    disconnectDevice(readerInfo.getReaderType());
+//                    mBroadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, null, e.getMessage()));
+//                }
+//
+//                @Override
+//                public void onComplete() {
+//                }
+//            });
+//        } else {
+//            mBroadcaster.notifyOnReady(getMerchantInfo(readerInfo, mEmployeeMerchant));
+//        }
+        /////////////////////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////
+
 
         mLastTransactionRequest = saleRequest;
         clearReferenceData();
         mOrder = new Order();
-        TaxRate taxRate=null;
-        mOrder.addCustomItem(new Order.CustomItem("item",((double)saleRequest.getAmount())/100,1, taxRate));
+        TaxRate taxRate = null;
+        mOrder.addCustomItem(new Order.CustomItem("item", ((double) saleRequest.getAmount()) / 100, 1, taxRate));
         if (saleRequest.getTipAmount() != null)
-            mOrder.setTip(((double)saleRequest.getTipAmount())/100);
+            mOrder.setTip(((double) saleRequest.getTipAmount()) / 100);
         mOrder.setExternalPaymentId(saleRequest.getExternalId());
         mOrder.allowDuplicates = allowDuplicate;
 
-        if (saleRequest instanceof KeyedSaleRequest){
-            creditCard = new CreditCard(((KeyedSaleRequest) saleRequest).getCardNumber(),((KeyedSaleRequest) saleRequest).getExpDate(),((KeyedSaleRequest) saleRequest).getCvv());
-            creditCard.setCardPresent(((KeyedSaleRequest) saleRequest).isCardPresent());
-            if (((KeyedSaleRequest) saleRequest).getBillingAddress() != null){
-                BillingAddress address =  ((KeyedSaleRequest) saleRequest).getBillingAddress();
-                creditCard.setBillingAddress(new CreditCard.BillingAddress(address.getStreet(),address.getZipPostalCode(),address.getCountry()));
+        if (saleRequest instanceof KeyedSaleRequest) {
+            mCreditCard = new CreditCard(((KeyedSaleRequest) saleRequest).getCardNumber(), ((KeyedSaleRequest) saleRequest).getExpDate(), ((KeyedSaleRequest) saleRequest).getCvv());
+            mCreditCard.setCardPresent(((KeyedSaleRequest) saleRequest).isCardPresent());
+            if (((KeyedSaleRequest) saleRequest).getBillingAddress() != null) {
+                BillingAddress address = ((KeyedSaleRequest) saleRequest).getBillingAddress();
+                mCreditCard.setBillingAddress(new CreditCard.BillingAddress(address.getStreet(), address.getZipPostalCode(), address.getCountry()));
             }
-            mAuthOrSaleTransaction.getObservable(mOrder,creditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentResponseObserver);
-        }else {
+            mAuthOrSaleTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mNewPaymentObserver);
+        } else {
             startCardReaderTransaction(readerType);
         }
     }
 
     public void preAuth(PreAuthRequest preAuthRequest, final ReaderInfo.ReaderType readerType, boolean allowDuplicate) {
-
-        if (mEmployeeMerchant != null && !mEmployeeMerchant.getMerchant().getFeatures().contains("preAuths")){
-            broadcaster.notifyOnPreAuthResponse(new PreAuthResponse(false,ResultCode.UNSUPPORTED));
+        Log.e(TAG, "preauth");
+        if (mEmployeeMerchant != null && !mEmployeeMerchant.getMerchant().getFeatures().contains("preAuths")) {
+            Log.e(TAG, "preauth not supported");
+            mBroadcaster.notifyOnPreAuthResponse(new PreAuthResponse(false, ResultCode.UNSUPPORTED));
             return;
         }
 
         mLastTransactionRequest = preAuthRequest;
         clearReferenceData();
         mOrder = new Order();
-        TaxRate taxRate=null;
-        mOrder.addCustomItem(new Order.CustomItem("item",((double)preAuthRequest.getAmount())/100,1, taxRate));
+        TaxRate taxRate = null;
+        mOrder.addCustomItem(new Order.CustomItem("item", ((double) preAuthRequest.getAmount()) / 100, 1, taxRate));
         mOrder.setTip(-1);
         mOrder.setExternalPaymentId(preAuthRequest.getExternalId());
         mOrder.allowDuplicates = allowDuplicate;
         //TODO: setTax amount in Order
 
-        if (preAuthRequest instanceof KeyedPreAuthRequest){
-            CreditCard creditCard = new CreditCard(((KeyedPreAuthRequest) preAuthRequest).getCardNumber(),((KeyedPreAuthRequest) preAuthRequest).getExpDate(),((KeyedPreAuthRequest) preAuthRequest).getCvv());
+        if (preAuthRequest instanceof KeyedPreAuthRequest) {
+            CreditCard creditCard = new CreditCard(((KeyedPreAuthRequest) preAuthRequest).getCardNumber(), ((KeyedPreAuthRequest) preAuthRequest).getExpDate(), ((KeyedPreAuthRequest) preAuthRequest).getCvv());
             creditCard.setCardPresent(((KeyedPreAuthRequest) preAuthRequest).isCardPresent());
-            if (((KeyedPreAuthRequest) preAuthRequest).getBillingAddress() != null){
-                BillingAddress address =  ((KeyedPreAuthRequest) preAuthRequest).getBillingAddress();
-                creditCard.setBillingAddress(new CreditCard.BillingAddress(address.getStreet(),address.getZipPostalCode(),address.getCountry()));
+            if (((KeyedPreAuthRequest) preAuthRequest).getBillingAddress() != null) {
+                BillingAddress address = ((KeyedPreAuthRequest) preAuthRequest).getBillingAddress();
+                creditCard.setBillingAddress(new CreditCard.BillingAddress(address.getStreet(), address.getZipPostalCode(), address.getCountry()));
             }
-            mAuthOrSaleTransaction.getObservable(mOrder,creditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentResponseObserver);
-        }else {
+            mAuthOrSaleTransaction.getObservable(mOrder, creditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mNewPaymentObserver);
+        } else {
             startCardReaderTransaction(readerType);
         }
     }
 
     public void auth(AuthRequest authRequest, final ReaderInfo.ReaderType readerType, boolean allowDuplicate) {
-        if (mEmployeeMerchant != null &&  !mEmployeeMerchant.getMerchant().getFeatures().contains("auths")){
-            broadcaster.notifyOnAuthResponse(new AuthResponse(false,ResultCode.UNSUPPORTED));
+        Log.e(TAG, "auth");
+        if (mEmployeeMerchant != null && !mEmployeeMerchant.getMerchant().getFeatures().contains("auths")) {
+            Log.e(TAG, "preauth not supported");
+            mBroadcaster.notifyOnAuthResponse(new AuthResponse(false, ResultCode.UNSUPPORTED));
             return;
         }
 
         mLastTransactionRequest = authRequest;
         clearReferenceData();
         mOrder = new Order();
-        TaxRate taxRate=null;
-        mOrder.addCustomItem(new Order.CustomItem("item",((double)authRequest.getAmount())/100,1, taxRate));
+        TaxRate taxRate = null;
+        mOrder.addCustomItem(new Order.CustomItem("item", ((double) authRequest.getAmount()) / 100, 1, taxRate));
         mOrder.setTip(-1);
         mOrder.setExternalPaymentId(authRequest.getExternalId());
         mOrder.allowDuplicates = allowDuplicate;
         //TODO: setTax amount in Order
 
-        if (authRequest instanceof KeyedAuthRequest){
-            CreditCard creditCard = new CreditCard(((KeyedAuthRequest) authRequest).getCardNumber(),((KeyedAuthRequest) authRequest).getExpDate(),((KeyedAuthRequest) authRequest).getCvv());
+        if (authRequest instanceof KeyedAuthRequest) {
+            CreditCard creditCard = new CreditCard(((KeyedAuthRequest) authRequest).getCardNumber(), ((KeyedAuthRequest) authRequest).getExpDate(), ((KeyedAuthRequest) authRequest).getCvv());
             creditCard.setCardPresent(((KeyedAuthRequest) authRequest).isCardPresent());
-            if (((KeyedAuthRequest) authRequest).getBillingAddress() != null){
-                BillingAddress address =  ((KeyedAuthRequest) authRequest).getBillingAddress();
-                creditCard.setBillingAddress(new CreditCard.BillingAddress(address.getStreet(),address.getZipPostalCode(),address.getCountry()));
+            if (((KeyedAuthRequest) authRequest).getBillingAddress() != null) {
+                BillingAddress address = ((KeyedAuthRequest) authRequest).getBillingAddress();
+                creditCard.setBillingAddress(new CreditCard.BillingAddress(address.getStreet(), address.getZipPostalCode(), address.getCountry()));
             }
-            mAuthOrSaleTransaction.getObservable(mOrder,creditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentResponseObserver);
-        }else {
+            mAuthOrSaleTransaction.getObservable(mOrder, creditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mNewPaymentObserver);
+        } else {
             startCardReaderTransaction(readerType);
         }
     }
 
     private void startCardReaderTransaction(final ReaderInfo.ReaderType readerType) {
+        Log.e(TAG, "startCardReaderTransaction");
         mGetConnectedReaders.getBlockingObservable().filter(new Predicate<ReaderInfo>() {
             @Override
             public boolean test(@NonNull ReaderInfo readerInfo) throws Exception {
                 return readerInfo.getReaderType() == readerType;
             }
-        }).switchIfEmpty(Observable.<ReaderInfo>error(new Error("",""))).subscribe(new Observer<ReaderInfo>() {
+        }).switchIfEmpty(Observable.<ReaderInfo>error(new Error("", ""))).subscribe(new Observer<ReaderInfo>() {
             @Override
             public void onSubscribe(Disposable d) {
+                Log.e(TAG, "startCardReaderTransaction subscribe");
             }
 
             @Override
             public void onNext(ReaderInfo readerInfo) {
+                Log.e(TAG, "startCardReaderTransaction next");
                 mLastTransactionReader = readerInfo;
-                mReadCard.getObservable(readerInfo, (int)(mOrder.getTotalAmount()*100)).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe();
+                mReadCard.getObservable(readerInfo, (int) Math.round(mOrder.getTotalAmount() * 100)).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe();
             }
 
             @Override
             public void onError(Throwable e) {
-                if (mLastTransactionRequest instanceof SaleRequest){
-                    SaleResponse saleResponse = new SaleResponse(false,ResultCode.CANCEL);
+                Log.e(TAG, "startCardReaderTransaction error");
+                if (mLastTransactionRequest instanceof SaleRequest) {
+                    Log.e(TAG, "startCardReaderTransaction error SaleRequest");
+                    SaleResponse saleResponse = new SaleResponse(false, ResultCode.CANCEL);
                     saleResponse.setMessage("Connect Reader");
                     saleResponse.setReason("Reader Not Connected");
-                    broadcaster.notifyOnSaleResponse(saleResponse);
-                }else if (mLastTransactionRequest instanceof AuthRequest){
-                    AuthResponse authResponse = new AuthResponse(false,ResultCode.CANCEL);
+                    mBroadcaster.notifyOnSaleResponse(saleResponse);
+                } else if (mLastTransactionRequest instanceof AuthRequest) {
+                    Log.e(TAG, "startCardReaderTransaction error AuthRequest");
+                    AuthResponse authResponse = new AuthResponse(false, ResultCode.CANCEL);
                     authResponse.setMessage("Connect Reader");
                     authResponse.setReason("Reader Not Connected");
-                    broadcaster.notifyOnAuthResponse(authResponse);
-                }else if (mLastTransactionRequest instanceof PreAuthRequest){
+                    mBroadcaster.notifyOnAuthResponse(authResponse);
+                } else if (mLastTransactionRequest instanceof PreAuthRequest) {
+                    Log.e(TAG, "startCardReaderTransaction error PreAuthRequest");
                     PreAuthResponse preAuthResponse = new PreAuthResponse(false, ResultCode.CANCEL);
                     preAuthResponse.setMessage("Connect Reader");
                     preAuthResponse.setReason("Reader Not Connected");
-                    broadcaster.notifyOnPreAuthResponse(preAuthResponse);
+                    mBroadcaster.notifyOnPreAuthResponse(preAuthResponse);
                 }
             }
 
             @Override
             public void onComplete() {
+                Log.e(TAG, "startCardReaderTransaction complete");
             }
         });
     }
 
     public void tipAdjustAuth(final TipAdjustAuthRequest authTipAdjustRequest) {
-        if (mEmployeeMerchant != null && mEmployeeMerchant.getMerchant().getFeatures().contains("tip_adjust")){
-            mAddTips.getObservable(authTipAdjustRequest.getPaymentId(),((double)authTipAdjustRequest.getTipAmount()/100)).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new CompletableObserver() {
+        if (mEmployeeMerchant != null && mEmployeeMerchant.getMerchant().getFeatures().contains("tip_adjust")) {
+            mAddTips.getObservable(authTipAdjustRequest.getPaymentId(), ((double) authTipAdjustRequest.getTipAmount() / 100)).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new CompletableObserver() {
                 @Override
-                public void onSubscribe(Disposable d) {}
+                public void onSubscribe(Disposable d) {
+                }
 
                 @Override
                 public void onComplete() {
-                    Log.e(TAG,"TipAdjustAuth onComplete");
-                    TipAdjustAuthResponse tipAdjustAuthResponse = new TipAdjustAuthResponse(true,ResultCode.SUCCESS);
+                    Log.e(TAG, "TipAdjustAuth onComplete");
+                    TipAdjustAuthResponse tipAdjustAuthResponse = new TipAdjustAuthResponse(true, ResultCode.SUCCESS);
                     tipAdjustAuthResponse.setPaymentId(authTipAdjustRequest.getPaymentId());
                     tipAdjustAuthResponse.setTipAmount(authTipAdjustRequest.getTipAmount());
-                    broadcaster.notifyOnTipAdjustAuthResponse(tipAdjustAuthResponse);
+                    mBroadcaster.notifyOnTipAdjustAuthResponse(tipAdjustAuthResponse);
                 }
 
                 @Override
                 public void onError(Throwable e) {
                     Error error = Error.convertToError(e);
-                    Log.e(TAG,"TipAdjustAuth onError");
-                    TipAdjustAuthResponse tipAdjustAuthResponse =  new TipAdjustAuthResponse(false,ResultCode.FAIL);
+                    Log.e(TAG, "TipAdjustAuth onError");
+                    TipAdjustAuthResponse tipAdjustAuthResponse = new TipAdjustAuthResponse(false, ResultCode.FAIL);
                     tipAdjustAuthResponse.setTipAmount(authTipAdjustRequest.getTipAmount());
                     tipAdjustAuthResponse.setPaymentId(authTipAdjustRequest.getPaymentId());
                     tipAdjustAuthResponse.setReason(error.getCode());
                     tipAdjustAuthResponse.setMessage(error.getMessage());
-                    broadcaster.notifyOnTipAdjustAuthResponse(tipAdjustAuthResponse);
+                    mBroadcaster.notifyOnTipAdjustAuthResponse(tipAdjustAuthResponse);
                 }
             });
-        }else {
-            TipAdjustAuthResponse tipAdjustAuthResponse =  new TipAdjustAuthResponse(false,ResultCode.UNSUPPORTED);
+        } else {
+            TipAdjustAuthResponse tipAdjustAuthResponse = new TipAdjustAuthResponse(false, ResultCode.UNSUPPORTED);
             tipAdjustAuthResponse.setTipAmount(authTipAdjustRequest.getTipAmount());
             tipAdjustAuthResponse.setPaymentId(authTipAdjustRequest.getPaymentId());
-            broadcaster.notifyOnTipAdjustAuthResponse(tipAdjustAuthResponse);
+            mBroadcaster.notifyOnTipAdjustAuthResponse(tipAdjustAuthResponse);
         }
     }
 
     public void capturePreAuth(final CapturePreAuthRequest capturePreAuthRequest) {
-        mCaptureTransaction.getObservable(capturePreAuthRequest.getPaymentID(),((double)capturePreAuthRequest.getAmount())/100,((double)capturePreAuthRequest.getTipAmount())/100).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<Payment>() {
+        mCaptureTransaction.getObservable(capturePreAuthRequest.getPaymentID(), ((double) capturePreAuthRequest.getAmount()) / 100, ((double) capturePreAuthRequest.getTipAmount()) / 100).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<Payment>() {
             @Override
             public void onSubscribe(Disposable d) {
             }
 
             @Override
             public void onNext(Payment payment) {
-                Log.e(TAG,"Capture Transaction onNext");
+                Log.e(TAG, "Capture Transaction onNext");
                 CapturePreAuthResponse response = new CapturePreAuthResponse(true, ResultCode.SUCCESS);
-                response.setPaymentID(payment.getId());
+                response.setPaymentID(payment.getPaymentId());
 
-                response.setTipAmount((long)(payment.getTipCharged()*100));
-                response.setAmount((long) (payment.getAmountCharged()* 100) - (long)(payment.getTipCharged()*100) );
-                broadcaster.notifyOnCapturePreAuth(response);
+                response.setTipAmount((long) (payment.getTipCharged() * 100));
+                response.setAmount((long) (payment.getAmountCharged() * 100) - (long) (payment.getTipCharged() * 100));
+                mBroadcaster.notifyOnCapturePreAuth(response);
             }
 
             @Override
             public void onError(Throwable e) {
                 Error error = Error.convertToError(e);
-                Log.e(TAG,"Capture Transaction onError");
+                Log.e(TAG, "Capture Transaction onError");
                 CapturePreAuthResponse response = new CapturePreAuthResponse(true, ResultCode.FAIL);
                 response.setPaymentID(capturePreAuthRequest.getPaymentID());
                 response.setAmount(capturePreAuthRequest.getAmount());
                 response.setTipAmount(capturePreAuthRequest.getTipAmount());
                 response.setReason(error.getCode());
                 response.setMessage(error.getMessage());
-                broadcaster.notifyOnCapturePreAuth(response);
+                mBroadcaster.notifyOnCapturePreAuth(response);
             }
 
             @Override
@@ -830,79 +899,80 @@ public class CloverGoConnectorImpl {
     }
 
     public void voidPayment(final VoidPaymentRequest voidPaymentRequest) {
-        if ( mEmployeeMerchant != null && mEmployeeMerchant.getMerchant().getFeatures().contains("voids")){
-            mVoidTransaction.getObservable(voidPaymentRequest.getOrderId(),voidPaymentRequest.getPaymentId()).subscribeOn(Schedulers.io())
+        if (mEmployeeMerchant != null && mEmployeeMerchant.getMerchant().getFeatures().contains("voids")) {
+            mVoidTransaction.getObservable(voidPaymentRequest.getOrderId(), voidPaymentRequest.getPaymentId()).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread()).subscribe(new CompletableObserver() {
                 @Override
-                public void onSubscribe(Disposable d) {}
+                public void onSubscribe(Disposable d) {
+                }
 
                 @Override
                 public void onComplete() {
-                    Log.e(TAG,"Void transaction onComplete");
-                    VoidPaymentResponse response = new VoidPaymentResponse(true,ResultCode.SUCCESS);
+                    Log.e(TAG, "Void transaction onComplete");
+                    VoidPaymentResponse response = new VoidPaymentResponse(true, ResultCode.SUCCESS);
                     response.setPaymentId(voidPaymentRequest.getPaymentId());
-                    broadcaster.notifyOnVoidPaymentResponse(response);
+                    mBroadcaster.notifyOnVoidPaymentResponse(response);
                 }
 
                 @Override
                 public void onError(Throwable e) {
-                    Log.e(TAG,"Void transaction onError "+ e.getMessage());
+                    Log.e(TAG, "Void transaction onError " + e.getMessage());
                     Error error = Error.convertToError(e);
-                    VoidPaymentResponse response = new VoidPaymentResponse(false,ResultCode.FAIL);
+                    VoidPaymentResponse response = new VoidPaymentResponse(false, ResultCode.FAIL);
                     response.setPaymentId(voidPaymentRequest.getPaymentId());
                     response.setReason(error.getCode());
                     response.setMessage(error.getMessage());
-                    broadcaster.notifyOnVoidPaymentResponse(response);
+                    mBroadcaster.notifyOnVoidPaymentResponse(response);
                 }
             });
-        }else {
-            VoidPaymentResponse voidPaymentResponse = new VoidPaymentResponse(false,ResultCode.FAIL);
+        } else {
+            VoidPaymentResponse voidPaymentResponse = new VoidPaymentResponse(false, ResultCode.FAIL);
             voidPaymentResponse.setPaymentId(voidPaymentRequest.getPaymentId());
-            broadcaster.notifyOnVoidPaymentResponse(voidPaymentResponse);
+            mBroadcaster.notifyOnVoidPaymentResponse(voidPaymentResponse);
         }
     }
 
     public void refundPayment(final RefundPaymentRequest refundPaymentRequest) {
-        if (refundPaymentRequest.getPaymentId() == null){
-            RefundPaymentResponse response =  new RefundPaymentResponse(false,ResultCode.ERROR);
+        if (refundPaymentRequest.getPaymentId() == null) {
+            RefundPaymentResponse response = new RefundPaymentResponse(false, ResultCode.ERROR);
             response.setReason("payment_id_null");
             response.setMessage("Payment ID must not be null");
 
-            broadcaster.notifyOnRefundPaymentResponse(response);
+            mBroadcaster.notifyOnRefundPaymentResponse(response);
             return;
         }
 
         String amount = null;
-        if (!refundPaymentRequest.isFullRefund()){
+        if (!refundPaymentRequest.isFullRefund()) {
             amount = String.valueOf(refundPaymentRequest.getAmount());
         }
-        mRefundTransaction.getObservable(refundPaymentRequest.getPaymentId(),amount).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<Refund>() {
+        mRefundTransaction.getObservable(refundPaymentRequest.getPaymentId(), amount).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<RefundSuccess>() {
             @Override
             public void onSubscribe(Disposable d) {
             }
 
             @Override
-            public void onNext(Refund refund) {
+            public void onNext(RefundSuccess refundSuccess) {
                 RefundPaymentResponse response = new RefundPaymentResponse(true, ResultCode.SUCCESS);
-                response.setPaymentId(refund.getPaymentId());
+                response.setPaymentId(refundSuccess.getRefundPaymentId());
                 response.setOrderId(refundPaymentRequest.getOrderId());
                 com.clover.sdk.v3.payments.Refund _refund = new com.clover.sdk.v3.payments.Refund();
-                _refund.setId(refund.getRefundId());
-                _refund.setAmount((long)(refund.getAmount()* 100));
+                _refund.setId(refundSuccess.getRefundId());
+                _refund.setAmount((long) (refundSuccess.getRefundAmount() * 100));
                 response.setRefund(_refund);
-                broadcaster.notifyOnRefundPaymentResponse(response);
+                mBroadcaster.notifyOnRefundPaymentResponse(response);
             }
 
             @Override
             public void onError(Throwable e) {
-                Log.e(TAG,"Refund transaction onError "+ e.getMessage());
+                Log.e(TAG, "Refund transaction onError " + e.getMessage());
                 Error error = Error.convertToError(e);
-                RefundPaymentResponse response = new RefundPaymentResponse(false,ResultCode.FAIL);
+                RefundPaymentResponse response = new RefundPaymentResponse(false, ResultCode.FAIL);
                 response.setPaymentId(refundPaymentRequest.getPaymentId());
                 response.setOrderId(refundPaymentRequest.getOrderId());
                 response.setReason(error.getCode());
                 response.setMessage(error.getMessage());
-                broadcaster.notifyOnRefundPaymentResponse(response);
+                mBroadcaster.notifyOnRefundPaymentResponse(response);
 
             }
 
@@ -921,139 +991,141 @@ public class CloverGoConnectorImpl {
 
             @Override
             public void onComplete() {
-                Log.e(TAG,"CloseOut onComplete");
-                CloseoutResponse closeoutResponse = new CloseoutResponse(true,ResultCode.SUCCESS);
-                broadcaster.notifyCloseout(closeoutResponse);
+                Log.e(TAG, "CloseOut onComplete");
+                CloseoutResponse closeoutResponse = new CloseoutResponse(true, ResultCode.SUCCESS);
+                mBroadcaster.notifyCloseout(closeoutResponse);
             }
 
             @Override
             public void onError(Throwable e) {
                 Error error = Error.convertToError(e);
-                CloseoutResponse closeoutResponse = new CloseoutResponse(false,ResultCode.FAIL);
+                CloseoutResponse closeoutResponse = new CloseoutResponse(false, ResultCode.FAIL);
                 closeoutResponse.setReason(error.getMessage());
 
-                broadcaster.notifyCloseout(closeoutResponse);
+                mBroadcaster.notifyCloseout(closeoutResponse);
             }
         });
     }
 
     public void acceptPayment(com.clover.sdk.v3.payments.Payment payment) {
         mOrder.allowDuplicates = true;
-        if (mLastTransactionRequest instanceof KeyedSaleRequest || mLastTransactionRequest instanceof KeyedAuthRequest){
-            mAuthOrSaleTransaction.getObservable(mOrder,creditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentResponseObserver);
-        }else if (mLastTransactionRequest instanceof KeyedPreAuthRequest){
-            mPreAuthTransaction.getObservable(mOrder,creditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentResponseObserver);
-        }else {
+        if (mLastTransactionRequest instanceof KeyedSaleRequest || mLastTransactionRequest instanceof KeyedAuthRequest) {
+            mAuthOrSaleTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mNewPaymentObserver);
+        } else if (mLastTransactionRequest instanceof KeyedPreAuthRequest) {
+            mPreAuthTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mNewPaymentObserver);
+        } else {
             EventBus.post(readerProgressEvent);
         }
     }
 
     public void rejectPayment(com.clover.sdk.v3.payments.Payment payment, Challenge challenge) {
-        if (readerProgressEvent != null && readerProgressEvent.getEventType() == ReaderProgressEvent.EventType.CHIP_DATA) {
+        if (readerProgressEvent != null && readerProgressEvent.getEventType() == ReaderProgressEvent.EventType.EMV_DATA) {
             mGetConnectedReaders.getBlockingObservable().subscribe(new Consumer<ReaderInfo>() {
                 @Override
                 public void accept(@NonNull ReaderInfo readerInfo) throws Exception {
                     final Map<String, String> completeEmvData = new HashMap<>();
                     completeEmvData.put("Result", "02");
                     completeEmvData.put("Authorization_Response", "5A33");
-                    mWriteToCard.getObservable(readerInfo, completeEmvData).subscribe();;
+                    mWriteToCard.getObservable(readerInfo, completeEmvData).subscribe();
+                    ;
                 }
             });
         }
     }
 
-    public void captureSignature(String paymentId, int[][] xy){
-        if (paymentId == null){
+    public void captureSignature(String paymentId, int[][] xy) {
+        if (paymentId == null) {
             throw new NullPointerException("Payment ID cannot be null");
-        }else if (xy == null){
+        } else if (xy == null) {
             throw new NullPointerException("Signature cannot be null");
-        }else {
-            captureSignature.getObservable(paymentId, xy).retry(3).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).onErrorComplete().subscribe();
+        } else {
+            mCaptureSignature.getObservable(paymentId, xy).retry(3).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).onErrorComplete().subscribe();
         }
     }
 
-    public void sendReceipt(String emailAddress, String phoneNo, String orderId){
-        sendReceipt.getObservable(emailAddress != null && !emailAddress.isEmpty() ? emailAddress : null, phoneNo != null && !phoneNo.isEmpty() ? phoneNo : null, orderId).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).onErrorComplete().subscribe();
+    public void sendReceipt(String emailAddress, String phoneNo, String orderId) {
+        mSendReceipt.getObservable(emailAddress != null && !emailAddress.isEmpty() ? emailAddress : null, phoneNo != null && !phoneNo.isEmpty() ? phoneNo : null, orderId).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).onErrorComplete().subscribe();
     }
 
     private void notifyPaymentResponse() {
-        // com.clover.sdk.v3.payments.Payment _payment = new com.clover.sdk.v3.payments.Payment();
-        GoPayment _payment = new GoPayment();
+        Log.e(TAG, "notifyPaymentResponse");
+        GoPayment goPayment = new GoPayment();
 
-        _payment.setId(payment.getId());
-        _payment.setAmount((long) (payment.getAmountCharged()* 100) - (long)(payment.getTipCharged()*100));
-        _payment.setTipAmount((long)(payment.getTipCharged()*100));
-        _payment.setExternalPaymentId(payment.getExternalPaymentId());
-        _payment.setSignatureRequired(payment.getCard().isSignatureRequired());
+        goPayment.setId(mPayment.getPaymentId());
+        goPayment.setAmount((long) (mPayment.getAmountCharged() * 100) - (long) (mPayment.getTipCharged() * 100));
+        goPayment.setTipAmount((long) (mPayment.getTipCharged() * 100));
+        goPayment.setExternalPaymentId(mPayment.getExternalPaymentId());
+        goPayment.setSignatureRequired(mPayment.getCard().isSignatureRequired());
 
         Reference orderRef = new Reference();
-        orderRef.setId(payment.getOrderId());
-        _payment.setOrder(orderRef);
-
+        orderRef.setId(mPayment.getOrderId());
+        goPayment.setOrder(orderRef);
 
         CardTransaction cardTransaction = new CardTransaction();
-        cardTransaction.setCardholderName(payment.getCard().getCardholderName());
-        cardTransaction.setCardType(CardType.valueOf(payment.getCard().getCardType()));
+        cardTransaction.setCardholderName(mPayment.getCard().getCardholderName());
+        cardTransaction.setCardType(CardType.valueOf(mPayment.getCard().getCardType()));
 
-        if (mLastTransactionRequest instanceof SaleRequest){
-            Log.e(TAG,"Sale onNext");
+        if (mLastTransactionRequest instanceof SaleRequest) {
+            Log.e(TAG, "notifyPaymentResponse SaleRequest");
             SaleResponse response = new SaleResponse(true, ResultCode.SUCCESS);
-            _payment.setResult(Result.SUCCESS);
+            goPayment.setResult(Result.SUCCESS);
             cardTransaction.setType(CardTransactionType.AUTH);
 
-            _payment.setCardTransaction(cardTransaction);
-            response.setPayment(_payment);
+            goPayment.setCardTransaction(cardTransaction);
+            response.setPayment(goPayment);
 
-            broadcaster.notifyOnSaleResponse(response);
+            mBroadcaster.notifyOnSaleResponse(response);
 
-        }else if (mLastTransactionRequest instanceof AuthRequest){
-            Log.e(TAG,"Auth onNext");
+        } else if (mLastTransactionRequest instanceof AuthRequest) {
+            Log.e(TAG, "notifyPaymentResponse AuthRequest");
             AuthResponse response = new AuthResponse(true, ResultCode.SUCCESS);
-            _payment.setResult(Result.SUCCESS);
+            goPayment.setResult(Result.SUCCESS);
             cardTransaction.setType(CardTransactionType.PREAUTH);
 
-            _payment.setCardTransaction(cardTransaction);
-            response.setPayment(_payment);
+            goPayment.setCardTransaction(cardTransaction);
+            response.setPayment(goPayment);
 
-            broadcaster.notifyOnAuthResponse(response);
+            mBroadcaster.notifyOnAuthResponse(response);
 
-        }else if (mLastTransactionRequest instanceof PreAuthRequest){
-            Log.e(TAG,"Pre-Auth onNext");
+        } else if (mLastTransactionRequest instanceof PreAuthRequest) {
+            Log.e(TAG, "notifyPaymentResponse PreAuthRequest");
             PreAuthResponse response = new PreAuthResponse(true, ResultCode.SUCCESS);
-            _payment.setResult(Result.AUTH);;
+            goPayment.setResult(Result.AUTH);
+            ;
             cardTransaction.setType(CardTransactionType.PREAUTH);
 
-            _payment.setCardTransaction(cardTransaction);
-            response.setPayment(_payment);
+            goPayment.setCardTransaction(cardTransaction);
+            response.setPayment(goPayment);
 
-            broadcaster.notifyOnPreAuthResponse(response);
+            mBroadcaster.notifyOnPreAuthResponse(response);
         }
     }
 
     private void clearReferenceData() {
-        readerProgressEvent= null;
-        creditCard = null;
+        readerProgressEvent = null;
+        mCreditCard = null;
         mLastTransactionReader = null;
     }
+
     private void notifyErrorResponse() {
-        if (mLastTransactionRequest instanceof SaleRequest){
-            Log.e(TAG,"Sale onError "+ transactionError.getMessage());
+        if (mLastTransactionRequest instanceof SaleRequest) {
+            Log.e(TAG, "notifyErrorResponse SaleRequest" + mTransactionError.getMessage());
             SaleResponse response = new SaleResponse(false, ResultCode.FAIL);
-            response.setReason(transactionError.getCode());
-            response.setMessage(transactionError.getMessage());
-            broadcaster.notifyOnSaleResponse(response);
-        }else if (mLastTransactionRequest instanceof AuthRequest){
-            Log.e(TAG,"Auth onError "+ transactionError.getMessage());
+            response.setReason(mTransactionError.getCode());
+            response.setMessage(mTransactionError.getMessage());
+            mBroadcaster.notifyOnSaleResponse(response);
+        } else if (mLastTransactionRequest instanceof AuthRequest) {
+            Log.e(TAG, "notifyErrorResponse AuthRequest" + mTransactionError.getMessage());
             AuthResponse response = new AuthResponse(false, ResultCode.FAIL);
-            response.setReason(transactionError.getCode());
-            response.setMessage(transactionError.getMessage());
-            broadcaster.notifyOnAuthResponse(response);
-        }else if (mLastTransactionRequest instanceof PreAuthRequest){
-            Log.e(TAG,"Pre-Auth onError "+ transactionError.getMessage());
+            response.setReason(mTransactionError.getCode());
+            response.setMessage(mTransactionError.getMessage());
+            mBroadcaster.notifyOnAuthResponse(response);
+        } else if (mLastTransactionRequest instanceof PreAuthRequest) {
+            Log.e(TAG, "notifyErrorResponse PreAuthRequest" + mTransactionError.getMessage());
             PreAuthResponse response = new PreAuthResponse(false, ResultCode.FAIL);
-            response.setReason(transactionError.getCode());
-            response.setMessage(transactionError.getMessage());
-            broadcaster.notifyOnPreAuthResponse(response);
+            response.setReason(mTransactionError.getCode());
+            response.setMessage(mTransactionError.getMessage());
+            mBroadcaster.notifyOnPreAuthResponse(response);
         }
     }
 
@@ -1069,7 +1141,5 @@ public class CloverGoConnectorImpl {
                 cancelCardRead.getObservable(readerInfo).subscribe();
             }
         });
-
     }
-
 }

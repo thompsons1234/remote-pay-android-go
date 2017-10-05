@@ -10,9 +10,16 @@ import com.clover.remote.client.messages.CapturePreAuthRequest;
 import com.clover.remote.client.messages.CloseoutRequest;
 import com.clover.remote.client.messages.CustomActivityRequest;
 import com.clover.remote.client.messages.ManualRefundRequest;
+import com.clover.remote.client.messages.MessageToActivity;
+import com.clover.remote.client.messages.OpenCashDrawerRequest;
 import com.clover.remote.client.messages.PreAuthRequest;
+import com.clover.remote.client.messages.PrintJobStatusRequest;
+import com.clover.remote.client.messages.PrintRequest;
 import com.clover.remote.client.messages.ReadCardDataRequest;
 import com.clover.remote.client.messages.RefundPaymentRequest;
+import com.clover.remote.client.messages.RetrieveDeviceStatusRequest;
+import com.clover.remote.client.messages.RetrievePaymentRequest;
+import com.clover.remote.client.messages.RetrievePrintersRequest;
 import com.clover.remote.client.messages.SaleRequest;
 import com.clover.remote.client.messages.TipAdjustAuthRequest;
 import com.clover.remote.client.messages.VerifySignatureRequest;
@@ -119,6 +126,16 @@ public class DefaultCloverGoConnector implements ICloverGoConnector {
   }
 
   @Override
+  public void retrieveDeviceStatus(RetrieveDeviceStatusRequest request) {
+
+  }
+
+  @Override
+  public void retrievePayment(RetrievePaymentRequest request) {
+
+  }
+
+  @Override
   public void sale(SaleRequest request) {
 
   }
@@ -194,7 +211,32 @@ public class DefaultCloverGoConnector implements ICloverGoConnector {
   }
 
   @Override
+  public void sendMessageToActivity(MessageToActivity request) {
+
+  }
+
+  @Override
   public void closeout(CloseoutRequest request) {
+
+  }
+
+  @Override
+  public void print(PrintRequest request) {
+
+  }
+
+  @Override
+  public void retrievePrinters(RetrievePrintersRequest request) {
+
+  }
+
+  @Override
+  public void retrievePrintJobStatus(PrintJobStatusRequest request) {
+
+  }
+
+  @Override
+  public void openCashDrawer(OpenCashDrawerRequest request) {
 
   }
 
@@ -210,7 +252,7 @@ public class DefaultCloverGoConnector implements ICloverGoConnector {
   }
 
   @Override
-  public void connectToDevice(ReaderInfo readerInfo) {
+  public void connectToBluetoothDevice(ReaderInfo readerInfo) {
 
   }
 

@@ -60,41 +60,40 @@ public class CloverDeviceEvent {
     PACKET_EXCEPTION,
     CONFIRM_DUPLICATE_CHECK,
 
-    // verify CVM flow
-    VERIFY_SIGNATURE_ON_PAPER,
-    VERIFY_SIGNATURE_ON_PAPER_CONFIRM_VOID,
-    VERIFY_SIGNATURE_ON_SCREEN,
-    VERIFY_SIGNATURE_ON_SCREEN_CONFIRM_VOID,
-    ADD_SIGNATURE,
-    SIGNATURE_ON_SCREEN_FALLBACK,
-    RETURN_TO_MERCHANT,
-    SIGNATURE_REJECT,
-    ADD_SIGNATURE_CANCEL_CONFIRM,
+        // verify CVM flow
+        VERIFY_SIGNATURE_ON_PAPER,
+        VERIFY_SIGNATURE_ON_PAPER_CONFIRM_VOID,
+        VERIFY_SIGNATURE_ON_SCREEN,
+        VERIFY_SIGNATURE_ON_SCREEN_CONFIRM_VOID,
+        ADD_SIGNATURE,
+        SIGNATURE_ON_SCREEN_FALLBACK,
+        RETURN_TO_MERCHANT,
+        SIGNATURE_REJECT,
+        ADD_SIGNATURE_CANCEL_CONFIRM,
 
-    // add tip flow
-    ADD_TIP,
+        // add tip flow
+        ADD_TIP,
 
-    // receipt options flow
-    RECEIPT_OPTIONS,
+        // receipt options flow
+        RECEIPT_OPTIONS,
 
-    // tender handling flow
-    HANDLE_TENDER,
+        // tender handling flow
+        HANDLE_TENDER,
 
     // starting custom activity, called from RTKA
     STARTING_CUSTOM_ACTIVITY,
 
-    //TODO : Rename Events Name
-    //CLOVER GO Transaction EVENTS
-    CARD_SWIPED,
-    CARD_TAPPED,
-    CANCEL_CARD_READ,
-    EMV_COMPLETE_DATA,
-    CARD_INSERTED_MSG,
-    LOW_BATTERY,
-    CARD_REMOVED_MSG,
-    PLEASE_SEE_PHONE_MSG,
-    READER_READY,
-  }
+        //TODO : Rename Events Name
+        //CLOVER GO Transaction EVENTS
+        CARD_SWIPED,
+        CARD_TAPPED,
+        CANCEL_CARD_READ,
+        EMV_COMPLETE_DATA,
+        CARD_INSERTED_MSG,
+        CARD_REMOVED_MSG,
+        PLEASE_SEE_PHONE_MSG,
+        READER_READY,
+    }
 
   private DeviceEventState eventState;
   private int code;

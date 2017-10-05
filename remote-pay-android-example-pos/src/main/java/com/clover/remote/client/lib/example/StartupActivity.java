@@ -16,14 +16,9 @@
 
 package com.clover.remote.client.lib.example;
 
-import com.clover.remote.client.lib.example.qrCode.barcode.BarcodeCaptureActivity;
-import com.clover.sdk.util.Platform;
-import com.clover.sdk.v1.Intents;
-import com.clover.sdk.v3.scanner.BarcodeResult;
-import com.clover.sdk.v3.scanner.BarcodeScanner;
-
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -32,17 +27,42 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.clover.remote.client.lib.example.qrCode.barcode.BarcodeCaptureActivity;
+import com.clover.remote.client.lib.example.rest.ApiClient;
+import com.clover.remote.client.lib.example.rest.ApiInterface;
+import com.clover.remote.client.lib.example.utils.Validator;
+import com.clover.sdk.util.Platform;
+import com.clover.sdk.v1.Intents;
+import com.clover.sdk.v3.scanner.BarcodeResult;
+import com.clover.sdk.v3.scanner.BarcodeScanner;
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import io.fabric.sdk.android.Fabric;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import static com.firstdata.clovergo.domain.model.ReaderInfo.ReaderType.RP350;
+import static com.firstdata.clovergo.domain.model.ReaderInfo.ReaderType.RP450;
 
 public class StartupActivity extends Activity {
 
@@ -55,6 +75,11 @@ public class StartupActivity extends Activity {
   public static final String LAN = "LAN";
   private static final int BARCODE_READER_REQUEST_CODE = 1;
   public static final String WS_CONFIG = "WS";
+
+  private static final String GO_API_KEY = "Lht4CAQq8XxgRikjxwE71JE20by5dzlY";
+  private static final String GO_SECRET = "7ebgf6ff8e98d1565ab988f5d770a911e36f0f2347e3ea4eb719478c55e74d9g";
+  private static final String GO_ACCESS_TOKEN = "533238e2-dbd7-98d8-ff6b-3e953d028e30";
+
 
   // Clover devices do not always support the custom Barcode scanner implemented here.
   // They DO have a different capability to scan barcodes.
@@ -76,8 +101,10 @@ public class StartupActivity extends Activity {
   };
 
   private RadioGroup readerRadioGroup;
+  private Toast mToast;
 
-  @Override protected void onCreate(Bundle savedInstanceState) {
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     Fabric.with(this, new Crashlytics());
     setContentView(R.layout.activity_startup);
@@ -88,26 +115,29 @@ public class StartupActivity extends Activity {
       getActionBar().hide();
     }
 
-    readerRadioGroup = (RadioGroup)findViewById(R.id.readerRadioGroup);
+    readerRadioGroup = (RadioGroup) findViewById(R.id.readerRadioGroup);
 
-    RadioGroup group = (RadioGroup)findViewById(R.id.radioGroup);
+    RadioGroup group = (RadioGroup) findViewById(R.id.radioGroup);
     group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-      @Override public void onCheckedChanged(RadioGroup group, int checkedId) {
+      @Override
+      public void onCheckedChanged(RadioGroup group, int checkedId) {
         TextView textView = (TextView) findViewById(R.id.lanPayDisplayAddress);
         textView.setEnabled(checkedId == R.id.lanRadioButton);
-        if (checkedId == R.id.goRadioButton){
+        if (checkedId == R.id.goRadioButton) {
           readerRadioGroup.setVisibility(View.VISIBLE);
           findViewById(R.id.llGoModes).setVisibility(View.VISIBLE);
           findViewById(R.id.connectButton).setVisibility(View.GONE);
-        }else{
+          findViewById(R.id.scanQRCode).setVisibility(View.GONE);
+        } else {
           readerRadioGroup.setVisibility(View.GONE);
           findViewById(R.id.llGoModes).setVisibility(View.GONE);
           findViewById(R.id.connectButton).setVisibility(View.VISIBLE);
+          findViewById(R.id.scanQRCode).setVisibility(View.VISIBLE);
         }
       }
     });
 
-    Button connectButton = (Button)findViewById(R.id.connectButton);
+    Button connectButton = (Button) findViewById(R.id.connectButton);
     connectButton.setOnLongClickListener(new View.OnLongClickListener() {
       @Override
       public boolean onLongClick(View v) {
@@ -118,45 +148,20 @@ public class StartupActivity extends Activity {
 
     // initialize...
     TextView textView = (TextView) findViewById(R.id.lanPayDisplayAddress);
-    String url = this.getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).getString(LAN_PAY_DISPLAY_URL,  "wss://192.168.1.101:12345/remote_pay");
+    String url = this.getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).getString(LAN_PAY_DISPLAY_URL, "wss://192.168.1.101:12345/remote_pay");
 
     textView.setText(url);
-    textView.setEnabled(((RadioGroup)findViewById(R.id.radioGroup)).getCheckedRadioButtonId() == R.id.lanRadioButton);
+    textView.setEnabled(((RadioGroup) findViewById(R.id.radioGroup)).getCheckedRadioButtonId() == R.id.lanRadioButton);
 
     String mode = this.getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).getString(CONNECTION_MODE, USB);
 
-    ((RadioButton)findViewById(R.id.lanRadioButton)).setChecked(LAN.equals(mode));
-    ((RadioButton)findViewById(R.id.usbRadioButton)).setChecked(!LAN.equals(mode));
+    ((RadioButton) findViewById(R.id.lanRadioButton)).setChecked(LAN.equals(mode));
+    ((RadioButton) findViewById(R.id.usbRadioButton)).setChecked(!LAN.equals(mode));
+    ((RadioButton) findViewById(R.id.goRadioButton)).setChecked(GO.equalsIgnoreCase(mode));
 
     // Switch out the barcode scanner for the Clover Devices
     if (Platform.isClover()) {
       cloverBarcodeScanner = new BarcodeScanner(this);
-    }
-  }
-
-  private boolean loadBaseURL() {
-
-    String _serverBaseURL = PreferenceManager.getDefaultSharedPreferences(this).getString(ExamplePOSActivity.EXAMPLE_POS_SERVER_KEY, "wss://10.0.0.101:12345/remote_pay");
-
-    TextView tv = (TextView)findViewById(R.id.lanPayDisplayAddress);
-    tv.setText(_serverBaseURL);
-
-    Log.d(TAG, _serverBaseURL);
-    return true;
-  }
-
-
-  public void scanQRCode(View view) {
-    if (cloverBarcodeScanner == null) {
-      // not clover, try the generic way
-      Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
-      startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
-    } else {
-      // It is a Clover device, use the Clover version
-      Bundle extras = new Bundle();
-      extras.putBoolean(Intents.EXTRA_LED_ON, false);
-      extras.putBoolean(Intents.EXTRA_SCAN_QR_CODE, true);
-      cloverBarcodeScanner.executeStartScan(extras);
     }
   }
 
@@ -177,9 +182,81 @@ public class StartupActivity extends Activity {
       unregisterCloverBarcodeScanner();
     }
   }
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    // For non-clover devices this is how the generic barcode scanner
+    // returns the scanned barcode
+    if (requestCode == BARCODE_READER_REQUEST_CODE) {
+      if (resultCode == CommonStatusCodes.SUCCESS) {
+        if (data != null) {
+          Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+          connect(parseValidateAndStoreURI(barcode.displayValue), WS_CONFIG, false);
+        }
+      } else Log.e(TAG, String.format(getString(R.string.barcode_error_format),
+              CommonStatusCodes.getStatusCodeString(resultCode)));
+    } else super.onActivityResult(requestCode, resultCode, data);
+  }
+
+  @Override
+  protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+
+    if (intent != null && intent.getData() != null) {
+      Uri uri = intent.getData();
+      String merchantId = "";
+      String employeeId = "";
+      String clientId = "";
+      String code = "";
+      String value;
+
+      for (String param : uri.getQueryParameterNames()) {
+        value = uri.getQueryParameter(param);
+
+        if (!TextUtils.isEmpty(value)) {
+          if (param.equalsIgnoreCase("merchant_id")) {
+            merchantId = value;
+          } else if (param.equalsIgnoreCase("employee_id")) {
+            employeeId = value;
+          } else if (param.equalsIgnoreCase("client_id")) {
+            clientId = value;
+          } else if (param.equalsIgnoreCase("code")) {
+            code = value;
+          }
+        }
+      }
+      getAccessToken(clientId, code);
+    }
+  }
+
+  private boolean loadBaseURL() {
+    String _serverBaseURL = PreferenceManager.getDefaultSharedPreferences(this).getString(ExamplePOSActivity.EXAMPLE_POS_SERVER_KEY, "wss://10.0.0.101:12345/remote_pay");
+
+    TextView tv = (TextView) findViewById(R.id.lanPayDisplayAddress);
+    tv.setText(_serverBaseURL);
+
+    Log.d(TAG, _serverBaseURL);
+    return true;
+  }
+
+  public void scanQRCode(View view) {
+    if (cloverBarcodeScanner == null) {
+      // not clover, try the generic way
+      Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
+      startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
+    } else {
+      // It is a Clover device, use the Clover version
+      Bundle extras = new Bundle();
+      extras.putBoolean(Intents.EXTRA_LED_ON, false);
+      extras.putBoolean(Intents.EXTRA_SCAN_QR_CODE, true);
+      cloverBarcodeScanner.executeStartScan(extras);
+    }
+  }
+
   private void registerCloverBarcodeScanner() {
     registerReceiver(cloverBarcodeReceiver, new IntentFilter(BarcodeResult.INTENT_ACTION));
   }
+
   private void unregisterCloverBarcodeScanner() {
     unregisterReceiver(cloverBarcodeReceiver);
   }
@@ -193,23 +270,22 @@ public class StartupActivity extends Activity {
   }
 
   public void connect(View view, boolean clearToken) {
-
-    RadioGroup group = (RadioGroup)findViewById(R.id.radioGroup);
+    RadioGroup group = (RadioGroup) findViewById(R.id.radioGroup);
     SharedPreferences prefs = this.getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE);
     SharedPreferences.Editor editor = prefs.edit();
     URI uri = null;
     String config;
 
-      if (group.getCheckedRadioButtonId() == R.id.goRadioButton) {
-          config = "GO";
-          editor.putString(CONNECTION_MODE, GO);
-          editor.commit();
-      } else if(group.getCheckedRadioButtonId() == R.id.usbRadioButton) {
+    if (group.getCheckedRadioButtonId() == R.id.goRadioButton) {
+      config = GO;
+      editor.putString(CONNECTION_MODE, GO);
+      editor.commit();
+    } else if (group.getCheckedRadioButtonId() == R.id.usbRadioButton) {
       config = USB;
       editor.putString(CONNECTION_MODE, USB);
       editor.apply();
     } else { // (group.getCheckedRadioButtonId() == R.id.lanRadioButton)
-      String uriStr = ((TextView)findViewById(R.id.lanPayDisplayAddress)).getText().toString();
+      String uriStr = ((TextView) findViewById(R.id.lanPayDisplayAddress)).getText().toString();
       config = WS_CONFIG;
       uri = parseValidateAndStoreURI(uriStr);
     }
@@ -220,11 +296,32 @@ public class StartupActivity extends Activity {
     Intent intent = new Intent();
     intent.setClass(this, ExamplePOSActivity.class);
 
-    if(config.equals("USB") || (config.equals(WS_CONFIG) && uri != null)) {
+    if (config.equals("USB") || (config.equals(WS_CONFIG) && uri != null)) {
       intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
       intent.putExtra(ExamplePOSActivity.EXTRA_CLEAR_TOKEN, clearToken);
       intent.putExtra(ExamplePOSActivity.EXTRA_WS_ENDPOINT, uri);
       startActivity(intent);
+
+    } else if (config.equals("GO")) {
+      if (Validator.isNetworkConnected(this)) {
+        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
+        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, GO_ACCESS_TOKEN);
+        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, GO_API_KEY);
+        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, GO_SECRET);
+
+        if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp450RadioButton) {
+          intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP450);
+
+        } else if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp350RadioButton) {
+          intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP350);
+
+        }
+
+        startActivity(intent);
+      } else {
+        showToast("Check internet connection");
+
+      }
     }
   }
 
@@ -238,8 +335,8 @@ public class StartupActivity extends Activity {
       editor.putString(CONNECTION_MODE, LAN);
       editor.apply();
       return uri;
-    } catch(URISyntaxException e) {
-      Log.e(TAG, "Invalid URL" ,e);
+    } catch (URISyntaxException e) {
+      Log.e(TAG, "Invalid URL", e);
       AlertDialog.Builder builder = new AlertDialog.Builder(this);
       builder.setTitle("Error");
       builder.setMessage("Invalid URL");
@@ -248,161 +345,83 @@ public class StartupActivity extends Activity {
     }
   }
 
-    if(config.equals("USB") || (config.equals("WS") && uri != null)) {
-      intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
-      intent.putExtra(ExamplePOSActivity.EXTRA_WS_ENDPOINT, uri);
-      startActivity(intent);
-    } else if (config.equals("GO") ){
+  public void connectGoWithAuthMode(View view) {
+    String oAuthClientId = "1AST2ETARGG7C";
+//    String oAuthClientId = "XD7KPB668V5SJ";
+//    String mOauthURL = "https://sandbox.dev.clover.com/oauth/authorize?client_id=" + oAuthClientId + "&response_type=code";
+//    String mOauthURL = "https://dev14.dev.clover.com/oauth/authorize?client_id=" + oAuthClientId + "&response_type=code";
+    String mOauthURL = "https://stg1.dev.clover.com/oauth/authorize?client_id=" + oAuthClientId + "&response_type=code";
 
-        if (Validator.isNetworkConnected(this)){
-
-            String apiKey = "Lht4CAQq8XxgRikjxwE71JE20by5dzlY";
-            String secret = "7ebgf6ff8e98d1565ab988f5d770a911e36f0f2347e3ea4eb719478c55e74d9g";
-            String accessToken = "533238e2-dbd7-98d8-ff6b-3e953d028e30";
-
-            intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
-            intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, accessToken);
-            intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, apiKey);
-            intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, secret);
-
-            if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp450RadioButton)
-                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP450);
-            else if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp350RadioButton)
-                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP350);
-
-            startActivity(intent);
-        }else {
-            Toast.makeText(this,"Check Internet Connection",Toast.LENGTH_LONG).show();
-        }
-
-    }
-
+    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mOauthURL));
+    startActivity(intent);
   }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // For non-clover devices this is how the generic barcode scanner
-        // returns the scanned barcode
-        if (requestCode == BARCODE_READER_REQUEST_CODE) {
-            if (resultCode == CommonStatusCodes.SUCCESS) {
-                if (data != null) {
-                    Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
-                    connect(parseValidateAndStoreURI(barcode.displayValue), WS_CONFIG, false);
-                }
-            } else Log.e(TAG, String.format(getString(R.string.barcode_error_format),
-                    CommonStatusCodes.getStatusCodeString(resultCode)));
-        } else super.onActivityResult(requestCode, resultCode, data);
-    }
+  private void getAccessToken(String clientId, String code) {
+    String apiKey = "byJiyq2GZNmS6LgtAhr2xGS6gz4dpBYX";
+    String clientSecret = "fea4a38b-9346-d75c-2f09-1670381a1499";
+//    String env = "sandbox.dev.clover.com";
+//    String env = "dev14.dev.clover.com";
+    String env = "stg1.dev.clover.com";
 
+    final ProgressDialog progressDialog = new ProgressDialog(this);
+    progressDialog.setTitle("Merchant account loading....");
+    progressDialog.show();
 
-    public void connectGoWithAuthMode(View view){
+    ApiInterface apiInterface = ApiClient.getClient().create(ApiInterface.class);
+    Call<ResponseBody> call = apiInterface.getAccessToken(apiKey, clientId, clientSecret, code, env);
 
-        String oAuthClientId = "1AST2ETARGG7C";
-        String mOauthURL = "https://dev14.dev.clover.com/oauth/authorize?client_id=" + oAuthClientId + "&response_type=code";
+    call.enqueue(new Callback<ResponseBody>() {
+      @Override
+      public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+        progressDialog.dismiss();
+        if (response != null) {
+          try {
+            JSONObject jsonObject = new JSONObject(response.body().string());
+            if (jsonObject.has("message")) {
+              String err = jsonObject.getString("message");
+              showToast(err);
+            } else if (jsonObject.has("access_token")) {
 
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mOauthURL));
-        startActivity(intent);
-    }
+              if (Validator.isNetworkConnected(StartupActivity.this)) {
+                String accessToken = jsonObject.getString("access_token");
+                String config = "GO";
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
+                Intent intent = new Intent();
+                intent.setClass(StartupActivity.this, ExamplePOSActivity.class);
+                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
+                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, accessToken);
+                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, GO_API_KEY);
+                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, GO_SECRET);
 
-        if (intent != null) {
-            Uri uri = intent.getData();
-            if (uri != null) {
-                String merchantId = "";
-                String employeeId = "";
-                String clientId = "";
-                String code = "";
+                if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp450RadioButton)
+                  intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP450);
+                else if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp350RadioButton)
+                  intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP350);
 
-                String url = uri.toString();
+                startActivity(intent);
+              } else {
+                showToast("Check Internet Connection");
 
-                String requiredDetails = url.substring(url.indexOf("?"));
-                String[] data =  requiredDetails.split("&");
-                for (String s : data) {
-                    int splitIndex = s.indexOf("=");
-                    String key =  s.substring(0, splitIndex);
-                    String value = s.substring(splitIndex+1);
-                    if (key.contains("merchant")) {
-                        merchantId = value;
-                    } else if (key.contains("employee")) {
-                        employeeId = value;
-                    } else if (key.contains("client")) {
-                        clientId = value;
-                    } else if (key.contains("code")) {
-                        code = value;
-                    }
-                }
-                getAccessToken(clientId, code);
+              }
+
             }
+          } catch (JSONException | IOException e) {
+            e.printStackTrace();
+          }
         }
+      }
 
+      @Override
+      public void onFailure(Call<ResponseBody> call, Throwable t) {
+      }
+    });
+  }
+
+  private void showToast(String message) {
+    if (mToast == null) {
+      mToast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
     }
-
-    private void getAccessToken(String clientId, String code) {
-
-        String apiKey = "byJiyq2GZNmS6LgtAhr2xGS6gz4dpBYX";
-        String clientSecret  = "fea4a38b-9346-d75c-2f09-1670381a1499";
-        String env = "dev14.dev.clover.com";
-
-        final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle("Merchant account loading....");
-        progressDialog.show();
-
-
-        ApiInterface apiInterface = ApiClient.getClient().create(ApiInterface.class);
-        Call<ResponseBody> call = apiInterface.getAccessToken(apiKey,clientId,clientSecret,code,env);
-
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                progressDialog.dismiss();
-                if (response!=null) {
-                    try {
-                        JSONObject jsonObject = new JSONObject(response.body().string());
-                        if (jsonObject.has("message")) {
-                            String err = jsonObject.getString("message");
-                            Toast.makeText(StartupActivity.this, err,Toast.LENGTH_SHORT).show();
-                        } else if (jsonObject.has("access_token")){
-
-                            if (Validator.isNetworkConnected(StartupActivity.this)){
-                                String accessToken = jsonObject.getString("access_token");
-                                String apiKey = "Lht4CAQq8XxgRikjxwE71JE20by5dzlY";
-                                String secret = "7ebgf6ff8e98d1565ab988f5d770a911e36f0f2347e3ea4eb719478c55e74d9g";
-                                String config = "GO";
-
-
-                                Intent intent = new Intent();
-                                intent.setClass(StartupActivity.this, ExamplePOSActivity.class);
-                                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
-                                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, accessToken);
-                                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, apiKey);
-                                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, secret);
-
-                                if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp450RadioButton)
-                                    intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP450);
-                                else if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp350RadioButton)
-                                    intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP350);
-
-                                startActivity(intent);
-                            }else {
-                                Toast.makeText(StartupActivity.this,"Check Internet Connection",Toast.LENGTH_LONG).show();
-                            }
-
-                        }
-                    }catch (JSONException | IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-            }
-        });
-
-
-    }
+    mToast.setText(message);
+    mToast.show();
+  }
 }

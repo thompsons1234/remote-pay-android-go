@@ -1,18 +1,15 @@
 package com.clover.remote.client.clovergo;
 
 
-import com.clover.remote.client.ICloverConnectorListener;
 import com.clover.remote.client.MerchantInfo;
-import com.clover.remote.client.messages.ActivityMessage;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
 import com.clover.remote.client.messages.CardApplicationIdentifier;
 import com.clover.remote.client.messages.CloseoutResponse;
 import com.clover.remote.client.messages.CloverDeviceErrorEvent;
 import com.clover.remote.client.messages.CloverDeviceEvent;
-import com.clover.remote.client.messages.CustomActivityResponse;
-import com.clover.remote.client.messages.PairingCodeMessage;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
+import com.clover.remote.client.messages.CustomActivityResponse;
 import com.clover.remote.client.messages.ManualRefundResponse;
 import com.clover.remote.client.messages.PreAuthResponse;
 import com.clover.remote.client.messages.PrintManualRefundDeclineReceiptMessage;
@@ -229,9 +226,21 @@ public class CloverGoConnectorBroadcaster extends CopyOnWriteArrayList<ICloverGo
         }
     }
 
-    public void notifyOnCloverGoDeviceActivity(CloverDeviceEvent deviceEvent){
+    public void notifyOnCloverGoDeviceActivity(CloverDeviceEvent deviceEvent) {
         for (ICloverGoConnectorListener listener : this) {
             listener.onCloverGoDeviceActivity(deviceEvent);
+        }
+    }
+
+    public void notifyOnGetMerchantInfo() {
+        for (ICloverGoConnectorListener listener : this) {
+            listener.onGetMerchantInfo();
+        }
+    }
+
+    public void notifyOnGetMerchantInfoResponse(boolean isSuccess) {
+        for (ICloverGoConnectorListener listener : this) {
+            listener.onGetMerchantInfoResponse(isSuccess);
         }
     }
 }

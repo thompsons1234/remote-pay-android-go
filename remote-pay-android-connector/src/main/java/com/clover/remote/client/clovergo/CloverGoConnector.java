@@ -45,7 +45,7 @@ public class CloverGoConnector extends DefaultCloverGoConnector{
     }
 
     @Override
-    public void connectToDevice(ReaderInfo readerInfo) {
+    public void connectToBluetoothDevice(ReaderInfo readerInfo) {
         cloverGoConnectorImpl.connectToDevice(readerInfo);
     }
 
@@ -67,16 +67,6 @@ public class CloverGoConnector extends DefaultCloverGoConnector{
     @Override
     public void sale(SaleRequest saleRequest) {
         cloverGoConnectorImpl.sale(saleRequest,mCloverGoConfiguration.getReaderType(),mCloverGoConfiguration.isAllowDuplicate());
-    }
-
-    @Override
-    public void acceptSignature(VerifySignatureRequest request) throws UnsupportedOperationException{
-        throw new UnsupportedOperationException("Operation Not supported for cloverGo");
-    }
-
-    @Override
-    public void rejectSignature(VerifySignatureRequest request) throws UnsupportedOperationException{
-        throw new UnsupportedOperationException("Operation Not supported for cloverGo");
     }
 
     @Override
@@ -120,26 +110,6 @@ public class CloverGoConnector extends DefaultCloverGoConnector{
     }
 
     @Override
-    public void manualRefund(ManualRefundRequest request) throws UnsupportedOperationException{
-        throw new UnsupportedOperationException("Operation Not supported for cloverGo");
-    }
-
-    @Override
-    public void vaultCard(Integer cardEntryMethods) throws UnsupportedOperationException{
-        throw new UnsupportedOperationException("Operation Not supported for cloverGo");
-    }
-
-    @Override
-    public void retrievePendingPayments() throws UnsupportedOperationException{
-        throw new UnsupportedOperationException("Operation Not supported for cloverGo");
-    }
-
-    @Override
-    public void readCardData(ReadCardDataRequest request) throws UnsupportedOperationException{
-        throw new UnsupportedOperationException("Operation Not supported for cloverGo");
-    }
-
-    @Override
     public void closeout(CloseoutRequest closeoutRequest){
         cloverGoConnectorImpl.closeout(closeoutRequest);
     }
@@ -164,6 +134,39 @@ public class CloverGoConnector extends DefaultCloverGoConnector{
         //TODO:
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void acceptSignature(VerifySignatureRequest request) throws UnsupportedOperationException{
+        throw new UnsupportedOperationException("Operation Not supported for cloverGo");
+    }
+
+    @Override
+    public void rejectSignature(VerifySignatureRequest request) throws UnsupportedOperationException{
+        throw new UnsupportedOperationException("Operation Not supported for cloverGo");
+    }
+
+    @Override
+    public void manualRefund(ManualRefundRequest request) throws UnsupportedOperationException{
+        throw new UnsupportedOperationException("Operation Not supported for cloverGo");
+    }
+
+    @Override
+    public void vaultCard(Integer cardEntryMethods) throws UnsupportedOperationException{
+        throw new UnsupportedOperationException("Operation Not supported for cloverGo");
+    }
+
+    @Override
+    public void retrievePendingPayments() throws UnsupportedOperationException{
+        throw new UnsupportedOperationException("Operation Not supported for cloverGo");
+    }
+
+    @Override
+    public void readCardData(ReadCardDataRequest request) throws UnsupportedOperationException{
+        throw new UnsupportedOperationException("Operation Not supported for cloverGo");
+    }
+
     @Override
     public void startCustomActivity(CustomActivityRequest request) throws UnsupportedOperationException{
         throw new UnsupportedOperationException("Operation Not supported for cloverGo");
@@ -172,43 +175,36 @@ public class CloverGoConnector extends DefaultCloverGoConnector{
     @Override
     public void showMessage(String message) throws UnsupportedOperationException{
         throw new UnsupportedOperationException("Operation Not supported for cloverGo");
-
     }
 
     @Override
     public void showWelcomeScreen() throws UnsupportedOperationException{
         throw new UnsupportedOperationException("Operation Not supported for cloverGo");
-
     }
 
     @Override
     public void showThankYouScreen() throws UnsupportedOperationException{
         throw new UnsupportedOperationException("Operation Not supported for cloverGo");
-
     }
 
     @Override
     public void displayPaymentReceiptOptions(String orderId, String paymentId) throws UnsupportedOperationException{
         throw new UnsupportedOperationException("Operation Not supported for cloverGo");
-
     }
 
     @Override
     public void openCashDrawer(String reason) throws UnsupportedOperationException{
         throw new UnsupportedOperationException("Operation Not supported for cloverGo");
-
     }
 
     @Override
     public void showDisplayOrder(DisplayOrder order) throws UnsupportedOperationException{
         throw new UnsupportedOperationException("Operation Not supported for cloverGo");
-
     }
 
     @Override
     public void removeDisplayOrder(DisplayOrder order) throws UnsupportedOperationException{
         throw new UnsupportedOperationException("Operation Not supported for cloverGo");
-
     }
 
     @Override
@@ -219,7 +215,6 @@ public class CloverGoConnector extends DefaultCloverGoConnector{
     @Override
     public void printText(List<String> messages) throws UnsupportedOperationException{
         throw new UnsupportedOperationException("Operation Not supported for cloverGo");
-
     }
 
     @Override
