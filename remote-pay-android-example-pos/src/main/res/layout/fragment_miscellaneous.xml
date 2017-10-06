@@ -95,7 +95,7 @@
             android:inputType="textMultiLine"
             android:ems="10"
             android:id="@+id/PrintImageURLText"
-            android:text="http://www.amerikanbodyart.com/media/stencil%20cupcake.jpg"/>
+            android:text="http://slodive.com/wp-content/uploads/2013/02/black-and-white-patterns/grooved.jpg"/>
 
         <Button
             android:layout_width="200dp"

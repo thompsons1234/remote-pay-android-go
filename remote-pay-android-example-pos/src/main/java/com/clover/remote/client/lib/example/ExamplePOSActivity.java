@@ -1426,25 +1426,34 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public void printTextClick(View view) {
     String[] textLines = ((TextView) findViewById(R.id.PrintTextText)).getText().toString().split("\n");
     List<String> lines = Arrays.asList(textLines);
-    PrintRequest pr = new PrintRequest(lines);
-    lastPrintRequestId = String.valueOf(getNextPrintRequestId());
-    pr.setPrintRequestId(lastPrintRequestId);
     if(printer != null){
+      PrintRequest pr = new PrintRequest(lines);
+      lastPrintRequestId = String.valueOf(getNextPrintRequestId());
+      pr.setPrintRequestId(lastPrintRequestId);
       pr = new PrintRequest(lines, lastPrintRequestId, printer.getId());
+      cloverConnector.print(pr);
+      printer = null;
     }
-    cloverConnector.print(pr);
+    else {
+      cloverConnector.printText(lines);
+    }
+
     updatePrintStatusText();
   }
 
   public void printImageURLClick(View view) {
     String URL = ((TextView) findViewById(R.id.PrintImageURLText)).getText().toString();
-    PrintRequest pr = new PrintRequest(URL);
-    lastPrintRequestId = String.valueOf(getNextPrintRequestId());
-    pr.setPrintRequestId(lastPrintRequestId);
     if(printer != null){
+      PrintRequest pr = new PrintRequest(URL);
+      lastPrintRequestId = String.valueOf(getNextPrintRequestId());
+      pr.setPrintRequestId(lastPrintRequestId);
       pr = new PrintRequest(URL, lastPrintRequestId, printer.getId());
+      cloverConnector.print(pr);
+      printer = null;
     }
-    cloverConnector.print(pr);
+    else{
+      cloverConnector.printImageFromURL(URL);
+    }
     updatePrintStatusText();
   }
 
@@ -1511,13 +1520,18 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   public void printImage(String imgDecodableString){
     Bitmap bitmap = BitmapFactory.decodeFile(imgDecodableString);
-    PrintRequest pr = new PrintRequest(bitmap);
-    lastPrintRequestId = String.valueOf(getNextPrintRequestId());
-    pr.setPrintRequestId(lastPrintRequestId);
     if(this.printer != null){
+      PrintRequest pr = new PrintRequest(bitmap);
+      lastPrintRequestId = String.valueOf(getNextPrintRequestId());
+      pr.setPrintRequestId(lastPrintRequestId);
       pr = new PrintRequest(bitmap, lastPrintRequestId, printer.getId());
+      cloverConnector.print(pr);
+      printer = null;
     }
-    cloverConnector.print(pr);
+    else{
+      cloverConnector.printImage(bitmap);
+    }
+
     updatePrintStatusText();
   }
 
