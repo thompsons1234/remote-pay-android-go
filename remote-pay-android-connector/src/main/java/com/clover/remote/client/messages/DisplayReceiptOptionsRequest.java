@@ -16,17 +16,16 @@
 
 package com.clover.remote.client.messages;
 
+import com.clover.remote.client.messages.BaseRequest;
+
 /**
  * Request object to refund a payment, either partially or fully
  */
 @SuppressWarnings(value="unused")
-public class RefundPaymentRequest extends BaseRequest {
+public class DisplayReceiptOptionsRequest extends BaseRequest {
   private String orderId;
   private String paymentId;
-  private long amount; // optional
-  private boolean fullRefund; // optional
   private boolean disablePrinting; // optional
-  private boolean disableReceiptSelection; // optional
 
   /**
    * Get the field value
@@ -67,42 +66,6 @@ public class RefundPaymentRequest extends BaseRequest {
   /**
    * Get the field value
    *
-   * @return Amount to be refunded
-   */
-  public long getAmount() {
-    return amount;
-  }
-
-  /**
-   * Set the field value
-   *
-   * @param amount Amount to be refunded
-   */
-  public void setAmount(long amount) {
-    this.amount = amount;
-  }
-
-  /**
-   * Get the field value
-   *
-   * @return If true, then it is a full refund.  The amount will be ignored.
-   */
-  public boolean isFullRefund() {
-    return fullRefund;
-  }
-
-  /**
-   * Set the field value
-   *
-   * @param fullRefund If true, then it is a full refund.  The amount will be ignored.
-   */
-  public void setFullRefund(boolean fullRefund) {
-    this.fullRefund = fullRefund;
-  }
-
-  /**
-   * Get the field value
-   *
    * @return The disablePrinting transaction override value
    */
   public boolean getDisablePrinting() {
@@ -116,24 +79,6 @@ public class RefundPaymentRequest extends BaseRequest {
    */
   public void setDisablePrinting(boolean disablePrinting) {
     this.disablePrinting = disablePrinting;
-  }
-
-  /**
-   * Get the field value
-   *
-   * @return The disableReceiptSelection transaction override value
-   */
-  public boolean getDisableReceiptSelection() {
-    return disableReceiptSelection;
-  }
-
-  /**
-   * Set the field value
-   *
-   * @param disableReceiptSelection The transaction override to turn off the Clover customer print screen
-   */
-  public void setDisableReceiptSelection(boolean disableReceiptSelection) {
-    this.disableReceiptSelection = disableReceiptSelection;
   }
 }
 

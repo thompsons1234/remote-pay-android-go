@@ -1047,13 +1047,36 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   }
 
   @Override
-  public void doShowPaymentReceiptScreen(String orderId, String paymentId) {
-    sendObjectMessage(new ShowPaymentReceiptOptionsMessage(orderId, paymentId, 2));
+  public void doShowPaymentReceiptScreen(String orderId, String paymentId, boolean disablePrinting) {
+    sendObjectMessage(new ShowPaymentReceiptOptionsMessage(orderId, paymentId, 3, disablePrinting));
   }
 
   @Override
   public void doKeyPress(KeyPress keyPress) {
     sendObjectMessage(new KeyPressMessage(keyPress));
+  }
+
+  @Override
+  public void doVoidPayment(final Payment payment, final VoidReason reason, boolean disablePrinting, boolean disableReceiptSelection) {
+    synchronized (ackLock) {
+      final String msgId = sendObjectMessage(new VoidPaymentMessage(payment, reason, disablePrinting, disableReceiptSelection));
+
+      AsyncTask<Object, Object, Object> aTask = new AsyncTask<Object, Object, Object>() {
+        @Override
+        protected Object doInBackground(Object[] params) {
+          notifyObserversPaymentVoided(payment, reason, ResultStatus.SUCCESS, null, null);
+          return null;
+        }
+      };
+
+      if (!supportsAcks()) {
+        aTask.execute();
+      } else {
+        // we will send back response after we get an ack
+        msgIdToTask.put(msgId, aTask);
+      }
+    }
+
   }
 
   @Override
@@ -1218,35 +1241,12 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
     sendObjectMessage(ar);
   }
 
-  @Override
-  public void doVoidPayment(final Payment payment, final VoidReason reason) {
-    synchronized (ackLock) {
-      final String msgId = sendObjectMessage(new VoidPaymentMessage(payment, reason));
-
-      AsyncTask<Object, Object, Object> aTask = new AsyncTask<Object, Object, Object>() {
-        @Override
-        protected Object doInBackground(Object[] params) {
-          notifyObserversPaymentVoided(payment, reason, ResultStatus.SUCCESS, null, null);
-          return null;
-        }
-      };
-
-      if (!supportsAcks()) {
-        aTask.execute();
-      } else {
-        // we will send back response after we get an ack
-        msgIdToTask.put(msgId, aTask);
-      }
-    }
-  }
-
-  @Override
-  public void doPaymentRefund(String orderId, String paymentId, long amount, boolean fullAmount) {
+  public void doPaymentRefund(String orderId, String paymentId, long amount, boolean fullRefund, boolean disablePrinting, boolean disableReceiptSelection) {
     /*
-     * Need this to get a V2 of refund request
+     * Need this to get a V3 of refund request
      */
-    RefundRequestMessage refundRequestMessage = new RefundRequestMessage(orderId, paymentId, amount, fullAmount);
-    sendObjectMessage(gson.toJson(refundRequestMessage), Method.REFUND_REQUEST, 2, (String)null);
+    RefundRequestMessage refundRequestMessage = new RefundRequestMessage(orderId, paymentId, amount, fullRefund, disablePrinting, disableReceiptSelection);
+    sendObjectMessage(gson.toJson(refundRequestMessage), Method.REFUND_REQUEST, 3, (String)null);
   }
 
   @Override
