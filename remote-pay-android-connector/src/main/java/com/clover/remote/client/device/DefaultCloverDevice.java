@@ -1048,7 +1048,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
 
   @Override
   public void doShowPaymentReceiptScreen(String orderId, String paymentId, boolean disablePrinting) {
-    sendObjectMessage(new ShowPaymentReceiptOptionsMessage(orderId, paymentId, 3, disablePrinting));
+    sendObjectMessage(new ShowPaymentReceiptOptionsMessage(orderId, paymentId, 2, disablePrinting));
   }
 
   @Override
