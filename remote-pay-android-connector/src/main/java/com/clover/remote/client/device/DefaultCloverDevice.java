@@ -1243,10 +1243,10 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
 
   public void doPaymentRefund(String orderId, String paymentId, long amount, boolean fullRefund, boolean disablePrinting, boolean disableReceiptSelection) {
     /*
-     * Need this to get a V3 of refund request
+     * Need this to get a V2 of refund request
      */
     RefundRequestMessage refundRequestMessage = new RefundRequestMessage(orderId, paymentId, amount, fullRefund, disablePrinting, disableReceiptSelection);
-    sendObjectMessage(gson.toJson(refundRequestMessage), Method.REFUND_REQUEST, 3, (String)null);
+    sendObjectMessage(gson.toJson(refundRequestMessage), Method.REFUND_REQUEST, 2, (String)null);
   }
 
   @Override
