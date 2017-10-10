@@ -47,7 +47,6 @@ import com.clover.remote.client.messages.CustomActivityRequest;
 import com.clover.remote.client.messages.CustomActivityResponse;
 import com.clover.remote.client.messages.OpenCashDrawerRequest;
 import com.clover.remote.client.messages.PrintJobStatusRequest;
-import com.clover.remote.client.messages.PrintJobStatusRequestPrintJobStatusRequest;
 import com.clover.remote.client.messages.PrintJobStatusResponse;
 import com.clover.remote.client.messages.PrintRequest;
 import com.clover.remote.client.messages.RetrievePaymentRequest;
