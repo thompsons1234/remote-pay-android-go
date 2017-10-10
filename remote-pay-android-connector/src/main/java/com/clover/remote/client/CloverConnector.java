@@ -47,6 +47,7 @@ import com.clover.remote.client.messages.CustomActivityRequest;
 import com.clover.remote.client.messages.CustomActivityResponse;
 import com.clover.remote.client.messages.OpenCashDrawerRequest;
 import com.clover.remote.client.messages.PrintJobStatusRequest;
+import com.clover.remote.client.messages.PrintJobStatusRequestPrintJobStatusRequest;
 import com.clover.remote.client.messages.PrintJobStatusResponse;
 import com.clover.remote.client.messages.PrintRequest;
 import com.clover.remote.client.messages.RetrievePaymentRequest;
@@ -105,6 +106,7 @@ import android.util.Log;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -667,7 +669,8 @@ public class CloverConnector implements ICloverConnector {
         broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR,0, null, "Print: The Clover Device is not ready"));
       }
       else{
-        device.doPrint(request);
+        List<Bitmap> images = new ArrayList<>();
+        device.doPrint(request.getImages(), request.getImageURLs(), request.getText(), request.getPrintRequestId(), request.getPrintDeviceId());
       }
     }
     else{
@@ -683,7 +686,7 @@ public class CloverConnector implements ICloverConnector {
         broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR,0, null, "RetrievePrinters: The Clover Device is not ready"));
       }
       else{
-        device.doRetrievePrinters(request);
+        device.doRetrievePrinters(request.getCategory());
       }
     }
     else{
@@ -698,7 +701,7 @@ public class CloverConnector implements ICloverConnector {
         broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR,0, null, "RetrievePrintJobStatus: The Clover Device is not ready"));
       }
       else{
-        device.doRetrievePrintJobStatus(request);
+        device.doRetrievePrintJobStatus(request.getPrintRequestId());
       }
     }
     else{
