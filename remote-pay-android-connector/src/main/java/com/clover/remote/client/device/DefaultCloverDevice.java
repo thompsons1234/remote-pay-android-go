@@ -1172,16 +1172,16 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   }
 
   @Override
-  public void doPrint(PrintRequest request) {
-    if (request.getText().size() > 0) {
-      doPrintText(request.getText(), request.getPrintRequestId(), request.getPrintDeviceId());
-    } else if (request.getImages().size() > 0) {
-      doPrintImage(request.getImages().get(0), request.getPrintRequestId(), request.getPrintDeviceId());
-    } else if (request.getImageURLs().size() > 0) {
+  public void doPrint(List<Bitmap> images, List<String> urls, List<String> textLines, String requestId, String deviceId) {
+    if (textLines.size() > 0) {
+      doPrintText(textLines, requestId, deviceId);
+    } else if (images.size() > 0) {
+      doPrintImage(images.get(0), requestId, deviceId);
+    } else if (urls.size() > 0) {
       try {
         // Make sure URL is well-formed
-        new URL(request.getImageURLs().get(0));
-        doPrintImage(request.getImageURLs().get(0), request.getPrintRequestId(), request.getPrintDeviceId());
+        new URL(urls.get(0));
+        doPrintImage(urls.get(0), requestId, deviceId);
       } catch (MalformedURLException ex) {
         Log.d(TAG, "In doPrint: PrintRequest had malformed image URL");
       }
@@ -1194,15 +1194,15 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   }
 
   @Override
-  public void doRetrievePrinters(RetrievePrintersRequest request) {
-    RetrievePrintersRequestMessage message = new RetrievePrintersRequestMessage(request.getCategory());
+  public void doRetrievePrinters(PrinterCategory request) {
+    RetrievePrintersRequestMessage message = new RetrievePrintersRequestMessage(category);
     sendObjectMessage(message);
 
   }
 
   @Override
-  public void doRetrievePrintJobStatus(PrintJobStatusRequest request) {
-    PrintJobStatusRequestMessage message = new PrintJobStatusRequestMessage(request.getPrintRequestId());
+  public void doRetrievePrintJobStatus(String printRequestId) {
+    PrintJobStatusRequestMessage message = new PrintJobStatusRequestMessage(printRequestId);
     sendObjectMessage(message);
   }
 
