@@ -352,6 +352,10 @@ public class StartupActivity extends Activity {
 //    String mOauthURL = "https://dev14.dev.clover.com/oauth/authorize?client_id=" + oAuthClientId + "&response_type=code";
     String mOauthURL = "https://stg1.dev.clover.com/oauth/authorize?client_id=" + oAuthClientId + "&response_type=code";
 
+    if (((RadioGroup) findViewById(R.id.radioGroup)).getCheckedRadioButtonId() == R.id.goRadioButton) {
+      getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).edit().putString(CONNECTION_MODE, GO).commit();
+    }
+
     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mOauthURL));
     startActivity(intent);
   }

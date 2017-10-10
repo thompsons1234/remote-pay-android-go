@@ -7,8 +7,7 @@ import retrofit2.Retrofit;
  */
 
 public class ApiClient {
-  //    public static final String BASE_URL = "https://api-int.payeezy.com/"; //dev14?
-  public static final String BASE_URL = "https://api-cat.payeezy.com/"; //stg1?
+  public static final String BASE_URL = "https://api-int.payeezy.com/"; //dev14?
   private static Retrofit retrofit = null;
 
   public static Retrofit getClient() {

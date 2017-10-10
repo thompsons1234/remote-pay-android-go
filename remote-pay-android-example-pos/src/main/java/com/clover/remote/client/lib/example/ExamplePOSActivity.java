@@ -591,7 +591,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           }
         });
         RetrievePrintersRequest rpr = new RetrievePrintersRequest();
-        cloverConnector.retrievePrinters(rpr);
+        getCloverConnector().retrievePrinters(rpr);
       }
 
       public void onError(final Exception e) {
@@ -630,7 +630,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                  cloverConnector.invokeInputOption(io);
+                  getCloverConnector().invokeInputOption(io);
                 }
               });
               ll.addView(btn);
@@ -768,7 +768,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
                 showRegister(null);
                 SystemClock.sleep(3000);
-                cloverConnector.showWelcomeScreen();
+                getCloverConnector().showWelcomeScreen();
               } else {
                 externalMismatch();
               }
@@ -776,7 +776,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           });
         } else {
           showMessage("Auth error:" + response.getResult(), Toast.LENGTH_LONG);
-          cloverConnector.showMessage("There was a problem processing the transaction");
+          getCloverConnector().showMessage("There was a problem processing the transaction");
           SystemClock.sleep(3000);
         }
       }
@@ -805,7 +805,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           }
         });
         SystemClock.sleep(3000);
-        cloverConnector.showWelcomeScreen();
+        getCloverConnector().showWelcomeScreen();
       }
 
       @Override
@@ -888,7 +888,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
         Fragment fragment = fragmentManager.findFragmentByTag("SIGNATURE");
         if (fragment == null) {
-          fragment = SignatureFragment.newInstance(request, cloverConnector);
+          fragment = SignatureFragment.newInstance(request, getCloverConnector());
           fragmentTransaction.add(R.id.contentContainer, fragment, "SIGNATURE");
         } else {
           ((SignatureFragment) fragment).setVerifySignatureRequest(request);
@@ -980,7 +980,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           showMessage("Error: Null SaleResponse", Toast.LENGTH_LONG);
         }
         SystemClock.sleep(3000);
-        cloverConnector.showWelcomeScreen();
+        getCloverConnector().showWelcomeScreen();
       }
 
       @Override
@@ -1083,12 +1083,12 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         } else {
           if (response.getResult() == ResultCode.CANCEL) {
             showMessage("User canceled the operation", Toast.LENGTH_SHORT);
-            cloverConnector.showWelcomeScreen();
+            getCloverConnector().showWelcomeScreen();
           } else {
             showMessage("Error capturing card: " + response.getResult(), Toast.LENGTH_LONG);
-            cloverConnector.showMessage("Card was not saved");
+            getCloverConnector().showMessage("Card was not saved");
             SystemClock.sleep(4000); //wait 4 seconds
-            cloverConnector.showWelcomeScreen();
+            getCloverConnector().showWelcomeScreen();
           }
         }
       }
@@ -1714,12 +1714,10 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     else {
       getCloverConnector().addCloverConnectorListener(ccListener);
 
-      cloverConnector.addCloverConnectorListener(ccListener);
-      cloverConnector.initializeConnection();
+      getCloverConnector().addCloverConnectorListener(ccListener);
+      getCloverConnector().initializeConnection();
     }
 
-//    cloverConnector.addCloverConnectorListener(ccListener);
-//    cloverConnector.initializeConnection();
     updateComponentsWithNewCloverConnector();
   }
 
@@ -2145,7 +2143,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   public void queryPaymentClick(View view) {
     String externalPaymentId = ((TextView) findViewById(R.id.QueryPaymentText)).getText().toString();
-    cloverConnector.retrievePayment(new RetrievePaymentRequest(externalPaymentId));
+    getCloverConnector().retrievePayment(new RetrievePaymentRequest(externalPaymentId));
   }
 
   public void printTextClick(View view) {
@@ -2161,13 +2159,13 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     try {
       // Operation Not Supported in Clove Go
 //          getCloverConnector().printText(lines);
-      cloverConnector.print(pr);
+      getCloverConnector().print(pr);
     } catch (UnsupportedOperationException e) {
       Toast.makeText(ExamplePOSActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
       Log.e("Example POS", e.getMessage());
     }
 
-//    cloverConnector.print(pr);
+//    getCloverConnector().print(pr);
     updatePrintStatusText();
   }
 
@@ -2179,13 +2177,13 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     if (printer != null) {
       pr = new PrintRequest(URL, lastPrintRequestId, printer.getId());
     }
-    cloverConnector.print(pr);
+    getCloverConnector().print(pr);
     updatePrintStatusText();
   }
 
   public void queryPrintStatusClick(View view) {
     PrintJobStatusRequest pjsr = new PrintJobStatusRequest(lastPrintRequestId);
-    cloverConnector.retrievePrintJobStatus(pjsr);
+    getCloverConnector().retrievePrintJobStatus(pjsr);
   }
 
   private void updatePrintStatusText() {
@@ -2202,7 +2200,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     } catch (UnsupportedOperationException e) {
       Log.e("EXAMPLE POS", e.getMessage());
     }
-//    cloverConnector.showMessage(((TextView) findViewById(R.id.ShowMessageText)).getText().toString());
+//    getCloverConnector().showMessage(((TextView) findViewById(R.id.ShowMessageText)).getText().toString());
   }
 
   public void showWelcomeMessageClick(View view) {
@@ -2230,7 +2228,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     if (printer != null) {
       ocdr.setDeviceId(printer.getId());
     }
-    cloverConnector.openCashDrawer(ocdr);
+    getCloverConnector().openCashDrawer(ocdr);
   }
 
   public void preauthCardClick(View view) {
@@ -2253,7 +2251,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       request.setSignatureThreshold(store.getSignatureThreshold());
       request.setDisableReceiptSelection(store.getDisableReceiptOptions());
       request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
-      cloverConnector.preAuth(request);
+      getCloverConnector().preAuth(request);
     }
   }
 
@@ -2282,7 +2280,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     if (this.printer != null) {
       pr = new PrintRequest(bitmap, lastPrintRequestId, printer.getId());
     }
-    cloverConnector.print(pr);
+    getCloverConnector().print(pr);
     updatePrintStatusText();
   }
 
@@ -2297,7 +2295,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                   @Override
                   public void onClick(DialogInterface dialog, int which) {
-                    cloverConnector.resetDevice();
+                    getCloverConnector().resetDevice();
                   }
                 })
                 .setNegativeButton("No", null)
@@ -2307,15 +2305,15 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void onReadCardDataClick(View view) {
-    cloverConnector.readCardData(new ReadCardDataRequest(store.getCardEntryMethods()));
+    getCloverConnector().readCardData(new ReadCardDataRequest(store.getCardEntryMethods()));
   }
 
   public void onGetDeviceStatusClick(View view) {
-    cloverConnector.retrieveDeviceStatus(new RetrieveDeviceStatusRequest(false));
+    getCloverConnector().retrieveDeviceStatus(new RetrieveDeviceStatusRequest(false));
   }
 
   public void onGetDeviceStatusCBClick(View view) {
-    cloverConnector.retrieveDeviceStatus(new RetrieveDeviceStatusRequest(true));
+    getCloverConnector().retrieveDeviceStatus(new RetrieveDeviceStatusRequest(true));
   }
 
   public void refreshPendingPayments(View view) {
@@ -2351,7 +2349,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       }
     }
 
-    cloverConnector.startCustomActivity(car);
+    getCloverConnector().startCustomActivity(car);
   }
 
   public void sendMessageToActivity(View view) {
@@ -2359,7 +2357,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     ConversationQuestionMessage message = new ConversationQuestionMessage("Why did the Storm Trooper buy an iPhone?");
     String payload = message.toJsonString();
     MessageToActivity messageRequest = new MessageToActivity(activityId, payload);
-    cloverConnector.sendMessageToActivity(messageRequest);
+    getCloverConnector().sendMessageToActivity(messageRequest);
     Button messageButton = (Button) findViewById(R.id.sendMessageToActivityButton);
     if (messageButton != null) {
       messageButton.setVisibility(View.INVISIBLE);
@@ -2368,7 +2366,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   public void sendMessageToActivity(String activityId, String payload) {
     MessageToActivity messageRequest = new MessageToActivity(activityId, payload);
-    cloverConnector.sendMessageToActivity(messageRequest);
+    getCloverConnector().sendMessageToActivity(messageRequest);
   }
 
   public void externalMismatch() {
