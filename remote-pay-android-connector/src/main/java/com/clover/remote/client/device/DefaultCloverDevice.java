@@ -101,6 +101,7 @@ import com.clover.remote.order.operation.OrderDeletedOperation;
 import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Payment;
+import com.clover.sdk.v3.printer.PrintCategory;
 import com.clover.sdk.v3.printer.Printer;
 
 import android.graphics.Bitmap;
@@ -1194,7 +1195,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   }
 
   @Override
-  public void doRetrievePrinters(PrinterCategory request) {
+  public void doRetrievePrinters(PrintCategory category) {
     RetrievePrintersRequestMessage message = new RetrievePrintersRequestMessage(category);
     sendObjectMessage(message);
 
