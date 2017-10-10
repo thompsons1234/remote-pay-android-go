@@ -47,6 +47,7 @@ import com.clover.remote.client.lib.example.model.POSPayment;
 import com.clover.remote.client.lib.example.model.POSRefund;
 import com.clover.remote.client.lib.example.model.POSStore;
 import com.clover.remote.client.lib.example.model.StoreObserver;
+import com.clover.remote.client.messages.DisplayReceiptOptionsRequest;
 import com.clover.remote.client.messages.RefundPaymentRequest;
 import com.clover.remote.client.messages.TipAdjustAuthRequest;
 import com.clover.remote.client.messages.VoidPaymentRequest;
@@ -156,6 +157,8 @@ public class OrdersFragment extends Fragment implements OrderObserver {
                         vpr.setPaymentId(posExchange.getPaymentID());
                         vpr.setOrderId(posExchange.getOrderId());
                         vpr.setVoidReason(VoidReason.USER_CANCEL.name());
+                        vpr.setDisablePrinting(store.getDisablePrinting() != null ? store.getDisablePrinting() : false);
+                        vpr.setDisableReceiptSelection(store.getDisableReceiptOptions() != null ? store.getDisableReceiptOptions() : false);
                         cloverConnector.voidPayment(vpr);
                         break;
                       }
@@ -164,6 +167,8 @@ public class OrdersFragment extends Fragment implements OrderObserver {
                         rpr.setPaymentId(posExchange.getPaymentID());
                         rpr.setOrderId(posExchange.orderID);
                         rpr.setFullRefund(true);
+                        rpr.setDisablePrinting(store.getDisablePrinting() != null ? store.getDisablePrinting() : false);
+                        rpr.setDisableReceiptSelection(store.getDisableReceiptOptions() != null ? store.getDisableReceiptOptions() : false);
                         cloverConnector.refundPayment(rpr);
                         break;
                       }
@@ -198,7 +203,11 @@ public class OrdersFragment extends Fragment implements OrderObserver {
                         break;
                       }
                       case "Receipt Options": {
-                        cloverConnector.displayPaymentReceiptOptions(posExchange.orderID, posExchange.getPaymentID());
+                        DisplayReceiptOptionsRequest request = new DisplayReceiptOptionsRequest();
+                        request.setOrderId(posExchange.orderID);
+                        request.setPaymentId(posExchange.paymentID);
+                        request.setDisablePrinting(store.getDisablePrinting() != null ? store.getDisablePrinting() : false);
+                        cloverConnector.displayPaymentReceiptOptions(request);
                         break;
                       }
 
