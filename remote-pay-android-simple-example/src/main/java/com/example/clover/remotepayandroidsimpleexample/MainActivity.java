@@ -1,11 +1,11 @@
 package com.example.clover.remotepayandroidsimpleexample;
 import com.clover.remote.client.CloverConnector;
+import com.clover.remote.client.CloverDeviceConfiguration;
 import com.clover.remote.client.DefaultCloverConnectorListener;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.MerchantInfo;
-import com.clover.remote.client.device.CloverDeviceConfiguration;
-import com.clover.remote.client.device.USBCloverDeviceConfiguration;
-import com.clover.remote.client.device.WebSocketCloverDeviceConfiguration;
+import com.clover.remote.client.USBCloverDeviceConfiguration;
+import com.clover.remote.client.WebSocketCloverDeviceConfiguration;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
 
 import android.app.Activity;
@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
     if(cloverConnector == null) {
       connect();
     }
-   }
+  }
 
   @Override
   protected void onDestroy(){
@@ -71,8 +71,8 @@ public class MainActivity extends Activity {
 
   private void connect(){
     Log.d(TAG, "connecting.....");
-    cloverConnector = new CloverConnector(getUSBConfiguration());
-//    cloverConnector = new CloverConnector(getNetworkConfiguration("192.168.0.123",12345));
+    //cloverConnector = new CloverConnector(getUSBConfiguration());
+    cloverConnector = new CloverConnector(getNetworkConfiguration("192.168.0.35",12345));
     cloverConnector.addCloverConnectorListener(new TestListener(cloverConnector));
     cloverConnector.initializeConnection();
   }
@@ -131,7 +131,7 @@ public class MainActivity extends Activity {
       trustStore.load(trustStoreStream, TRUST_STORE_PASSWORD.toCharArray());
 
       // For WebSocket configuration, we must handle the device pairing via callback
-      return new WebSocketCloverDeviceConfiguration(endpoint, 2000L, 2000L, APP_ID, trustStore, POS_NAME, DEVICE_NAME, null) {
+      return new WebSocketCloverDeviceConfiguration(endpoint,APP_ID, trustStore, POS_NAME, DEVICE_NAME, null) {
         @Override
         public void onPairingCode(final String pairingCode) {
           runOnUiThread(new Runnable() {
@@ -201,6 +201,11 @@ public class MainActivity extends Activity {
     Intent intent = new Intent();
     intent.setClass(this, MakeRefundActivity.class);
     startActivity(intent);
+  }
+
+  public void sendDeviceLogs(View view){
+    Log.d(TAG, "send device logs clicked");
+    cloverConnector.sendCloverDeviceLog("because");
   }
 
   public static ICloverConnector getCloverConnector (){
