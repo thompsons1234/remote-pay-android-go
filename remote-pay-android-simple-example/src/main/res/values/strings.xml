@@ -1,5 +1,5 @@
 <resources>
-  <string name="app_name">My Application</string>
+  <string name="app_name">Clover Simple Example</string>
   <string name="connection_successful">Connection Successful!!!</string>
   <string name="disconnected">Disconnected</string>
   <string name="make_sale">Make Sale</string>
