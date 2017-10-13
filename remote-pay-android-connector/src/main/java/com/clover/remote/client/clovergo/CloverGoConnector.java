@@ -126,7 +126,7 @@ public class CloverGoConnector extends DefaultCloverGoConnector{
 
     @Override
     public void cancel() {
-        cloverGoConnectorImpl.cancel(mCloverGoConfiguration.getReaderType());
+        cloverGoConnectorImpl.cancelReaderTransaction(mCloverGoConfiguration.getReaderType());
     }
 
     @Override

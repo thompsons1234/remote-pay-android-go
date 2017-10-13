@@ -460,6 +460,7 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
       view.findViewById(R.id.CancelCashBox).setVisibility(View.GONE);
       view.findViewById(R.id.PrintImageButton).setVisibility(View.GONE);
       view.findViewById(R.id.ResetBox).setVisibility(View.GONE);
+      view.findViewById(R.id.ReadCardDataButton).setVisibility(View.GONE);
       view.findViewById(R.id.CustomActivityBox).setVisibility(View.GONE);
 
       view.findViewById(R.id.ManualSwitch).setVisibility(View.GONE);

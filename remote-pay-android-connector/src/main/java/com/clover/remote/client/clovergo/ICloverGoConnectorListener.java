@@ -48,4 +48,6 @@ public interface ICloverGoConnectorListener extends ICloverConnectorListener {
 
     void onGetMerchantInfoResponse(boolean isSuccess);
 
+    void onSignatureNeeded();
+
 }

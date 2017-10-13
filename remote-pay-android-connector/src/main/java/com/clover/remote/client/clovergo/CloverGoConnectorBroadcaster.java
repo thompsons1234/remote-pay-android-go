@@ -38,6 +38,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CloverGoConnectorBroadcaster extends CopyOnWriteArrayList<ICloverGoConnectorListener> {
 
+    public void notifyOnSignatureRequired() {
+        for (ICloverGoConnectorListener listener : this) {
+            listener.onSignatureNeeded();
+        }
+    }
+
     public void notifyOnTipAdded(long tip) {
         for (ICloverGoConnectorListener listener : this) {
             listener.onTipAdded(new TipAddedMessage(tip));

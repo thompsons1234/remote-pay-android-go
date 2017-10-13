@@ -173,16 +173,16 @@ public class CloverGoConnectorImpl {
     String url;
     switch (env) {
       case LIVE:
-        url = "https://api.payeezy.com/clovergosdk/v2/";
+        url = "https://api.payeezy.com/clovergosdk/v1/";
         break;
       case SANDBOX:
-        url = "https://api-cert.payeezy.com/clovergosdk/v2/";
+        url = "https://api-cert.payeezy.com/clovergosdk/v1/";
         break;
       case SANDBOX_DEV:
-        url = "https://api-cert.payeezy.com/clovergosdk/v2/";
+        url = "https://api-cert.payeezy.com/clovergosdk/v1/";
         break;
       default: // DEMO is default
-        url = "https://api-cat.payeezy.com/clovergosdk/v2/";
+        url = "https://api-cat.payeezy.com/clovergosdk/v1/";
     }
 
     DaggerApplicationComponent.builder().sDKDataComponent(DaggerSDKDataComponent.builder().readerModule(new ReaderModule(configuration.getContext())).
@@ -1076,7 +1076,7 @@ public class CloverGoConnectorImpl {
     }
   }
 
-  public void cancel(final ReaderInfo.ReaderType readerType) {
+  public void cancelReaderTransaction(final ReaderInfo.ReaderType readerType) {
     mGetConnectedReaders.getBlockingObservable().filter(new Predicate<ReaderInfo>() {
       @Override
       public boolean test(@NonNull ReaderInfo readerInfo) throws Exception {

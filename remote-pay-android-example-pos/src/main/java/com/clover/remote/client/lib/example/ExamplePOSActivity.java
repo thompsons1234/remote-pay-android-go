@@ -1172,6 +1172,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
 
     ccGoListener = new ICloverGoConnectorListener() {
+      @Override
+      public void onSignatureNeeded() {
+
+      }
+
       public void onDeviceDisconnected() {
       }
 
