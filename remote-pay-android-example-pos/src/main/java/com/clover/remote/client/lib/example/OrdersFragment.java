@@ -359,8 +359,8 @@ public class OrdersFragment extends Fragment implements OrderObserver {
   private void updateOrderList() {
     final List<POSOrder> orders = new ArrayList<POSOrder>(store.getOrders().size());
     List<POSOrder> storeOrders = store.getOrders();
-    for(POSOrder currentOrder : storeOrders) {
-      if(currentOrder.getStatus() != POSOrder.OrderStatus.INITIAL) {
+    for (POSOrder currentOrder : storeOrders) {
+      if (currentOrder.getStatus() != POSOrder.OrderStatus.INITIAL) {
         orders.add(currentOrder);
       }
     }

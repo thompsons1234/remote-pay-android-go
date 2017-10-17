@@ -200,15 +200,30 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     @Override
     public void onAcceptClicked(final int challengeIndex) {
+
       if (challengeIndex == currentChallenges.length - 1) { // no more challenges, so accept the payment
         getCloverConnector().acceptPayment(currentPayment);
         currentChallenges = null;
         currentPayment = null;
+
       } else { // show the next challenge
         runOnUiThread(new Runnable() {
           @Override
           public void run() {
-            showPaymentConfirmation(paymentConfirmationListener, currentChallenges[challengeIndex + 1], challengeIndex + 1);
+
+            Challenge theChallenge = currentChallenges[challengeIndex + 1];
+
+            switch(theChallenge.type) {
+              case DUPLICATE_CHALLENGE:
+                showPaymentConfirmation(paymentConfirmationListener, theChallenge,  challengeIndex + 1);
+                break;
+
+              // TODO: This is a HACK until we get the enum PARTIAL_AUTH added to Challenge.ChallengeType enum.
+              // Since Clover Go is not using OFFLINE_CHALLENGE, for now this is a safe hack.
+              case OFFLINE_CHALLENGE:
+                showPartialAuthChallenge(paymentConfirmationListener, theChallenge,  challengeIndex + 1);
+                break;
+            }
           }
         });
       }
@@ -273,7 +288,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       final Spinner paymentTypeSpinner = (Spinner) findViewById(R.id.selectPaymentSpinner);
       paymentTypeSpinner.setVisibility(View.VISIBLE);
+
       paymentTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
           switch (paymentTypeSpinner.getSelectedItem().toString()) {
@@ -1342,37 +1359,21 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       public void onDeviceError(CloverDeviceErrorEvent deviceErrorEvent) {
         switch (deviceErrorEvent.getErrorType()) {
           case READER_ERROR:
-            showAlertDialog(deviceErrorEvent.getErrorType().name(), deviceErrorEvent.getMessage());
-            break;
           case CARD_ERROR:
-            showAlertDialog(deviceErrorEvent.getErrorType().name(), deviceErrorEvent.getMessage());
-            break;
           case READER_TIMEOUT:
+          case COMMUNICATION_ERROR:
+          case LOW_BATTERY:
+          case PARTIAL_AUTH_REJECTED:
+          case DUPLICATE_TRANSACTION_REJECTED:
             showAlertDialog(deviceErrorEvent.getErrorType().name(), deviceErrorEvent.getMessage());
             break;
           case MULTIPLE_CONTACT_LESS_CARD_DETECTED_ERROR:
-            showProgressDialog(deviceErrorEvent.getErrorType().name(), deviceErrorEvent.getMessage(), true);
-            break;
           case CONTACT_LESS_FAILED_TRY_CONTACT_ERROR:
-            showProgressDialog(deviceErrorEvent.getErrorType().name(), deviceErrorEvent.getMessage(), true);
-            break;
           case EMV_CARD_SWIPED_ERROR:
-            showProgressDialog(deviceErrorEvent.getErrorType().name(), deviceErrorEvent.getMessage(), true);
-            break;
           case DIP_FAILED_ALL_ATTEMPTS_ERROR:
-            showProgressDialog(deviceErrorEvent.getErrorType().name(), deviceErrorEvent.getMessage(), true);
-            break;
           case DIP_FAILED_ERROR:
-            showProgressDialog(deviceErrorEvent.getErrorType().name(), deviceErrorEvent.getMessage(), true);
-            break;
           case SWIPE_FAILED_ERROR:
             showProgressDialog(deviceErrorEvent.getErrorType().name(), deviceErrorEvent.getMessage(), true);
-            break;
-          case COMMUNICATION_ERROR:
-            showAlertDialog(deviceErrorEvent.getErrorType().name(), deviceErrorEvent.getMessage());
-            break;
-          case LOW_BATTERY:
-            showAlertDialog(deviceErrorEvent.getErrorType().name(), deviceErrorEvent.getMessage());
             break;
         }
       }
@@ -1402,7 +1403,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               SystemClock.sleep(3000);
               showStatus("");
               try {
-                // Operation Not Supported in Clove Go
+                // Operation Not Supported in Clover Go
                 getCloverConnector().showWelcomeScreen();
               } catch (UnsupportedOperationException e) {
                 Log.e("Example POS", e.getMessage());
@@ -1523,16 +1524,29 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       @Override
       public void onConfirmPaymentRequest(ConfirmPaymentRequest request) {
-        //TODO: Discuss Clover GO doesnt return Payment Object on Duplicate Transaction
+        //TODO: Discuss Clover GO doesn't return Payment Object on Duplicate Transaction
         if (/*request.getPayment() == null ||*/ request.getChallenges() == null) {
           showMessage("Error: The ConfirmPaymentRequest was missing the payment and/or challenges.", Toast.LENGTH_LONG);
         } else {
           currentPayment = request.getPayment();
           currentChallenges = request.getChallenges();
+          final Challenge theChallenge = currentChallenges[0];
+
           runOnUiThread(new Runnable() {
             @Override
             public void run() {
-              showPaymentConfirmation(paymentConfirmationListener, currentChallenges[0], 0);
+
+              switch(theChallenge.type) {
+                case DUPLICATE_CHALLENGE:
+                  showPaymentConfirmation(paymentConfirmationListener, theChallenge, 0);
+                  break;
+
+                // TODO: This is a HACK until we get the enum PARTIAL_AUTH added to Challenge.ChallengeType enum.
+                // Since Clover Go is not using OFFLINE_CHALLENGE, for now this is a safe hack.
+                case OFFLINE_CHALLENGE:
+                  showPartialAuthChallenge(paymentConfirmationListener, theChallenge, 0);
+                  break;
+              }
             }
           });
         }
@@ -1788,14 +1802,25 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   private void showPaymentConfirmation(PaymentConfirmationListener listenerIn, Challenge challengeIn, int challengeIndexIn) {
+    showChallengeDialog(R.string.payment_confirmation, R.string.reject, R.string.accept, listenerIn, challengeIn, challengeIndexIn);
+  }
+
+  private void showPartialAuthChallenge(PaymentConfirmationListener listenerIn, Challenge challengeIn, int challengeIndexIn) {
+    showChallengeDialog(R.string.partial_auth_error_lbl, R.string.no, R.string.yes, listenerIn, challengeIn, challengeIndexIn);
+  }
+
+  private void showChallengeDialog(int titleResId, int negativeButtonResId, int positiveButtonResId,
+                                   PaymentConfirmationListener listenerIn, Challenge challengeIn,
+                                   int challengeIndexIn) {
+
     final int challengeIndex = challengeIndexIn;
     final Challenge challenge = challengeIn;
     final PaymentConfirmationListener listener = listenerIn;
     AlertDialog.Builder confirmationDialog = new AlertDialog.Builder(this);
-    confirmationDialog.setTitle("Payment Confirmation");
+    confirmationDialog.setTitle(titleResId);
     confirmationDialog.setCancelable(false);
     confirmationDialog.setMessage(challenge.message);
-    confirmationDialog.setNegativeButton("Reject", new DialogInterface.OnClickListener() {
+    confirmationDialog.setNegativeButton(negativeButtonResId, new DialogInterface.OnClickListener() {
 
       @Override
       public void onClick(DialogInterface dialog, int which) {
@@ -1803,7 +1828,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         dialog.dismiss();
       }
     });
-    confirmationDialog.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
+    confirmationDialog.setPositiveButton(positiveButtonResId, new DialogInterface.OnClickListener() {
 
       @Override
       public void onClick(DialogInterface dialog, int which) {

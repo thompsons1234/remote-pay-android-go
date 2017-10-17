@@ -27,7 +27,8 @@ public class POSOrder {
 
   public enum OrderStatus {
     OPEN, CLOSED, LOCKED, PAID, INITIAL, PARTIALLY_PAID {
-      @Override public String toString() {
+      @Override
+      public String toString() {
         return "PARTIALLY PAID";
       }
     };
@@ -151,10 +152,10 @@ public class POSOrder {
   }
 
   public boolean removeItem(POSLineItem li, int quantity) {
-    if(li.getQuantity() <= quantity) {
+    if (li.getQuantity() <= quantity) {
       return remoteAllItems(li);
     } else {
-      li.setQuantity(li.getQuantity()-quantity);
+      li.setQuantity(li.getQuantity() - quantity);
       notifyObserverItemChanged(li);
     }
     return true;
@@ -162,19 +163,19 @@ public class POSOrder {
 
   public boolean remoteAllItems(POSLineItem li) {
     boolean removed = items.remove(li);
-    if(removed) {
+    if (removed) {
       notifyObserverItemRemoved(li);
     }
     return removed;
   }
 
-  public void setPendingPaymentId (String pendingPaymentId){
+  public void setPendingPaymentId(String pendingPaymentId) {
     Log.d(TAG, "externalPaymentID set to : " + pendingPaymentId);
     this.pendingPaymentId = pendingPaymentId;
   }
 
-  public String getPendingPaymentId(){
-    Log.d(TAG,"returning externalPaymentID: "+pendingPaymentId);
+  public String getPendingPaymentId() {
+    Log.d(TAG, "returning externalPaymentID: " + pendingPaymentId);
     return pendingPaymentId;
   }
 
@@ -199,20 +200,25 @@ public class POSOrder {
     payments.add(refund);
     notifyObserverRefundAdded(refund);
   }
-///TODO: As per Clover GO example - public OrderStatus getStatus() {
+
+  ///TODO: As per Clover GO example - public OrderStatus getStatus() {
   public POSOrder.OrderStatus getStatus() {
-    if(items.size() == 0 && payments.size() == 0) {
+
+    if (items.size() == 0 && payments.size() == 0) {
       return OrderStatus.INITIAL;
     } else {
+
       long totalPaid = 0;
-      for(POSExchange payment : payments) {
-        if(payment instanceof POSPayment) {
+
+      for (POSExchange payment : payments) {
+        if (payment instanceof POSPayment) {
           totalPaid += payment.getAmount();
-        } else if(payment instanceof POSRefund) {
+        } else if (payment instanceof POSRefund) {
           totalPaid -= payment.getAmount();
         }
       }
-      if(getTotal() > 0 && totalPaid >= getTotal()) {
+
+      if (getTotal() > 0 && totalPaid >= getTotal()) {
         return OrderStatus.PAID;
       } else if (totalPaid > 0) {
         return OrderStatus.PARTIALLY_PAID;
@@ -221,7 +227,6 @@ public class POSOrder {
       }
     }
   }
-
 
   protected void removeItem(POSLineItem selectedLineItem) {
     items.remove(selectedLineItem);

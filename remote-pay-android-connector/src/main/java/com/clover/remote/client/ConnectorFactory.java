@@ -26,12 +26,10 @@ public class ConnectorFactory {
 
             } else {
                 return cloverGoConnectorMap.get(((CloverGoDeviceConfiguration) configuration).getReaderType());
-
             }
 
         } else {
             return new CloverConnector(configuration);
-
         }
     }
 //  public static ICloverGoConnector createCloverGoConnector(CloverGoDeviceConfiguration configuration) {

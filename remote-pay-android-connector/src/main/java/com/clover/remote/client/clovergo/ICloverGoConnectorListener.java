@@ -1,8 +1,10 @@
 package com.clover.remote.client.clovergo;
 
 import com.clover.remote.client.ICloverConnectorListener;
+import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CardApplicationIdentifier;
 import com.clover.remote.client.messages.CloverDeviceEvent;
+import com.firstdata.clovergo.domain.model.Payment;
 import com.firstdata.clovergo.domain.model.ReaderInfo;
 
 import java.util.List;
@@ -17,12 +19,12 @@ public interface ICloverGoConnectorListener extends ICloverConnectorListener {
     /**
      * Called when the Clover Go Bluetooth device is Discovered to connect
      */
-    public void onDeviceDiscovered(ReaderInfo readerInfo);
+    void onDeviceDiscovered(ReaderInfo readerInfo);
 
     /**
      * Called when the Clover device is disconnected
      */
-    public void onDeviceDisconnected(ReaderInfo readerInfo);
+    void onDeviceDisconnected(ReaderInfo readerInfo);
 
     /**
      * Chip cards have application identifiers which negotiates with the card reader on what application identifier to use to send card data back to reader to process transaction.

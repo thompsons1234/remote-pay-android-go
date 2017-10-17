@@ -30,6 +30,8 @@ public class CloverDeviceErrorEvent {
     COMMUNICATION_ERROR,
     VALIDATION_ERROR,
     EXCEPTION,
+    DUPLICATE_TRANSACTION_REJECTED,
+    PARTIAL_AUTH_REJECTED,
 
         // Clover Go Device ERROR Events
         READER_ERROR,

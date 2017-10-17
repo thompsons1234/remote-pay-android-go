@@ -19,7 +19,6 @@ package com.clover.remote.client.lib.example;
 import com.clover.remote.Challenge;
 
 public interface PaymentConfirmationListener {
-  public void onRejectClicked(Challenge challenge);
-
-  public void onAcceptClicked(int challengeIndex);
+  void onRejectClicked(Challenge challenge);
+  void onAcceptClicked(int challengeIndex);
 }

@@ -17,10 +17,8 @@
 package com.clover.remote.client.lib.example;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,17 +26,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import com.clover.remote.PendingPaymentEntry;
 import com.clover.remote.client.lib.example.utils.IdUtils;
-import com.clover.sdk.v3.payments.TransactionSettings;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.clovergo.ICloverGoConnector;
-import com.clover.remote.client.clovergo.messages.KeyedAuthRequest;
-import com.clover.remote.client.clovergo.messages.KeyedSaleRequest;
 import com.clover.remote.client.lib.example.adapter.AvailableItemsAdapter;
 import com.clover.remote.client.lib.example.model.OrderObserver;
 import com.clover.remote.client.lib.example.model.POSCard;
@@ -58,7 +51,7 @@ import com.clover.remote.client.messages.SaleRequest;
 import com.clover.remote.order.DisplayDiscount;
 import com.clover.remote.order.DisplayLineItem;
 import com.clover.remote.order.DisplayOrder;
-import com.firstdata.clovergo.domain.utils.CreditCardUtil;
+import com.firstdata.clovergo.domain.model.Payment;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -221,8 +214,9 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
           FragmentManager fm = getFragmentManager();
           keyedTransactionFragment.show(fm,"KEYED_FRAGMENT");
       }else {
-          if (cloverConnector instanceof ICloverGoConnector)
-              ((ExamplePOSActivity) getActivity()).showProgressDialog("Auth Transaction", "Swipe, Tap or Dip card for Payment", true);
+          if (cloverConnector instanceof ICloverGoConnector) {
+            ((ExamplePOSActivity) getActivity()).showProgressDialog("Auth Transaction", "Swipe, Tap or Dip card for Payment", true);
+          }
           String externalPaymentID = IdUtils.getNextId();
           Log.d(TAG, "ExternalPaymentID:" + externalPaymentID);
           store.getCurrentOrder().setPendingPaymentId(externalPaymentID);

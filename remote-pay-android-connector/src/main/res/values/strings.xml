@@ -1,7 +1,6 @@
 <resources>
-    <string name="title_activity_clover_merchant_device">CloverMerchantDevice</string>
-
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
-
+  <string name="title_activity_clover_merchant_device">CloverMerchantDevice</string>
+  <string name="hello_world">Hello world!</string>
+  <string name="action_settings">Settings</string>
+  <string name="partial_auth_error_msg">This card has been approved for %1$s with a remaining balance of %2$s. \n\nWould you like to authorize this card for partial payment?</string>
 </resources>

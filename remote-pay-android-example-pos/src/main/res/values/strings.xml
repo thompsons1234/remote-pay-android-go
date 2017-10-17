@@ -140,6 +140,7 @@
   <string name="name">Name:</string>
   <string name="type">Type:</string>
   <string name="get_print_status">Get Print Status</string>
+  <string name="partial_auth_error_lbl">Partially Approved</string>
 
   <string-array name="pref_protocol_list_titles">
     <item>WS</item>
@@ -150,16 +151,19 @@
     <item>wss</item>
   </string-array>
 
-  <item type="id" name="button_exit"/>
+  <item name="button_exit" type="id" />
 
 
-    <string name="select_one">Select one</string>
-    <string name="signature_text">Sign to approve payment</string>
+  <string name="select_one">Select one</string>
+  <string name="signature_text">Sign to approve payment</string>
 
-    <string name="send_receipt_info_lbl">Send receipt to a mobile number or email address</string>
-    <string name="send_receipt_btn_lbl">Send Receipt</string>
-    <string name="no_receipt_btn_lbl">No Receipt</string>
+  <string name="send_receipt_info_lbl">Send receipt to a mobile number or email address</string>
+  <string name="send_receipt_btn_lbl">Send Receipt</string>
+  <string name="no_receipt_btn_lbl">No Receipt</string>
 
-    <string name="filter_number">12345 67890</string>
-    <string name="start_transaction_btn">Start Transaction</string>
+  <string name="filter_number">12345 67890</string>
+  <string name="start_transaction_btn">Start Transaction</string>
+
+  <string name="payment_confirmation">Payment Confirmation</string>
+
 </resources>

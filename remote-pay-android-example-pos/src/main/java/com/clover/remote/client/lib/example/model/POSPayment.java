@@ -34,8 +34,6 @@ public class POSPayment extends POSExchange {
 
   public POSPayment(String paymentID, String orderID, String employeeID, long amount, long tip, long cashBack) {
     this(paymentID, null, orderID, employeeID, amount, tip, cashBack);
-
-
   }
 
   public POSPayment(String paymentID, String externalPaymentId, String orderID, String employeeID, long amount, long tip, long cashBack) {
