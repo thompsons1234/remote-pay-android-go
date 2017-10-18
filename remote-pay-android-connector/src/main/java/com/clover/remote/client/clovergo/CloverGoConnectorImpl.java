@@ -12,9 +12,7 @@ import com.clover.remote.client.clovergo.messages.GoPayment;
 import com.clover.remote.client.clovergo.messages.KeyedAuthRequest;
 import com.clover.remote.client.clovergo.messages.KeyedPreAuthRequest;
 import com.clover.remote.client.clovergo.messages.KeyedSaleRequest;
-import com.clover.remote.client.clovergo.util.NumberUtil;
 import com.clover.remote.client.lib.BuildConfig;
-import com.clover.remote.client.lib.R;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthRequest;
@@ -131,7 +129,6 @@ public class CloverGoConnectorImpl {
   private ReaderProgressEvent mReaderProgressEvent;
   private ReaderInfo mLastTransactionReader;
   private TransactionRequest mLastTransactionRequest;
-  private Context mContext;
 
   @Inject
   AuthOrSaleTransaction mAuthOrSaleTransaction;
@@ -179,7 +176,6 @@ public class CloverGoConnectorImpl {
   public CloverGoConnectorImpl(final CloverGoConnectorBroadcaster broadcaster, CloverGoDeviceConfiguration configuration) {
     Log.d(TAG, "CloverGoConnectorImpl env=" + configuration.getEnv());
     mBroadcaster = broadcaster;
-    mContext = configuration.getContext();
 
     CloverGoDeviceConfiguration.ENV env = configuration.getEnv();
     String url;
@@ -244,26 +240,7 @@ public class CloverGoConnectorImpl {
 
         mPayment = payment;
 
-        if (mOrder.getStatus() == Order.STATUS_PARTIAL_PAYMENT) {
-
-          Log.d(TAG, "mNewPaymentObserver.onNext: Order.STATUS_PARTIAL_PAYMENT");
-          Log.d(TAG, "mOrder.getPendingAuthAmount(): " + mOrder.getPendingAuthAmount());
-          Log.d(TAG, "mOrder.getPendingAuthTax(): " + mOrder.getPendingAuthTax());
-          Log.d(TAG, "mOrder.getPendingAuthTotal(): " + mOrder.getPendingAuthTotal());
-
-          ConfirmPaymentRequest confirmPaymentRequest = new ConfirmPaymentRequest();
-
-          String challengeMessage = mContext.getResources().getString(
-            R.string.partial_auth_error_msg,
-            NumberUtil.getCurrencyString(payment.getAmountCharged()),
-            NumberUtil.getCurrencyString(mOrder.getPendingAuthAmount()));
-
-          Challenge[] challenge = {new Challenge(challengeMessage, Challenge.ChallengeType.OFFLINE_CHALLENGE, VoidReason.REJECT_PARTIAL_AUTH)};
-          confirmPaymentRequest.setChallenges(challenge);
-
-          mBroadcaster.notifyOnConfirmPaymentRequest(confirmPaymentRequest);
-
-        } else if (CARD_MODE_EMV_CONTACT.equalsIgnoreCase(mPayment.getCard().getMode())) {
+        if (CARD_MODE_EMV_CONTACT.equalsIgnoreCase(mPayment.getCard().getMode())) {
 
           Log.d(TAG, "mPaymentObserver next EMV_CONTACT");
           Map<String, String> data = new HashMap<>();
@@ -723,13 +700,13 @@ public class CloverGoConnectorImpl {
     //TODO: setTax amount in Order
 
     if (preAuthRequest instanceof KeyedPreAuthRequest) {
-      mCreditCard = new CreditCard(((KeyedPreAuthRequest) preAuthRequest).getCardNumber(), ((KeyedPreAuthRequest) preAuthRequest).getExpDate(), ((KeyedPreAuthRequest) preAuthRequest).getCvv());
-      mCreditCard.setCardPresent(((KeyedPreAuthRequest) preAuthRequest).isCardPresent());
+      CreditCard creditCard = new CreditCard(((KeyedPreAuthRequest) preAuthRequest).getCardNumber(), ((KeyedPreAuthRequest) preAuthRequest).getExpDate(), ((KeyedPreAuthRequest) preAuthRequest).getCvv());
+      creditCard.setCardPresent(((KeyedPreAuthRequest) preAuthRequest).isCardPresent());
       if (((KeyedPreAuthRequest) preAuthRequest).getBillingAddress() != null) {
         BillingAddress address = ((KeyedPreAuthRequest) preAuthRequest).getBillingAddress();
-        mCreditCard.setBillingAddress(new CreditCard.BillingAddress(address.getStreet(), address.getZipPostalCode(), address.getCountry()));
+        creditCard.setBillingAddress(new CreditCard.BillingAddress(address.getStreet(), address.getZipPostalCode(), address.getCountry()));
       }
-      mAuthOrSaleTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
+      mAuthOrSaleTransaction.getObservable(mOrder, creditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
     } else {
       startCardReaderTransaction(readerType);
     }
@@ -754,13 +731,13 @@ public class CloverGoConnectorImpl {
     //TODO: setTax amount in Order
 
     if (authRequest instanceof KeyedAuthRequest) {
-      mCreditCard = new CreditCard(((KeyedAuthRequest) authRequest).getCardNumber(), ((KeyedAuthRequest) authRequest).getExpDate(), ((KeyedAuthRequest) authRequest).getCvv());
-      mCreditCard.setCardPresent(((KeyedAuthRequest) authRequest).isCardPresent());
+      CreditCard creditCard = new CreditCard(((KeyedAuthRequest) authRequest).getCardNumber(), ((KeyedAuthRequest) authRequest).getExpDate(), ((KeyedAuthRequest) authRequest).getCvv());
+      creditCard.setCardPresent(((KeyedAuthRequest) authRequest).isCardPresent());
       if (((KeyedAuthRequest) authRequest).getBillingAddress() != null) {
         BillingAddress address = ((KeyedAuthRequest) authRequest).getBillingAddress();
-        mCreditCard.setBillingAddress(new CreditCard.BillingAddress(address.getStreet(), address.getZipPostalCode(), address.getCountry()));
+        creditCard.setBillingAddress(new CreditCard.BillingAddress(address.getStreet(), address.getZipPostalCode(), address.getCountry()));
       }
-      mAuthOrSaleTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
+      mAuthOrSaleTransaction.getObservable(mOrder, creditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
     } else {
       startCardReaderTransaction(readerType);
     }
@@ -1007,18 +984,9 @@ public class CloverGoConnectorImpl {
   }
 
   public void acceptPayment(com.clover.sdk.v3.payments.Payment payment) {
-
-    mTransactionError = null;
-
     mOrder.allowDuplicates = true;
     if (mLastTransactionRequest instanceof KeyedSaleRequest || mLastTransactionRequest instanceof KeyedAuthRequest) {
-
-      if (mOrder.getStatus() == Order.STATUS_PARTIAL_PAYMENT) {
-        notifyPaymentResponse();
-      } else {
-        mAuthOrSaleTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
-      }
-
+      mAuthOrSaleTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
     } else if (mLastTransactionRequest instanceof KeyedPreAuthRequest) {
       mPreAuthTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
     } else {
@@ -1027,18 +995,7 @@ public class CloverGoConnectorImpl {
   }
 
   public void rejectPayment(com.clover.sdk.v3.payments.Payment payment, Challenge challenge) {
-
-    if (mOrder.getStatus() == Order.STATUS_PARTIAL_PAYMENT) {
-      mBroadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.PARTIAL_AUTH_REJECTED, 0, null, "In rejectPayment: Partial auth rejected by user."));
-      voidPayment(mPayment, VoidReason.REJECT_PARTIAL_AUTH.name());
-
-      // TODO: Test this (duplicate) logic.  mTransactionError might not have been cleared properly
-    } else if (mTransactionError != null && DUPLICATE_TRANSACTION.equals(mTransactionError.getCode())) {
-      mBroadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.DUPLICATE_TRANSACTION_REJECTED, 0, null, "In rejectPayment: Duplicate transaction rejected by user."));
-      voidPayment(mPayment, VoidReason.REJECT_DUPLICATE.name());
-
-    } else if (mReaderProgressEvent != null && mReaderProgressEvent.getEventType() == ReaderProgressEvent.EventType.EMV_DATA) {
-
+    if (mReaderProgressEvent != null && mReaderProgressEvent.getEventType() == ReaderProgressEvent.EventType.EMV_DATA) {
       mGetConnectedReaders.getBlockingObservable().subscribe(new Consumer<ReaderInfo>() {
         @Override
         public void accept(@NonNull ReaderInfo readerInfo) throws Exception {
@@ -1057,22 +1014,7 @@ public class CloverGoConnectorImpl {
     } else if (xy == null) {
       throw new NullPointerException("Signature cannot be null");
     } else {
-      mCaptureSignature.getObservable(paymentId, xy).retry(3).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).onErrorComplete().subscribe(new CompletableObserver() {
-        @Override
-        public void onSubscribe(Disposable d) {
-        }
-
-        @Override
-        public void onComplete() {
-          Log.d("JD", "mCaptureSignature.getObservable.onComplete()");
-
-          // Anything to do here for partial auth?
-        }
-
-        @Override
-        public void onError(Throwable e) {
-        }
-      });
+      mCaptureSignature.getObservable(paymentId, xy).retry(3).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).onErrorComplete().subscribe();
     }
   }
 

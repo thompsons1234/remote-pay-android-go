@@ -219,11 +219,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                 showPaymentConfirmation(paymentConfirmationListener, theChallenge,  challengeIndex + 1);
                 break;
 
-              // TODO: This is a HACK until we get the enum PARTIAL_AUTH added to Challenge.ChallengeType enum.
-              // Since Clover Go is not using OFFLINE_CHALLENGE, for now this is a safe hack.
-              case OFFLINE_CHALLENGE:
-                showPartialAuthChallenge(paymentConfirmationListener, theChallenge,  challengeIndex + 1);
-                break;
             }
           }
         });
@@ -1544,11 +1539,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                   showPaymentConfirmation(paymentConfirmationListener, theChallenge, 0);
                   break;
 
-                // TODO: This is a HACK until we get the enum PARTIAL_AUTH added to Challenge.ChallengeType enum.
-                // Since Clover Go is not using OFFLINE_CHALLENGE, for now this is a safe hack.
-                case OFFLINE_CHALLENGE:
-                  showPartialAuthChallenge(paymentConfirmationListener, theChallenge, 0);
-                  break;
               }
             }
           });
