@@ -22,10 +22,7 @@ import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
 import com.clover.remote.client.CloverConnector;
 import com.clover.remote.client.CloverDeviceConfiguration;
-import com.clover.remote.client.messages.PrintJobStatusRequest;
-import com.clover.remote.client.messages.PrintRequest;
 import com.clover.remote.client.messages.ResultCode;
-import com.clover.remote.client.messages.RetrievePrintersRequest;
 import com.clover.remote.client.transport.ICloverTransport;
 import com.clover.remote.client.transport.ICloverTransportObserver;
 import com.clover.remote.message.AcknowledgementMessage;
@@ -122,7 +119,7 @@ import java.util.Map;
 
 public class DefaultCloverDevice extends CloverDevice implements ICloverTransportObserver {
   private static final String TAG = DefaultCloverDevice.class.getName();
-  private static final String REMOTE_SDK = "com.clover.cloverconnector.android:1.3.2";
+  private static final String REMOTE_SDK = "com.clover.cloverconnector.android:1.4";
 
   private Gson gson = new Gson();
   private static int id = 0;
