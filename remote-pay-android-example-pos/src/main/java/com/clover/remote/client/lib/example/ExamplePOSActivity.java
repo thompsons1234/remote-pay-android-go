@@ -185,7 +185,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public static final String EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN = "EXTRA_CLOVER_GO_CONNECTOR_CONFIG_ACCESS_TOKEN";
   public static final String EXTRA_CLOVER_GO_CONNECTOR_API_KEY = "EXTRA_CLOVER_GO_CONNECTOR_CONFIG_API_KEY";
   public static final String EXTRA_CLOVER_GO_CONNECTOR_SECRET = "EXTRA_CLOVER_GO_CONNECTOR_CONFIG_SECRET";
-  public static String EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE = "EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE";
+  public static final String EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE = "EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE";
+  public static final String EXTRA_CLOVER_GO_CONNECTOR_ENV = "EXTRA_CLOVER_GO_CONNECTOR_ENV";
   private String paymentType;
 
   Payment currentPayment = null;
@@ -247,6 +248,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   private String apiKey;
   private String secret;
   private String accessToken;
+  private CloverGoDeviceConfiguration.ENV goEnv;
 
   private ProgressDialog progressDialog;
   private Dialog alertDialog;
@@ -284,6 +286,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       apiKey = getIntent().getStringExtra(EXTRA_CLOVER_GO_CONNECTOR_API_KEY);
       secret = getIntent().getStringExtra(EXTRA_CLOVER_GO_CONNECTOR_SECRET);
       accessToken = getIntent().getStringExtra(EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN);
+      goEnv = (CloverGoDeviceConfiguration.ENV) getIntent().getSerializableExtra(EXTRA_CLOVER_GO_CONNECTOR_ENV);
       currentGoConfig = (ReaderInfo.ReaderType) getIntent().getExtras().get(EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE);
 
       final Spinner paymentTypeSpinner = (Spinner) findViewById(R.id.selectPaymentSpinner);
@@ -298,7 +301,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               paymentType = "";
               currentGoConfig = ReaderInfo.ReaderType.RP450;
               if (cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP450) == null) {
-                CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, CloverGoDeviceConfiguration.ENV.DEMO, apiKey, secret, "com.clover.examplepos:1.2").deviceType(ReaderInfo.ReaderType.RP450).allowAutoConnect(false).build();
+                CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, goEnv, apiKey, secret, "com.clover.examplepos:1.2").deviceType(ReaderInfo.ReaderType.RP450).allowAutoConnect(false).build();
                 ICloverGoConnector cloverGo450Connector = (CloverGoConnector) ConnectorFactory.createCloverConnector(config);
                 cloverGoConnectorMap.put(ReaderInfo.ReaderType.RP450, cloverGo450Connector);
                 cloverGo450Connector.addCloverGoConnectorListener(ccGoListener);
@@ -314,7 +317,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               paymentType = "";
               currentGoConfig = ReaderInfo.ReaderType.RP350;
               if (cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP350) == null) {
-                CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, CloverGoDeviceConfiguration.ENV.DEMO, apiKey, secret, "com.clover.examplepos:1.2").deviceType(ReaderInfo.ReaderType.RP350).allowAutoConnect(false).build();
+                CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, goEnv, apiKey, secret, "com.clover.examplepos:1.2").deviceType(ReaderInfo.ReaderType.RP350).allowAutoConnect(false).build();
                 ICloverGoConnector cloverGo350Connector = (CloverGoConnector) ConnectorFactory.createCloverConnector(config);
                 cloverGoConnectorMap.put(ReaderInfo.ReaderType.RP350, cloverGo350Connector);
                 cloverGo350Connector.addCloverGoConnectorListener(ccGoListener);
@@ -340,7 +343,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         }
       });
 
-      goConfig = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, CloverGoDeviceConfiguration.ENV.DEMO, apiKey, secret, "com.clover.examplepos:1.2").deviceType(currentGoConfig).allowAutoConnect(false).build();
+      goConfig = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, goEnv, apiKey, secret, "com.clover.examplepos:1.2").deviceType(currentGoConfig).allowAutoConnect(false).build();
 
       ICloverGoConnector cloverGoConnector = (CloverGoConnector) ConnectorFactory.createCloverConnector(goConfig);
       cloverGoConnectorMap.put(currentGoConfig, cloverGoConnector);
@@ -2136,7 +2139,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   public void connect350Click(View view) {
     if (cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP350) == null) {
-      CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, CloverGoDeviceConfiguration.ENV.DEMO, apiKey, secret, "com.clover.examplepos:1.2").deviceType(ReaderInfo.ReaderType.RP350).allowAutoConnect(false).build();
+      CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, goEnv, apiKey, secret, "com.clover.examplepos:1.2").deviceType(ReaderInfo.ReaderType.RP350).allowAutoConnect(false).build();
       ICloverGoConnector cloverGo350Connector = (CloverGoConnector) ConnectorFactory.createCloverConnector(config);
       cloverGoConnectorMap.put(ReaderInfo.ReaderType.RP350, cloverGo350Connector);
       cloverGo350Connector.addCloverGoConnectorListener(ccGoListener);
@@ -2152,7 +2155,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     if (isBluetoothEnabled() && isGPSEnabled()) {
       if (cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP450) == null) {
-        CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, CloverGoDeviceConfiguration.ENV.DEMO, apiKey, secret, "com.clover.examplepos:1.2").deviceType(ReaderInfo.ReaderType.RP450).allowAutoConnect(false).build();
+        CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, goEnv, apiKey, secret, "com.clover.examplepos:1.2").deviceType(ReaderInfo.ReaderType.RP450).allowAutoConnect(false).build();
         ICloverGoConnector cloverGo450Connector = (CloverGoConnector) ConnectorFactory.createCloverConnector(config);
         cloverGoConnectorMap.put(ReaderInfo.ReaderType.RP450, cloverGo450Connector);
         cloverGo450Connector.addCloverGoConnectorListener(ccGoListener);

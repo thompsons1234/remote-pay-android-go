@@ -36,6 +36,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.clover.remote.client.clovergo.CloverGoDeviceConfiguration;
 import com.clover.remote.client.lib.example.qrCode.barcode.BarcodeCaptureActivity;
 import com.clover.remote.client.lib.example.rest.ApiClient;
 import com.clover.remote.client.lib.example.rest.ApiInterface;
@@ -76,9 +77,9 @@ public class StartupActivity extends Activity {
   private static final int BARCODE_READER_REQUEST_CODE = 1;
   public static final String WS_CONFIG = "WS";
 
-  private static final String GO_API_KEY = "Lht4CAQq8XxgRikjxwE71JE20by5dzlY";
-  private static final String GO_SECRET = "7ebgf6ff8e98d1565ab988f5d770a911e36f0f2347e3ea4eb719478c55e74d9g";
-  private static final String GO_ACCESS_TOKEN = "533238e2-dbd7-98d8-ff6b-3e953d028e30";
+  private static final CloverGoDeviceConfiguration.ENV GO_ENV = CloverGoDeviceConfiguration.ENV.LIVE;
+  private String mGoApiKey, mGoSecret, mGoAccessToken;
+  private String mOAuthClientId, mOAuthClientSecret, mOAuthEnv, mOAuthUrl, mOAuthApiKey;
 
 
   // Clover devices do not always support the custom Barcode scanner implemented here.
@@ -277,6 +278,7 @@ public class StartupActivity extends Activity {
     String config;
 
     if (group.getCheckedRadioButtonId() == R.id.goRadioButton) {
+      setGoParams();
       config = GO;
       editor.putString(CONNECTION_MODE, GO);
       editor.commit();
@@ -305,9 +307,10 @@ public class StartupActivity extends Activity {
     } else if (config.equals("GO")) {
       if (Validator.isNetworkConnected(this)) {
         intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
-        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, GO_ACCESS_TOKEN);
-        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, GO_API_KEY);
-        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, GO_SECRET);
+        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, mGoAccessToken);
+        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, mGoApiKey);
+        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, mGoSecret);
+        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ENV, GO_ENV);
 
         if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp450RadioButton) {
           intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP450);
@@ -346,33 +349,23 @@ public class StartupActivity extends Activity {
   }
 
   public void connectGoWithAuthMode(View view) {
-    String oAuthClientId = "1AST2ETARGG7C";
-//    String oAuthClientId = "XD7KPB668V5SJ";
-//    String mOauthURL = "https://sandbox.dev.clover.com/oauth/authorize?client_id=" + oAuthClientId + "&response_type=code";
-//    String mOauthURL = "https://dev14.dev.clover.com/oauth/authorize?client_id=" + oAuthClientId + "&response_type=code";
-    String mOauthURL = "https://stg1.dev.clover.com/oauth/authorize?client_id=" + oAuthClientId + "&response_type=code";
+    setGoParams();
 
     if (((RadioGroup) findViewById(R.id.radioGroup)).getCheckedRadioButtonId() == R.id.goRadioButton) {
       getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).edit().putString(CONNECTION_MODE, GO).commit();
     }
 
-    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mOauthURL));
+    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mOAuthUrl));
     startActivity(intent);
   }
 
   private void getAccessToken(String clientId, String code) {
-    String apiKey = "byJiyq2GZNmS6LgtAhr2xGS6gz4dpBYX";
-    String clientSecret = "fea4a38b-9346-d75c-2f09-1670381a1499";
-//    String env = "sandbox.dev.clover.com";
-//    String env = "dev14.dev.clover.com";
-    String env = "stg1.dev.clover.com";
-
     final ProgressDialog progressDialog = new ProgressDialog(this);
     progressDialog.setTitle("Merchant account loading....");
     progressDialog.show();
 
     ApiInterface apiInterface = ApiClient.getClient().create(ApiInterface.class);
-    Call<ResponseBody> call = apiInterface.getAccessToken(apiKey, clientId, clientSecret, code, env);
+    Call<ResponseBody> call = apiInterface.getAccessToken(mOAuthApiKey, clientId, mOAuthClientSecret, code, mOAuthEnv);
 
     call.enqueue(new Callback<ResponseBody>() {
       @Override
@@ -394,8 +387,9 @@ public class StartupActivity extends Activity {
                 intent.setClass(StartupActivity.this, ExamplePOSActivity.class);
                 intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
                 intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, accessToken);
-                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, GO_API_KEY);
-                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, GO_SECRET);
+                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, mGoApiKey);
+                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, mGoSecret);
+                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ENV, GO_ENV);
 
                 if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp450RadioButton)
                   intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP450);
@@ -427,5 +421,34 @@ public class StartupActivity extends Activity {
     }
     mToast.setText(message);
     mToast.show();
+  }
+
+  private void setGoParams() {
+    mOAuthApiKey = "byJiyq2GZNmS6LgtAhr2xGS6gz4dpBYX";
+
+    if (GO_ENV == CloverGoDeviceConfiguration.ENV.LIVE) {
+      mGoApiKey = "mexbZJX5D3fa5kje1dZmrJVKOyAF9w8F";
+      mGoSecret = "6hak16ff8e76r4565ab988f5d986a911e36f0f2347e3fv3eb719478c98e89io0";
+      mGoAccessToken = "dd18d9a6-4bea-47e3-7d40-3ab8b0d61c29";
+
+      mOAuthClientId = "K66BM82VZ4HAM";//PROD - CloverSDKDemoApp App ID
+      mOAuthUrl = "https://clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
+
+      mOAuthClientSecret = "6e2f4d4c-da09-a42c-fa72-bbd96a5c63aa"; //PROD - CloverSDKDemoApp App Secret
+      mOAuthEnv = "www.clover.com";
+
+    } else {
+      mGoApiKey = "Lht4CAQq8XxgRikjxwE71JE20by5dzlY";
+      mGoSecret = "7ebgf6ff8e98d1565ab988f5d770a911e36f0f2347e3ea4eb719478c55e74d9g";
+      mGoAccessToken = "533238e2-dbd7-98d8-ff6b-3e953d028e30";
+
+      mOAuthClientId = "1AST2ETARGG7C";
+      mOAuthUrl = "https://stg1.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
+//    String mOAuthUrl = "https://sandbox.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
+//    String mOAuthUrl = "https://dev14.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
+
+      mOAuthClientSecret = "fea4a38b-9346-d75c-2f09-1670381a1499";
+      mOAuthEnv = "stg1.dev.clover.com";
+    }
   }
 }
