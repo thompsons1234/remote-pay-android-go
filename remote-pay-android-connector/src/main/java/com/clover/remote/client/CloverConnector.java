@@ -105,7 +105,6 @@ import android.util.Log;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -668,7 +667,6 @@ public class CloverConnector implements ICloverConnector {
         broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR,0, null, "Print: The Clover Device is not ready"));
       }
       else{
-        List<Bitmap> images = new ArrayList<>();
         device.doPrint(request.getImages(), request.getImageURLs(), request.getText(), request.getPrintRequestId(), request.getPrintDeviceId());
       }
     }
