@@ -1,12 +1,11 @@
 package com.clover.remote.client.clovergo;
 
-import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.clover.remote.Challenge;
 import com.clover.remote.client.MerchantInfo;
-import com.clover.remote.client.clovergo.di.DaggerApplicationComponent;
+import com.clover.remote.client.clovergo.di.CloverGoSDKApplicationData;
 import com.clover.remote.client.clovergo.messages.BillingAddress;
 import com.clover.remote.client.clovergo.messages.GoPayment;
 import com.clover.remote.client.clovergo.messages.KeyedAuthRequest;
@@ -41,9 +40,6 @@ import com.clover.sdk.v3.payments.CardTransaction;
 import com.clover.sdk.v3.payments.CardTransactionType;
 import com.clover.sdk.v3.payments.CardType;
 import com.clover.sdk.v3.payments.Result;
-import com.firstdata.clovergo.data.DaggerSDKDataComponent;
-import com.firstdata.clovergo.data.module.NetworkModule;
-import com.firstdata.clovergo.data.module.UtilityModule;
 import com.firstdata.clovergo.domain.model.CreditCard;
 import com.firstdata.clovergo.domain.model.EmployeeMerchant;
 import com.firstdata.clovergo.domain.model.EmvCard;
@@ -75,7 +71,6 @@ import com.firstdata.clovergo.domain.usecase.ScanForReaders;
 import com.firstdata.clovergo.domain.usecase.SendReceipt;
 import com.firstdata.clovergo.domain.usecase.VoidTransaction;
 import com.firstdata.clovergo.domain.usecase.WriteToCard;
-import com.firstdata.clovergo.reader.module.ReaderModule;
 import com.google.android.gms.iid.InstanceID;
 import com.roam.roamreaderunifiedapi.utils.HexUtils;
 
@@ -193,9 +188,10 @@ public class CloverGoConnectorImpl {
         url = "https://api-cat.payeezy.com/clovergosdk/v1/";
     }
 
-    DaggerApplicationComponent.builder().sDKDataComponent(DaggerSDKDataComponent.builder().readerModule(new ReaderModule(configuration.getContext())).
-            networkModule(new NetworkModule(url, configuration.getApiKey(), configuration.getSecret(), configuration.getAccessToken(), InstanceID.getInstance(configuration.getContext()).getId(), BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME)).
-            utilityModule(new UtilityModule(configuration.getContext())).build()).build().inject(this);
+
+    CloverGoSDKApplicationData cloverGoSDKApplicationData = new CloverGoSDKApplicationData(configuration.getApplicationId(), BuildConfig.VERSION_NAME, configuration.getContext(), url, configuration.getApiKey(),
+            configuration.getSecret(), configuration.getAccessToken(), InstanceID.getInstance(configuration.getContext()).getId());
+    cloverGoSDKApplicationData.getApplicationComponent().inject(this);
 
     initObservers();
 

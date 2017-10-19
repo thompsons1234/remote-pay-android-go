@@ -78,6 +78,8 @@ public class StartupActivity extends Activity {
   public static final String WS_CONFIG = "WS";
 
   private static final CloverGoDeviceConfiguration.ENV GO_ENV = CloverGoDeviceConfiguration.ENV.LIVE;
+  private static final String APP_ID = "com.firstdata.hack2020";
+
   private String mGoApiKey, mGoSecret, mGoAccessToken;
   private String mOAuthClientId, mOAuthClientSecret, mOAuthEnv, mOAuthUrl, mOAuthApiKey;
 
@@ -308,6 +310,7 @@ public class StartupActivity extends Activity {
       if (Validator.isNetworkConnected(this)) {
         intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
         intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, mGoAccessToken);
+        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_APP_ID, APP_ID);
         intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, mGoApiKey);
         intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, mGoSecret);
         intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ENV, GO_ENV);
@@ -387,6 +390,7 @@ public class StartupActivity extends Activity {
                 intent.setClass(StartupActivity.this, ExamplePOSActivity.class);
                 intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
                 intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, accessToken);
+                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_APP_ID, APP_ID);
                 intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, mGoApiKey);
                 intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, mGoSecret);
                 intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ENV, GO_ENV);
