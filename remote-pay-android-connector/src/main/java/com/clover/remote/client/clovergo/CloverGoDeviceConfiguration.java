@@ -103,13 +103,12 @@ public class CloverGoDeviceConfiguration implements CloverDeviceConfiguration {
         return readerType;
     }
 
-
     public static class Builder {
 
         CloverGoDeviceConfiguration mCLoCloverGoConfiguration;
 
         /**
-         * Build CloverGo Object with AccessToken(mandatory parameter to initialize CloverGo Object)
+         * Build CloverGo Object with AccessToken(mandatory parameter to initialize Clover Go Object)
          *
          * @param accessToken access token received from the OAuth request
          * @param apiKey      API Key
@@ -120,11 +119,10 @@ public class CloverGoDeviceConfiguration implements CloverDeviceConfiguration {
             mCLoCloverGoConfiguration = new CloverGoDeviceConfiguration(context, accessToken, env, apiKey, secret, appId);
         }
 
-
         /**
-         * This method is used to set Allow Duplicate Transaction or not. This is optional field. By default, It is not allowed.
+         * Toggles switch to allow duplicate transactions. Optional setting. Default is false (no duplicates allowed.)
          *
-         * @param allowDuplicate Boolean field whether to allow duplicates or not
+         * @param allowDuplicate Boolean field whether to allow duplicates
          * @return CloverGoBuilder instance
          */
         public Builder overrideDuplicateTransaction(boolean allowDuplicate) {
@@ -133,7 +131,7 @@ public class CloverGoDeviceConfiguration implements CloverDeviceConfiguration {
         }
 
         /**
-         * This method is used to set scan timeout to scan for RP450 readers. This is optional field. By Default, it scans for 30 seconds.
+         * Sets the scan timeout (how long the phone will look for the RP450 bluetooth card reader.) Optional setting.  Default is 30 second scan timeout.
          *
          * @param timeOut Scan period in milliseconds to scan for RP450 readers.
          * @return CloverGoBuilder instance
@@ -145,7 +143,7 @@ public class CloverGoDeviceConfiguration implements CloverDeviceConfiguration {
 
 
         /**
-         * This method is used to set to allow auto connect to last RP450 connected reader when App come in foreground. This is optional parameter. By Default, it is disabled.
+         * Toggles setting to allow auto-connect to last connected RP450 card reader when app comes to foreground. Optional setting.  Default is false (disabled.)
          *
          * @param autoConnect Boolean field to enable auto connect to last connected RP450
          * @return CloverGoBuilder instance
@@ -157,6 +155,11 @@ public class CloverGoDeviceConfiguration implements CloverDeviceConfiguration {
             return this;
         }
 
+        /**
+         * Sets the ReaderInfo.ReaderType of the device being configured
+         * @param readerType
+         * @return CloverGoBuilder instance
+         */
         public Builder deviceType(ReaderInfo.ReaderType readerType) {
             mCLoCloverGoConfiguration.readerType = readerType;
             //if (autoConnect)
@@ -164,11 +167,10 @@ public class CloverGoDeviceConfiguration implements CloverDeviceConfiguration {
             return this;
         }
 
-
         /**
-         * Initializes the CloverGo object
+         * Returns the configured (built) CloverGoDeviceConfiguration instance
          *
-         * @return CloverGo instance
+         * @return CloverGoDeviceConfiguration instance
          */
         public CloverGoDeviceConfiguration build() {
             return mCLoCloverGoConfiguration;

@@ -442,8 +442,9 @@ public class CloverGoConnectorImpl {
           case COMMON_APPLICATION_IDENTIFIER:
             Iterator<String> it = readerProgressEvent.getData().keySet().iterator();
             String aid = null;
-            if (it.hasNext())
-              aid = readerProgressEvent.getData().get(it.next());
+            if (it.hasNext()) {
+                aid = readerProgressEvent.getData().get(it.next());
+            }
 
             Log.d(TAG, "mProgressObserver next " + readerProgressEvent.getEventType() + " aid=" + aid);
             mReadCard.getObservable(mLastTransactionReader, aid, 0).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe();

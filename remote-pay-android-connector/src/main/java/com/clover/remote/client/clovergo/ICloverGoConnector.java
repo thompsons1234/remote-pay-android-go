@@ -41,11 +41,7 @@ package com.clover.remote.client.clovergo;
    */
   public void removeCloverGoConnectorListener(ICloverGoConnectorListener listener);
 
-  /**
-   *  return the Merchant object for the Merchant configured for the Clover Mini
-   **/
 
-//TODO: Rename to connectToBluetoothDevice
   void connectToBluetoothDevice(ReaderInfo readerInfo);
 
   void disconnectDevice();

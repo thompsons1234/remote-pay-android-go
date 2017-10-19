@@ -55,6 +55,25 @@ dependencies {
 apply plugin: 'signing'
 apply plugin: 'io.codearte.nexus-staging'
 
+task androidJavadocs(type: Javadoc, dependsOn: 'assembleRelease') {
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    android.libraryVariants.all { variant ->
+        if (variant.name == 'release') {
+            owner.classpath += variant.javaCompile.classpath
+        }
+    }
+    source = android.sourceSets.main.java.srcDirs
+
+    include '**/CloverGoConnector.java', '**/DefaultCloverGoConnector.java', '**/ICloverGoConnector.java',
+            '**/ICloverConnector.java', '**/ReaderInfo.java', '**/CloverGoDeviceConfiguration.java',
+            '**/SaleRequest.java', '**/com/clover/sdk/v3/payments/Payment.java', '**/Challenge.java',
+            '**/AuthRequest.java', '**/PreAuthRequest.java', '**/TipAdjustAuthRequest.java',
+            '**/CapturePreAuthRequest.java', '**/VoidPaymentRequest.java', '**/RefundPaymentRequest.java',
+            '**/CloseoutRequest.java'
+
+    exclude '**/R.html', '**/R.*.html', '**/index.html'
+}
+
 /*
 uploadArchives {
     repositories {
