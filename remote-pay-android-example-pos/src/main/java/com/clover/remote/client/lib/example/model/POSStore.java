@@ -263,8 +263,4 @@ public class POSStore {
   public void setAutomaticPaymentConfirmation(Boolean automaticPaymentConfirmation) {
     this.automaticPaymentConfirmation = automaticPaymentConfirmation;
   }
-
-  public interface POSStoreHolder {
-    POSStore getStore();
-  }
 }

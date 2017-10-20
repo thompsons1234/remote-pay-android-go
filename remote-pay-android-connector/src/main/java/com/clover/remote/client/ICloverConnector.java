@@ -336,8 +336,4 @@ public interface ICloverConnector extends Serializable {
    */
   void retrievePayment(RetrievePaymentRequest request);
 
-  interface CloverConnectorHolder {
-    ICloverConnector getCloverConnector();
-  }
-
 }

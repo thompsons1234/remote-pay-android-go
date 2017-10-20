@@ -21,20 +21,19 @@
     android:layout_width="fill_parent"
     android:orientation="horizontal"
     android:layout_below="@+id/TransactionSettings"
-    android:layout_above="@+id/linearLayout"
-  >
+    android:layout_above="@+id/linearLayout">
   <LinearLayout
       android:orientation="vertical"
       android:layout_width="225dp"
       android:layout_weight="0"
       android:layout_height="fill_parent">
-
-    <FrameLayout
-      android:id="@+id/current_order_fragment_container"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-    />
-
+    <fragment
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:name="com.clover.remote.client.lib.example.CurrentOrderFragment"
+        tools:layout="@layout/fragment_current_order"
+        android:id="@+id/PendingOrder">
+    </fragment>
   </LinearLayout>
   <GridView
       android:layout_width="wrap_content"
