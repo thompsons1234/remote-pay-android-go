@@ -16,9 +16,9 @@
 
 package com.clover.remote.client.lib.example;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -51,7 +51,6 @@ import com.clover.remote.client.messages.SaleRequest;
 import com.clover.remote.order.DisplayDiscount;
 import com.clover.remote.order.DisplayLineItem;
 import com.clover.remote.order.DisplayOrder;
-import com.firstdata.clovergo.domain.model.Payment;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,48 +59,41 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-
 public class RegisterFragment extends Fragment implements CurrentOrderFragmentListener, AvailableItemListener {
-  private OnFragmentInteractionListener mListener;
+
   private static final String TAG = RegisterFragment.class.getSimpleName();
+  public static final String CURRENT_ORDER_FRAGMENT = "CURRENT_ORDER_FRAGMENT";
 
   POSStore store;
   ICloverConnector cloverConnector;
-  Map<POSItem, AvailableItem> itemToAvailableItem = new HashMap<POSItem, AvailableItem>();
   private String paymentType;
 
   public static RegisterFragment newInstance(POSStore store, ICloverConnector cloverConnector) {
-
-    RegisterFragment fragment = new RegisterFragment();
-    fragment.setStore(store);
-    fragment.setCloverConnector(cloverConnector);
-
-    Bundle args = new Bundle();
-    fragment.setArguments(args);
-    return fragment;
+    return new RegisterFragment();
   }
-
 
   public RegisterFragment() {
     // Required empty public constructor
   }
 
   @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-  }
-
-  @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
                            Bundle savedInstanceState) {
-    // Inflate the layout for this fragment
+
     View view = inflater.inflate(R.layout.fragment_register, container, false);
-
     GridView gv = (GridView)view.findViewById(R.id.AvailableItems);
-
     gv.setId(R.id.AvailableItems);
 
-    final AvailableItemsAdapter availableItemsAdapter = new AvailableItemsAdapter(view.getContext(), R.id.AvailableItems, new ArrayList<POSItem>(store.getAvailableItems()), store);
+    // This might not work either because activity might get recreated and kill store.
+    if (store == null) {
+      setStore(((POSStore.POSStoreHolder)getActivity()).getStore());
+    }
+
+    if (cloverConnector == null) {
+      setCloverConnector(((ICloverConnector.CloverConnectorHolder)getActivity()).getCloverConnector());
+    }
+
+    final AvailableItemsAdapter availableItemsAdapter = new AvailableItemsAdapter(view.getContext(), R.id.AvailableItems, new ArrayList<>(store.getAvailableItems()), store);
     gv.setAdapter(availableItemsAdapter);
 
     gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -111,37 +103,35 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
       }
     });
 
-    CurrentOrderFragment currentOrderFragment = ((CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder));
-    currentOrderFragment.setOrder(store.getCurrentOrder());
-    currentOrderFragment.addListener(this);
+    createOrderFragment();
+
     return view;
   }
 
+  private void createOrderFragment() {
 
-  @Override
-  public void onAttach(Activity activity) {
-    super.onAttach(activity);
-    try {
-      mListener = (OnFragmentInteractionListener) activity;
-    } catch (ClassCastException e) {
+    FragmentManager fragManager = getChildFragmentManager();
+    CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) fragManager.findFragmentByTag(CURRENT_ORDER_FRAGMENT);
 
-      throw new ClassCastException(activity.toString()
-                                   + " must implement OnFragmentInteractionListener: " + activity.getClass().getName());
+    if (currentOrderFragment != null) {
+      currentOrderFragment.addListener(this);
+    } else {
+      currentOrderFragment = CurrentOrderFragment.newInstance();
+      currentOrderFragment.addListener(this);
+      FragmentTransaction fragTrans = fragManager.beginTransaction();
+      fragTrans.replace(R.id.current_order_fragment_container, currentOrderFragment, CURRENT_ORDER_FRAGMENT);
+      fragTrans.commit();
     }
+
   }
 
-  @Override
-  public void onDetach() {
-    super.onDetach();
-    mListener = null;
-  }
 
   public void setPaymentType(String paymentType) {
     this.paymentType = paymentType;
   }
 
   public interface OnFragmentInteractionListener {
-    public void onFragmentInteraction(Uri uri);
+    void onFragmentInteraction(Uri uri);
   }
 
   public POSStore getStore() {
@@ -156,7 +146,6 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     store.addCurrentOrderObserver(observer);
   }
 
-
   public ICloverConnector getCloverConnector() {
     return cloverConnector;
   }
@@ -164,7 +153,6 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
   public void setCloverConnector(ICloverConnector cloverConnector) {
     this.cloverConnector = cloverConnector;
   }
-
 
   @Override
   public void onSaleClicked() {
@@ -203,7 +191,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
   @Override
   public void onNewOrderClicked() {
     store.createOrder(true);
-    CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
+    CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentByTag(CURRENT_ORDER_FRAGMENT);
     currentOrderFragment.setOrder(store.getCurrentOrder());
   }
 

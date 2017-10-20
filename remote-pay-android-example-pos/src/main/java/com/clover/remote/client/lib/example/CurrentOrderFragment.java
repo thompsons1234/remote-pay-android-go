@@ -38,6 +38,7 @@ import com.clover.remote.client.lib.example.model.POSLineItem;
 import com.clover.remote.client.lib.example.model.POSOrder;
 import com.clover.remote.client.lib.example.model.POSPayment;
 import com.clover.remote.client.lib.example.model.POSRefund;
+import com.clover.remote.client.lib.example.model.POSStore;
 import com.clover.remote.client.lib.example.utils.CurrencyUtils;
 
 import java.util.ArrayList;
@@ -49,13 +50,9 @@ public class CurrentOrderFragment extends Fragment implements OrderObserver {
 
   POSOrder order = new POSOrder();
   List<CurrentOrderFragmentListener> listeners = new ArrayList<CurrentOrderFragmentListener>(5);
-  private OnFragmentInteractionListener mListener;
 
   public static CurrentOrderFragment newInstance() {
-    CurrentOrderFragment fragment = new CurrentOrderFragment();
-    Bundle args = new Bundle();
-    fragment.setArguments(args);
-    return fragment;
+    return new CurrentOrderFragment();
   }
 
   public CurrentOrderFragment() {
@@ -69,6 +66,9 @@ public class CurrentOrderFragment extends Fragment implements OrderObserver {
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+    setOrder(((POSStore.POSStoreHolder)getActivity()).getStore().getCurrentOrder());
+
     View v = inflater.inflate(R.layout.fragment_current_order, container, false);
     updateListView();
     Button newOrderButton = ((Button) v.findViewById(R.id.NewOrderButton));
@@ -105,7 +105,7 @@ public class CurrentOrderFragment extends Fragment implements OrderObserver {
             .setMessage(String.format("Do you want to remove %s items from the order?", thisTheseLabel))
             .setPositiveButton("Yes", new DialogInterface.OnClickListener(){
               @Override public void onClick(DialogInterface dialog, int which) {
-                order.remoteAllItems(lineItem);
+                getOrder().remoteAllItems(lineItem);
               }
             })
             .setNegativeButton("No", null)
@@ -113,7 +113,6 @@ public class CurrentOrderFragment extends Fragment implements OrderObserver {
         return true; // consume the event
       }
     });
-
 
     return v;
   }
@@ -142,8 +141,8 @@ public class CurrentOrderFragment extends Fragment implements OrderObserver {
       getView().post(new Runnable(){
         @Override public void run() {
           ListView listView = (ListView) getView().findViewById(R.id.CurrentOrderItems);
-          POSLineItem[] itemArray = new POSLineItem[order.getItems().size()];
-          AvailableItemListViewAdapter items = new AvailableItemListViewAdapter(listView.getContext(), R.layout.listitem_order_item, order.getItems().toArray(itemArray));
+          POSLineItem[] itemArray = new POSLineItem[getOrder().getItems().size()];
+          AvailableItemListViewAdapter items = new AvailableItemListViewAdapter(listView.getContext(), R.layout.listitem_order_item, getOrder().getItems().toArray(itemArray));
           listView.setAdapter(items);
         }
       });
@@ -154,16 +153,9 @@ public class CurrentOrderFragment extends Fragment implements OrderObserver {
   public void onAttach(Activity activity) {
     super.onAttach(activity);
     try {
-      mListener = (OnFragmentInteractionListener) activity;
     } catch (ClassCastException e) {
       throw new ClassCastException(activity.toString() + " must implement OnFragmentInteractionListener");
     }
-  }
-
-  @Override
-  public void onDetach() {
-    super.onDetach();
-    mListener = null;
   }
 
   public void updateCurrentOrder() {
@@ -179,11 +171,11 @@ public class CurrentOrderFragment extends Fragment implements OrderObserver {
     if (getView() != null) {
       getView().post(new Runnable(){
         @Override public void run() {
-          String subtotalFormatted = CurrencyUtils.format(order.getPreTaxSubTotal(), Locale.getDefault());
+          String subtotalFormatted = CurrencyUtils.format(getOrder().getPreTaxSubTotal(), Locale.getDefault());
           ((TextView) getView().findViewById(R.id.SubtotalLabel)).setText(subtotalFormatted);
-          String taxFormatted = CurrencyUtils.format(order.getTaxAmount(), Locale.getDefault());
+          String taxFormatted = CurrencyUtils.format(getOrder().getTaxAmount(), Locale.getDefault());
           ((TextView) getView().findViewById(R.id.TaxLabel)).setText(taxFormatted);
-          String totalFormatted = CurrencyUtils.format(order.getTotal(), Locale.getDefault());
+          String totalFormatted = CurrencyUtils.format(getOrder().getTotal(), Locale.getDefault());
           ((TextView) getView().findViewById(R.id.TotalLabel)).setText(totalFormatted);
         }
       });
@@ -191,15 +183,24 @@ public class CurrentOrderFragment extends Fragment implements OrderObserver {
   }
 
   public interface OnFragmentInteractionListener {
-    public void onFragmentInteraction(Uri uri);
+    void onFragmentInteraction(Uri uri);
   }
 
   public void setOrder(POSOrder order) {
-    this.order.removeObserver(this);
+    if (this.order != null) {
+      this.order.removeObserver(this);
+    }
     this.order = order;
     this.order.addOrderObserver(this);
     updateCurrentOrder();
     updateTotals();
+  }
+
+  private POSOrder getOrder() {
+    if (order == null) {
+      setOrder(((POSStore.POSStoreHolder)getActivity()).getStore().getCurrentOrder());
+    }
+    return order;
   }
 
   @Override public void lineItemAdded(POSOrder posOrder, POSLineItem lineItem) {

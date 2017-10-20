@@ -155,11 +155,14 @@ import java.util.prefs.Preferences;
 
 import io.fabric.sdk.android.Fabric;
 
+import static com.clover.remote.client.lib.example.RegisterFragment.CURRENT_ORDER_FRAGMENT;
+
 public class ExamplePOSActivity extends Activity implements CurrentOrderFragment.OnFragmentInteractionListener,
         AvailableItem.OnFragmentInteractionListener, OrdersFragment.OnFragmentInteractionListener,
         RegisterFragment.OnFragmentInteractionListener, SignatureFragment.OnFragmentInteractionListener,
         CardsFragment.OnFragmentInteractionListener, ManualRefundsFragment.OnFragmentInteractionListener, MiscellaneousFragment.OnFragmentInteractionListener,
-        ProcessingFragment.OnFragmentInteractionListener, PreAuthFragment.OnFragmentInteractionListener, GoSignatureFragment.OnFragmentInteractionListener {
+        ProcessingFragment.OnFragmentInteractionListener, PreAuthFragment.OnFragmentInteractionListener, GoSignatureFragment.OnFragmentInteractionListener,
+        POSStore.POSStoreHolder, ICloverConnector.CloverConnectorHolder {
 
   private static final String TAG = "ExamplePOSActivity";
   public static final String EXAMPLE_POS_SERVER_KEY = "clover_device_endpoint";
@@ -256,6 +259,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   private ReaderInfo.ReaderType currentGoConfig;
 
   @Override
+  public POSStore getStore() {
+    return store;
+  }
+
+  @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     Fabric.with(this, new Crashlytics());
@@ -289,7 +297,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       final Spinner paymentTypeSpinner = (Spinner) findViewById(R.id.selectPaymentSpinner);
       paymentTypeSpinner.setVisibility(View.VISIBLE);
-
       paymentTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
         @Override
@@ -436,14 +443,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     initialize();
 
-    FrameLayout frameLayout = (FrameLayout) findViewById(R.id.contentContainer);
-
     FragmentManager fragmentManager = getFragmentManager();
     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
     RegisterFragment register = RegisterFragment.newInstance(store, getCloverConnector());
-
-    fragmentTransaction.add(R.id.contentContainer, register, "REGISTER");
+    fragmentTransaction.replace(R.id.contentContainer, register, "REGISTER");
     fragmentTransaction.commit();
 
     ratingsDialog = new Dialog(ExamplePOSActivity.this);
@@ -781,7 +785,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                 showMessage("Auth successfully processed.", Toast.LENGTH_SHORT);
 
                 store.createOrder(false);
-                CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
+                CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentByTag(CURRENT_ORDER_FRAGMENT);
                 currentOrderFragment.setOrder(store.getCurrentOrder());
 
                 showRegister(null);
@@ -881,7 +885,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
                   //TODO: if order isn't fully paid, don't create a new order...
                   store.createOrder(false);
-                  CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
+                  CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentByTag(CURRENT_ORDER_FRAGMENT);
                   currentOrderFragment.setOrder(store.getCurrentOrder());
                   showRegister(null);
                 }
@@ -980,7 +984,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                   @Override
                   public void run() {
                     store.createOrder(false);
-                    CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
+                    CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentByTag(CURRENT_ORDER_FRAGMENT);
                     currentOrderFragment.setOrder(store.getCurrentOrder());
                     showRegister(null);
                   }
@@ -1393,7 +1397,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               showMessage("Auth successfully processed.", Toast.LENGTH_SHORT);
 
               store.createOrder(false);
-              CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
+              CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentByTag(CURRENT_ORDER_FRAGMENT);
               currentOrderFragment.setOrder(store.getCurrentOrder());
 
               if (_payment.isSignatureRequired()) {
@@ -1504,7 +1508,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
                   //TODO: if order isn't fully paid, don't create a new order...
                   store.createOrder(false);
-                  CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
+                  CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentByTag(CURRENT_ORDER_FRAGMENT);
                   currentOrderFragment.setOrder(store.getCurrentOrder());
                   showRegister(null);
                 }
@@ -1570,7 +1574,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               store.addPaymentToOrder(payment, store.getCurrentOrder());
               showMessage("Sale successfully processed", Toast.LENGTH_SHORT);
               store.createOrder(false);
-              CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
+              CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentByTag(CURRENT_ORDER_FRAGMENT);
               currentOrderFragment.setOrder(store.getCurrentOrder());
               if (_payment.isSignatureRequired()) {
                 captureSignature(_payment.getId());
@@ -2454,7 +2458,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     mDialog.show();
   }
 
-  private ICloverConnector getCloverConnector() {
+  @Override
+  public ICloverConnector getCloverConnector() {
     if (currentGoConfig == ReaderInfo.ReaderType.RP450) {
       return cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP450);
     } else if (currentGoConfig == ReaderInfo.ReaderType.RP350) {
