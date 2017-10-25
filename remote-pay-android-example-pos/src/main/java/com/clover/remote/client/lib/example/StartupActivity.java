@@ -77,8 +77,8 @@ public class StartupActivity extends Activity {
   private static final int BARCODE_READER_REQUEST_CODE = 1;
   public static final String WS_CONFIG = "WS";
 
-  private static final CloverGoDeviceConfiguration.ENV GO_ENV = CloverGoDeviceConfiguration.ENV.LIVE;
-  private static final String APP_ID = "com.firstdata.hack2020";
+  private static final CloverGoDeviceConfiguration.ENV GO_ENV = CloverGoDeviceConfiguration.ENV.DEMO;
+  private static final String APP_ID = "com.clover.examplepos:1.9"; //com.firstdata.hack2020
 
   private String mGoApiKey, mGoSecret, mGoAccessToken;
   private String mOAuthClientId, mOAuthClientSecret, mOAuthEnv, mOAuthUrl, mOAuthApiKey;
