@@ -360,7 +360,7 @@ public class CloverGoConnectorImpl {
         switch (readerProgressEvent.getEventType()) {
           case CARD_INSERTED:
             deviceEvent = new CloverDeviceEvent();
-            deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.CARD_INSERTED_MSG);
+            deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.CARD_INSERTED);
             deviceEvent.setMessage("Processing Transaction, Leave card inserted");
             mBroadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
             break;
@@ -372,7 +372,7 @@ public class CloverGoConnectorImpl {
             break;
           case EMV_COMPLETE:
             deviceEvent = new CloverDeviceEvent();
-            deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.EMV_COMPLETE_DATA);
+            deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.EMV_COMPLETE);
             deviceEvent.setMessage("Please remove card");
             mBroadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
 
@@ -389,7 +389,7 @@ public class CloverGoConnectorImpl {
             break;
           case CARD_REMOVED:
             deviceEvent = new CloverDeviceEvent();
-            deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.CARD_REMOVED_MSG);
+            deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.CARD_REMOVED);
             deviceEvent.setMessage("Card Removed");
             mBroadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
 

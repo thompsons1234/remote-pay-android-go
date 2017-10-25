@@ -20,7 +20,7 @@ package com.clover.remote.client.messages;
  * General error used for reporting error events
  * to the POS
  */
-@SuppressWarnings(value="unused")
+@SuppressWarnings(value = "unused")
 public class CloverDeviceErrorEvent {
 
   /**
@@ -33,20 +33,20 @@ public class CloverDeviceErrorEvent {
     DUPLICATE_TRANSACTION_REJECTED,
     PARTIAL_AUTH_REJECTED,
 
-        // Clover Go Device ERROR Events
-        READER_ERROR,
-        CARD_ERROR,
-        READER_TIMEOUT,
-        MULTIPLE_CONTACT_LESS_CARD_DETECTED_ERROR,
-        CONTACT_LESS_FAILED_TRY_CONTACT_ERROR,
-        EMV_CARD_SWIPED_ERROR,
-        DIP_FAILED_ALL_ATTEMPTS_ERROR,
-        DIP_FAILED_ERROR,
-        SWIPE_FAILED_ERROR,
-        LOW_BATTERY,
-        READER_NOT_CONNECTED
+    // Clover Go Device ERROR Events
+    READER_ERROR,
+    CARD_ERROR,
+    READER_TIMEOUT,
+    MULTIPLE_CONTACT_LESS_CARD_DETECTED_ERROR,
+    CONTACT_LESS_FAILED_TRY_CONTACT_ERROR,
+    EMV_CARD_SWIPED_ERROR,
+    DIP_FAILED_ALL_ATTEMPTS_ERROR,
+    DIP_FAILED_ERROR,
+    SWIPE_FAILED_ERROR,
+    LOW_BATTERY,
+    READER_NOT_CONNECTED
 
-    }
+  }
 
   private final CloverDeviceErrorType errorType;
   private final Integer code;
@@ -57,8 +57,8 @@ public class CloverDeviceErrorEvent {
    * Constructor
    *
    * @param errorType error type
-   * @param devCode error code
-   * @param msg description of the error
+   * @param devCode   error code
+   * @param msg       description of the error
    */
   public CloverDeviceErrorEvent(CloverDeviceErrorType errorType, Integer devCode, Throwable cause, String msg) {
     this.errorType = errorType;

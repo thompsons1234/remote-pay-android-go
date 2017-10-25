@@ -1225,21 +1225,21 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         switch (deviceEvent.getEventState()) {
 
           case CARD_SWIPED:
-            showProgressDialog(deviceEvent.getEventState().name(), deviceEvent.getMessage(), false);
+            showProgressDialog("Card Swiped", deviceEvent.getMessage(), false);
             break;
           case CARD_TAPPED:
-            showProgressDialog(deviceEvent.getEventState().name(), deviceEvent.getMessage(), false);
+            showProgressDialog("Contactless Payment Started", deviceEvent.getMessage(), false);
+            break;
+          case EMV_COMPLETE:
+            showProgressDialog("EMV Transaction Completed", deviceEvent.getMessage(), false);
+            break;
+          case CARD_INSERTED:
+            showProgressDialog("Card Inserted", deviceEvent.getMessage(), false);
             break;
           case CANCEL_CARD_READ:
             showMessage(deviceEvent.getMessage(), Toast.LENGTH_LONG);
             break;
-          case EMV_COMPLETE_DATA:
-            showProgressDialog(deviceEvent.getEventState().name(), deviceEvent.getMessage(), false);
-            break;
-          case CARD_INSERTED_MSG:
-            showProgressDialog(deviceEvent.getEventState().name(), deviceEvent.getMessage(), false);
-            break;
-          case CARD_REMOVED_MSG:
+          case CARD_REMOVED:
             showMessage(deviceEvent.getMessage(), Toast.LENGTH_LONG);
             break;
           case PLEASE_SEE_PHONE_MSG:
@@ -1366,7 +1366,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           case LOW_BATTERY:
           case PARTIAL_AUTH_REJECTED:
           case DUPLICATE_TRANSACTION_REJECTED:
-            showAlertDialog(deviceErrorEvent.getErrorType().name(), deviceErrorEvent.getMessage());
+            showAlertDialog(deviceErrorEvent.getErrorType().name().replace('_',' '), deviceErrorEvent.getMessage());
             break;
           case MULTIPLE_CONTACT_LESS_CARD_DETECTED_ERROR:
           case CONTACT_LESS_FAILED_TRY_CONTACT_ERROR:
@@ -1374,7 +1374,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           case DIP_FAILED_ALL_ATTEMPTS_ERROR:
           case DIP_FAILED_ERROR:
           case SWIPE_FAILED_ERROR:
-            showProgressDialog(deviceErrorEvent.getErrorType().name(), deviceErrorEvent.getMessage(), true);
+            showProgressDialog(deviceErrorEvent.getErrorType().name().replace('_',' '), deviceErrorEvent.getMessage(), true);
             break;
         }
       }
