@@ -19,7 +19,6 @@ package com.clover.remote.client.lib.example;
 import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
-import com.clover.remote.client.CloverConnector;
 import com.clover.remote.client.CloverConnectorFactory;
 import com.clover.remote.client.CloverDeviceConfiguration;
 import com.clover.remote.client.ICloverConnector;
