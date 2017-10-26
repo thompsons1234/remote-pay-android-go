@@ -302,7 +302,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       return;
     }
 
-    cloverConnector = CloverConnectorFactory.createCloverConnector(config);
+    cloverConnector = CloverConnectorFactory.createICloverConnector(config);
 
     initialize();
 

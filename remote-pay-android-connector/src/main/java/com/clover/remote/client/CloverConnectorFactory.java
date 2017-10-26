@@ -5,7 +5,7 @@ package com.clover.remote.client;
  */
 public class CloverConnectorFactory {
 
-  public static CloverConnector createCloverConnector(CloverDeviceConfiguration config) {
+  public static ICloverConnector createICloverConnector(CloverDeviceConfiguration config) {
 
     return new CloverConnector(config);
   }
