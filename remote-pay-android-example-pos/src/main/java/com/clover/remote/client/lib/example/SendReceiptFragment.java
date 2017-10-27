@@ -1,7 +1,6 @@
 package com.clover.remote.client.lib.example;
 
 import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,8 +9,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.clovergo.ICloverGoConnector;
+import com.clover.remote.client.clovergo.ICloverGoConnectorListener;
 import com.clover.remote.client.lib.example.utils.Validator;
 
 /**
@@ -20,84 +19,75 @@ import com.clover.remote.client.lib.example.utils.Validator;
 
 public class SendReceiptFragment extends Fragment {
 
+  private ICloverGoConnector cGoConnector;
+  private String orderID;
 
-    private ICloverConnector cloverConnector;
-    private String orderID;
+  private ICloverGoConnectorListener.SendReceipt sendReceipt;
 
-    public static SendReceiptFragment newInstance(String orderID, ICloverConnector cloverConnector) {
-        SendReceiptFragment fragment = new SendReceiptFragment();
-        fragment.setCloverConnector(cloverConnector);
-        fragment.setOrderID(orderID);
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
+  public static SendReceiptFragment newInstance(String orderID, ICloverGoConnector cGoConnector) {
+    SendReceiptFragment fragment = new SendReceiptFragment();
+    fragment.cGoConnector = cGoConnector;
+    fragment.orderID = orderID;
+    return fragment;
+  }
 
-    public SendReceiptFragment() {
-        // Required empty public constructor
-    }
+  public static SendReceiptFragment newInstance(String orderID, ICloverGoConnectorListener.SendReceipt sendReceipt) {
+    SendReceiptFragment fragment = new SendReceiptFragment();
+    fragment.sendReceipt = sendReceipt;
+    fragment.orderID = orderID;
+    return fragment;
+  }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+  public SendReceiptFragment() {
+    // Required empty public constructor
+  }
 
-    }
+  @Override
+  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    final View view = inflater.inflate(R.layout.fragment_send_receipt, container, false);
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        final View view = inflater.inflate(R.layout.fragment_send_receipt, container, false);
+    if (view != null) {
+      final EditText mEmailEditText = (EditText) view.findViewById(R.id.sendReceiptEmailEdit);
+      final EditText mPhoneEditText = (EditText) view.findViewById(R.id.sendReceiptPhoneEdit);
+      Button mSendReceiptBtn = (Button) view.findViewById(R.id.sendReceiptBtn);
+      Button mNoReceiptBtn = (Button) view.findViewById(R.id.noReceiptBtn);
 
-        if (view != null) {
+      mSendReceiptBtn.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
 
-            final EditText mEmailEditText = (EditText) view.findViewById(R.id.sendReceiptEmailEdit);
-            final EditText mPhoneEditText = (EditText) view.findViewById(R.id.sendReceiptPhoneEdit);
-            Button mSendReceiptBtn = (Button) view.findViewById(R.id.sendReceiptBtn);
-            Button mNoReceiptBtn = (Button) view.findViewById(R.id.noReceiptBtn);
+          String phoneNumber = mPhoneEditText.getText().toString().replaceAll("\\D", "");
+          String email = mEmailEditText.getText().toString();
 
-            mSendReceiptBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+          if (Validator.validateEmailInput(email) || Validator.validatePhoneNumberInput(phoneNumber)) {
+            if (sendReceipt != null) {
+              sendReceipt.sendRequestedReceipt(email, phoneNumber, orderID);
+            } else {
+              cGoConnector.sendReceipt(email, phoneNumber, orderID);
+            }
 
-                    String phoneNumber = mPhoneEditText.getText().toString().replaceAll("\\D", "");
-                    String email = mEmailEditText.getText().toString();
+            ((ExamplePOSActivity) getActivity()).hideKeyboard();
+            getActivity().getFragmentManager().beginTransaction().hide(SendReceiptFragment.this).commit();
 
-                    if (Validator.validateEmailInput(email) || Validator.validatePhoneNumberInput(phoneNumber)) {
-                        ((ICloverGoConnector)cloverConnector).sendReceipt(email,phoneNumber,orderID);
-
-                        FragmentTransaction fragmentTransaction = getActivity().getFragmentManager().beginTransaction();
-                        fragmentTransaction.hide(SendReceiptFragment.this);
-                        fragmentTransaction.commit();
-
-                    } else {
-                        Toast.makeText(getActivity(), "Please enter a valid phone number or email", Toast.LENGTH_SHORT).show();
-                    }
-
-                }
-            });
-
-            mNoReceiptBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    FragmentTransaction fragmentTransaction = getActivity().getFragmentManager().beginTransaction();
-                    fragmentTransaction.hide(SendReceiptFragment.this);
-                    fragmentTransaction.commit();
-                }
-            });
+          } else {
+            Toast.makeText(getActivity(), "Please enter a valid phone number or email", Toast.LENGTH_SHORT).show();
+          }
 
         }
+      });
 
-        return view;
+      mNoReceiptBtn.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          if (sendReceipt != null)
+            sendReceipt.noReceipt();
+
+          ((ExamplePOSActivity) getActivity()).hideKeyboard();
+          getActivity().getFragmentManager().beginTransaction().remove(SendReceiptFragment.this).commit();
+        }
+      });
     }
 
-
-    public void setCloverConnector(ICloverConnector cloverConnector) {
-        this.cloverConnector = cloverConnector;
-    }
-
-    public void setOrderID(String orderID) {
-        this.orderID = orderID;
-    }
-
-
+    return view;
+  }
 }

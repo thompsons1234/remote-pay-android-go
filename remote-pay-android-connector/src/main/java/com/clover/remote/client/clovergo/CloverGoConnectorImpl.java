@@ -259,9 +259,11 @@ public class CloverGoConnectorImpl {
           }
           mWriteToCard.getObservable(mLastTransactionReader, data).subscribe();
 
+        } else if (mPayment.getCard().isSignatureRequired()) {
+          notifySignatureRequired();
         } else {
           Log.d(TAG, "mPaymentObserver next non-EMV_CONTACT");
-          notifyPaymentResponse();
+          notifySendReceipt();
         }
       }
 
@@ -278,9 +280,9 @@ public class CloverGoConnectorImpl {
           mBroadcaster.notifyOnConfirmPaymentRequest(confirmPaymentRequest);
           return;
         } else if ((CHARGE_DECLINED.equals(mTransactionError.getCode()) ||
-          CHARGE_DECLINED_REFERRAL.equals(mTransactionError.getCode())) &&
-          mReaderProgressEvent != null &&
-          mReaderProgressEvent.getEventType() == ReaderProgressEvent.EventType.EMV_DATA) {
+                CHARGE_DECLINED_REFERRAL.equals(mTransactionError.getCode())) &&
+                mReaderProgressEvent != null &&
+                mReaderProgressEvent.getEventType() == ReaderProgressEvent.EventType.EMV_DATA) {
 
           mGetConnectedReaders.getBlockingObservable().subscribe(new Consumer<ReaderInfo>() {
             @Override
@@ -395,7 +397,10 @@ public class CloverGoConnectorImpl {
 
             if (mPayment != null) {
               Log.d(TAG, "mProgressObserver next " + readerProgressEvent.getEventType() + " payment not null");
-              notifyPaymentResponse();
+              if (mPayment.getCard().isSignatureRequired())
+                notifySignatureRequired();
+              else
+                notifyPaymentResponse();
             } else if (mTransactionError != null) {
               Log.d(TAG, "mProgressObserver next " + readerProgressEvent.getEventType() + " transaction error not null");
               notifyErrorResponse();
@@ -439,7 +444,7 @@ public class CloverGoConnectorImpl {
             Iterator<String> it = readerProgressEvent.getData().keySet().iterator();
             String aid = null;
             if (it.hasNext()) {
-                aid = readerProgressEvent.getData().get(it.next());
+              aid = readerProgressEvent.getData().get(it.next());
             }
 
             Log.d(TAG, "mProgressObserver next " + readerProgressEvent.getEventType() + " aid=" + aid);
@@ -589,8 +594,8 @@ public class CloverGoConnectorImpl {
     }
 
     return new MerchantInfo(mEmployeeMerchant.getMerchant().getId(), mEmployeeMerchant.getMerchant().getName(),
-                supportsSales, supportAuths, supportsPreAuths, supportsVaultCards, supportsManualRefunds, supportsVoids,
-                supportsTipAdjust, readerInfo.getBluetoothName(), readerInfo.getSerialNo(), readerInfo.getReaderType().name());
+            supportsSales, supportAuths, supportsPreAuths, supportsVaultCards, supportsManualRefunds, supportsVoids,
+            supportsTipAdjust, readerInfo.getBluetoothName(), readerInfo.getSerialNo(), readerInfo.getReaderType().name());
 
   }
 
@@ -1005,18 +1010,39 @@ public class CloverGoConnectorImpl {
     }
   }
 
-  public void captureSignature(String paymentId, int[][] xy) {
-    if (paymentId == null) {
-      throw new NullPointerException("Payment ID cannot be null");
-    } else if (xy == null) {
-      throw new NullPointerException("Signature cannot be null");
-    } else {
-      mCaptureSignature.getObservable(paymentId, xy).retry(3).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).onErrorComplete().subscribe();
-    }
-  }
-
   public void sendReceipt(String emailAddress, String phoneNo, String orderId) {
     mSendReceipt.getObservable(emailAddress != null && !emailAddress.isEmpty() ? emailAddress : null, phoneNo != null && !phoneNo.isEmpty() ? phoneNo : null, orderId).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).onErrorComplete().subscribe();
+  }
+
+  private void notifySignatureRequired() {
+    mBroadcaster.notifyOnSignatureRequired(mPayment, new ICloverGoConnectorListener.SignatureCapture() {
+      @Override
+      public void captureSignature(String paymentId, int[][] xy) {
+        if (paymentId == null) {
+          throw new NullPointerException("Payment ID cannot be null");
+        } else if (xy == null) {
+          throw new NullPointerException("Signature cannot be null");
+        } else {
+          mCaptureSignature.getObservable(paymentId, xy).retry(3).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).onErrorComplete().subscribe();
+          notifySendReceipt();
+        }
+      }
+    });
+  }
+
+  private void notifySendReceipt() {
+    mBroadcaster.notifyOnSendReceipt(mOrder, new ICloverGoConnectorListener.SendReceipt() {
+      @Override
+      public void sendRequestedReceipt(String email, String phone, String orderId) {
+        sendReceipt(email, phone, orderId);
+        notifyPaymentResponse();
+      }
+
+      @Override
+      public void noReceipt() {
+        notifyPaymentResponse();
+      }
+    });
   }
 
   private void notifyPaymentResponse() {

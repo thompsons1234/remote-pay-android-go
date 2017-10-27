@@ -70,6 +70,7 @@ import com.clover.remote.client.clovergo.CloverGoDeviceConfiguration;
 import com.clover.remote.client.clovergo.ICloverGoConnector;
 import com.clover.remote.client.clovergo.ICloverGoConnectorListener;
 import com.clover.remote.client.clovergo.messages.GoPayment;
+import com.clover.remote.client.clovergo.util.DeviceUtil;
 import com.clover.remote.client.lib.example.messages.ConversationQuestionMessage;
 import com.clover.remote.client.lib.example.messages.ConversationResponseMessage;
 import com.clover.remote.client.lib.example.messages.CustomerInfo;
@@ -139,6 +140,7 @@ import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.Payment;
 import com.clover.sdk.v3.printer.Printer;
 import com.crashlytics.android.Crashlytics;
+import com.firstdata.clovergo.domain.model.Order;
 import com.firstdata.clovergo.domain.model.ReaderInfo;
 import com.google.gson.Gson;
 
@@ -159,7 +161,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         AvailableItem.OnFragmentInteractionListener, OrdersFragment.OnFragmentInteractionListener,
         RegisterFragment.OnFragmentInteractionListener, SignatureFragment.OnFragmentInteractionListener,
         CardsFragment.OnFragmentInteractionListener, ManualRefundsFragment.OnFragmentInteractionListener, MiscellaneousFragment.OnFragmentInteractionListener,
-        ProcessingFragment.OnFragmentInteractionListener, PreAuthFragment.OnFragmentInteractionListener, GoSignatureFragment.OnFragmentInteractionListener {
+        ProcessingFragment.OnFragmentInteractionListener, PreAuthFragment.OnFragmentInteractionListener {
 
   private static final String TAG = "ExamplePOSActivity";
   public static final String EXAMPLE_POS_SERVER_KEY = "clover_device_endpoint";
@@ -1188,11 +1190,26 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     };
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     ccGoListener = new ICloverGoConnectorListener() {
       @Override
-      public void onSignatureNeeded() {
+      public void onSendReceipt(Order order, SendReceipt sendReceipt) {
+        hideKeyboard();
+        dismissDialog();
 
+        SendReceiptFragment fragment = SendReceiptFragment.newInstance(order.getId(), sendReceipt);
+        getFragmentManager().beginTransaction().add(R.id.contentContainer, fragment).commit();
+      }
+
+      @Override
+      public void onSignatureRequired(com.firstdata.clovergo.domain.model.Payment payment, SignatureCapture signatureCapture) {
+        hideKeyboard();
+        dismissDialog();
+
+        GoSignatureFragment fragment = GoSignatureFragment.newInstance(payment.getPaymentId(), signatureCapture);
+        getFragmentManager().beginTransaction().add(R.id.contentContainer, fragment).commit();
       }
 
       public void onDeviceDisconnected() {
@@ -1381,6 +1398,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       @Override
       public void onAuthResponse(final AuthResponse response) {
+        hideKeyboard();
         dismissDialog();
         if (response.isSuccess()) {
           runOnUiThread(new Runnable() {
@@ -1395,10 +1413,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               store.createOrder(false);
               CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
               currentOrderFragment.setOrder(store.getCurrentOrder());
-
-              if (_payment.isSignatureRequired()) {
-                captureSignature(_payment.getId());
-              }
 
               showRegister(null);
               SystemClock.sleep(3000);
@@ -1425,6 +1439,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       @Override
       public void onPreAuthResponse(final PreAuthResponse response) {
+        hideKeyboard();
         dismissDialog();
 
         if (response.isSuccess()) {
@@ -1435,10 +1450,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           store.addPreAuth(payment);
           showMessage("PreAuth successfully processed.", Toast.LENGTH_SHORT);
           showPreAuths(null);
-
-          if (_payment.isSignatureRequired()) {
-            captureSignature(_payment.getId());
-          }
 
         } else {
           showAlertDialog(response.getReason(), response.getMessage());
@@ -1559,6 +1570,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       @Override
       public void onSaleResponse(final SaleResponse response) {
+        hideKeyboard();
         dismissDialog();
         if (response != null) {
           if (response.isSuccess()) { // Handle cancel response
@@ -1572,9 +1584,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               store.createOrder(false);
               CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
               currentOrderFragment.setOrder(store.getCurrentOrder());
-              if (_payment.isSignatureRequired()) {
-                captureSignature(_payment.getId());
-              }
               showRegister(null);
               showStatus("");
             } else { // Handle null payment
@@ -1734,18 +1743,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     }
 
     updateComponentsWithNewCloverConnector();
-  }
-
-
-  private void captureSignature(String paymentID) {
-
-    FragmentManager fragmentManager = getFragmentManager();
-    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-    GoSignatureFragment fragment = GoSignatureFragment.newInstance(paymentID, getCloverConnector());
-    fragmentTransaction.add(R.id.contentContainer, fragment);
-
-    fragmentTransaction.commit();
   }
 
   private void showStatus(String msg) {
@@ -2493,6 +2490,10 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     if (progressDialog != null && progressDialog.isShowing()) {
       progressDialog.dismiss();
     }
+  }
+
+  public void hideKeyboard() {
+    DeviceUtil.hideKeyboard(this.getCurrentFocus());
   }
 
   private boolean isBluetoothEnabled() {

@@ -267,11 +267,6 @@ public class DefaultCloverGoConnector implements ICloverGoConnector {
   }
 
   @Override
-  public void captureSignature(String paymentId, int[][] xy) {
-
-  }
-
-  @Override
   public void sendReceipt(String email, String phoneNo, String orderId) {
 
   }

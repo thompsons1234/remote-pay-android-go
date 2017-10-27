@@ -20,8 +20,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -33,6 +31,7 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
+
 import com.clover.remote.PendingPaymentEntry;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.clovergo.ICloverGoConnector;
@@ -92,9 +91,10 @@ public class OrdersFragment extends Fragment implements OrderObserver {
     super.onCreate(savedInstanceState);
   }
 
-  @Override public void onDestroy() {
+  @Override
+  public void onDestroy() {
     super.onDestroy();
-    if(selectedOrder != null) {
+    if (selectedOrder != null) {
       selectedOrder.removeObserver(this);
     }
   }
@@ -119,7 +119,7 @@ public class OrdersFragment extends Fragment implements OrderObserver {
     ordersListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override
       public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if(selectedOrder != null) {
+        if (selectedOrder != null) {
           selectedOrder.removeObserver(OrdersFragment.this);
         }
         POSOrder posOrder = (POSOrder) ordersListView.getItemAtPosition(position);
@@ -138,10 +138,10 @@ public class OrdersFragment extends Fragment implements OrderObserver {
         String[] options = null;
 
         if (posExchange instanceof POSPayment) {
-          if (((POSPayment)posExchange).getPaymentStatus() == POSPayment.Status.AUTHORIZED) {
+          if (((POSPayment) posExchange).getPaymentStatus() == POSPayment.Status.AUTHORIZED) {
             //TODO: Remove Receipt Option for CLover GO
             options = new String[]{"Void Payment", "Refund Payment", "Tip Adjust Payment", "Receipt Options"};
-          } else if (((POSPayment)posExchange).getPaymentStatus() == POSPayment.Status.PAID) {
+          } else if (((POSPayment) posExchange).getPaymentStatus() == POSPayment.Status.PAID) {
             //TODO: Remove Receipt Option for CLover GO
             options = new String[]{"Void Payment", "Refund Payment", "Receipt Options"};
           } else {
@@ -203,16 +203,11 @@ public class OrdersFragment extends Fragment implements OrderObserver {
                             break;
                           }
                           case "Receipt Options": {
+                            if (cloverConnector instanceof ICloverGoConnector) {
+                              SendReceiptFragment fragment = SendReceiptFragment.newInstance(posExchange.getOrderId(), (ICloverGoConnector) cloverConnector);
+                              getFragmentManager().beginTransaction().add(R.id.contentContainer, fragment).commit();
 
-                            if (cloverConnector instanceof ICloverGoConnector){
-                              FragmentManager fragmentManager = getFragmentManager();
-                              FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-                              SendReceiptFragment fragment = SendReceiptFragment.newInstance(posExchange.getOrderId(),cloverConnector);
-                              fragmentTransaction.add(R.id.contentContainer, fragment);
-
-                              fragmentTransaction.commit();
-                            }else {
+                            } else {
                               try {
                                 // Operation not Supported in CloverGO
                                 cloverConnector.displayPaymentReceiptOptions(posExchange.orderID, posExchange.getPaymentID());
@@ -246,8 +241,9 @@ public class OrdersFragment extends Fragment implements OrderObserver {
   }
 
   private void updateItems(final POSOrder posOrder) {
-    getView().post(new Runnable(){
-      @Override public void run() {
+    getView().post(new Runnable() {
+      @Override
+      public void run() {
         final ListView itemsListView = (ListView) view.findViewById(R.id.ItemsGridView);
         ItemsListViewAdapter itemsListViewAdapter = new ItemsListViewAdapter(view.getContext(), R.id.ItemsGridView, posOrder.getItems());
         itemsListView.setAdapter(itemsListViewAdapter);
@@ -257,7 +253,8 @@ public class OrdersFragment extends Fragment implements OrderObserver {
 
   private void updatePayments(final POSOrder posOrder) {
     getView().post(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         final ListView paymentsListView = (ListView) view.findViewById(R.id.PaymentsGridView);
         PaymentsListViewAdapter paymentsListViewAdapter = new PaymentsListViewAdapter(view.getContext(), R.id.PaymentsGridView, posOrder.getPayments());
         paymentsListView.setAdapter(paymentsListViewAdapter);
@@ -279,7 +276,7 @@ public class OrdersFragment extends Fragment implements OrderObserver {
       mListener = (OnFragmentInteractionListener) activity;
     } catch (ClassCastException e) {
       throw new ClassCastException(activity.toString()
-                                   + " must implement OnFragmentInteractionListener");
+              + " must implement OnFragmentInteractionListener");
     }
   }
 
@@ -298,58 +295,71 @@ public class OrdersFragment extends Fragment implements OrderObserver {
         updateOrderList();
       }
 
-      @Override public void cardAdded(POSCard card) {
+      @Override
+      public void cardAdded(POSCard card) {
 
       }
 
-      @Override public void refundAdded(POSNakedRefund refund) {
+      @Override
+      public void refundAdded(POSNakedRefund refund) {
 
       }
 
-      @Override public void preAuthAdded(POSPayment payment) {
+      @Override
+      public void preAuthAdded(POSPayment payment) {
 
       }
 
-      @Override public void preAuthRemoved(POSPayment payment) {
+      @Override
+      public void preAuthRemoved(POSPayment payment) {
 
       }
 
-      @Override public void pendingPaymentsRetrieved(List<PendingPaymentEntry> pendingPayments) {
+      @Override
+      public void pendingPaymentsRetrieved(List<PendingPaymentEntry> pendingPayments) {
 
       }
 
     });
 
     store.addCurrentOrderObserver(new OrderObserver() {
-      @Override public void lineItemAdded(POSOrder posOrder, POSLineItem lineItem) {
+      @Override
+      public void lineItemAdded(POSOrder posOrder, POSLineItem lineItem) {
         updateOrderList();
       }
 
-      @Override public void lineItemRemoved(POSOrder posOrder, POSLineItem lineItem) {
+      @Override
+      public void lineItemRemoved(POSOrder posOrder, POSLineItem lineItem) {
         updateOrderList();
       }
 
-      @Override public void lineItemChanged(POSOrder posOrder, POSLineItem lineItem) {
+      @Override
+      public void lineItemChanged(POSOrder posOrder, POSLineItem lineItem) {
         updateOrderList();
       }
 
-      @Override public void paymentAdded(POSOrder posOrder, POSPayment payment) {
+      @Override
+      public void paymentAdded(POSOrder posOrder, POSPayment payment) {
         updateOrderList();
       }
 
-      @Override public void refundAdded(POSOrder posOrder, POSRefund refund) {
+      @Override
+      public void refundAdded(POSOrder posOrder, POSRefund refund) {
         updateOrderList();
       }
 
-      @Override public void paymentChanged(POSOrder posOrder, POSExchange pay) {
+      @Override
+      public void paymentChanged(POSOrder posOrder, POSExchange pay) {
         updateOrderList();
       }
 
-      @Override public void discountAdded(POSOrder posOrder, POSDiscount discount) {
+      @Override
+      public void discountAdded(POSOrder posOrder, POSDiscount discount) {
         updateOrderList();
       }
 
-      @Override public void discountChanged(POSOrder posOrder, POSDiscount discount) {
+      @Override
+      public void discountChanged(POSOrder posOrder, POSDiscount discount) {
         updateOrderList();
       }
     });
@@ -366,48 +376,58 @@ public class OrdersFragment extends Fragment implements OrderObserver {
     }
 
     Collections.sort(orders, new Comparator<POSOrder>() {
-      @Override public int compare(POSOrder lhs, POSOrder rhs) {
+      @Override
+      public int compare(POSOrder lhs, POSOrder rhs) {
         return Integer.parseInt(rhs.id) - Integer.parseInt(lhs.id);
       }
     });
 
     getActivity().runOnUiThread(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         OrdersListViewAdapter listViewAdapter = new OrdersListViewAdapter(view.getContext(), R.id.ItemsGridView, orders);
         ordersListView.setAdapter(listViewAdapter);
       }
     });
   }
 
-  @Override public void lineItemAdded(POSOrder posOrder, POSLineItem lineItem) {
+  @Override
+  public void lineItemAdded(POSOrder posOrder, POSLineItem lineItem) {
 
   }
 
-  @Override public void lineItemRemoved(POSOrder posOrder, POSLineItem lineItem) {
+  @Override
+  public void lineItemRemoved(POSOrder posOrder, POSLineItem lineItem) {
 
   }
 
-  @Override public void lineItemChanged(POSOrder posOrder, POSLineItem lineItem) {
+  @Override
+  public void lineItemChanged(POSOrder posOrder, POSLineItem lineItem) {
 
   }
 
-  @Override public void paymentAdded(POSOrder posOrder, POSPayment payment) {
+  @Override
+  public void paymentAdded(POSOrder posOrder, POSPayment payment) {
 
   }
 
-  @Override public void refundAdded(POSOrder posOrder, POSRefund refund) {
+  @Override
+  public void refundAdded(POSOrder posOrder, POSRefund refund) {
     updateDisplaysForOrder(posOrder);
   }
 
-  @Override public void paymentChanged(POSOrder posOrder, POSExchange pay) {
+  @Override
+  public void paymentChanged(POSOrder posOrder, POSExchange pay) {
     updatePayments(posOrder);
   }
 
-  @Override public void discountAdded(POSOrder posOrder, POSDiscount discount) {
+  @Override
+  public void discountAdded(POSOrder posOrder, POSDiscount discount) {
 
   }
 
-  @Override public void discountChanged(POSOrder posOrder, POSDiscount discount) {
+  @Override
+  public void discountChanged(POSOrder posOrder, POSDiscount discount) {
 
   }
 

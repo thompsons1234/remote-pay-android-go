@@ -1,9 +1,9 @@
 package com.clover.remote.client.clovergo;
 
 import com.clover.remote.client.ICloverConnectorListener;
-import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CardApplicationIdentifier;
 import com.clover.remote.client.messages.CloverDeviceEvent;
+import com.firstdata.clovergo.domain.model.Order;
 import com.firstdata.clovergo.domain.model.Payment;
 import com.firstdata.clovergo.domain.model.ReaderInfo;
 
@@ -16,40 +16,51 @@ import java.util.List;
 public interface ICloverGoConnectorListener extends ICloverConnectorListener {
 
 
-    /**
-     * Called when the Clover Go Bluetooth device is Discovered to connect
-     */
-    void onDeviceDiscovered(ReaderInfo readerInfo);
+  /**
+   * Called when the Clover Go Bluetooth device is Discovered to connect
+   */
+  void onDeviceDiscovered(ReaderInfo readerInfo);
 
-    /**
-     * Called when the Clover device is disconnected
-     */
-    void onDeviceDisconnected(ReaderInfo readerInfo);
+  /**
+   * Called when the Clover device is disconnected
+   */
+  void onDeviceDisconnected(ReaderInfo readerInfo);
 
-    /**
-     * Chip cards have application identifiers which negotiates with the card reader on what application identifier to use to send card data back to reader to process transaction.
-     * <p>
-     * In case card has multiple application identifiers and reader is not able to negotiate explicit consent from customer is needed to proceed.
-     * Please return one of the application identifiers from the list to proceed or null to cancel transaction
-     *
-     * @param applicationIdentifierList - application identifier from the card.
-     * @return selected application identifier
-     */
-    void onAidMatch(List<CardApplicationIdentifier> applicationIdentifierList, AidSelection aidSelection);
+  /**
+   * Chip cards have application identifiers which negotiates with the card reader on what application identifier to use to send card data back to reader to process transaction.
+   * <p>
+   * In case card has multiple application identifiers and reader is not able to negotiate explicit consent from customer is needed to proceed.
+   * Please return one of the application identifiers from the list to proceed or null to cancel transaction
+   *
+   * @param applicationIdentifierList - application identifier from the card.
+   * @return selected application identifier
+   */
+  void onAidMatch(List<CardApplicationIdentifier> applicationIdentifierList, AidSelection aidSelection);
 
-    /**
-     * on AidSelection return selected Application Identifier
-     */
-    interface AidSelection{
-        void selectApplicationIdentifier(CardApplicationIdentifier selectedCardApplicationIdentifier);
-    }
+  /**
+   * on AidSelection return selected Application Identifier
+   */
+  interface AidSelection {
+    void selectApplicationIdentifier(CardApplicationIdentifier selectedCardApplicationIdentifier);
+  }
 
-    void onCloverGoDeviceActivity(CloverDeviceEvent deviceEvent );
+  void onCloverGoDeviceActivity(CloverDeviceEvent deviceEvent);
 
-    void onGetMerchantInfo();
+  void onGetMerchantInfo();
 
-    void onGetMerchantInfoResponse(boolean isSuccess);
+  void onGetMerchantInfoResponse(boolean isSuccess);
 
-    void onSignatureNeeded();
+  void onSignatureRequired(Payment payment, SignatureCapture signatureCapture);
 
+  interface SignatureCapture {
+    void captureSignature(String paymentId, int[][] xy);
+  }
+
+  void onSendReceipt(Order order, SendReceipt sendReceipt);
+
+  interface SendReceipt {
+    void sendRequestedReceipt(String email, String phone, String orderId);
+
+    void noReceipt();
+  }
 }

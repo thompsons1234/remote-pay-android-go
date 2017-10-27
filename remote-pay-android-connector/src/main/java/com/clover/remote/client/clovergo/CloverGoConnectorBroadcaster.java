@@ -27,6 +27,8 @@ import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.message.TipAddedMessage;
+import com.firstdata.clovergo.domain.model.Order;
+import com.firstdata.clovergo.domain.model.Payment;
 import com.firstdata.clovergo.domain.model.ReaderInfo;
 
 import java.util.List;
@@ -37,12 +39,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 
 public class CloverGoConnectorBroadcaster extends CopyOnWriteArrayList<ICloverGoConnectorListener> {
-
-    public void notifyOnSignatureRequired() {
-        for (ICloverGoConnectorListener listener : this) {
-            listener.onSignatureNeeded();
-        }
-    }
 
     public void notifyOnTipAdded(long tip) {
         for (ICloverGoConnectorListener listener : this) {
@@ -120,6 +116,18 @@ public class CloverGoConnectorBroadcaster extends CopyOnWriteArrayList<ICloverGo
     public void notifyOnAidMatch(List<CardApplicationIdentifier> cardApplicationIdentifiers, ICloverGoConnectorListener.AidSelection aidSelection) {
         for (ICloverGoConnectorListener listener : this) {
             listener.onAidMatch(cardApplicationIdentifiers, aidSelection);
+        }
+    }
+
+    public void notifyOnSignatureRequired(Payment payment, ICloverGoConnectorListener.SignatureCapture signatureCapture) {
+        for (ICloverGoConnectorListener listener : this) {
+            listener.onSignatureRequired(payment, signatureCapture);
+        }
+    }
+
+    public void notifyOnSendReceipt(Order order, ICloverGoConnectorListener.SendReceipt sendReceipt) {
+        for (ICloverGoConnectorListener listener : this) {
+            listener.onSendReceipt(order, sendReceipt);
         }
     }
 

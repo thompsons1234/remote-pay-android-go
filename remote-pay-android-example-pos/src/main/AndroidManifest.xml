@@ -15,20 +15,20 @@
   ~ limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.clover.remote.client.lib.example"
-    android:versionName="1.9"
-    android:versionCode="9">
+          package="com.clover.remote.client.lib.example"
+          android:versionCode="10"
+          android:versionName="1.10">
 
     <uses-sdk>
         17
     </uses-sdk>
 
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
 
-    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
@@ -41,35 +41,39 @@
         android:theme="@style/AppBaseTheme">
         <activity
             android:name=".StartupActivity"
-            android:launchMode="singleTop"
             android:label="@string/title_activity_example_pos"
-            android:windowSoftInputMode="stateHidden"
-            android:screenOrientation="landscape">
+            android:launchMode="singleTop"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <intent-filter>
-                <data android:scheme="clovergooauth" android:host="oauthresult" />
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="oauthresult"
+                    android:scheme="clovergooauth"/>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
             </intent-filter>
         </activity>
         <activity
             android:name=".ExamplePOSActivity"
             android:label="@string/title_activity_example_pos"
-            android:screenOrientation="sensorLandscape" >
+            android:screenOrientation="sensorLandscape">
         </activity>
 
         <activity
             android:name="com.clover.remote.client.lib.example.qrCode.barcode.BarcodeCaptureActivity"
             android:label="@string/title_activity_example_pos"
-            android:screenOrientation="sensor" >
+            android:screenOrientation="sensor">
         </activity>
+
         <meta-data
             android:name="io.fabric.ApiKey"
-            android:value="43bf7f63d61fb948f3ac6e95ff6b5e0cff45fb3e" />
+            android:value="43bf7f63d61fb948f3ac6e95ff6b5e0cff45fb3e"/>
     </application>
 
 </manifest>
