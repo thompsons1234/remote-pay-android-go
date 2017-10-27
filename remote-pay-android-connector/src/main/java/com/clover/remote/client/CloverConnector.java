@@ -1269,31 +1269,23 @@ public class CloverConnector implements ICloverConnector {
       // than after the server call, which calls onPaymetRefund),
       // we will hold on to the response from
       // onRefundResponse (Which has more information than just the refund) and publish it here
-      if (lastRefundResponse != null) {
-        if (lastRefundResponse.getRefund().getId().equals(refund.getId())) {
+      if(refund.getOrderRef() != null){
+        RefundPaymentResponse response = new RefundPaymentResponse(true, ResultCode.SUCCESS);
+        response.setOrderId(refund.getOrderRef().getId());
+        response.setPaymentId(refund.getPayment().getId());
+        response.setRefund(refund);
+        cloverConnector.broadcaster.notifyOnRefundPaymentResponse(response);
+      }
+      else{
+        if(lastRefundResponse != null && lastRefundResponse.getRefund().getId() == refund.getId()){
           cloverConnector.broadcaster.notifyOnRefundPaymentResponse(lastRefundResponse);
-        } else {
-          Log.e(this.getClass().getName(), "The last PaymentRefundResponse has a different refund than this refund in finishOk");
         }
-      } else {
-        Log.w(this.getClass().getName(), "Shouldn't get an onFinishOk without having gotten an onPaymentRefund unless recovering!");
-
-        String orderId = null;
-        String paymentId = null;
-        if (refund != null) {
-          if (refund.getOrderRef() != null) {
-            orderId = refund.getOrderRef().getId();
-          }
-          if (refund.getPayment() != null) {
-            paymentId = refund.getPayment().getId();
-          }
+        else{
+          RefundPaymentResponse response = new RefundPaymentResponse(true, ResultCode.SUCCESS);
+          response.setPaymentId(refund.getPayment().getId());
+          response.setRefund(refund);
+          cloverConnector.broadcaster.notifyOnRefundPaymentResponse(response);
         }
-
-        RefundPaymentResponse rpr = new RefundPaymentResponse(true, ResultCode.SUCCESS);
-        rpr.setRefund(refund);
-        rpr.setOrderId(orderId);
-        rpr.setPaymentId(paymentId);
-        cloverConnector.broadcaster.notifyOnRefundPaymentResponse(rpr);
       }
     }
 
