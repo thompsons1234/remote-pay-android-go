@@ -20,11 +20,12 @@ repositories {
   maven { url "http://artifactory.corp.clover.com:8081/artifactory/repo" }
   mavenCentral()
   maven { url 'https://maven.fabric.io/public' }
+    google()
 }
 
 android {
   compileSdkVersion 21
-  buildToolsVersion '25.0.2'
+  buildToolsVersion '26.0.2'
 
   defaultConfig {
     minSdkVersion 17

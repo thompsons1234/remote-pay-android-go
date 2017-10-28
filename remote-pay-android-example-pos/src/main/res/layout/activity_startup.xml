@@ -19,7 +19,6 @@
             android:id="@+id/usbRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/lanRadioButton"
             android:layout_centerVertical="true"
             android:checked="true"
             android:text="@string/usb_clover_connector"/>
@@ -28,7 +27,6 @@
             android:id="@+id/goRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/lanRadioButton"
             android:layout_centerVertical="true"
             android:checked="true"
             android:text="Clover Go"/>
@@ -37,7 +35,6 @@
             android:id="@+id/lanRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/usbRadioButton"
             android:layout_centerHorizontal="true"
             android:checked="false"
             android:text="@string/lan_pay_display"/>
@@ -46,9 +43,6 @@
             android:id="@+id/lanPayDisplayAddress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/lanRadioButton"
-            android:layout_alignRight="@+id/lanRadioButton"
-            android:layout_below="@+id/lanRadioButton"
             android:layout_marginBottom="15sp"
             android:layout_marginLeft="31dp"
             android:inputType="textUri"
@@ -60,7 +54,6 @@
             android:id="@+id/nativeRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/lanPayDisplayAddress"
             android:layout_centerHorizontal="true"
             android:checked="false"
             android:text="@string/native_display"/>
@@ -96,40 +89,11 @@
         android:onClick="scanQRCode"
         android:text="@string/scan_qr_code"/>
 
-    <RadioGroup
-        android:id="@+id/readerRadioGroup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/radioGroup"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:orientation="horizontal"
-        android:visibility="gone">
-
-        <RadioButton
-            android:id="@+id/rp450RadioButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/goRadioButton"
-            android:layout_centerVertical="true"
-            android:checked="true"
-            android:text="RP450 Reader"/>
-
-        <RadioButton
-            android:id="@+id/rp350RadioButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/lanRadioButton"
-            android:layout_centerVertical="true"
-            android:checked="false"
-            android:text="RP350 Reader"/>
-    </RadioGroup>
-
     <LinearLayout
         android:id="@+id/llGoModes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/readerRadioGroup"
+        android:layout_below="@+id/scanQRCode"
         android:layout_centerHorizontal="true"
         android:orientation="horizontal"
         android:visibility="gone">
@@ -146,9 +110,6 @@
             android:id="@+id/oAuthButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/radioGroup"
-            android:layout_centerHorizontal="true"
-            android:layout_toRightOf="@+id/connectButton"
             android:onClick="connectGoWithAuthMode"
             android:text="Get OAUTH Token"/>
     </LinearLayout>

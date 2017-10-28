@@ -47,7 +47,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -142,6 +141,7 @@ import com.clover.sdk.v3.printer.Printer;
 import com.crashlytics.android.Crashlytics;
 import com.firstdata.clovergo.domain.model.Order;
 import com.firstdata.clovergo.domain.model.ReaderInfo;
+import com.firstdata.clovergo.domain.usecase.GetConnectedReaders;
 import com.google.gson.Gson;
 
 import java.io.InputStream;
@@ -156,6 +156,18 @@ import java.util.Locale;
 import java.util.prefs.Preferences;
 
 import io.fabric.sdk.android.Fabric;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Predicate;
+
+import static com.clover.remote.client.lib.example.AppConstants.CONFIG_TYPE_GO;
+import static com.clover.remote.client.lib.example.AppConstants.CONFIG_TYPE_USB;
+import static com.clover.remote.client.lib.example.AppConstants.CONFIG_TYPE_WS;
+import static com.clover.remote.client.lib.example.AppConstants.FRAGMENT_PAYMENT_METHODS;
+import static com.clover.remote.client.lib.example.AppConstants.PAYMENT_TYPE_KEYED;
+import static com.clover.remote.client.lib.example.AppConstants.PAYMENT_TYPE_RP350;
+import static com.clover.remote.client.lib.example.AppConstants.PAYMENT_TYPE_RP450;
+import static com.firstdata.clovergo.domain.model.ReaderInfo.ReaderType.RP350;
+import static com.firstdata.clovergo.domain.model.ReaderInfo.ReaderType.RP450;
 
 public class ExamplePOSActivity extends Activity implements CurrentOrderFragment.OnFragmentInteractionListener,
         AvailableItem.OnFragmentInteractionListener, OrdersFragment.OnFragmentInteractionListener,
@@ -188,46 +200,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public static final String EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN = "EXTRA_CLOVER_GO_CONNECTOR_CONFIG_ACCESS_TOKEN";
   public static final String EXTRA_CLOVER_GO_CONNECTOR_API_KEY = "EXTRA_CLOVER_GO_CONNECTOR_CONFIG_API_KEY";
   public static final String EXTRA_CLOVER_GO_CONNECTOR_SECRET = "EXTRA_CLOVER_GO_CONNECTOR_CONFIG_SECRET";
-  public static final String EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE = "EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE";
   public static final String EXTRA_CLOVER_GO_CONNECTOR_ENV = "EXTRA_CLOVER_GO_CONNECTOR_ENV";
-  private String paymentType;
 
+  private String paymentType;
   Payment currentPayment = null;
   Challenge[] currentChallenges = null;
-  PaymentConfirmationListener paymentConfirmationListener = new PaymentConfirmationListener() {
-    @Override
-    public void onRejectClicked(Challenge challenge) { // Reject payment and send the challenge along for logging/reason
-      getCloverConnector().rejectPayment(currentPayment, challenge);
-      currentChallenges = null;
-      currentPayment = null;
-    }
-
-    @Override
-    public void onAcceptClicked(final int challengeIndex) {
-
-      if (challengeIndex == currentChallenges.length - 1) { // no more challenges, so accept the payment
-        getCloverConnector().acceptPayment(currentPayment);
-        currentChallenges = null;
-        currentPayment = null;
-
-      } else { // show the next challenge
-        runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-
-            Challenge theChallenge = currentChallenges[challengeIndex + 1];
-
-            switch(theChallenge.type) {
-              case DUPLICATE_CHALLENGE:
-                showPaymentConfirmation(paymentConfirmationListener, theChallenge,  challengeIndex + 1);
-                break;
-
-            }
-          }
-        });
-      }
-    }
-  };
 
   boolean usb = true;
 
@@ -255,7 +232,42 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   private ArrayList<ReaderInfo> mArrayListReadersList;
   private ArrayList<String> mArrayListReaderString;
   private ArrayAdapter<String> mReaderArrayAdapter;
-  private ReaderInfo.ReaderType currentGoConfig;
+  private ReaderInfo.ReaderType goReaderType;
+
+  PaymentConfirmationListener paymentConfirmationListener = new PaymentConfirmationListener() {
+    @Override
+    public void onRejectClicked(Challenge challenge) { // Reject payment and send the challenge along for logging/reason
+      getCloverConnector().rejectPayment(currentPayment, challenge);
+      currentChallenges = null;
+      currentPayment = null;
+    }
+
+    @Override
+    public void onAcceptClicked(final int challengeIndex) {
+
+      if (challengeIndex == currentChallenges.length - 1) { // no more challenges, so accept the payment
+        getCloverConnector().acceptPayment(currentPayment);
+        currentChallenges = null;
+        currentPayment = null;
+
+      } else { // show the next challenge
+        runOnUiThread(new Runnable() {
+          @Override
+          public void run() {
+
+            Challenge theChallenge = currentChallenges[challengeIndex + 1];
+
+            switch (theChallenge.type) {
+              case DUPLICATE_CHALLENGE:
+                showPaymentConfirmation(paymentConfirmationListener, theChallenge, challengeIndex + 1);
+                break;
+
+            }
+          }
+        });
+      }
+    }
+  };
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -273,11 +285,10 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     String posName = "Clover Example POS";
     String applicationId = posName + ":1.4";
     CloverDeviceConfiguration config;
-    CloverGoDeviceConfiguration goConfig;
 
     String configType = getIntent().getStringExtra(EXTRA_CLOVER_CONNECTOR_CONFIG);
 
-    if ("GO".equals(configType)) {
+    if (CONFIG_TYPE_GO.equals(configType)) {
       findViewById(R.id.RefundButton).setVisibility(View.GONE);
       findViewById(R.id.CardsButton).setVisibility(View.GONE);
       findViewById(R.id.PendingButton).setVisibility(View.GONE);
@@ -287,70 +298,12 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       accessToken = getIntent().getStringExtra(EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN);
       appId = getIntent().getStringExtra(EXTRA_CLOVER_GO_CONNECTOR_APP_ID);
       goEnv = (CloverGoDeviceConfiguration.ENV) getIntent().getSerializableExtra(EXTRA_CLOVER_GO_CONNECTOR_ENV);
-      currentGoConfig = (ReaderInfo.ReaderType) getIntent().getExtras().get(EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE);
 
-      final Spinner paymentTypeSpinner = (Spinner) findViewById(R.id.selectPaymentSpinner);
-      paymentTypeSpinner.setVisibility(View.VISIBLE);
+      initializeReader(RP450);
 
-      paymentTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-
-        @Override
-        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-          switch (paymentTypeSpinner.getSelectedItem().toString()) {
-            case "RP450":
-              paymentType = "";
-              currentGoConfig = ReaderInfo.ReaderType.RP450;
-              if (cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP450) == null) {
-                CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, goEnv, apiKey, secret, appId).deviceType(ReaderInfo.ReaderType.RP450).allowAutoConnect(false).build();
-                ICloverGoConnector cloverGo450Connector = (CloverGoConnector) ConnectorFactory.createCloverConnector(config);
-                cloverGoConnectorMap.put(ReaderInfo.ReaderType.RP450, cloverGo450Connector);
-                cloverGo450Connector.addCloverGoConnectorListener(ccGoListener);
-              }
-              if (merchantInfoMap.get(ReaderInfo.ReaderType.RP450) == null) {
-                ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Disconnected");
-              } else {
-                MerchantInfo merchantInfo = merchantInfoMap.get(ReaderInfo.ReaderType.RP450);
-                ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText(String.format(merchantInfo.getDeviceInfo().getModel() + " Connected: %s (%s)", merchantInfo.getDeviceInfo().getSerial(), merchantInfo.getMerchantName()));
-              }
-              break;
-            case "RP350":
-              paymentType = "";
-              currentGoConfig = ReaderInfo.ReaderType.RP350;
-              if (cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP350) == null) {
-                CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, goEnv, apiKey, secret, appId).deviceType(ReaderInfo.ReaderType.RP350).allowAutoConnect(false).build();
-                ICloverGoConnector cloverGo350Connector = (CloverGoConnector) ConnectorFactory.createCloverConnector(config);
-                cloverGoConnectorMap.put(ReaderInfo.ReaderType.RP350, cloverGo350Connector);
-                cloverGo350Connector.addCloverGoConnectorListener(ccGoListener);
-              }
-
-              if (merchantInfoMap.get(ReaderInfo.ReaderType.RP350) == null) {
-                ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Disconnected");
-              } else {
-                MerchantInfo merchantInfo = merchantInfoMap.get(ReaderInfo.ReaderType.RP350);
-                ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText(String.format(merchantInfo.getDeviceInfo().getModel() + " Connected: %s (%s)", merchantInfo.getDeviceInfo().getSerial(), merchantInfo.getMerchantName()));
-              }
-              break;
-            case "KEYED":
-              paymentType = "KEYED";
-              break;
-          }
-          updateComponentsWithNewCloverConnector();
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> parent) {
-
-        }
-      });
-
-      goConfig = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, goEnv, apiKey, secret, appId).deviceType(currentGoConfig).allowAutoConnect(false).build();
-
-      ICloverGoConnector cloverGoConnector = (CloverGoConnector) ConnectorFactory.createCloverConnector(goConfig);
-      cloverGoConnectorMap.put(currentGoConfig, cloverGoConnector);
-
-    } else if ("USB".equals(configType)) {
+    } else if (CONFIG_TYPE_USB.equals(configType)) {
       config = new USBCloverDeviceConfiguration(this, applicationId);
-    } else if ("WS".equals(configType)) {
+    } else if (CONFIG_TYPE_WS.equals(configType)) {
 
       String serialNumber = "Aisle 3";
       String authToken = null;
@@ -370,7 +323,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               authToken = value;
             } else {
               Log.w(TAG, String.format("Found query parameter \"%s\" with value \"%s\"",
-                      name, value));
+                name, value));
             }
           }
           uri = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), null, uri.getFragment());
@@ -438,8 +391,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     initialize();
 
-    FrameLayout frameLayout = (FrameLayout) findViewById(R.id.contentContainer);
-
     FragmentManager fragmentManager = getFragmentManager();
     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
@@ -454,13 +405,63 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     ratingsDialog.setCanceledOnTouchOutside(true);
     ratingsList = (ListView) ratingsDialog.findViewById(R.id.ratingsList);
     ratingsAdapter = new ArrayAdapter<>(ExamplePOSActivity.this, android.R.layout.simple_list_item_1, new String[0]);
+  }
 
+  private void initializeReader(ReaderInfo.ReaderType readerType) {
+
+    switch (readerType) {
+
+      case RP350:
+
+        // Need paymentType in addition to goReaderType in case key entered is selected.
+        paymentType = PAYMENT_TYPE_RP350;
+        goReaderType = RP350;
+
+        if (cloverGoConnectorMap.get(RP350) == null) {
+          CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, goEnv, apiKey, secret, appId).deviceType(RP350).allowAutoConnect(false).build();
+          ICloverGoConnector cloverGo350Connector = (CloverGoConnector) ConnectorFactory.createCloverConnector(config);
+          cloverGoConnectorMap.put(RP350, cloverGo350Connector);
+          cloverGo350Connector.addCloverGoConnectorListener(ccGoListener);
+        }
+
+        if (merchantInfoMap.get(RP350) == null) {
+          ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Disconnected");
+        } else {
+          MerchantInfo merchantInfo = merchantInfoMap.get(RP350);
+          ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText(String.format(merchantInfo.getDeviceInfo().getModel() + " Connected: %s (%s)", merchantInfo.getDeviceInfo().getSerial(), merchantInfo.getMerchantName()));
+        }
+        break;
+
+      case RP450:
+      default:
+
+        paymentType = PAYMENT_TYPE_RP450;
+        goReaderType = RP450;
+
+        if (cloverGoConnectorMap.get(RP450) == null) {
+          CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, goEnv, apiKey, secret, appId).
+            deviceType(RP450).
+            allowAutoConnect(false).build();
+
+          ICloverGoConnector cloverGo450Connector = (CloverGoConnector) ConnectorFactory.createCloverConnector(config);
+          cloverGoConnectorMap.put(RP450, cloverGo450Connector);
+          cloverGo450Connector.addCloverGoConnectorListener(ccGoListener);
+        }
+        if (merchantInfoMap.get(RP450) == null) {
+          ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Disconnected");
+        } else {
+          MerchantInfo merchantInfo = merchantInfoMap.get(RP450);
+          ((TextView) findViewById(R.id.ConnectionStatusLabel)).
+            setText(String.format(merchantInfo.getDeviceInfo().getModel() + " Connected: %s (%s)", merchantInfo.getDeviceInfo().getSerial(), merchantInfo.getMerchantName()));
+        }
+        break;
+    }
+    updateComponentsWithNewCloverConnector();
   }
 
   public List<Printer> getPrinters() {
     return this.printers;
   }
-
 
   private KeyStore createTrustStore() {
     try {
@@ -528,7 +529,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       }
     }
     if (requestCode == RESULT_LOAD_IMG && resultCode == RESULT_OK
-            && null != data) {
+      && null != data) {
       // Get the Image from data
 
       Uri selectedImage = data.getData();
@@ -536,7 +537,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       // Get the cursor
       Cursor cursor = getContentResolver().query(selectedImage,
-              filePathColumn, null, null, null);
+        filePathColumn, null, null, null);
       // Move to first row
       cursor.moveToFirst();
 
@@ -573,7 +574,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     if (getCloverConnector() != null) {
       getCloverConnector().dispose();
     }
-
 
     ICloverConnectorListener ccListener = new ICloverConnectorListener() {
       public void onDeviceDisconnected() {
@@ -1220,7 +1220,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         merchantInfoMap.put(readerInfo.getReaderType(), null);
         Toast.makeText(ExamplePOSActivity.this, "Disconnected", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "disconnected");
-        if (currentGoConfig == readerInfo.getReaderType()) {
+        if (goReaderType == readerInfo.getReaderType()) {
           ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Disconnected");
         }
 
@@ -1331,13 +1331,13 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         runOnUiThread(new Runnable() {
           public void run() {
 
-            if (currentGoConfig.name().equalsIgnoreCase(merchantInfo.getDeviceInfo().getModel())) {
+            if (goReaderType.name().equalsIgnoreCase(merchantInfo.getDeviceInfo().getModel())) {
               ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText(String.format(merchantInfo.getDeviceInfo().getModel() + " Connected: %s (%s)", merchantInfo.getDeviceInfo().getSerial(), merchantInfo.getMerchantName()));
             }
-            if ("RP450".equals(merchantInfo.getDeviceInfo().getModel())) {
+            if (PAYMENT_TYPE_RP450.equals(merchantInfo.getDeviceInfo().getModel())) {
               merchantInfoMap.put(ReaderInfo.ReaderType.RP450, merchantInfo);
-            } else if ("RP350".equals(merchantInfo.getDeviceInfo().getModel())) {
-              merchantInfoMap.put(ReaderInfo.ReaderType.RP350, merchantInfo);
+            } else if (PAYMENT_TYPE_RP350.equals(merchantInfo.getDeviceInfo().getModel())) {
+              merchantInfoMap.put(RP350, merchantInfo);
             }
             if (pairingCodeDialog != null && pairingCodeDialog.isShowing()) {
               pairingCodeDialog.dismiss();
@@ -1383,7 +1383,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           case LOW_BATTERY:
           case PARTIAL_AUTH_REJECTED:
           case DUPLICATE_TRANSACTION_REJECTED:
-            showAlertDialog(deviceErrorEvent.getErrorType().name().replace('_',' '), deviceErrorEvent.getMessage());
+            showAlertDialog(deviceErrorEvent.getErrorType().name().replace('_', ' '), deviceErrorEvent.getMessage());
             break;
           case MULTIPLE_CONTACT_LESS_CARD_DETECTED_ERROR:
           case CONTACT_LESS_FAILED_TRY_CONTACT_ERROR:
@@ -1391,7 +1391,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           case DIP_FAILED_ALL_ATTEMPTS_ERROR:
           case DIP_FAILED_ERROR:
           case SWIPE_FAILED_ERROR:
-            showProgressDialog(deviceErrorEvent.getErrorType().name().replace('_',' '), deviceErrorEvent.getMessage(), true);
+            showProgressDialog(deviceErrorEvent.getErrorType().name().replace('_', ' '), deviceErrorEvent.getMessage(), true);
             break;
         }
       }
@@ -1445,7 +1445,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         if (response.isSuccess()) {
           GoPayment _payment = (GoPayment) response.getPayment();
           POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), "DFLTEMPLYEE", _payment.getAmount(), _payment.getTipAmount() != null ? _payment.getTipAmount() : 0,
-                  _payment.getCashbackAmount() != null ? _payment.getCashbackAmount() : 0);
+            _payment.getCashbackAmount() != null ? _payment.getCashbackAmount() : 0);
           setPaymentStatus(payment, response);
           store.addPreAuth(payment);
           showMessage("PreAuth successfully processed.", Toast.LENGTH_SHORT);
@@ -1548,7 +1548,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
             @Override
             public void run() {
 
-              switch(theChallenge.type) {
+              switch (theChallenge.type) {
                 case DUPLICATE_CHALLENGE:
                   showPaymentConfirmation(paymentConfirmationListener, theChallenge, 0);
                   break;
@@ -1733,16 +1733,12 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     };
 
-    if (currentGoConfig == ReaderInfo.ReaderType.RP450 || currentGoConfig == ReaderInfo.ReaderType.RP350)
+    if (goReaderType == ReaderInfo.ReaderType.RP450 || goReaderType == ReaderInfo.ReaderType.RP350)
       ((ICloverGoConnector) getCloverConnector()).addCloverGoConnectorListener(ccGoListener);
     else {
       getCloverConnector().addCloverConnectorListener(ccListener);
-
-      getCloverConnector().addCloverConnectorListener(ccListener);
       getCloverConnector().initializeConnection();
     }
-
-    updateComponentsWithNewCloverConnector();
   }
 
   private void showStatus(String msg) {
@@ -1778,8 +1774,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    if (cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP350) != null) {
-      cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP350).disconnectDevice();
+    if (cloverGoConnectorMap.get(RP350) != null) {
+      cloverGoConnectorMap.get(RP350).disconnectDevice();
     }
     if (cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP450) != null) {
       cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP450).disconnectDevice();
@@ -2062,6 +2058,58 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     fragmentTransaction.commit();
   }
 
+  public void showPaymentTypes(String transactionType) {
+
+    FragmentManager fragmentManager = getFragmentManager();
+    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+    hideFragments(fragmentManager, fragmentTransaction);
+
+    PaymentTypeFragment paymentTypeFragment = (PaymentTypeFragment)fragmentManager.findFragmentByTag(FRAGMENT_PAYMENT_METHODS);
+
+    if (paymentTypeFragment == null) {
+
+      paymentTypeFragment = new PaymentTypeFragment();
+
+      // Must create NEW args here
+      Bundle args = new Bundle();
+      paymentTypeFragment.setArguments(setPaymentTypeArgs(args, transactionType));
+      fragmentTransaction.add(R.id.contentContainer, paymentTypeFragment);
+
+    } else {
+
+      // Must get OLD args here to reset values
+      setPaymentTypeArgs(paymentTypeFragment.getArguments(), transactionType);
+      fragmentTransaction.show(paymentTypeFragment);
+    }
+
+    fragmentTransaction.commit();
+  }
+
+  private Bundle setPaymentTypeArgs(Bundle args, String transactionType) {
+    args.putString(AppConstants.TRANSACTION_TYPE_ARG, transactionType);
+    args.putBoolean(AppConstants.PAYMENT_TYPE_RP350, isReaderTypeConnected(RP350));
+    args.putBoolean(AppConstants.PAYMENT_TYPE_RP450, isReaderTypeConnected(RP450));
+    return args;
+  }
+
+  public void paymentTypeSelected(String transactionType, String paymentType) {
+
+    FragmentManager fragmentManager = getFragmentManager();
+    RegisterFragment refFragment = (RegisterFragment) fragmentManager.findFragmentByTag("REGISTER");
+    if (refFragment != null) {
+
+      Log.d(TAG, "Proceeding with transaction, transactionType: " + transactionType + ", paymentType: " + paymentType);
+      refFragment.proceedWithTransaction(transactionType, getCloverConnector(), paymentType);
+    } else {
+      throw new RuntimeException("OOPS!  There is no register fragment!");
+    }
+  }
+
+  public void paymentTypeCanceled() {
+    showRegister(null);
+  }
+
   private void hideFragments(FragmentManager fragmentManager, FragmentTransaction fragmentTransaction) {
     Fragment fragment = fragmentManager.findFragmentByTag("ORDERS");
     if (fragment != null) {
@@ -2107,7 +2155,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     } catch (UnsupportedOperationException e) {
       Toast.makeText(ExamplePOSActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
     }
-
   }
 
   public void onManualRefundClick(View view) {
@@ -2128,16 +2175,16 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void connect350Click(View view) {
-    if (cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP350) == null) {
-      CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, goEnv, apiKey, secret, appId).deviceType(ReaderInfo.ReaderType.RP350).allowAutoConnect(false).build();
+    if (cloverGoConnectorMap.get(RP350) == null) {
+      CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, goEnv, apiKey, secret, appId).deviceType(RP350).allowAutoConnect(false).build();
       ICloverGoConnector cloverGo350Connector = (CloverGoConnector) ConnectorFactory.createCloverConnector(config);
-      cloverGoConnectorMap.put(ReaderInfo.ReaderType.RP350, cloverGo350Connector);
+      cloverGoConnectorMap.put(RP350, cloverGo350Connector);
       cloverGo350Connector.addCloverGoConnectorListener(ccGoListener);
     }
-    if (merchantInfoMap.get(ReaderInfo.ReaderType.RP350) == null) {
-      cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP350).initializeConnection();
+    if (merchantInfoMap.get(RP350) == null) {
+      cloverGoConnectorMap.get(RP350).initializeConnection();
     } else {
-      showMessage("Reader 450 Already Connected", Toast.LENGTH_LONG);
+      showMessage("Reader 350 Already Connected", Toast.LENGTH_LONG);
     }
   }
 
@@ -2161,7 +2208,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     } else {
       showMessage("Enable GPS and Bluetooth", Toast.LENGTH_LONG);
     }
-
   }
 
   public void queryPaymentClick(View view) {
@@ -2180,15 +2226,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     }
 
     try {
-      // Operation Not Supported in Clove Go
-//          getCloverConnector().printText(lines);
       getCloverConnector().print(pr);
     } catch (UnsupportedOperationException e) {
       Toast.makeText(ExamplePOSActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
       Log.e("Example POS", e.getMessage());
     }
-
-//    getCloverConnector().print(pr);
     updatePrintStatusText();
   }
 
@@ -2215,15 +2257,12 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void showMessageClick(View view) {
-
-
     try {
       // Operation not Supported in CLover GO
       getCloverConnector().showMessage(((TextView) findViewById(R.id.ShowMessageText)).getText().toString());
     } catch (UnsupportedOperationException e) {
       Log.e("EXAMPLE POS", e.getMessage());
     }
-//    getCloverConnector().showMessage(((TextView) findViewById(R.id.ShowMessageText)).getText().toString());
   }
 
   public void showWelcomeMessageClick(View view) {
@@ -2256,7 +2295,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   public void preauthCardClick(View view) {
 
-    if ("KEYED".equals(paymentType)) {
+    if (PAYMENT_TYPE_KEYED.equals(paymentType)) {
       KeyedTransactionFragment keyedTransactionFragment = KeyedTransactionFragment.newInstance(store, getCloverConnector(), "preAuth");
       FragmentManager fm = getFragmentManager();
       keyedTransactionFragment.show(fm, "KEYED_FRAGMENT");
@@ -2285,7 +2324,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     getCloverConnector().closeout(request);
   }
 
-
   public void printImageClick(View view) {
     Intent galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
     startActivityForResult(galleryIntent, RESULT_LOAD_IMG);
@@ -2307,22 +2345,21 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     updatePrintStatusText();
   }
 
-
   public void onResetDeviceClick(View view) {
     runOnUiThread(new Runnable() {
       @Override
       public void run() {
         new AlertDialog.Builder(ExamplePOSActivity.this)
-                .setTitle("Reset Device")
-                .setMessage("Are you sure you want to reset the device? Warning: You may lose any pending transaction information.")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                  @Override
-                  public void onClick(DialogInterface dialog, int which) {
-                    getCloverConnector().resetDevice();
-                  }
-                })
-                .setNegativeButton("No", null)
-                .show();
+          .setTitle("Reset Device")
+          .setMessage("Are you sure you want to reset the device? Warning: You may lose any pending transaction information.")
+          .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+              getCloverConnector().resetDevice();
+            }
+          })
+          .setNegativeButton("No", null)
+          .show();
       }
     });
   }
@@ -2451,14 +2488,40 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     mDialog.show();
   }
 
-  private ICloverConnector getCloverConnector() {
-    if (currentGoConfig == ReaderInfo.ReaderType.RP450) {
-      return cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP450);
-    } else if (currentGoConfig == ReaderInfo.ReaderType.RP350) {
-      return cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP350);
-    } else {
-      return cloverConnector;
+  private boolean isReaderTypeConnected(ReaderInfo.ReaderType readerType) {
+
+    boolean isConnected = false;
+    ICloverGoConnector connector = cloverGoConnectorMap.get(readerType);
+
+    if (connector != null) {
+
+      GetConnectedReaders getConnectedReaders = connector.getConnectedReaders();
+      List<ReaderInfo> readerList = getConnectedReaders.getBlockingObservable().filter(new Predicate<ReaderInfo>() {
+        @Override
+        public boolean test(@NonNull ReaderInfo readerInfo) throws Exception {
+          return readerInfo.isConnected();
+        }
+      }).toList().blockingGet();
+
+      if (readerList != null && readerList.size() > 0) {
+        isConnected = true;
+      }
     }
+    return isConnected;
+  }
+
+  private ICloverConnector getCloverConnector() {
+
+    // Default
+    ICloverConnector connector;
+
+    if (goReaderType != null && cloverGoConnectorMap.get(goReaderType) != null) {
+      connector = cloverGoConnectorMap.get(goReaderType);
+    } else {
+      connector = cloverConnector;
+    }
+
+    return connector;
   }
 
   public void showProgressDialog(String title, String message, boolean isCancelable) {

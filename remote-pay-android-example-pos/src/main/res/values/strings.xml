@@ -166,4 +166,10 @@
 
   <string name="payment_confirmation">Payment Confirmation</string>
 
+  <!-- Payment Types Fragment -->
+  <string name="select_payment_type">Select Payment Type</string>
+  <string name="payment_type_rp450">RP450 (Bluetooth)</string>
+  <string name="payment_type_rp350">RP350 (Audio Jack)</string>
+  <string name="payment_type_key_enter">Key Enter (Manual)</string>
+
 </resources>

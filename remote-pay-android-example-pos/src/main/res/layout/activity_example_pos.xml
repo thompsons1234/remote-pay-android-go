@@ -140,32 +140,12 @@
         </LinearLayout>
     </HorizontalScrollView>
 
-    <LinearLayout
-        android:id="@+id/devicePanel"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/top_panel_scroll_vw"
-        android:orientation="horizontal">
-
-        <Spinner
-            android:id="@+id/selectPaymentSpinner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:dropDownWidth="wrap_content"
-            android:entries="@array/payment_type"
-            android:prompt="@string/select_one"
-            android:spinnerMode="dropdown"
-            android:visibility="gone"/>
-
-    </LinearLayout>
-
     <FrameLayout
         android:id="@+id/contentContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/Divider"
-        android:layout_below="@+id/devicePanel">
+        android:layout_below="@+id/top_panel_scroll_vw">
 
     </FrameLayout>
 

@@ -51,7 +51,6 @@ import com.clover.remote.client.messages.SaleRequest;
 import com.clover.remote.order.DisplayDiscount;
 import com.clover.remote.order.DisplayLineItem;
 import com.clover.remote.order.DisplayOrder;
-import com.firstdata.clovergo.domain.model.Payment;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,6 +58,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import static com.clover.remote.client.lib.example.AppConstants.PAYMENT_TYPE_KEYED;
+import static com.clover.remote.client.lib.example.AppConstants.TRANSACTION_TYPE_AUTH;
+import static com.clover.remote.client.lib.example.AppConstants.TRANSACTION_TYPE_SALE;
 
 
 public class RegisterFragment extends Fragment implements CurrentOrderFragmentListener, AvailableItemListener {
@@ -168,36 +171,53 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
   @Override
   public void onSaleClicked() {
+    ((ExamplePOSActivity)getActivity()).showPaymentTypes(TRANSACTION_TYPE_SALE);
+  }
 
-      if ("KEYED".equals(paymentType)){
-          KeyedTransactionFragment keyedTransactionFragment = KeyedTransactionFragment.newInstance(store,cloverConnector,"sale");
-          FragmentManager fm = getFragmentManager();
-          keyedTransactionFragment.show(fm,"KEYED_FRAGMENT");
-      }else {
-          if (cloverConnector instanceof ICloverGoConnector)
-              ((ExamplePOSActivity) getActivity()).showProgressDialog("Sale Transaction", "Swipe, Tap or Dip card for Payment", true);
+  public void proceedWithTransaction(String transactionType, ICloverConnector cloverConnector, String paymentType) {
+    if (transactionType.equals(AppConstants.TRANSACTION_TYPE_AUTH)) {
+      proceedWithAuth(cloverConnector, paymentType);
+    } else if (transactionType.equals(AppConstants.TRANSACTION_TYPE_SALE)) {
+      proceedWithSale(cloverConnector,paymentType);
+    } else {
+      throw new RuntimeException("Something has gone drastically wrong!  There is no proper transactionType");
+    }
+  }
 
-          String externalPaymentID = IdUtils.getNextId();
-          Log.d(TAG, "ExternalPaymentID:" + externalPaymentID);
-          store.getCurrentOrder().setPendingPaymentId(externalPaymentID);
-          SaleRequest request = new SaleRequest(store.getCurrentOrder().getTotal(), externalPaymentID);
-          request.setCardEntryMethods(store.getCardEntryMethods());
-          request.setAllowOfflinePayment(store.getAllowOfflinePayment());
-          request.setForceOfflinePayment(store.getForceOfflinePayment());
-          request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
-          request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
-          request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
-          request.setDisablePrinting(store.getDisablePrinting());
-          request.setTipMode(store.getTipMode());
-          request.setSignatureEntryLocation(store.getSignatureEntryLocation());
-          request.setSignatureThreshold(store.getSignatureThreshold());
-          request.setDisableReceiptSelection(store.getDisableReceiptOptions());
-          request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
-          request.setTipAmount(store.getTipAmount());
-          request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
-          request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
-          cloverConnector.sale(request);
-      }
+  private void proceedWithSale(ICloverConnector cloverConnector, String paymentType) {
+
+    this.cloverConnector = cloverConnector;
+    this.paymentType = paymentType;
+
+    if (PAYMENT_TYPE_KEYED.equals(paymentType)){
+      KeyedTransactionFragment keyedTransactionFragment = KeyedTransactionFragment.newInstance(store,cloverConnector,"sale");
+      FragmentManager fm = getFragmentManager();
+      keyedTransactionFragment.show(fm,"KEYED_FRAGMENT");
+    }else {
+      if (cloverConnector instanceof ICloverGoConnector)
+        ((ExamplePOSActivity) getActivity()).showProgressDialog("Sale Transaction", "Swipe, Tap or Dip card for Payment", true);
+
+      String externalPaymentID = IdUtils.getNextId();
+      Log.d(TAG, "ExternalPaymentID:" + externalPaymentID);
+      store.getCurrentOrder().setPendingPaymentId(externalPaymentID);
+      SaleRequest request = new SaleRequest(store.getCurrentOrder().getTotal(), externalPaymentID);
+      request.setCardEntryMethods(store.getCardEntryMethods());
+      request.setAllowOfflinePayment(store.getAllowOfflinePayment());
+      request.setForceOfflinePayment(store.getForceOfflinePayment());
+      request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
+      request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
+      request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
+      request.setDisablePrinting(store.getDisablePrinting());
+      request.setTipMode(store.getTipMode());
+      request.setSignatureEntryLocation(store.getSignatureEntryLocation());
+      request.setSignatureThreshold(store.getSignatureThreshold());
+      request.setDisableReceiptSelection(store.getDisableReceiptOptions());
+      request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
+      request.setTipAmount(store.getTipAmount());
+      request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
+      request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
+      cloverConnector.sale(request);
+    }
   }
 
   @Override
@@ -207,9 +227,18 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     currentOrderFragment.setOrder(store.getCurrentOrder());
   }
 
+
   @Override
   public void onAuthClicked() {
-      if ("KEYED".equals(paymentType)){
+    ((ExamplePOSActivity)getActivity()).showPaymentTypes(TRANSACTION_TYPE_AUTH);
+  }
+
+  private void proceedWithAuth(ICloverConnector cloverConnector, String paymentType) {
+
+    this.cloverConnector = cloverConnector;
+    this.paymentType = paymentType;
+
+    if (PAYMENT_TYPE_KEYED.equals(paymentType)){
           KeyedTransactionFragment keyedTransactionFragment = KeyedTransactionFragment.newInstance(store,cloverConnector,"auth");
           FragmentManager fm = getFragmentManager();
           keyedTransactionFragment.show(fm,"KEYED_FRAGMENT");

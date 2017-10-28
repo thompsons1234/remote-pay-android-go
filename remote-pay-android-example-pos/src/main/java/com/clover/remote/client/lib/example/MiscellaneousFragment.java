@@ -58,6 +58,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.clover.remote.client.lib.example.AppConstants.CONFIG_TYPE_GO;
 import static com.clover.remote.client.lib.example.StartupActivity.CONNECTION_MODE;
 import static com.clover.remote.client.lib.example.StartupActivity.EXAMPLE_APP_NAME;
 
@@ -450,7 +451,7 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
         }
       }
     });
-    if (!mode.equalsIgnoreCase("go")) {
+    if (!mode.equals(CONFIG_TYPE_GO)) {
       updateSwitches(view);
     } else {
       view.findViewById(R.id.connectReaderBox).setVisibility(View.VISIBLE);

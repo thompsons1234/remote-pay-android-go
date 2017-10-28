@@ -27,6 +27,7 @@ import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.remote.order.DisplayOrder;
 import com.clover.sdk.v3.payments.Payment;
 import com.firstdata.clovergo.domain.model.ReaderInfo;
+import com.firstdata.clovergo.domain.usecase.GetConnectedReaders;
 
 import java.util.List;
 
@@ -270,4 +271,10 @@ public class DefaultCloverGoConnector implements ICloverGoConnector {
   public void sendReceipt(String email, String phoneNo, String orderId) {
 
   }
+
+  @Override
+  public GetConnectedReaders getConnectedReaders() {
+    return null;
+  }
+
 }

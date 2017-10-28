@@ -62,8 +62,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.firstdata.clovergo.domain.model.ReaderInfo.ReaderType.RP350;
-import static com.firstdata.clovergo.domain.model.ReaderInfo.ReaderType.RP450;
+import static com.clover.remote.client.lib.example.AppConstants.*;
 
 public class StartupActivity extends Activity {
 
@@ -71,18 +70,13 @@ public class StartupActivity extends Activity {
   public static final String EXAMPLE_APP_NAME = "EXAMPLE_APP";
   public static final String LAN_PAY_DISPLAY_URL = "LAN_PAY_DISPLAY_URL";
   public static final String CONNECTION_MODE = "CONNECTION_MODE";
-  public static final String USB = "USB";
-  public static final String GO = "GO";
-  public static final String LAN = "LAN";
   private static final int BARCODE_READER_REQUEST_CODE = 1;
-  public static final String WS_CONFIG = "WS";
 
   private static final CloverGoDeviceConfiguration.ENV GO_ENV = CloverGoDeviceConfiguration.ENV.DEMO;
   private static final String APP_ID = "com.clover.examplepos:1.9"; //com.firstdata.hack2020
 
   private String mGoApiKey, mGoSecret, mGoAccessToken;
   private String mOAuthClientId, mOAuthClientSecret, mOAuthEnv, mOAuthUrl, mOAuthApiKey;
-
 
   // Clover devices do not always support the custom Barcode scanner implemented here.
   // They DO have a different capability to scan barcodes.
@@ -97,13 +91,12 @@ public class StartupActivity extends Activity {
         String barcode = barcodeResult.getBarcode();
         Log.d(TAG, "Barcode from clover handler is " + barcode);
         if (barcode != null) {
-          connect(parseValidateAndStoreURI(barcode), WS_CONFIG, false);
+          connect(parseValidateAndStoreURI(barcode), CONFIG_TYPE_WS, false);
         }
       }
     }
   };
 
-  private RadioGroup readerRadioGroup;
   private Toast mToast;
 
   @Override
@@ -118,8 +111,6 @@ public class StartupActivity extends Activity {
       getActionBar().hide();
     }
 
-    readerRadioGroup = (RadioGroup) findViewById(R.id.readerRadioGroup);
-
     RadioGroup group = (RadioGroup) findViewById(R.id.radioGroup);
     group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
       @Override
@@ -127,12 +118,10 @@ public class StartupActivity extends Activity {
         TextView textView = (TextView) findViewById(R.id.lanPayDisplayAddress);
         textView.setEnabled(checkedId == R.id.lanRadioButton);
         if (checkedId == R.id.goRadioButton) {
-          readerRadioGroup.setVisibility(View.VISIBLE);
           findViewById(R.id.llGoModes).setVisibility(View.VISIBLE);
           findViewById(R.id.connectButton).setVisibility(View.GONE);
           findViewById(R.id.scanQRCode).setVisibility(View.GONE);
         } else {
-          readerRadioGroup.setVisibility(View.GONE);
           findViewById(R.id.llGoModes).setVisibility(View.GONE);
           findViewById(R.id.connectButton).setVisibility(View.VISIBLE);
           findViewById(R.id.scanQRCode).setVisibility(View.VISIBLE);
@@ -156,11 +145,11 @@ public class StartupActivity extends Activity {
     textView.setText(url);
     textView.setEnabled(((RadioGroup) findViewById(R.id.radioGroup)).getCheckedRadioButtonId() == R.id.lanRadioButton);
 
-    String mode = this.getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).getString(CONNECTION_MODE, USB);
+    String mode = this.getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).getString(CONNECTION_MODE, CONFIG_TYPE_USB);
 
-    ((RadioButton) findViewById(R.id.lanRadioButton)).setChecked(LAN.equals(mode));
-    ((RadioButton) findViewById(R.id.usbRadioButton)).setChecked(!LAN.equals(mode));
-    ((RadioButton) findViewById(R.id.goRadioButton)).setChecked(GO.equalsIgnoreCase(mode));
+    ((RadioButton) findViewById(R.id.lanRadioButton)).setChecked(CONFIG_TYPE_LAN.equals(mode));
+    ((RadioButton) findViewById(R.id.usbRadioButton)).setChecked(!CONFIG_TYPE_LAN.equals(mode));
+    ((RadioButton) findViewById(R.id.goRadioButton)).setChecked(CONFIG_TYPE_GO.equalsIgnoreCase(mode));
 
     // Switch out the barcode scanner for the Clover Devices
     if (Platform.isClover()) {
@@ -194,7 +183,7 @@ public class StartupActivity extends Activity {
       if (resultCode == CommonStatusCodes.SUCCESS) {
         if (data != null) {
           Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
-          connect(parseValidateAndStoreURI(barcode.displayValue), WS_CONFIG, false);
+          connect(parseValidateAndStoreURI(barcode.displayValue), CONFIG_TYPE_WS, false);
         }
       } else Log.e(TAG, String.format(getString(R.string.barcode_error_format),
               CommonStatusCodes.getStatusCodeString(resultCode)));
@@ -281,16 +270,16 @@ public class StartupActivity extends Activity {
 
     if (group.getCheckedRadioButtonId() == R.id.goRadioButton) {
       setGoParams();
-      config = GO;
-      editor.putString(CONNECTION_MODE, GO);
-      editor.commit();
+      config = CONFIG_TYPE_GO;
+      editor.putString(CONNECTION_MODE, CONFIG_TYPE_GO);
+      editor.apply();
     } else if (group.getCheckedRadioButtonId() == R.id.usbRadioButton) {
-      config = USB;
-      editor.putString(CONNECTION_MODE, USB);
+      config = CONFIG_TYPE_USB;
+      editor.putString(CONNECTION_MODE, CONFIG_TYPE_USB);
       editor.apply();
     } else { // (group.getCheckedRadioButtonId() == R.id.lanRadioButton)
       String uriStr = ((TextView) findViewById(R.id.lanPayDisplayAddress)).getText().toString();
-      config = WS_CONFIG;
+      config = CONFIG_TYPE_WS;
       uri = parseValidateAndStoreURI(uriStr);
     }
     connect(uri, config, clearToken);
@@ -300,13 +289,13 @@ public class StartupActivity extends Activity {
     Intent intent = new Intent();
     intent.setClass(this, ExamplePOSActivity.class);
 
-    if (config.equals("USB") || (config.equals(WS_CONFIG) && uri != null)) {
+    if (config.equals(CONFIG_TYPE_USB) || (config.equals(CONFIG_TYPE_WS) && uri != null)) {
       intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
       intent.putExtra(ExamplePOSActivity.EXTRA_CLEAR_TOKEN, clearToken);
       intent.putExtra(ExamplePOSActivity.EXTRA_WS_ENDPOINT, uri);
       startActivity(intent);
 
-    } else if (config.equals("GO")) {
+    } else if (config.equals(CONFIG_TYPE_GO)) {
       if (Validator.isNetworkConnected(this)) {
         intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
         intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, mGoAccessToken);
@@ -314,14 +303,6 @@ public class StartupActivity extends Activity {
         intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, mGoApiKey);
         intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, mGoSecret);
         intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ENV, GO_ENV);
-
-        if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp450RadioButton) {
-          intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP450);
-
-        } else if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp350RadioButton) {
-          intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP350);
-
-        }
 
         startActivity(intent);
       } else {
@@ -338,7 +319,7 @@ public class StartupActivity extends Activity {
       URI uri = new URI(uriStr);
       String addressOnly = String.format("%s://%s:%d%s", uri.getScheme(), uri.getHost(), uri.getPort(), uri.getPath());
       editor.putString(LAN_PAY_DISPLAY_URL, addressOnly);
-      editor.putString(CONNECTION_MODE, LAN);
+      editor.putString(CONNECTION_MODE, CONFIG_TYPE_LAN);
       editor.apply();
       return uri;
     } catch (URISyntaxException e) {
@@ -355,7 +336,7 @@ public class StartupActivity extends Activity {
     setGoParams();
 
     if (((RadioGroup) findViewById(R.id.radioGroup)).getCheckedRadioButtonId() == R.id.goRadioButton) {
-      getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).edit().putString(CONNECTION_MODE, GO).commit();
+      getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).edit().putString(CONNECTION_MODE, CONFIG_TYPE_GO).commit();
     }
 
     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mOAuthUrl));
@@ -384,7 +365,7 @@ public class StartupActivity extends Activity {
 
               if (Validator.isNetworkConnected(StartupActivity.this)) {
                 String accessToken = jsonObject.getString("access_token");
-                String config = "GO";
+                String config = CONFIG_TYPE_GO;
 
                 Intent intent = new Intent();
                 intent.setClass(StartupActivity.this, ExamplePOSActivity.class);
@@ -395,17 +376,10 @@ public class StartupActivity extends Activity {
                 intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, mGoSecret);
                 intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ENV, GO_ENV);
 
-                if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp450RadioButton)
-                  intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP450);
-                else if (readerRadioGroup.getCheckedRadioButtonId() == R.id.rp350RadioButton)
-                  intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_READER_TYPE, RP350);
-
                 startActivity(intent);
               } else {
                 showToast("Check Internet Connection");
-
               }
-
             }
           } catch (JSONException | IOException e) {
             e.printStackTrace();
