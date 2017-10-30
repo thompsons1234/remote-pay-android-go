@@ -258,6 +258,8 @@ public class CloverGoConnectorImpl {
           }
           mWriteToCard.getObservable(mLastTransactionReader, data).subscribe();
 
+        } else if (mPayment.getCard().isSignatureRequired()) {
+          notifySignatureRequired();
         } else {
           Log.d(TAG, "mPaymentObserver next non-EMV_CONTACT");
           notifySendReceipt();
@@ -277,9 +279,9 @@ public class CloverGoConnectorImpl {
           mBroadcaster.notifyOnConfirmPaymentRequest(confirmPaymentRequest);
           return;
         } else if ((CHARGE_DECLINED.equals(mTransactionError.getCode()) ||
-          CHARGE_DECLINED_REFERRAL.equals(mTransactionError.getCode())) &&
-          mReaderProgressEvent != null &&
-          mReaderProgressEvent.getEventType() == ReaderProgressEvent.EventType.EMV_DATA) {
+                CHARGE_DECLINED_REFERRAL.equals(mTransactionError.getCode())) &&
+                mReaderProgressEvent != null &&
+                mReaderProgressEvent.getEventType() == ReaderProgressEvent.EventType.EMV_DATA) {
 
           mGetConnectedReaders.getBlockingObservable().subscribe(new Consumer<ReaderInfo>() {
             @Override
@@ -591,8 +593,8 @@ public class CloverGoConnectorImpl {
     }
 
     return new MerchantInfo(mEmployeeMerchant.getMerchant().getId(), mEmployeeMerchant.getMerchant().getName(),
-      supportsSales, supportAuths, supportsPreAuths, supportsVaultCards, supportsManualRefunds, supportsVoids,
-      supportsTipAdjust, readerInfo.getBluetoothName(), readerInfo.getSerialNo(), readerInfo.getReaderType().name());
+            supportsSales, supportAuths, supportsPreAuths, supportsVaultCards, supportsManualRefunds, supportsVoids,
+            supportsTipAdjust, readerInfo.getBluetoothName(), readerInfo.getSerialNo(), readerInfo.getReaderType().name());
 
   }
 
