@@ -2074,7 +2074,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       // Must create NEW args here
       Bundle args = new Bundle();
       paymentTypeFragment.setArguments(setPaymentTypeArgs(args, transactionType));
-      fragmentTransaction.add(R.id.contentContainer, paymentTypeFragment);
+      fragmentTransaction.add(R.id.contentContainer, paymentTypeFragment, FRAGMENT_PAYMENT_METHODS);
 
     } else {
 
@@ -2096,11 +2096,18 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public void paymentTypeSelected(String transactionType, String paymentType) {
 
     FragmentManager fragmentManager = getFragmentManager();
-    RegisterFragment refFragment = (RegisterFragment) fragmentManager.findFragmentByTag("REGISTER");
-    if (refFragment != null) {
+    RegisterFragment registerFragment = (RegisterFragment) fragmentManager.findFragmentByTag("REGISTER");
+    if (registerFragment != null) {
 
       Log.d(TAG, "Proceeding with transaction, transactionType: " + transactionType + ", paymentType: " + paymentType);
-      refFragment.proceedWithTransaction(transactionType, getCloverConnector(), paymentType);
+
+      if (paymentType.equals(AppConstants.PAYMENT_TYPE_RP350)) {
+        goReaderType = ReaderInfo.ReaderType.RP350;
+      } else if (paymentType.equals(AppConstants.PAYMENT_TYPE_RP450)) {
+        goReaderType = ReaderInfo.ReaderType.RP450;
+      }
+
+      registerFragment.proceedWithTransaction(transactionType, getCloverConnector(), paymentType);
     } else {
       throw new RuntimeException("OOPS!  There is no register fragment!");
     }
@@ -2111,7 +2118,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   private void hideFragments(FragmentManager fragmentManager, FragmentTransaction fragmentTransaction) {
-    Fragment fragment = fragmentManager.findFragmentByTag("ORDERS");
+    Fragment fragment = fragmentManager.findFragmentByTag(AppConstants.FRAGMENT_PAYMENT_METHODS);
+    if (fragment != null) {
+      fragmentTransaction.hide(fragment);
+    }
+    fragment = fragmentManager.findFragmentByTag("ORDERS");
     if (fragment != null) {
       fragmentTransaction.hide(fragment);
     }

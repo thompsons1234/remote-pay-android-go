@@ -29,7 +29,7 @@ import java.util.List;
 public class CloverGoConnector extends DefaultCloverGoConnector {
 
   private CloverGoDeviceConfiguration cloverGoDeviceConfiguration;
-  private CloverGoConnectorImpl cloverGoConnectorImpl;
+  private static CloverGoConnectorImpl cloverGoConnectorImpl;
 
   public CloverGoConnector(CloverGoDeviceConfiguration mCloverGoConfiguration) {
     this.cloverGoDeviceConfiguration = mCloverGoConfiguration;
