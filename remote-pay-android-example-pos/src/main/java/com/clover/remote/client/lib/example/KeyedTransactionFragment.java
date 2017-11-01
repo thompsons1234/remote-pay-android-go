@@ -88,7 +88,6 @@ public class KeyedTransactionFragment extends DialogFragment {
             }
         });
 
-
         return view;
     }
 

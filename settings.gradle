@@ -1,4 +1,4 @@
 //include ':remote-pay-android-connector', ':remote-pay-android-example-pos', 'native-android-example-pos', ':remote-pay-android-simple-example', ':reader', ':data', ':domain', ':roam'
 
 // TODO: Go developers to revert back where native-android-example, and remote-pay-android-simple-example is included before merging the changes into main(develop?) branch
-include ':remote-pay-android-connector', ':remote-pay-android-example-pos', ':reader', ':data', ':domain', ':roam'
+include ':remote-pay-android-connector', ':remote-pay-android-example-pos', ':roam'

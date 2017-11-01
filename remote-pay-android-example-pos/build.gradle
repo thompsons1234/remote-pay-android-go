@@ -1,5 +1,6 @@
 buildscript {
   repositories {
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
     maven { url 'https://maven.fabric.io/public' }
   }
 
@@ -19,8 +20,9 @@ repositories {
   mavenLocal()
   maven { url "http://artifactory.corp.clover.com:8081/artifactory/repo" }
   mavenCentral()
+  maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
   maven { url 'https://maven.fabric.io/public' }
-    google()
+  google()
 }
 
 android {
@@ -53,8 +55,8 @@ dependencies {
   compile 'com.google.code.gson:gson:2.8.0'
   compile 'com.google.android.gms:play-services-vision:10.2.6'
 
-    compile 'com.android.support:multidex:1.0.1'
-    compile('com.crashlytics.sdk.android:crashlytics:2.7.0@aar') {
-        transitive = true;
-    }
+  compile 'com.android.support:multidex:1.0.1'
+  compile('com.crashlytics.sdk.android:crashlytics:2.7.0@aar') {
+    transitive = true;
+  }
 }

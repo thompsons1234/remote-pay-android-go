@@ -11,6 +11,7 @@ repositories {
   maven { url "http://artifactory.corp.clover.com:8081/artifactory/repo" }
   maven { url "http://artifactory.corp.clover.com:8081/artifactory/libs-release" }
   mavenCentral()
+  maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
   jcenter()
 }
 
@@ -31,6 +32,7 @@ android {
 defaultTasks 'install'
 
 dependencies {
+
   compile 'com.clover:clover-remote-interface:214-SNAPSHOT'
   compile 'com.clover.sdk:clover-android-sdk:187-SNAPSHOT'
   compile 'com.google.code.gson:gson:2.3.1'
@@ -40,15 +42,15 @@ dependencies {
   compile 'com.google.android.gms:play-services-gcm:10.2.6'
   compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
   annotationProcessor 'com.google.dagger:dagger-compiler:2.9'
-  compile project(':data')
+  compile "com.firstdata.clovergo:data:$cloverGoSDKVersion-SNAPSHOT:QaRelease@aar"
   compile 'com.squareup.okhttp3:okhttp:3.5.0'
   compile 'com.squareup.retrofit2:retrofit:2.1.0'
   compile 'com.squareup.retrofit2:converter-jackson:2.1.0'
-  compile project(':domain')
+  compile "com.firstdata.clovergo:domain:$cloverGoSDKVersion-SNAPSHOT"
   compile 'com.squareup.retrofit2:adapter-rxjava2:2.2.0'
   compile 'io.reactivex.rxjava2:rxjava:2.0.6'
   compile 'com.google.dagger:dagger:2.9'
-  compile project(':reader')
+  compile "com.firstdata.clovergo:reader:$cloverGoSDKVersion-SNAPSHOT@aar"
   compile project(':roam')
 }
 
@@ -69,7 +71,7 @@ task androidJavadocs(type: Javadoc, dependsOn: 'assembleRelease') {
             '**/SaleRequest.java', '**/com/clover/sdk/v3/payments/Payment.java', '**/Challenge.java',
             '**/AuthRequest.java', '**/PreAuthRequest.java', '**/TipAdjustAuthRequest.java',
             '**/CapturePreAuthRequest.java', '**/VoidPaymentRequest.java', '**/RefundPaymentRequest.java',
-            '**/CloseoutRequest.java'
+            '**/CloseoutRequest.java', '**/ICloverGoConnectorListener.java'
 
     exclude '**/R.html', '**/R.*.html', '**/index.html'
 }
