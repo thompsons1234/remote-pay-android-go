@@ -1,0 +1,2 @@
+configurations.maybeCreate("default")
+artifacts.add("default", file('clover-android-sdk-187-SNAPSHOT.aar'))
