@@ -1,17 +1,21 @@
 package com.clover.remote.client.clovergo;
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.clover.remote.Challenge;
+import com.clover.remote.client.Constants;
 import com.clover.remote.client.MerchantInfo;
 import com.clover.remote.client.clovergo.di.CloverGoSDKApplicationData;
 import com.clover.remote.client.clovergo.messages.BillingAddress;
 import com.clover.remote.client.clovergo.messages.GoPayment;
 import com.clover.remote.client.clovergo.messages.KeyedAuthRequest;
 import com.clover.remote.client.clovergo.messages.KeyedPreAuthRequest;
+import com.clover.remote.client.clovergo.messages.KeyedRequest;
 import com.clover.remote.client.clovergo.messages.KeyedSaleRequest;
 import com.clover.remote.client.lib.BuildConfig;
+import com.clover.remote.client.lib.R;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthRequest;
@@ -96,6 +100,9 @@ import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.clover.remote.client.clovergo.CloverGoConstants.CARD_MODE_EMV_CONTACT;
+import static com.clover.remote.client.clovergo.CloverGoConstants.TRANSACTION_TYPE_AUTH;
+import static com.clover.remote.client.clovergo.CloverGoConstants.TRANSACTION_TYPE_PREAUTH;
+import static com.clover.remote.client.clovergo.CloverGoConstants.TRANSACTION_TYPE_SALE;
 import static com.firstdata.clovergo.domain.model.ReaderProgressEvent.EventType.EMV_DATA;
 import static com.firstdata.clovergo.domain.model.ReaderProgressEvent.EventType.SWIPE_DATA;
 
@@ -168,9 +175,12 @@ public class CloverGoConnectorImpl {
   private TransactionError mTransactionError;
   private EmployeeMerchant mEmployeeMerchant;
 
+  private Context context;
+
   public CloverGoConnectorImpl(final CloverGoConnectorBroadcaster broadcaster, CloverGoDeviceConfiguration configuration) {
     Log.d(TAG, "CloverGoConnectorImpl env=" + configuration.getEnv());
     mBroadcaster = broadcaster;
+    context = configuration.getContext();
 
     CloverGoDeviceConfiguration.ENV env = configuration.getEnv();
     String url;
@@ -647,7 +657,32 @@ public class CloverGoConnectorImpl {
       mScanDisposable.dispose();
   }
 
-  public void sale(SaleRequest saleRequest, final ReaderInfo.ReaderType readerType, boolean allowDuplicate) {
+  public void preAuth(PreAuthRequest preAuthRequest, final ReaderInfo.ReaderType readerType, boolean allowDuplicate) {
+
+    Log.d(TAG, "preauth");
+    if (mEmployeeMerchant != null && !mEmployeeMerchant.getMerchant().getFeatures().contains("preAuths")) {
+      Log.d(TAG, "preauth not supported");
+      mBroadcaster.notifyOnPreAuthResponse(new PreAuthResponse(false, ResultCode.UNSUPPORTED));
+      return;
+    }
+
+    beginTransaction(TRANSACTION_TYPE_PREAUTH, preAuthRequest, readerType, allowDuplicate);
+  }
+
+  public void auth(final AuthRequest authRequest, final ReaderInfo.ReaderType readerType, boolean allowDuplicate) {
+
+    Log.d(TAG, "auth");
+    if (mEmployeeMerchant != null && !mEmployeeMerchant.getMerchant().getFeatures().contains("auths")) {
+      Log.d(TAG, "preauth not supported");
+      mBroadcaster.notifyOnAuthResponse(new AuthResponse(false, ResultCode.UNSUPPORTED));
+      return;
+    }
+
+    beginTransaction(TRANSACTION_TYPE_AUTH, authRequest, readerType, allowDuplicate);
+  }
+
+  public void sale(final SaleRequest saleRequest, final ReaderInfo.ReaderType readerType, final boolean allowDuplicate) {
+
     Log.d(TAG, "sale");
 
     if (mEmployeeMerchant != null && !mEmployeeMerchant.getMerchant().getFeatures().contains("sales")) {
@@ -656,95 +691,153 @@ public class CloverGoConnectorImpl {
       return;
     }
 
-    mLastTransactionRequest = saleRequest;
-    clearReferenceData();
-    mOrder = new Order();
-    TaxRate taxRate = null;
-    mOrder.addCustomItem(new Order.CustomItem("item", ((double) saleRequest.getAmount()) / 100, 1, taxRate));
+    beginTransaction(TRANSACTION_TYPE_SALE, saleRequest, readerType, allowDuplicate);
+  }
 
-    if (saleRequest.getTipAmount() != null) {
-      mOrder.setTip(((double) saleRequest.getTipAmount()) / 100);
-    }
+  private void beginTransaction(final String transactionType, final TransactionRequest transactionRequest, final ReaderInfo.ReaderType readerType, final boolean allowDuplicate) {
 
-    mOrder.setExternalPaymentId(saleRequest.getExternalId());
-    mOrder.allowDuplicates = allowDuplicate;
+    int cardEntryMethods = transactionRequest.getCardEntryMethods();
+    List<ReaderInfo> connectedReaders = mGetConnectedReaders.getBlockingObservable().toList().blockingGet();
 
-    if (saleRequest instanceof KeyedSaleRequest) {
-      mCreditCard = new CreditCard(((KeyedSaleRequest) saleRequest).getCardNumber(), ((KeyedSaleRequest) saleRequest).getExpDate(), ((KeyedSaleRequest) saleRequest).getCvv());
-      mCreditCard.setCardPresent(((KeyedSaleRequest) saleRequest).isCardPresent());
-      if (((KeyedSaleRequest) saleRequest).getBillingAddress() != null) {
-        BillingAddress address = ((KeyedSaleRequest) saleRequest).getBillingAddress();
-        mCreditCard.setBillingAddress(new CreditCard.BillingAddress(address.getStreet(), address.getZipPostalCode(), address.getCountry()));
-      }
-      mAuthOrSaleTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
+    // If either Key Entered card entry method is allowed OR at least one card reader is allowed and connected,
+    // then go to the payment options screen.
+    if (cardEntrySwitchIsOn(cardEntryMethods, Constants.CARD_ENTRY_METHOD_MANUAL) ||
+      atLeastOneCardReaderAllowedAndConnected(cardEntryMethods, connectedReaders)) {
+
+      mBroadcaster.notifyOnPaymentTypeRequired(transactionType, cardEntryMethods, connectedReaders, new ICloverGoConnectorListener.PaymentTypeSelection() {
+        @Override
+        public void selectPaymentType(ICloverGoConnector.GoPaymentType goPaymentType) {
+          continueTransactionAfterPaymentTypeChosen(transactionType, transactionRequest, goPaymentType, readerType, allowDuplicate);
+        }
+      });
+
     } else {
-      startCardReaderTransaction(readerType);
+
+      Log.d(TAG, "mBroadcaster.notifyOnDeviceError");
+
+      // Otherwise display an error because either nothing was allowed or connected
+      mBroadcaster.notifyOnDeviceError(
+        new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.READER_NOT_CONNECTED,
+          0,
+          null,
+          context.getString(R.string.no_card_readers_connected_no_keyenter_allowed)));
+
     }
   }
 
-  public void preAuth(PreAuthRequest preAuthRequest, final ReaderInfo.ReaderType readerType, boolean allowDuplicate) {
-    Log.d(TAG, "preauth");
-    if (mEmployeeMerchant != null && !mEmployeeMerchant.getMerchant().getFeatures().contains("preAuths")) {
-      Log.d(TAG, "preauth not supported");
-      mBroadcaster.notifyOnPreAuthResponse(new PreAuthResponse(false, ResultCode.UNSUPPORTED));
-      return;
-    }
+  private boolean atLeastOneCardReaderAllowedAndConnected(int cardEntryMethods, List<ReaderInfo> connectedReaders) {
 
-    mLastTransactionRequest = preAuthRequest;
+    boolean rp350Available =  ((cardEntrySwitchIsOn(cardEntryMethods, Constants.CARD_ENTRY_METHOD_ICC_CONTACT) ||
+      cardEntrySwitchIsOn(cardEntryMethods, Constants.CARD_ENTRY_METHOD_MAG_STRIPE)) &&
+      readerConnected(ReaderInfo.ReaderType.RP350, connectedReaders));
+
+    boolean rp450Available = (cardEntrySwitchIsOn(cardEntryMethods, Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS) &&
+      readerConnected(ReaderInfo.ReaderType.RP450, connectedReaders));
+
+    return rp350Available || rp450Available;
+  }
+
+  private boolean readerConnected(ReaderInfo.ReaderType readerType, List<ReaderInfo> connectedReaders) {
+
+    boolean connected = false;
+
+    if (connectedReaders != null && connectedReaders.size() > 0) {
+      for (ReaderInfo connectedReader : connectedReaders) {
+        if (connectedReader.getReaderType() == readerType) {
+          connected = true;
+        }
+      }
+    }
+    return connected;
+  }
+
+  private boolean cardEntrySwitchIsOn(int cardEntryMethods, int cardEntryOption) {
+    return ((cardEntryMethods & cardEntryOption) == cardEntryOption);
+  }
+
+  public void continueTransactionAfterPaymentTypeChosen(final String transactionType,
+                                                        final TransactionRequest transactionRequest,
+                                                        final ICloverGoConnector.GoPaymentType goPaymentType,
+                                                        final ReaderInfo.ReaderType readerType,
+                                                        final boolean allowDuplicate) {
+
+    Log.d(TAG, "continueTransactionAfterPaymentTypeChosen");
+
+    // Now, still need callback for KeyEntry, yes?
+    if (goPaymentType == ICloverGoConnector.GoPaymentType.KEYED) {
+
+      mBroadcaster.notifyOnManualCardEntryRequired(transactionType, transactionRequest, goPaymentType, readerType, allowDuplicate, new ICloverGoConnectorListener.ManualCardEntry() {
+        @Override
+        public void cardDataEntered(TransactionRequest transactionRequest, String transactionType) {
+          continueTransactionAfterCardEnteredManually(transactionType, transactionRequest, goPaymentType, readerType, allowDuplicate);
+        }
+      });
+
+    } else {
+
+      // Card reader transaction (not keyed)
+      prepOrder(transactionType, transactionRequest, allowDuplicate);
+      startCardReaderTransaction(readerType, transactionType);
+    }
+  }
+
+  public void continueTransactionAfterCardEnteredManually(String transactionType,
+                                                          final TransactionRequest transactionRequest,
+                                                          final ICloverGoConnector.GoPaymentType goPaymentType,
+                                                          final ReaderInfo.ReaderType readerType,
+                                                          boolean allowDuplicate) {
+
+    Log.d(TAG, "continueTransactionAfterCardEnteredManually");
+
+    prepOrder(transactionType, transactionRequest, allowDuplicate);
+    prepKeyedCreditCardForTransaction((KeyedRequest)transactionRequest);
+    mAuthOrSaleTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
+  }
+
+  private void prepOrder(String transactionType, TransactionRequest transactionRequest, boolean allowDuplicate) {
+    mLastTransactionRequest = transactionRequest;
     clearReferenceData();
     mOrder = new Order();
     TaxRate taxRate = null;
-    mOrder.addCustomItem(new Order.CustomItem("item", ((double) preAuthRequest.getAmount()) / 100, 1, taxRate));
-    mOrder.setTip(TIP_AMOUNT_AUTH);
-    mOrder.setExternalPaymentId(preAuthRequest.getExternalId());
+    mOrder.addCustomItem(new Order.CustomItem("item", ((double) transactionRequest.getAmount()) / 100, 1, taxRate));
+
+    if (transactionType.equals(TRANSACTION_TYPE_AUTH) || transactionType.equals(TRANSACTION_TYPE_PREAUTH)) {
+      mOrder.setTip(TIP_AMOUNT_AUTH);
+
+    } else if (transactionType.equals(TRANSACTION_TYPE_SALE)){
+
+      Long tipAmount = ((SaleRequest)transactionRequest).getTipAmount();
+
+      if (tipAmount != null) {
+        mOrder.setTip(((double) tipAmount) / 100);
+      }
+    }
+    mOrder.setExternalPaymentId(transactionRequest.getExternalId());
     mOrder.allowDuplicates = allowDuplicate;
     //TODO: setTax amount in Order
+  }
 
-    if (preAuthRequest instanceof KeyedPreAuthRequest) {
-      CreditCard creditCard = new CreditCard(((KeyedPreAuthRequest) preAuthRequest).getCardNumber(), ((KeyedPreAuthRequest) preAuthRequest).getExpDate(), ((KeyedPreAuthRequest) preAuthRequest).getCvv());
-      creditCard.setCardPresent(((KeyedPreAuthRequest) preAuthRequest).isCardPresent());
-      if (((KeyedPreAuthRequest) preAuthRequest).getBillingAddress() != null) {
-        BillingAddress address = ((KeyedPreAuthRequest) preAuthRequest).getBillingAddress();
-        creditCard.setBillingAddress(new CreditCard.BillingAddress(address.getStreet(), address.getZipPostalCode(), address.getCountry()));
-      }
-      mAuthOrSaleTransaction.getObservable(mOrder, creditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
-    } else {
-      startCardReaderTransaction(readerType);
+  private void prepKeyedCreditCardForTransaction(KeyedRequest keyedRequest) {
+    mCreditCard = new CreditCard(keyedRequest.getCardNumber(), keyedRequest.getExpDate(), keyedRequest.getCvv());
+    mCreditCard.setCardPresent(keyedRequest.isCardPresent());
+    if (keyedRequest.getBillingAddress() != null) {
+      BillingAddress address = keyedRequest.getBillingAddress();
+      mCreditCard.setBillingAddress(new CreditCard.BillingAddress(address.getStreet(), address.getZipPostalCode(), address.getCountry()));
     }
   }
 
-  public void auth(AuthRequest authRequest, final ReaderInfo.ReaderType readerType, boolean allowDuplicate) {
-    Log.d(TAG, "auth");
-    if (mEmployeeMerchant != null && !mEmployeeMerchant.getMerchant().getFeatures().contains("auths")) {
-      Log.d(TAG, "preauth not supported");
-      mBroadcaster.notifyOnAuthResponse(new AuthResponse(false, ResultCode.UNSUPPORTED));
-      return;
-    }
+  private void startCardReaderTransaction(final ReaderInfo.ReaderType readerType, String transactionType) {
 
-    mLastTransactionRequest = authRequest;
-    clearReferenceData();
-    mOrder = new Order();
-    TaxRate taxRate = null;
-    mOrder.addCustomItem(new Order.CustomItem("item", ((double) authRequest.getAmount()) / 100, 1, taxRate));
-    mOrder.setTip(-1);
-    mOrder.setExternalPaymentId(authRequest.getExternalId());
-    mOrder.allowDuplicates = allowDuplicate;
-    //TODO: setTax amount in Order
+    String message = "";
 
-    if (authRequest instanceof KeyedAuthRequest) {
-      CreditCard creditCard = new CreditCard(((KeyedAuthRequest) authRequest).getCardNumber(), ((KeyedAuthRequest) authRequest).getExpDate(), ((KeyedAuthRequest) authRequest).getCvv());
-      creditCard.setCardPresent(((KeyedAuthRequest) authRequest).isCardPresent());
-      if (((KeyedAuthRequest) authRequest).getBillingAddress() != null) {
-        BillingAddress address = ((KeyedAuthRequest) authRequest).getBillingAddress();
-        creditCard.setBillingAddress(new CreditCard.BillingAddress(address.getStreet(), address.getZipPostalCode(), address.getCountry()));
-      }
-      mAuthOrSaleTransaction.getObservable(mOrder, creditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
+    if (readerType == ReaderInfo.ReaderType.RP350) {
+      message = "Swipe or Dip card for Payment";
     } else {
-      startCardReaderTransaction(readerType);
+      message = "Swipe, Tap or Dip card for Payment";
     }
-  }
 
-  private void startCardReaderTransaction(final ReaderInfo.ReaderType readerType) {
+    mBroadcaster.notifyOnProgressDialog(transactionType, message, true);
+
     Log.d(TAG, "startCardReaderTransaction");
     mGetConnectedReaders.getBlockingObservable().filter(new Predicate<ReaderInfo>() {
       @Override
@@ -1137,9 +1230,5 @@ public class CloverGoConnectorImpl {
         cancelCardRead.getObservable(readerInfo).subscribe();
       }
     });
-  }
-
-  public GetConnectedReaders getConnectedReaders() {
-    return mGetConnectedReaders;
   }
 }

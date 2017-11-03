@@ -52,7 +52,6 @@
                 android:onClick="connect450Click"
                 android:text="Connect RP450"/>
         </LinearLayout>
-        ]
 
         <LinearLayout
             android:id="@+id/APIButtons"

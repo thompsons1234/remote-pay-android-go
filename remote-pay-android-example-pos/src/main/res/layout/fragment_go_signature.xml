@@ -47,6 +47,7 @@
         android:gestureStrokeLengthThreshold="0.1"
         android:gestureStrokeType="multiple"
         android:gestureStrokeWidth="7"
+        android:gestureColor="@color/clover_green"
         android:orientation="vertical"/>
 
     <TextView

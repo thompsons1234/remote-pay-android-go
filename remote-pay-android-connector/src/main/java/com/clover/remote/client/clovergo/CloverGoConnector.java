@@ -1,6 +1,7 @@
 package com.clover.remote.client.clovergo;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
@@ -22,6 +23,10 @@ import com.firstdata.clovergo.domain.usecase.GetConnectedReaders;
 
 import java.util.List;
 
+import static com.clover.remote.client.Constants.CARD_ENTRY_METHOD_ICC_CONTACT;
+import static com.clover.remote.client.Constants.CARD_ENTRY_METHOD_MANUAL;
+import static com.clover.remote.client.Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS;
+
 /**
  * Created by Akhani, Avdhesh on 4/18/17.
  */
@@ -33,8 +38,9 @@ public class CloverGoConnector extends DefaultCloverGoConnector {
 
   public CloverGoConnector(CloverGoDeviceConfiguration mCloverGoConfiguration) {
     this.cloverGoDeviceConfiguration = mCloverGoConfiguration;
-    if (cloverGoConnectorImpl == null)
+    if (cloverGoConnectorImpl == null) {
       cloverGoConnectorImpl = new CloverGoConnectorImpl(broadcaster, mCloverGoConfiguration);
+    }
   }
 
   /**
@@ -56,13 +62,13 @@ public class CloverGoConnector extends DefaultCloverGoConnector {
     cloverGoConnectorImpl.connectToDevice(readerInfo);
   }
 
-    /**
-     * Disconnect the card reader.  For Bluetooth, frees up the card reader.  For audio jack, performs software disconnect
-     */
-    @Override
-    public void disconnectDevice() {
-        cloverGoConnectorImpl.disconnectDevice(cloverGoDeviceConfiguration.getReaderType());
-    }
+  /**
+   * Disconnect the card reader.  For Bluetooth, frees up the card reader.  For audio jack, performs software disconnect
+   */
+  @Override
+  public void disconnectDevice() {
+    cloverGoConnectorImpl.disconnectDevice(cloverGoDeviceConfiguration.getReaderType());
+  }
 
   /**
    * Stop scanning for a bluetooth card reader
@@ -80,15 +86,28 @@ public class CloverGoConnector extends DefaultCloverGoConnector {
     broadcaster.clear();
   }
 
-    /**
-     * Starts a card reader transaction
-     * @param saleRequest
-     */
-    @Override
-    public void sale(SaleRequest saleRequest) {
-        cloverGoConnectorImpl.sale(saleRequest,cloverGoDeviceConfiguration.getReaderType(),cloverGoDeviceConfiguration.isAllowDuplicate());
-    }
+  /**
+   * Starts a card reader transaction
+   *
+   * @param saleRequest
+   */
+  @Override
+  public void sale(SaleRequest saleRequest) {
 
+    // Note: The SaleRequest has a method called getCardEntryMethods() that returns an int.
+    // That value is a combination of bits set to denote any number of card entry methods.
+    // That combination of card entry methods should be considered a mask, limiting the card entry
+    // types allowed by the app.
+    //
+    // The demo app sets those bits in the UI, however you can set them based on any logic.
+    // For Clover Go functionality, here are the bits that need to be or'd in order to set the
+    // card reader methods int value.
+    //
+    // CARD_ENTRY_METHOD_MANUAL: Manual Card Entry (keyed in)
+    // CARD_ENTRY_METHOD_NFC_CONTACTLESS: RP450 Bluetooth reader
+    // CARD_ENTRY_METHOD_ICC_CONTACT: RP350 Audio Jack reader
+    cloverGoConnectorImpl.sale(saleRequest, cloverGoDeviceConfiguration.getReaderType(), cloverGoDeviceConfiguration.isAllowDuplicate());
+  }
 
   @Override
   public void acceptPayment(com.clover.sdk.v3.payments.Payment payment) {
@@ -100,15 +119,15 @@ public class CloverGoConnector extends DefaultCloverGoConnector {
     cloverGoConnectorImpl.rejectPayment(payment, challenge);
   }
 
-    @Override
-    public void auth(AuthRequest authRequest) {
-        cloverGoConnectorImpl.auth(authRequest, cloverGoDeviceConfiguration.getReaderType(),cloverGoDeviceConfiguration.isAllowDuplicate());
-    }
+  @Override
+  public void auth(AuthRequest authRequest) {
+    cloverGoConnectorImpl.auth(authRequest, cloverGoDeviceConfiguration.getReaderType(), cloverGoDeviceConfiguration.isAllowDuplicate());
+  }
 
-    @Override
-    public void preAuth(PreAuthRequest preAuthRequest) {
-        cloverGoConnectorImpl.preAuth(preAuthRequest, cloverGoDeviceConfiguration.getReaderType(),cloverGoDeviceConfiguration.isAllowDuplicate());
-    }
+  @Override
+  public void preAuth(PreAuthRequest preAuthRequest) {
+    cloverGoConnectorImpl.preAuth(preAuthRequest, cloverGoDeviceConfiguration.getReaderType(), cloverGoDeviceConfiguration.isAllowDuplicate());
+  }
 
   @Override
   public void tipAdjustAuth(final TipAdjustAuthRequest authTipAdjustRequest) {
@@ -302,10 +321,5 @@ public class CloverGoConnector extends DefaultCloverGoConnector {
   @Override
   public void printImageFromURL(String url) throws UnsupportedOperationException {
     throw new UnsupportedOperationException("Operation Not supported in Clover Go");
-  }
-
-  @Override
-  public GetConnectedReaders getConnectedReaders() {
-    return cloverGoConnectorImpl.getConnectedReaders();
   }
 }

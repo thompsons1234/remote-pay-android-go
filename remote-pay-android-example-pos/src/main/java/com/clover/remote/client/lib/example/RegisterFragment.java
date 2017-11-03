@@ -18,7 +18,6 @@ package com.clover.remote.client.lib.example;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -59,11 +58,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static com.clover.remote.client.lib.example.AppConstants.PAYMENT_TYPE_KEYED;
-import static com.clover.remote.client.lib.example.AppConstants.TRANSACTION_TYPE_AUTH;
-import static com.clover.remote.client.lib.example.AppConstants.TRANSACTION_TYPE_SALE;
-
-
 public class RegisterFragment extends Fragment implements CurrentOrderFragmentListener, AvailableItemListener {
   private OnFragmentInteractionListener mListener;
   private static final String TAG = RegisterFragment.class.getSimpleName();
@@ -71,7 +65,6 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
   POSStore store;
   ICloverConnector cloverConnector;
   Map<POSItem, AvailableItem> itemToAvailableItem = new HashMap<POSItem, AvailableItem>();
-  private String paymentType;
 
   public static RegisterFragment newInstance(POSStore store, ICloverConnector cloverConnector) {
 
@@ -100,7 +93,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     // Inflate the layout for this fragment
     View view = inflater.inflate(R.layout.fragment_register, container, false);
 
-    GridView gv = (GridView)view.findViewById(R.id.AvailableItems);
+    GridView gv = (GridView) view.findViewById(R.id.AvailableItems);
 
     gv.setId(R.id.AvailableItems);
 
@@ -108,7 +101,8 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     gv.setAdapter(availableItemsAdapter);
 
     gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-      @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+      @Override
+      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         POSItem item = availableItemsAdapter.getItem(position);
         onItemSelected(item);
       }
@@ -129,7 +123,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     } catch (ClassCastException e) {
 
       throw new ClassCastException(activity.toString()
-                                   + " must implement OnFragmentInteractionListener: " + activity.getClass().getName());
+        + " must implement OnFragmentInteractionListener: " + activity.getClass().getName());
     }
   }
 
@@ -137,10 +131,6 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
   public void onDetach() {
     super.onDetach();
     mListener = null;
-  }
-
-  public void setPaymentType(String paymentType) {
-    this.paymentType = paymentType;
   }
 
   public interface OnFragmentInteractionListener {
@@ -171,53 +161,27 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
   @Override
   public void onSaleClicked() {
-    ((ExamplePOSActivity)getActivity()).showPaymentTypes(TRANSACTION_TYPE_SALE);
-  }
 
-  public void proceedWithTransaction(String transactionType, ICloverConnector cloverConnector, String paymentType) {
-    if (transactionType.equals(AppConstants.TRANSACTION_TYPE_AUTH)) {
-      proceedWithAuth(cloverConnector, paymentType);
-    } else if (transactionType.equals(AppConstants.TRANSACTION_TYPE_SALE)) {
-      proceedWithSale(cloverConnector,paymentType);
-    } else {
-      throw new RuntimeException("Something has gone drastically wrong!  There is no proper transactionType");
-    }
-  }
-
-  private void proceedWithSale(ICloverConnector cloverConnector, String paymentType) {
-
-    this.cloverConnector = cloverConnector;
-    this.paymentType = paymentType;
-
-    if (PAYMENT_TYPE_KEYED.equals(paymentType)){
-      KeyedTransactionFragment keyedTransactionFragment = KeyedTransactionFragment.newInstance(store,cloverConnector,"sale");
-      FragmentManager fm = getFragmentManager();
-      keyedTransactionFragment.show(fm,"KEYED_FRAGMENT");
-    }else {
-      if (cloverConnector instanceof ICloverGoConnector)
-        ((ExamplePOSActivity) getActivity()).showProgressDialog("Sale Transaction", "Swipe, Tap or Dip card for Payment", true);
-
-      String externalPaymentID = IdUtils.getNextId();
-      Log.d(TAG, "ExternalPaymentID:" + externalPaymentID);
-      store.getCurrentOrder().setPendingPaymentId(externalPaymentID);
-      SaleRequest request = new SaleRequest(store.getCurrentOrder().getTotal(), externalPaymentID);
-      request.setCardEntryMethods(store.getCardEntryMethods());
-      request.setAllowOfflinePayment(store.getAllowOfflinePayment());
-      request.setForceOfflinePayment(store.getForceOfflinePayment());
-      request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
-      request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
-      request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
-      request.setDisablePrinting(store.getDisablePrinting());
-      request.setTipMode(store.getTipMode());
-      request.setSignatureEntryLocation(store.getSignatureEntryLocation());
-      request.setSignatureThreshold(store.getSignatureThreshold());
-      request.setDisableReceiptSelection(store.getDisableReceiptOptions());
-      request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
-      request.setTipAmount(store.getTipAmount());
-      request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
-      request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
-      cloverConnector.sale(request);
-    }
+    String externalPaymentID = IdUtils.getNextId();
+    Log.d(TAG, "ExternalPaymentID:" + externalPaymentID);
+    store.getCurrentOrder().setPendingPaymentId(externalPaymentID);
+    SaleRequest request = new SaleRequest(store.getCurrentOrder().getTotal(), externalPaymentID);
+    request.setCardEntryMethods(store.getCardEntryMethods());
+    request.setAllowOfflinePayment(store.getAllowOfflinePayment());
+    request.setForceOfflinePayment(store.getForceOfflinePayment());
+    request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
+    request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
+    request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
+    request.setDisablePrinting(store.getDisablePrinting());
+    request.setTipMode(store.getTipMode());
+    request.setSignatureEntryLocation(store.getSignatureEntryLocation());
+    request.setSignatureThreshold(store.getSignatureThreshold());
+    request.setDisableReceiptSelection(store.getDisableReceiptOptions());
+    request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
+    request.setTipAmount(store.getTipAmount());
+    request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
+    request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
+    cloverConnector.sale(request);
   }
 
   @Override
@@ -230,41 +194,25 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
   @Override
   public void onAuthClicked() {
-    ((ExamplePOSActivity)getActivity()).showPaymentTypes(TRANSACTION_TYPE_AUTH);
-  }
 
-  private void proceedWithAuth(ICloverConnector cloverConnector, String paymentType) {
-
-    this.cloverConnector = cloverConnector;
-    this.paymentType = paymentType;
-
-    if (PAYMENT_TYPE_KEYED.equals(paymentType)){
-          KeyedTransactionFragment keyedTransactionFragment = KeyedTransactionFragment.newInstance(store,cloverConnector,"auth");
-          FragmentManager fm = getFragmentManager();
-          keyedTransactionFragment.show(fm,"KEYED_FRAGMENT");
-      }else {
-          if (cloverConnector instanceof ICloverGoConnector) {
-            ((ExamplePOSActivity) getActivity()).showProgressDialog("Auth Transaction", "Swipe, Tap or Dip card for Payment", true);
-          }
-          String externalPaymentID = IdUtils.getNextId();
-          Log.d(TAG, "ExternalPaymentID:" + externalPaymentID);
-          store.getCurrentOrder().setPendingPaymentId(externalPaymentID);
-          AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), externalPaymentID);
-          request.setCardEntryMethods(store.getCardEntryMethods());
-          request.setAllowOfflinePayment(store.getAllowOfflinePayment());
-          request.setForceOfflinePayment(store.getForceOfflinePayment());
-          request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
-          request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
-          request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
-          request.setDisablePrinting(store.getDisablePrinting());
-          request.setSignatureEntryLocation(store.getSignatureEntryLocation());
-          request.setSignatureThreshold(store.getSignatureThreshold());
-          request.setDisableReceiptSelection(store.getDisableReceiptOptions());
-          request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
-          request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
-          request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
-          cloverConnector.auth(request);
-      }
+    String externalPaymentID = IdUtils.getNextId();
+    Log.d(TAG, "ExternalPaymentID:" + externalPaymentID);
+    store.getCurrentOrder().setPendingPaymentId(externalPaymentID);
+    AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), externalPaymentID);
+    request.setCardEntryMethods(store.getCardEntryMethods());
+    request.setAllowOfflinePayment(store.getAllowOfflinePayment());
+    request.setForceOfflinePayment(store.getForceOfflinePayment());
+    request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
+    request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
+    request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
+    request.setDisablePrinting(store.getDisablePrinting());
+    request.setSignatureEntryLocation(store.getSignatureEntryLocation());
+    request.setSignatureThreshold(store.getSignatureThreshold());
+    request.setDisableReceiptSelection(store.getDisableReceiptOptions());
+    request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
+    request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
+    request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
+    cloverConnector.auth(request);
   }
 
   @Override
@@ -291,7 +239,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
         try {
           // Operation Not Supported in Clove Go
           cloverConnector.showWelcomeScreen();
-        }catch (UnsupportedOperationException e){
+        } catch (UnsupportedOperationException e) {
           Log.e("Example POS", e.getMessage());
         }
       }
@@ -307,20 +255,24 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
     }
 
-    @Override public void refundAdded(POSNakedRefund refund) {
+    @Override
+    public void refundAdded(POSNakedRefund refund) {
 
     }
 
 
-    @Override public void preAuthAdded(POSPayment payment) {
+    @Override
+    public void preAuthAdded(POSPayment payment) {
 
     }
 
-    @Override public void preAuthRemoved(POSPayment payment) {
+    @Override
+    public void preAuthRemoved(POSPayment payment) {
 
     }
 
-    @Override public void pendingPaymentsRetrieved(List<PendingPaymentEntry> pendingPayments) {
+    @Override
+    public void pendingPaymentsRetrieved(List<PendingPaymentEntry> pendingPayments) {
 
     }
 
@@ -345,7 +297,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
       try {
         // Operation Not Supported in Clove Go
         cloverConnector.showDisplayOrder(displayOrder);
-      }catch (UnsupportedOperationException e){
+      } catch (UnsupportedOperationException e) {
         Log.e("Example POS", e.getMessage());
       }
     }
@@ -373,7 +325,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
       try {
         // Operation Not Supported in Clove Go
         cloverConnector.showDisplayOrder(displayOrder);
-      }catch (UnsupportedOperationException e){
+      } catch (UnsupportedOperationException e) {
         Log.e("Example POS", e.getMessage());
       }
     }
@@ -396,7 +348,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
       try {
         // Operation Not Supported in Clove Go
         cloverConnector.showDisplayOrder(displayOrder);
-      }catch (UnsupportedOperationException e){
+      } catch (UnsupportedOperationException e) {
         Log.e("Example POS", e.getMessage());
       }
 

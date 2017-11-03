@@ -271,10 +271,4 @@ public class DefaultCloverGoConnector implements ICloverGoConnector {
   public void sendReceipt(String email, String phoneNo, String orderId) {
 
   }
-
-  @Override
-  public GetConnectedReaders getConnectedReaders() {
-    return null;
-  }
-
 }

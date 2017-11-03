@@ -23,6 +23,7 @@ import com.clover.remote.client.messages.RefundPaymentResponse;
 import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
 import com.clover.remote.client.messages.SaleResponse;
 import com.clover.remote.client.messages.TipAdjustAuthResponse;
+import com.clover.remote.client.messages.TransactionRequest;
 import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
@@ -119,6 +120,20 @@ public class CloverGoConnectorBroadcaster extends CopyOnWriteArrayList<ICloverGo
         }
     }
 
+    public void notifyOnPaymentTypeRequired(String transactionType, int cardEntryMethods, List<ReaderInfo> connectedReaders, ICloverGoConnectorListener.PaymentTypeSelection paymentTypeSelection) {
+        for (ICloverGoConnectorListener listener : this) {
+            listener.onPaymentTypeRequired(transactionType, cardEntryMethods, connectedReaders, paymentTypeSelection);
+        }
+    }
+
+    public void notifyOnManualCardEntryRequired(String transactionType, TransactionRequest transactionRequest, ICloverGoConnector.GoPaymentType goPaymentType,
+                                                ReaderInfo.ReaderType readerType, boolean allowDuplicate, ICloverGoConnectorListener.ManualCardEntry manualCardEntry) {
+
+        for (ICloverGoConnectorListener listener : this) {
+            listener.onManualCardEntryRequired(transactionType, transactionRequest, goPaymentType, readerType, allowDuplicate, manualCardEntry);
+        }
+    }
+
     public void notifyOnSignatureRequired(Payment payment, ICloverGoConnectorListener.SignatureCapture signatureCapture) {
         for (ICloverGoConnectorListener listener : this) {
             listener.onSignatureRequired(payment, signatureCapture);
@@ -136,7 +151,6 @@ public class CloverGoConnectorBroadcaster extends CopyOnWriteArrayList<ICloverGo
             listener.onDeviceDisconnected();
         }
     }
-
 
     public void notifyOnDisconnect(ReaderInfo readerInfo) {
         for (ICloverGoConnectorListener listener : this) {
@@ -255,6 +269,12 @@ public class CloverGoConnectorBroadcaster extends CopyOnWriteArrayList<ICloverGo
     public void notifyOnGetMerchantInfoResponse(boolean isSuccess) {
         for (ICloverGoConnectorListener listener : this) {
             listener.onGetMerchantInfoResponse(isSuccess);
+        }
+    }
+
+    public void notifyOnProgressDialog(String title, String message, boolean isCancelable) {
+        for (ICloverGoConnectorListener listener : this) {
+            listener.notifyOnProgressDialog(title, message, isCancelable);
         }
     }
 }

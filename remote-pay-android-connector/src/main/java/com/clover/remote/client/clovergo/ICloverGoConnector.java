@@ -45,5 +45,9 @@ public interface ICloverGoConnector extends ICloverConnector {
 
   void sendReceipt(String email, String phoneNo, String orderId);
 
-  GetConnectedReaders getConnectedReaders();
- }
+  enum GoPaymentType {
+    KEYED,
+    RP350,
+    RP450
+  }
+}

@@ -3,4 +3,5 @@
   <string name="hello_world">Hello world!</string>
   <string name="action_settings">Settings</string>
   <string name="partial_auth_error_msg">This card has been approved for %1$s with a remaining balance of %2$s. \n\nWould you like to authorize this card for partial payment?</string>
+  <string name="no_card_readers_connected_no_keyenter_allowed">You are not allowing Key Entry and there are no Clover Go devices connected.  The transaction cannot continue.  Please use the Misc screen to enable Transaction Settings and/or connect a card reader first.</string>
 </resources>

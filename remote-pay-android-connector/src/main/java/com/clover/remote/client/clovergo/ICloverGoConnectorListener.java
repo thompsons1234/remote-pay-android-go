@@ -3,6 +3,7 @@ package com.clover.remote.client.clovergo;
 import com.clover.remote.client.ICloverConnectorListener;
 import com.clover.remote.client.messages.CardApplicationIdentifier;
 import com.clover.remote.client.messages.CloverDeviceEvent;
+import com.clover.remote.client.messages.TransactionRequest;
 import com.firstdata.clovergo.domain.model.Order;
 import com.firstdata.clovergo.domain.model.Payment;
 import com.firstdata.clovergo.domain.model.ReaderInfo;
@@ -29,7 +30,7 @@ public interface ICloverGoConnectorListener extends ICloverConnectorListener {
   /**
    * Chip cards have application identifiers which negotiates with the card reader on what application identifier to use to send card data back to reader to process transaction.
    * <p>
-   * In case card has multiple application identifiers and reader is not able to negotiate explicit consent from customer is needed to proceed.
+   * In case card has multiple application identifiers and reader is not able to negotiate, explicit consent from customer is needed to proceed.
    * Please return one of the application identifiers from the list to proceed or null to cancel transaction
    *
    * @param applicationIdentifierList - application identifier from the card.
@@ -37,11 +38,32 @@ public interface ICloverGoConnectorListener extends ICloverConnectorListener {
    */
   void onAidMatch(List<CardApplicationIdentifier> applicationIdentifierList, AidSelection aidSelection);
 
+  void onPaymentTypeRequired(String transactionType, int cardEntryMethods, List<ReaderInfo> connectedReaders, PaymentTypeSelection paymentTypeSelection);
+
+  void onManualCardEntryRequired(String transactionType, TransactionRequest saleRequest, ICloverGoConnector.GoPaymentType goPaymentType,
+                                 ReaderInfo.ReaderType readerType, boolean allowDuplicate, ManualCardEntry manualCardEntry);
+
+  void notifyOnProgressDialog(String title, String message, boolean isCancelable);
+
   /**
    * on AidSelection return selected Application Identifier
    */
   interface AidSelection {
     void selectApplicationIdentifier(CardApplicationIdentifier selectedCardApplicationIdentifier);
+  }
+
+  /**
+   * on payment type selected
+   */
+  interface PaymentTypeSelection {
+    void selectPaymentType(ICloverGoConnector.GoPaymentType goPaymentType);
+  }
+
+  /**
+   * on manual card data entered (keyed)
+   */
+  interface ManualCardEntry {
+    void cardDataEntered(TransactionRequest transactionRequest, String transactionType);
   }
 
   void onCloverGoDeviceActivity(CloverDeviceEvent deviceEvent);

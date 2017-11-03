@@ -451,9 +451,11 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
         }
       }
     });
+
     if (!mode.equals(CONFIG_TYPE_GO)) {
       updateSwitches(view);
     } else {
+
       view.findViewById(R.id.connectReaderBox).setVisibility(View.VISIBLE);
 
       view.findViewById(R.id.miscContainer1).setVisibility(View.GONE);
@@ -463,12 +465,12 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
       view.findViewById(R.id.ResetBox).setVisibility(View.GONE);
       view.findViewById(R.id.ReadCardDataButton).setVisibility(View.GONE);
       view.findViewById(R.id.CustomActivityBox).setVisibility(View.GONE);
-
-      view.findViewById(R.id.ManualSwitch).setVisibility(View.GONE);
+//
+//      view.findViewById(R.id.ManualSwitch).setVisibility(View.GONE);
       view.findViewById(R.id.SwipeSwitch).setVisibility(View.GONE);
-      view.findViewById(R.id.ChipSwitch).setVisibility(View.GONE);
-      view.findViewById(R.id.ContactlessSwitch).setVisibility(View.GONE);
-
+//      view.findViewById(R.id.ChipSwitch).setVisibility(View.GONE);
+//      view.findViewById(R.id.ContactlessSwitch).setVisibility(View.GONE);
+//
       view.findViewById(R.id.forceOfflinePayBox).setVisibility(View.GONE);
       view.findViewById(R.id.allowOfflinePayBox).setVisibility(View.GONE);
       view.findViewById(R.id.WelcomeThankYouBox).setVisibility(View.GONE);
@@ -480,14 +482,15 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
       view.findViewById(R.id.AutomaticSignatureConfirmationSwitch).setVisibility(View.GONE);
       view.findViewById(R.id.AutomaticPaymentConfirmationSwitch).setVisibility(View.GONE);
 
-//      view.findViewById(R.id.WelcomeThankYouBox).setVisibility(View.GONE);
-//      view.findViewById(R.id.WelcomeThankYouBox).setVisibility(View.GONE);
-//      view.findViewById(R.id.WelcomeThankYouBox).setVisibility(View.GONE);
-//      view.findViewById(R.id.WelcomeThankYouBox).setVisibility(View.GONE);
+      view.findViewById(R.id.WelcomeThankYouBox).setVisibility(View.GONE);
+      view.findViewById(R.id.WelcomeThankYouBox).setVisibility(View.GONE);
+      view.findViewById(R.id.WelcomeThankYouBox).setVisibility(View.GONE);
+      view.findViewById(R.id.WelcomeThankYouBox).setVisibility(View.GONE);
+
+      updateTransactionTypeSwitches();
     }
     return view;
   }
-//onCreateView end
 
   @Override
   public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo){
@@ -642,10 +645,7 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
         Log.e(getClass().getSimpleName(), "Clover Connector Weak Reference is null");
         return;
       }
-      manualSwitch.setChecked((store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_MANUAL) == Constants.CARD_ENTRY_METHOD_MANUAL);
-      contactlessSwitch.setChecked((store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS) == Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS);
-      chipSwitch.setChecked((store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_ICC_CONTACT) == Constants.CARD_ENTRY_METHOD_ICC_CONTACT);
-      swipeSwitch.setChecked((store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_MAG_STRIPE) == Constants.CARD_ENTRY_METHOD_MAG_STRIPE);
+      updateTransactionTypeSwitches();
 
       printingSwitch.setChecked(store.getDisablePrinting() != null ? store.getDisablePrinting() : false);
       disableReceiptOptionsSwitch.setChecked(store.getDisableReceiptOptions() != null ? store.getDisableReceiptOptions() : false);
@@ -680,5 +680,12 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
       updatingSwitches = false;
     }
 
+  }
+
+  private void updateTransactionTypeSwitches() {
+    manualSwitch.setChecked((store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_MANUAL) == Constants.CARD_ENTRY_METHOD_MANUAL);
+    contactlessSwitch.setChecked((store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS) == Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS);
+    chipSwitch.setChecked((store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_ICC_CONTACT) == Constants.CARD_ENTRY_METHOD_ICC_CONTACT);
+    swipeSwitch.setChecked((store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_MAG_STRIPE) == Constants.CARD_ENTRY_METHOD_MAG_STRIPE);
   }
 }
