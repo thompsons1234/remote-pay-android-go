@@ -1,7 +1,6 @@
 package com.clover.remote.client.clovergo;
 
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
@@ -19,13 +18,8 @@ import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.remote.order.DisplayOrder;
 import com.firstdata.clovergo.domain.model.ReaderInfo;
-import com.firstdata.clovergo.domain.usecase.GetConnectedReaders;
 
 import java.util.List;
-
-import static com.clover.remote.client.Constants.CARD_ENTRY_METHOD_ICC_CONTACT;
-import static com.clover.remote.client.Constants.CARD_ENTRY_METHOD_MANUAL;
-import static com.clover.remote.client.Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS;
 
 /**
  * Created by Akhani, Avdhesh on 4/18/17.
@@ -106,7 +100,7 @@ public class CloverGoConnector extends DefaultCloverGoConnector {
     // CARD_ENTRY_METHOD_MANUAL: Manual Card Entry (keyed in)
     // CARD_ENTRY_METHOD_NFC_CONTACTLESS: RP450 Bluetooth reader
     // CARD_ENTRY_METHOD_ICC_CONTACT: RP350 Audio Jack reader
-    cloverGoConnectorImpl.sale(saleRequest, cloverGoDeviceConfiguration.getReaderType(), cloverGoDeviceConfiguration.isAllowDuplicate());
+    cloverGoConnectorImpl.sale(saleRequest, cloverGoDeviceConfiguration.isAllowDuplicate());
   }
 
   @Override

@@ -35,6 +35,10 @@ dependencies {
 
   compile 'com.clover:clover-remote-interface:214-SNAPSHOT'
   compile 'com.clover.sdk:clover-android-sdk:187-SNAPSHOT'
+
+//  compile group: 'com.clover', name: 'clover-remote-interface', version: '211.1'
+//  compile group: 'com.clover.sdk', name: 'clover-android-sdk', version: '183'
+
   compile 'com.google.code.gson:gson:2.3.1'
   compile 'com.neovisionaries:nv-websocket-client:1.31'
   testCompile 'junit:junit:4.12'

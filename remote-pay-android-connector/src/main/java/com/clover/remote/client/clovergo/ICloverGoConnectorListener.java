@@ -56,7 +56,7 @@ public interface ICloverGoConnectorListener extends ICloverConnectorListener {
    * on payment type selected
    */
   interface PaymentTypeSelection {
-    void selectPaymentType(ICloverGoConnector.GoPaymentType goPaymentType);
+    void selectPaymentType(ICloverGoConnector.GoPaymentType goPaymentType, ReaderInfo.ReaderType readerType);
   }
 
   /**

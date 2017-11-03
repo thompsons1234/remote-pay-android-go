@@ -103,6 +103,8 @@ import static com.clover.remote.client.clovergo.CloverGoConstants.CARD_MODE_EMV_
 import static com.clover.remote.client.clovergo.CloverGoConstants.TRANSACTION_TYPE_AUTH;
 import static com.clover.remote.client.clovergo.CloverGoConstants.TRANSACTION_TYPE_PREAUTH;
 import static com.clover.remote.client.clovergo.CloverGoConstants.TRANSACTION_TYPE_SALE;
+import static com.firstdata.clovergo.domain.model.ReaderInfo.ReaderType.RP350;
+import static com.firstdata.clovergo.domain.model.ReaderInfo.ReaderType.RP450;
 import static com.firstdata.clovergo.domain.model.ReaderProgressEvent.EventType.EMV_DATA;
 import static com.firstdata.clovergo.domain.model.ReaderProgressEvent.EventType.SWIPE_DATA;
 
@@ -610,7 +612,7 @@ public class CloverGoConnectorImpl {
 
   public void initializeConnection(ReaderInfo.ReaderType readerType) {
     Log.d(TAG, "initializeConnection " + readerType.name());
-    if (readerType == ReaderInfo.ReaderType.RP450) {
+    if (readerType == RP450) {
       mScanForReaders.getObservable(null, 15000).subscribe(new Observer<ReaderInfo>() {
         @Override
         public void onSubscribe(Disposable d) {
@@ -634,7 +636,7 @@ public class CloverGoConnectorImpl {
           Log.d(TAG, "initializeConnection complete");
         }
       });
-    } else if (readerType == ReaderInfo.ReaderType.RP350) {
+    } else if (readerType == RP350) {
       ReaderInfo readerInfo = ReaderInfo.createRP350ReaderType();
       mConnectToReader.getObservable(readerInfo.getReaderType(), readerInfo.getBluetoothName(), readerInfo.getBluetoothIdentifier()).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe();
     }
@@ -666,7 +668,7 @@ public class CloverGoConnectorImpl {
       return;
     }
 
-    beginTransaction(TRANSACTION_TYPE_PREAUTH, preAuthRequest, readerType, allowDuplicate);
+    beginTransaction(TRANSACTION_TYPE_PREAUTH, preAuthRequest, allowDuplicate);
   }
 
   public void auth(final AuthRequest authRequest, final ReaderInfo.ReaderType readerType, boolean allowDuplicate) {
@@ -678,10 +680,10 @@ public class CloverGoConnectorImpl {
       return;
     }
 
-    beginTransaction(TRANSACTION_TYPE_AUTH, authRequest, readerType, allowDuplicate);
+    beginTransaction(TRANSACTION_TYPE_AUTH, authRequest, allowDuplicate);
   }
 
-  public void sale(final SaleRequest saleRequest, final ReaderInfo.ReaderType readerType, final boolean allowDuplicate) {
+  public void sale(final SaleRequest saleRequest, final boolean allowDuplicate) {
 
     Log.d(TAG, "sale");
 
@@ -691,10 +693,10 @@ public class CloverGoConnectorImpl {
       return;
     }
 
-    beginTransaction(TRANSACTION_TYPE_SALE, saleRequest, readerType, allowDuplicate);
+    beginTransaction(TRANSACTION_TYPE_SALE, saleRequest, allowDuplicate);
   }
 
-  private void beginTransaction(final String transactionType, final TransactionRequest transactionRequest, final ReaderInfo.ReaderType readerType, final boolean allowDuplicate) {
+  private void beginTransaction(final String transactionType, final TransactionRequest transactionRequest, final boolean allowDuplicate) {
 
     int cardEntryMethods = transactionRequest.getCardEntryMethods();
     List<ReaderInfo> connectedReaders = mGetConnectedReaders.getBlockingObservable().toList().blockingGet();
@@ -706,7 +708,7 @@ public class CloverGoConnectorImpl {
 
       mBroadcaster.notifyOnPaymentTypeRequired(transactionType, cardEntryMethods, connectedReaders, new ICloverGoConnectorListener.PaymentTypeSelection() {
         @Override
-        public void selectPaymentType(ICloverGoConnector.GoPaymentType goPaymentType) {
+        public void selectPaymentType(ICloverGoConnector.GoPaymentType goPaymentType, ReaderInfo.ReaderType readerType) {
           continueTransactionAfterPaymentTypeChosen(transactionType, transactionRequest, goPaymentType, readerType, allowDuplicate);
         }
       });
@@ -729,10 +731,10 @@ public class CloverGoConnectorImpl {
 
     boolean rp350Available =  ((cardEntrySwitchIsOn(cardEntryMethods, Constants.CARD_ENTRY_METHOD_ICC_CONTACT) ||
       cardEntrySwitchIsOn(cardEntryMethods, Constants.CARD_ENTRY_METHOD_MAG_STRIPE)) &&
-      readerConnected(ReaderInfo.ReaderType.RP350, connectedReaders));
+      readerConnected(RP350, connectedReaders));
 
     boolean rp450Available = (cardEntrySwitchIsOn(cardEntryMethods, Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS) &&
-      readerConnected(ReaderInfo.ReaderType.RP450, connectedReaders));
+      readerConnected(RP450, connectedReaders));
 
     return rp350Available || rp450Available;
   }
@@ -830,7 +832,7 @@ public class CloverGoConnectorImpl {
 
     String message = "";
 
-    if (readerType == ReaderInfo.ReaderType.RP350) {
+    if (readerType == RP350) {
       message = "Swipe or Dip card for Payment";
     } else {
       message = "Swipe, Tap or Dip card for Payment";

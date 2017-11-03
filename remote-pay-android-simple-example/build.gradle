@@ -33,5 +33,6 @@ dependencies {
   })
   compile 'com.android.support.constraint:constraint-layout:1.0.2'
   compile 'com.clover.sdk:remote-pay-android-connector:1.2'
+//  compile group: 'com.clover.sdk', name: 'remote-pay-android-connector', version: '1.2'
   testCompile 'junit:junit:4.12'
 }

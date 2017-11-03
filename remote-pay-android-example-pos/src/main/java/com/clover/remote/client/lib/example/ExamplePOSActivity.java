@@ -2501,8 +2501,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       goReaderType = RP450;
     }
     cloverConnector = cloverGoConnectorMap.get(goReaderType);
-
-    paymentTypeSelection.selectPaymentType(paymentType);
+    updateComponentsWithNewCloverConnector();
+    paymentTypeSelection.selectPaymentType(paymentType, goReaderType);
   }
 
   public void goPaymentTypeCanceled() {
