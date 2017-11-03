@@ -14,7 +14,6 @@ import com.clover.remote.client.clovergo.messages.KeyedAuthRequest;
 import com.clover.remote.client.clovergo.messages.KeyedPreAuthRequest;
 import com.clover.remote.client.clovergo.messages.KeyedRequest;
 import com.clover.remote.client.clovergo.messages.KeyedSaleRequest;
-import com.clover.remote.client.lib.BuildConfig;
 import com.clover.remote.client.lib.R;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.AuthResponse;
@@ -54,7 +53,6 @@ import com.firstdata.clovergo.domain.model.ReaderError;
 import com.firstdata.clovergo.domain.model.ReaderInfo;
 import com.firstdata.clovergo.domain.model.ReaderProgressEvent;
 import com.firstdata.clovergo.domain.model.RefundSuccess;
-import com.firstdata.clovergo.domain.model.TaxRate;
 import com.firstdata.clovergo.domain.model.TransactionError;
 import com.firstdata.clovergo.domain.rx.EventBus;
 import com.firstdata.clovergo.domain.rx.ReusableObserver;
@@ -188,20 +186,20 @@ public class CloverGoConnectorImpl {
     String url;
     switch (env) {
       case LIVE:
-        url = "https://api.payeezy.com/clovergosdk/v1/";
+        url = "https://api.payeezy.com/clovergosdk/v2/";
         break;
       case SANDBOX:
-        url = "https://api-cert.payeezy.com/clovergosdk/v1/";
+        url = "https://api-cert.payeezy.com/clovergosdk/v2/";
         break;
       case SANDBOX_DEV:
-        url = "https://api-cert.payeezy.com/clovergosdk/v1/";
+        url = "https://api-cert.payeezy.com/clovergosdk/v2/";
         break;
       default: // DEMO is default
-        url = "https://api-cat.payeezy.com/clovergosdk/v1/";
+        url = "https://api-cat.payeezy.com/clovergosdk/v2/";
     }
 
-    CloverGoSDKApplicationData cloverGoSDKApplicationData = new CloverGoSDKApplicationData(configuration.getApplicationId(), BuildConfig.VERSION_NAME, configuration.getContext(), url, configuration.getApiKey(),
-      configuration.getSecret(), configuration.getAccessToken(), InstanceID.getInstance(configuration.getContext()).getId());
+    CloverGoSDKApplicationData cloverGoSDKApplicationData = new CloverGoSDKApplicationData(configuration.getApplicationId(), configuration.getAppVersion(), configuration.getContext(), url, configuration.getApiKey(),
+        configuration.getSecret(), configuration.getAccessToken(), InstanceID.getInstance(configuration.getContext()).getId());
     cloverGoSDKApplicationData.getApplicationComponent().inject(this);
 
     initObservers();
@@ -291,9 +289,9 @@ public class CloverGoConnectorImpl {
           mBroadcaster.notifyOnConfirmPaymentRequest(confirmPaymentRequest);
           return;
         } else if ((CHARGE_DECLINED.equals(mTransactionError.getCode()) ||
-                CHARGE_DECLINED_REFERRAL.equals(mTransactionError.getCode())) &&
-                mReaderProgressEvent != null &&
-                mReaderProgressEvent.getEventType() == ReaderProgressEvent.EventType.EMV_DATA) {
+            CHARGE_DECLINED_REFERRAL.equals(mTransactionError.getCode())) &&
+            mReaderProgressEvent != null &&
+            mReaderProgressEvent.getEventType() == ReaderProgressEvent.EventType.EMV_DATA) {
 
           mGetConnectedReaders.getBlockingObservable().subscribe(new Consumer<ReaderInfo>() {
             @Override
@@ -605,8 +603,8 @@ public class CloverGoConnectorImpl {
     }
 
     return new MerchantInfo(mEmployeeMerchant.getMerchant().getId(), mEmployeeMerchant.getMerchant().getName(),
-            supportsSales, supportAuths, supportsPreAuths, supportsVaultCards, supportsManualRefunds, supportsVoids,
-            supportsTipAdjust, readerInfo.getBluetoothName(), readerInfo.getSerialNo(), readerInfo.getReaderType().name());
+        supportsSales, supportAuths, supportsPreAuths, supportsVaultCards, supportsManualRefunds, supportsVoids,
+        supportsTipAdjust, readerInfo.getBluetoothName(), readerInfo.getSerialNo(), readerInfo.getReaderType().name());
 
   }
 
@@ -704,7 +702,7 @@ public class CloverGoConnectorImpl {
     // If either Key Entered card entry method is allowed OR at least one card reader is allowed and connected,
     // then go to the payment options screen.
     if (cardEntrySwitchIsOn(cardEntryMethods, Constants.CARD_ENTRY_METHOD_MANUAL) ||
-      atLeastOneCardReaderAllowedAndConnected(cardEntryMethods, connectedReaders)) {
+        atLeastOneCardReaderAllowedAndConnected(cardEntryMethods, connectedReaders)) {
 
       mBroadcaster.notifyOnPaymentTypeRequired(transactionType, cardEntryMethods, connectedReaders, new ICloverGoConnectorListener.PaymentTypeSelection() {
         @Override
@@ -719,22 +717,22 @@ public class CloverGoConnectorImpl {
 
       // Otherwise display an error because either nothing was allowed or connected
       mBroadcaster.notifyOnDeviceError(
-        new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.READER_NOT_CONNECTED,
-          0,
-          null,
-          context.getString(R.string.no_card_readers_connected_no_keyenter_allowed)));
+          new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.READER_NOT_CONNECTED,
+              0,
+              null,
+              context.getString(R.string.no_card_readers_connected_no_keyenter_allowed)));
 
     }
   }
 
   private boolean atLeastOneCardReaderAllowedAndConnected(int cardEntryMethods, List<ReaderInfo> connectedReaders) {
 
-    boolean rp350Available =  ((cardEntrySwitchIsOn(cardEntryMethods, Constants.CARD_ENTRY_METHOD_ICC_CONTACT) ||
-      cardEntrySwitchIsOn(cardEntryMethods, Constants.CARD_ENTRY_METHOD_MAG_STRIPE)) &&
-      readerConnected(RP350, connectedReaders));
+    boolean rp350Available = ((cardEntrySwitchIsOn(cardEntryMethods, Constants.CARD_ENTRY_METHOD_ICC_CONTACT) ||
+        cardEntrySwitchIsOn(cardEntryMethods, Constants.CARD_ENTRY_METHOD_MAG_STRIPE)) &&
+        readerConnected(RP350, connectedReaders));
 
     boolean rp450Available = (cardEntrySwitchIsOn(cardEntryMethods, Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS) &&
-      readerConnected(RP450, connectedReaders));
+        readerConnected(RP450, connectedReaders));
 
     return rp350Available || rp450Available;
   }
@@ -792,7 +790,7 @@ public class CloverGoConnectorImpl {
     Log.d(TAG, "continueTransactionAfterCardEnteredManually");
 
     prepOrder(transactionType, transactionRequest, allowDuplicate);
-    prepKeyedCreditCardForTransaction((KeyedRequest)transactionRequest);
+    prepKeyedCreditCardForTransaction((KeyedRequest) transactionRequest);
     mAuthOrSaleTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
   }
 
@@ -800,15 +798,14 @@ public class CloverGoConnectorImpl {
     mLastTransactionRequest = transactionRequest;
     clearReferenceData();
     mOrder = new Order();
-    TaxRate taxRate = null;
-    mOrder.addCustomItem(new Order.CustomItem("item", ((double) transactionRequest.getAmount()) / 100, 1, taxRate));
+    mOrder.addCustomItem(new Order.CustomItem("item", ((double) transactionRequest.getAmount()) / 100, 1, null));
 
     if (transactionType.equals(TRANSACTION_TYPE_AUTH) || transactionType.equals(TRANSACTION_TYPE_PREAUTH)) {
       mOrder.setTip(TIP_AMOUNT_AUTH);
 
-    } else if (transactionType.equals(TRANSACTION_TYPE_SALE)){
+    } else if (transactionType.equals(TRANSACTION_TYPE_SALE)) {
 
-      Long tipAmount = ((SaleRequest)transactionRequest).getTipAmount();
+      Long tipAmount = ((SaleRequest) transactionRequest).getTipAmount();
 
       if (tipAmount != null) {
         mOrder.setTip(((double) tipAmount) / 100);
@@ -973,7 +970,7 @@ public class CloverGoConnectorImpl {
   public void voidPayment(final VoidPaymentRequest voidPaymentRequest) {
     if (mEmployeeMerchant != null && mEmployeeMerchant.getMerchant().getFeatures().contains("voids")) {
       mVoidTransaction.getObservable(voidPaymentRequest.getOrderId(), voidPaymentRequest.getPaymentId()).subscribeOn(Schedulers.io())
-              .observeOn(AndroidSchedulers.mainThread()).subscribe(new CompletableObserver() {
+          .observeOn(AndroidSchedulers.mainThread()).subscribe(new CompletableObserver() {
         @Override
         public void onSubscribe(Disposable d) {
         }

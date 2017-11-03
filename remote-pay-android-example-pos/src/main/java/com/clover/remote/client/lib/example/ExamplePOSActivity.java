@@ -170,10 +170,10 @@ import static com.firstdata.clovergo.domain.model.ReaderInfo.ReaderType.RP350;
 import static com.firstdata.clovergo.domain.model.ReaderInfo.ReaderType.RP450;
 
 public class ExamplePOSActivity extends Activity implements CurrentOrderFragment.OnFragmentInteractionListener,
-  AvailableItem.OnFragmentInteractionListener, OrdersFragment.OnFragmentInteractionListener,
-  RegisterFragment.OnFragmentInteractionListener, SignatureFragment.OnFragmentInteractionListener,
-  CardsFragment.OnFragmentInteractionListener, ManualRefundsFragment.OnFragmentInteractionListener, MiscellaneousFragment.OnFragmentInteractionListener,
-  ProcessingFragment.OnFragmentInteractionListener, PreAuthFragment.OnFragmentInteractionListener {
+    AvailableItem.OnFragmentInteractionListener, OrdersFragment.OnFragmentInteractionListener,
+    RegisterFragment.OnFragmentInteractionListener, SignatureFragment.OnFragmentInteractionListener,
+    CardsFragment.OnFragmentInteractionListener, ManualRefundsFragment.OnFragmentInteractionListener, MiscellaneousFragment.OnFragmentInteractionListener,
+    ProcessingFragment.OnFragmentInteractionListener, PreAuthFragment.OnFragmentInteractionListener {
 
   private static final String TAG = "ExamplePOSActivity";
   public static final String EXAMPLE_POS_SERVER_KEY = "clover_device_endpoint";
@@ -197,6 +197,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   private ArrayAdapter<String> ratingsAdapter;
 
   public static final String EXTRA_CLOVER_GO_CONNECTOR_APP_ID = "EXTRA_CLOVER_GO_CONNECTOR_APP_ID";
+  public static final String EXTRA_CLOVER_GO_CONNECTOR_APP_VERSION = "EXTRA_CLOVER_GO_CONNECTOR_APP_VERSION";
   public static final String EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN = "EXTRA_CLOVER_GO_CONNECTOR_CONFIG_ACCESS_TOKEN";
   public static final String EXTRA_CLOVER_GO_CONNECTOR_API_KEY = "EXTRA_CLOVER_GO_CONNECTOR_CONFIG_API_KEY";
   public static final String EXTRA_CLOVER_GO_CONNECTOR_SECRET = "EXTRA_CLOVER_GO_CONNECTOR_CONFIG_SECRET";
@@ -224,6 +225,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   private String secret;
   private String accessToken;
   private String appId;
+  private String appVersion;
   private CloverGoDeviceConfiguration.ENV goEnv;
 
   private ProgressDialog progressDialog;
@@ -298,6 +300,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       secret = getIntent().getStringExtra(EXTRA_CLOVER_GO_CONNECTOR_SECRET);
       accessToken = getIntent().getStringExtra(EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN);
       appId = getIntent().getStringExtra(EXTRA_CLOVER_GO_CONNECTOR_APP_ID);
+      appVersion = getIntent().getStringExtra(EXTRA_CLOVER_GO_CONNECTOR_APP_VERSION);
       goEnv = (CloverGoDeviceConfiguration.ENV) getIntent().getSerializableExtra(EXTRA_CLOVER_GO_CONNECTOR_ENV);
 
       initializeReader(RP450);
@@ -326,7 +329,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               authToken = value;
             } else {
               Log.w(TAG, String.format("Found query parameter \"%s\" with value \"%s\"",
-                name, value));
+                  name, value));
             }
           }
           uri = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), null, uri.getFragment());
@@ -437,7 +440,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         } else {
           MerchantInfo merchantInfo = merchantInfoMap.get(RP450);
           ((TextView) findViewById(R.id.ConnectionStatusLabel)).
-            setText(String.format(merchantInfo.getDeviceInfo().getModel() + " Connected: %s (%s)", merchantInfo.getDeviceInfo().getSerial(), merchantInfo.getMerchantName()));
+              setText(String.format(merchantInfo.getDeviceInfo().getModel() + " Connected: %s (%s)", merchantInfo.getDeviceInfo().getSerial(), merchantInfo.getMerchantName()));
         }
         break;
     }
@@ -449,7 +452,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     goReaderType = readerType;
 
     if (cloverGoConnectorMap.get(readerType) == null) {
-      CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, goEnv, apiKey, secret, appId).deviceType(readerType).allowAutoConnect(false).build();
+      CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, goEnv, apiKey, secret, appId, appVersion).deviceType(readerType).allowAutoConnect(false).build();
       ICloverGoConnector cloverGoConnector = (CloverGoConnector) ConnectorFactory.createCloverConnector(config);
       cloverGoConnectorMap.put(readerType, cloverGoConnector);
       cloverGoConnector.addCloverGoConnectorListener(ccGoListener);
@@ -481,6 +484,12 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   private void initStore() {
     // initialize store...
+    store.addAvailableItem(new POSItem("100", "$1 Gift Card", 100, false, false));
+    store.addAvailableItem(new POSItem("101", "$2 Gift Card", 200, false, false));
+    store.addAvailableItem(new POSItem("102", "$3 Gift Card", 300, false, false));
+    store.addAvailableItem(new POSItem("103", "$5 Gift Card", 500, false, false));
+    store.addAvailableItem(new POSItem("104", "$10 Gift Card", 1000, false, false));
+
     store.addAvailableItem(new POSItem("0", "Chicken Nuggets", 539, true, true));
     store.addAvailableItem(new POSItem("1", "Hamburger", 699, true, true));
     store.addAvailableItem(new POSItem("2", "Cheeseburger", 759, true, true));
@@ -526,7 +535,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       }
     }
     if (requestCode == RESULT_LOAD_IMG && resultCode == RESULT_OK
-      && null != data) {
+        && null != data) {
       // Get the Image from data
 
       Uri selectedImage = data.getData();
@@ -534,7 +543,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       // Get the cursor
       Cursor cursor = getContentResolver().query(selectedImage,
-        filePathColumn, null, null, null);
+          filePathColumn, null, null, null);
       // Move to first row
       cursor.moveToFirst();
 
@@ -1167,22 +1176,22 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       @Override
       public void onRetrieveDeviceStatusResponse(RetrieveDeviceStatusResponse response) {
         showMessage((response.isSuccess() ? "Success!" : "Failed!") + " State: " + response.getState()
-          + " ExternalActivityId: " + response.getData().toString()
-          + " reason: " + response.getReason(), Toast.LENGTH_LONG);
+            + " ExternalActivityId: " + response.getData().toString()
+            + " reason: " + response.getReason(), Toast.LENGTH_LONG);
       }
 
       @Override
       public void onResetDeviceResponse(ResetDeviceResponse response) {
         showMessage((response.isSuccess() ? "Success!" : "Failed!") + " State: " + response.getState()
-          + " reason: " + response.getReason(), Toast.LENGTH_LONG);
+            + " reason: " + response.getReason(), Toast.LENGTH_LONG);
       }
 
       @Override
       public void onRetrievePaymentResponse(RetrievePaymentResponse response) {
         showMessage("RetrievePayment: " + (response.isSuccess() ? "Success!" : "Failed!")
-          + " QueryStatus: " + response.getQueryStatus() + " for id " + response.getExternalPaymentId()
-          + " Payment: " + response.getPayment()
-          + " reason: " + response.getReason(), Toast.LENGTH_LONG);
+            + " QueryStatus: " + response.getQueryStatus() + " for id " + response.getExternalPaymentId()
+            + " Payment: " + response.getPayment()
+            + " reason: " + response.getReason(), Toast.LENGTH_LONG);
       }
 
     };
@@ -1366,18 +1375,18 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         if ((cardEntryMethods & Constants.CARD_ENTRY_METHOD_MANUAL) == Constants.CARD_ENTRY_METHOD_MANUAL) {
           args.putBoolean(AppConstants.PAYMENT_TYPE_KEYED, true);
         }
-        
+
         for (ReaderInfo connectedReader : connectedReaders) {
 
           // Checking if connected again here in case it disconnected on the way to this logic
           if (connectedReader.isConnected()) {
             if (connectedReader.getReaderType() == RP350 &&
-              ((cardEntryMethods & Constants.CARD_ENTRY_METHOD_ICC_CONTACT) == Constants.CARD_ENTRY_METHOD_ICC_CONTACT)) {
+                ((cardEntryMethods & Constants.CARD_ENTRY_METHOD_ICC_CONTACT) == Constants.CARD_ENTRY_METHOD_ICC_CONTACT)) {
 
               args.putBoolean(AppConstants.PAYMENT_TYPE_RP350, true);
 
             } else if (connectedReader.getReaderType() == RP450 &&
-              ((cardEntryMethods & Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS) == Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS)) {
+                ((cardEntryMethods & Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS) == Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS)) {
 
               args.putBoolean(AppConstants.PAYMENT_TYPE_RP450, true);
             }
@@ -1512,7 +1521,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         if (response.isSuccess()) {
           GoPayment _payment = (GoPayment) response.getPayment();
           POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), "DFLTEMPLYEE", _payment.getAmount(), _payment.getTipAmount() != null ? _payment.getTipAmount() : 0,
-            _payment.getCashbackAmount() != null ? _payment.getCashbackAmount() : 0);
+              _payment.getCashbackAmount() != null ? _payment.getCashbackAmount() : 0);
           setPaymentStatus(payment, response);
           store.addPreAuth(payment);
           showMessage("PreAuth successfully processed.", Toast.LENGTH_SHORT);
@@ -2353,16 +2362,16 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       @Override
       public void run() {
         new AlertDialog.Builder(ExamplePOSActivity.this)
-          .setTitle("Reset Device")
-          .setMessage("Are you sure you want to reset the device? Warning: You may lose any pending transaction information.")
-          .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-              getCloverConnector().resetDevice();
-            }
-          })
-          .setNegativeButton("No", null)
-          .show();
+            .setTitle("Reset Device")
+            .setMessage("Are you sure you want to reset the device? Warning: You may lose any pending transaction information.")
+            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+              @Override
+              public void onClick(DialogInterface dialog, int which) {
+                getCloverConnector().resetDevice();
+              }
+            })
+            .setNegativeButton("No", null)
+            .show();
       }
     });
   }

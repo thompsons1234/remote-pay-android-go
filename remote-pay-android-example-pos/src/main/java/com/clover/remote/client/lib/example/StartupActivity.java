@@ -62,7 +62,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.clover.remote.client.lib.example.AppConstants.*;
+import static com.clover.remote.client.lib.example.AppConstants.CONFIG_TYPE_GO;
+import static com.clover.remote.client.lib.example.AppConstants.CONFIG_TYPE_LAN;
+import static com.clover.remote.client.lib.example.AppConstants.CONFIG_TYPE_USB;
+import static com.clover.remote.client.lib.example.AppConstants.CONFIG_TYPE_WS;
 
 public class StartupActivity extends Activity {
 
@@ -73,7 +76,8 @@ public class StartupActivity extends Activity {
   private static final int BARCODE_READER_REQUEST_CODE = 1;
 
   private static final CloverGoDeviceConfiguration.ENV GO_ENV = CloverGoDeviceConfiguration.ENV.DEMO;
-  private static final String APP_ID = "com.clover.examplepos:1.9"; //com.firstdata.hack2020
+  private static final String APP_ID = "com.example.clovergosampleapp"; //com.firstdata.hack2020
+  private static final String APP_VERSION = "1.0";
 
   private String mGoApiKey, mGoSecret, mGoAccessToken;
   private String mOAuthClientId, mOAuthClientSecret, mOAuthEnv, mOAuthUrl, mOAuthApiKey;
@@ -186,7 +190,7 @@ public class StartupActivity extends Activity {
           connect(parseValidateAndStoreURI(barcode.displayValue), CONFIG_TYPE_WS, false);
         }
       } else Log.e(TAG, String.format(getString(R.string.barcode_error_format),
-              CommonStatusCodes.getStatusCodeString(resultCode)));
+          CommonStatusCodes.getStatusCodeString(resultCode)));
     } else super.onActivityResult(requestCode, resultCode, data);
   }
 
@@ -300,6 +304,7 @@ public class StartupActivity extends Activity {
         intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
         intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, mGoAccessToken);
         intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_APP_ID, APP_ID);
+        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_APP_VERSION, APP_VERSION);
         intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, mGoApiKey);
         intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, mGoSecret);
         intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ENV, GO_ENV);
@@ -372,6 +377,7 @@ public class StartupActivity extends Activity {
                 intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
                 intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, accessToken);
                 intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_APP_ID, APP_ID);
+                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_APP_VERSION, APP_VERSION);
                 intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, mGoApiKey);
                 intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, mGoSecret);
                 intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ENV, GO_ENV);
