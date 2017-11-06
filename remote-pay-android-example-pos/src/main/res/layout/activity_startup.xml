@@ -59,12 +59,21 @@
             android:text="@string/native_display"/>
     </RadioGroup>
 
+    <TextView
+        android:id="@+id/version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:textSize="30sp"
+        tools:text="VERSION : 1.XX"/>
+
     <ImageView
         android:id="@+id/logoView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/radioGroup"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/version"
         android:layout_centerHorizontal="true"
         android:scaleType="fitCenter"
         android:src="@mipmap/clover_horizontal"/>

@@ -414,6 +414,30 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     ratingsAdapter = new ArrayAdapter<>(ExamplePOSActivity.this, android.R.layout.simple_list_item_1, new String[0]);
   }
 
+  @Override
+  public void onBackPressed() {
+    AlertDialog.Builder confirmationDialog = new AlertDialog.Builder(this);
+    confirmationDialog.setTitle("Exit");
+    confirmationDialog.setMessage("Are you sure you want to close the sample app?");
+    confirmationDialog.setCancelable(false);
+    confirmationDialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+        dialog.dismiss();
+      }
+    });
+    confirmationDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+        dialog.dismiss();
+        ExamplePOSActivity.super.onBackPressed();
+      }
+    });
+    confirmationDialog.show();
+  }
+
   private void initializeReader(ReaderInfo.ReaderType readerType) {
 
     switch (readerType) {
@@ -2502,7 +2526,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void goPaymentTypeSelected(String transactionType, ICloverGoConnector.GoPaymentType paymentType) {
-
+    showRegister(null);
     Log.d(TAG, "Proceeding with transaction, transactionType: " + transactionType + ", paymentType: " + paymentType.name());
 
     if (paymentType == ICloverGoConnector.GoPaymentType.RP350) {

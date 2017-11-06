@@ -260,6 +260,7 @@ public class CloverGoConnectorImpl {
           } else {
             Log.d(TAG, "mPaymentObserver next EMV_CONTACT non-extra");
             data.put("Result", "01");
+            //TODO: Coordinate with Arjun what/when to fix here when authCode is null. This crashes if null
             data.put("Auth_Code", HexUtils.convertASCII2HexaDecimal(mPayment.getAuthCode()));
             data.put("Authorization_Response", "3030");
 

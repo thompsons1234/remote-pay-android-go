@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -113,6 +114,12 @@ public class StartupActivity extends Activity {
 
     if (null != getActionBar()) {
       getActionBar().hide();
+    }
+
+    TextView version = ((TextView)findViewById(R.id.version));
+    try {
+      version.setText("Version : " + getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
+    } catch (PackageManager.NameNotFoundException e) {
     }
 
     RadioGroup group = (RadioGroup) findViewById(R.id.radioGroup);
