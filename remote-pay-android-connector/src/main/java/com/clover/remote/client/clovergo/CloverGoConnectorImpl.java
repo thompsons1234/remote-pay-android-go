@@ -7,6 +7,7 @@ import android.util.Log;
 import com.clover.remote.Challenge;
 import com.clover.remote.client.Constants;
 import com.clover.remote.client.MerchantInfo;
+import com.clover.remote.client.clovergo.CloverGoConstants.TRANSACTION_TYPE;
 import com.clover.remote.client.clovergo.di.CloverGoSDKApplicationData;
 import com.clover.remote.client.clovergo.messages.BillingAddress;
 import com.clover.remote.client.clovergo.messages.GoPayment;
@@ -98,9 +99,6 @@ import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.clover.remote.client.clovergo.CloverGoConstants.CARD_MODE_EMV_CONTACT;
-import static com.clover.remote.client.clovergo.CloverGoConstants.TRANSACTION_TYPE_AUTH;
-import static com.clover.remote.client.clovergo.CloverGoConstants.TRANSACTION_TYPE_PREAUTH;
-import static com.clover.remote.client.clovergo.CloverGoConstants.TRANSACTION_TYPE_SALE;
 import static com.firstdata.clovergo.domain.model.ReaderInfo.ReaderType.RP350;
 import static com.firstdata.clovergo.domain.model.ReaderInfo.ReaderType.RP450;
 import static com.firstdata.clovergo.domain.model.ReaderProgressEvent.EventType.EMV_DATA;
@@ -666,7 +664,7 @@ public class CloverGoConnectorImpl {
       return;
     }
 
-    beginTransaction(TRANSACTION_TYPE_PREAUTH, preAuthRequest, allowDuplicate);
+    beginTransaction(TRANSACTION_TYPE.PRE_AUTH, preAuthRequest, allowDuplicate);
   }
 
   public void auth(final AuthRequest authRequest, final ReaderInfo.ReaderType readerType, boolean allowDuplicate) {
@@ -678,7 +676,7 @@ public class CloverGoConnectorImpl {
       return;
     }
 
-    beginTransaction(TRANSACTION_TYPE_AUTH, authRequest, allowDuplicate);
+    beginTransaction(TRANSACTION_TYPE.AUTH, authRequest, allowDuplicate);
   }
 
   public void sale(final SaleRequest saleRequest, final boolean allowDuplicate) {
@@ -691,10 +689,10 @@ public class CloverGoConnectorImpl {
       return;
     }
 
-    beginTransaction(TRANSACTION_TYPE_SALE, saleRequest, allowDuplicate);
+    beginTransaction(TRANSACTION_TYPE.SALE, saleRequest, allowDuplicate);
   }
 
-  private void beginTransaction(final String transactionType, final TransactionRequest transactionRequest, final boolean allowDuplicate) {
+  private void beginTransaction(final TRANSACTION_TYPE transactionType, final TransactionRequest transactionRequest, final boolean allowDuplicate) {
 
     int cardEntryMethods = transactionRequest.getCardEntryMethods();
     List<ReaderInfo> connectedReaders = mGetConnectedReaders.getBlockingObservable().toList().blockingGet();
@@ -755,7 +753,7 @@ public class CloverGoConnectorImpl {
     return ((cardEntryMethods & cardEntryOption) == cardEntryOption);
   }
 
-  public void continueTransactionAfterPaymentTypeChosen(final String transactionType,
+  public void continueTransactionAfterPaymentTypeChosen(final TRANSACTION_TYPE transactionType,
                                                         final TransactionRequest transactionRequest,
                                                         final ICloverGoConnector.GoPaymentType goPaymentType,
                                                         final ReaderInfo.ReaderType readerType,
@@ -768,7 +766,7 @@ public class CloverGoConnectorImpl {
 
       mBroadcaster.notifyOnManualCardEntryRequired(transactionType, transactionRequest, goPaymentType, readerType, allowDuplicate, new ICloverGoConnectorListener.ManualCardEntry() {
         @Override
-        public void cardDataEntered(TransactionRequest transactionRequest, String transactionType) {
+        public void cardDataEntered(TransactionRequest transactionRequest, TRANSACTION_TYPE transactionType) {
           continueTransactionAfterCardEnteredManually(transactionType, transactionRequest, goPaymentType, readerType, allowDuplicate);
         }
       });
@@ -781,7 +779,7 @@ public class CloverGoConnectorImpl {
     }
   }
 
-  public void continueTransactionAfterCardEnteredManually(String transactionType,
+  public void continueTransactionAfterCardEnteredManually(TRANSACTION_TYPE transactionType,
                                                           final TransactionRequest transactionRequest,
                                                           final ICloverGoConnector.GoPaymentType goPaymentType,
                                                           final ReaderInfo.ReaderType readerType,
@@ -794,16 +792,16 @@ public class CloverGoConnectorImpl {
     mAuthOrSaleTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
   }
 
-  private void prepOrder(String transactionType, TransactionRequest transactionRequest, boolean allowDuplicate) {
+  private void prepOrder(TRANSACTION_TYPE transactionType, TransactionRequest transactionRequest, boolean allowDuplicate) {
     mLastTransactionRequest = transactionRequest;
     clearReferenceData();
     mOrder = new Order();
     mOrder.addCustomItem(new Order.CustomItem("item", ((double) transactionRequest.getAmount()) / 100, 1, null));
 
-    if (transactionType.equals(TRANSACTION_TYPE_AUTH) || transactionType.equals(TRANSACTION_TYPE_PREAUTH)) {
+    if (transactionType == TRANSACTION_TYPE.AUTH || transactionType == TRANSACTION_TYPE.PRE_AUTH) {
       mOrder.setTip(TIP_AMOUNT_AUTH);
 
-    } else if (transactionType.equals(TRANSACTION_TYPE_SALE)) {
+    } else if (transactionType == TRANSACTION_TYPE.SALE) {
 
       Long tipAmount = ((SaleRequest) transactionRequest).getTipAmount();
 
@@ -825,7 +823,7 @@ public class CloverGoConnectorImpl {
     }
   }
 
-  private void startCardReaderTransaction(final ReaderInfo.ReaderType readerType, String transactionType) {
+  private void startCardReaderTransaction(final ReaderInfo.ReaderType readerType, TRANSACTION_TYPE transactionType) {
 
     String message = "";
 
@@ -835,7 +833,7 @@ public class CloverGoConnectorImpl {
       message = "Swipe, Tap or Dip card for Payment";
     }
 
-    mBroadcaster.notifyOnProgressDialog(transactionType, message, true);
+    mBroadcaster.notifyOnProgressDialog(transactionType.name(), message, true);
 
     Log.d(TAG, "startCardReaderTransaction");
     mGetConnectedReaders.getBlockingObservable().filter(new Predicate<ReaderInfo>() {
@@ -944,7 +942,7 @@ public class CloverGoConnectorImpl {
       public void onError(Throwable e) {
         Error error = Error.convertToError(e);
         Log.d(TAG, "Capture Transaction onError");
-        CapturePreAuthResponse response = new CapturePreAuthResponse(true, ResultCode.FAIL);
+        CapturePreAuthResponse response = new CapturePreAuthResponse(false, ResultCode.FAIL);
         response.setPaymentID(capturePreAuthRequest.getPaymentID());
         response.setAmount(capturePreAuthRequest.getAmount());
         response.setTipAmount(capturePreAuthRequest.getTipAmount());
