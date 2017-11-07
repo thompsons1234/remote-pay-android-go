@@ -173,12 +173,14 @@ public class CloverGoConnectorImpl {
   private TransactionError mTransactionError;
   private EmployeeMerchant mEmployeeMerchant;
 
-  private Context context;
+  private String noCardReadersConnected;
 
   public CloverGoConnectorImpl(final CloverGoConnectorBroadcaster broadcaster, CloverGoDeviceConfiguration configuration) {
     Log.d(TAG, "CloverGoConnectorImpl env=" + configuration.getEnv());
     mBroadcaster = broadcaster;
-    context = configuration.getContext();
+
+    // Getting this string here so we don't hold on to context
+    noCardReadersConnected = configuration.getContext().getString(R.string.no_card_readers_connected_no_keyenter_allowed);
 
     CloverGoDeviceConfiguration.ENV env = configuration.getEnv();
     String url;
@@ -719,8 +721,7 @@ public class CloverGoConnectorImpl {
           new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.READER_NOT_CONNECTED,
               0,
               null,
-              context.getString(R.string.no_card_readers_connected_no_keyenter_allowed)));
-
+            noCardReadersConnected));
     }
   }
 

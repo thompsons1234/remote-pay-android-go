@@ -238,6 +238,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   private ReaderInfo.ReaderType goReaderType = RP450;
   private String configType;
 
+  private Button connectionStatusButton;
+
+
   PaymentConfirmationListener paymentConfirmationListener = new PaymentConfirmationListener() {
     @Override
     public void onRejectClicked(Challenge challenge) { // Reject payment and send the challenge along for logging/reason
@@ -291,6 +294,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     CloverDeviceConfiguration config;
 
     configType = getIntent().getStringExtra(EXTRA_CLOVER_CONNECTOR_CONFIG);
+    connectionStatusButton = (Button) findViewById(R.id.ConnectionStatusButton);
+    connectionStatusButton.setEnabled(false);
 
     if (CONFIG_TYPE_GO.equals(configType)) {
       findViewById(R.id.RefundButton).setVisibility(View.GONE);
@@ -440,36 +445,34 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   private void initializeReader(ReaderInfo.ReaderType readerType) {
 
-    switch (readerType) {
+    if (readerType == RP350 || readerType == RP450) {
 
-      case RP350:
+      MerchantInfo merchantInfo = merchantInfoMap.get(readerType);
 
-        // Need paymentType in addition to goReaderType in case key entered is selected.
-        createCloverGoConnector(RP350);
+      // Need paymentType in addition to goReaderType in case key entered is selected.
+        createCloverGoConnector(readerType);
 
-        if (merchantInfoMap.get(RP350) == null) {
-          ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Disconnected");
+        if (merchantInfo == null) {
+          setDisconnectedStatus();
         } else {
-          MerchantInfo merchantInfo = merchantInfoMap.get(RP350);
-          ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText(String.format(merchantInfo.getDeviceInfo().getModel() + " Connected: %s (%s)", merchantInfo.getDeviceInfo().getSerial(), merchantInfo.getMerchantName()));
+          setConnectedStatus(merchantInfo);
         }
-        break;
-
-      case RP450:
-      default:
-
-        createCloverGoConnector(RP450);
-
-        if (merchantInfoMap.get(RP450) == null) {
-          ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Disconnected");
-        } else {
-          MerchantInfo merchantInfo = merchantInfoMap.get(RP450);
-          ((TextView) findViewById(R.id.ConnectionStatusLabel)).
-              setText(String.format(merchantInfo.getDeviceInfo().getModel() + " Connected: %s (%s)", merchantInfo.getDeviceInfo().getSerial(), merchantInfo.getMerchantName()));
-        }
-        break;
     }
     updateComponentsWithNewCloverConnector();
+  }
+
+  private void setConnectedStatus(MerchantInfo merchantInfo) {
+    connectionStatusButton.setText(String.format(merchantInfo.getDeviceInfo().getModel() + " Connected: %s (%s)", merchantInfo.getDeviceInfo().getSerial(), merchantInfo.getMerchantName()));
+    connectionStatusButton.setEnabled(true);
+  }
+
+  private void setConnectingStatus() {
+    connectionStatusButton.setText("Connecting...");
+  }
+
+  private void setDisconnectedStatus() {
+    connectionStatusButton.setText("Disconnected");
+    connectionStatusButton.setEnabled(false);
   }
 
   private void createCloverGoConnector(ReaderInfo.ReaderType readerType) {
@@ -613,7 +616,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           public void run() {
             Toast.makeText(ExamplePOSActivity.this, "Disconnected", Toast.LENGTH_SHORT).show();
             Log.d(TAG, "disconnected");
-            ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Disconnected");
+            setDisconnectedStatus();
           }
         });
 
@@ -625,7 +628,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           @Override
           public void run() {
             showMessage("Connecting...", Toast.LENGTH_SHORT);
-            ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Connecting");
+            setConnectingStatus();
           }
         });
       }
@@ -638,7 +641,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               pairingCodeDialog = null;
             }
             showMessage("Ready!", Toast.LENGTH_SHORT);
-            ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText(String.format("Connected: %s (%s)", merchantInfo.getDeviceInfo().getSerial(), merchantInfo.getMerchantName()));
+            setConnectedStatus(merchantInfo);
           }
         });
         RetrievePrintersRequest rpr = new RetrievePrintersRequest();
@@ -1252,7 +1255,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         Toast.makeText(ExamplePOSActivity.this, "Disconnected", Toast.LENGTH_SHORT).show();
         Log.d(TAG, "disconnected");
         if (goReaderType == readerInfo.getReaderType()) {
-          ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Disconnected");
+          setDisconnectedStatus();
         }
 
       }
@@ -1263,7 +1266,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           @Override
           public void run() {
             showMessage("Connecting...", Toast.LENGTH_SHORT);
-            ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText("Connecting");
+            setConnectingStatus();
           }
         });
       }
@@ -1425,7 +1428,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           public void run() {
 
             if (goReaderType.name().equalsIgnoreCase(merchantInfo.getDeviceInfo().getModel())) {
-              ((TextView) findViewById(R.id.ConnectionStatusLabel)).setText(String.format(merchantInfo.getDeviceInfo().getModel() + " Connected: %s (%s)", merchantInfo.getDeviceInfo().getSerial(), merchantInfo.getMerchantName()));
+              setConnectedStatus(merchantInfo);
             }
             if (PAYMENT_TYPE_RP450.equals(merchantInfo.getDeviceInfo().getModel())) {
               merchantInfoMap.put(RP450, merchantInfo);
@@ -1997,6 +2000,17 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     if (!usb) {
       Intent intent = new Intent(this, ExamplePOSSettingsActivity.class);
       startActivityForResult(intent, WS_ENDPOINT_ACTIVITY);
+    }
+  }
+
+  public void disconnect450(View view) {
+
+    ICloverGoConnector cloverGoConnector = cloverGoConnectorMap.get(ReaderInfo.ReaderType.RP450);
+
+    if (cloverGoConnector != null && merchantInfoMap.get(RP450) != null) {
+      cloverGoConnector.disconnectDevice();
+    } else {
+      Toast.makeText(this, "Nothing to disconnect", Toast.LENGTH_SHORT).show();
     }
   }
 

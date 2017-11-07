@@ -40,17 +40,30 @@
             android:layout_marginBottom="15sp"
             android:layout_marginRight="15dp">
 
-            <TextView
-                android:id="@+id/ConnectionStatusLabel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="fill_horizontal|center_vertical"
-                android:layout_weight="2"
-                android:paddingLeft="11dp"
-                android:paddingRight="11dp"
-                android:text="@string/disconnected"/>
+            <!--<TextView-->
+                <!--android:id="@+id/ConnectionStatusButton"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_gravity="fill_horizontal|center_vertical"-->
+                <!--android:layout_weight="2"-->
+                <!--android:paddingLeft="11dp"-->
+                <!--android:paddingRight="11dp"-->
+                <!--android:text="@string/disconnected"/>-->
 
             <Button
+              android:id="@+id/ConnectionStatusButton"
+              android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginRight="5sp"
+                android:layout_toStartOf="@+id/RegisterButton"
+                android:background="@drawable/button_border_padding"
+                android:onClick="disconnect450"
+                android:text="@string/disconnected"
+                android:textSize="18sp"/>
+
+            <Button
+                android:id="@+id/RegisterButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
