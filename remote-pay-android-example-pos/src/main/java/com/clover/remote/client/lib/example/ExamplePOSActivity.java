@@ -67,7 +67,7 @@ import com.clover.remote.client.USBCloverDeviceConfiguration;
 import com.clover.remote.client.WebSocketCloverDeviceConfiguration;
 import com.clover.remote.client.clovergo.CloverGoConnector;
 import com.clover.remote.client.clovergo.CloverGoConstants;
-import com.clover.remote.client.clovergo.CloverGoConstants.TRANSACTION_TYPE;
+import com.clover.remote.client.clovergo.CloverGoConstants.TransactionType;
 import com.clover.remote.client.clovergo.CloverGoDeviceConfiguration;
 import com.clover.remote.client.clovergo.ICloverGoConnector;
 import com.clover.remote.client.clovergo.ICloverGoConnectorListener;
@@ -298,6 +298,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     connectionStatusButton.setEnabled(false);
 
     if (CONFIG_TYPE_GO.equals(configType)) {
+
+      store.setCardEntryMethods(getDefaultCloverGoCardEntryMethods());
+
       findViewById(R.id.RefundButton).setVisibility(View.GONE);
       findViewById(R.id.CardsButton).setVisibility(View.GONE);
       findViewById(R.id.PendingButton).setVisibility(View.GONE);
@@ -1362,25 +1365,25 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       }
 
       @Override
-      public void onPaymentTypeRequired(TRANSACTION_TYPE transactionType, final int cardEntryMethods, List<ReaderInfo> connectedReaders, final PaymentTypeSelection paymentTypeSelection) {
+      public void onPaymentTypeRequired(TransactionType transactionType, final int cardEntryMethods, List<ReaderInfo> connectedReaders, final PaymentTypeSelection paymentTypeSelection) {
         ExamplePOSActivity.this.paymentTypeSelection = paymentTypeSelection;
         showGoPaymentTypes(transactionType, connectedReaders, cardEntryMethods);
       }
 
       @Override
-      public void onManualCardEntryRequired(TRANSACTION_TYPE transactionType, TransactionRequest saleRequest, ICloverGoConnector.GoPaymentType goPaymentType,
+      public void onManualCardEntryRequired(TransactionType transactionType, TransactionRequest saleRequest, ICloverGoConnector.GoPaymentType goPaymentType,
                                             ReaderInfo.ReaderType readerType, boolean allowDuplicate, ManualCardEntry manualCardEntry) {
         ExamplePOSActivity.this.manualCardEntry = manualCardEntry;
         showKeyEntry(transactionType);
       }
 
-      private void showKeyEntry(TRANSACTION_TYPE transactionType) {
+      private void showKeyEntry(TransactionType transactionType) {
         KeyedTransactionFragment keyedTransactionFragment = KeyedTransactionFragment.newInstance(store, transactionType);
         FragmentManager fm = getFragmentManager();
         keyedTransactionFragment.show(fm, FRAGMENT_KEY_ENTRY);
       }
 
-      public void showGoPaymentTypes(TRANSACTION_TYPE transactionType, List<ReaderInfo> connectedReaders, int cardEntryMethods) {
+      public void showGoPaymentTypes(TransactionType transactionType, List<ReaderInfo> connectedReaders, int cardEntryMethods) {
 
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -1396,7 +1399,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         fragmentTransaction.commit();
       }
 
-      private Bundle setGoPaymentTypeArgs(Bundle args, TRANSACTION_TYPE transactionType, List<ReaderInfo> connectedReaders, int cardEntryMethods) {
+      private Bundle setGoPaymentTypeArgs(Bundle args, TransactionType transactionType, List<ReaderInfo> connectedReaders, int cardEntryMethods) {
 
         args.putSerializable(CloverGoConstants.TRANSACTION_TYPE_ARG, transactionType);
 
@@ -2557,7 +2560,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     showRegister(null);
   }
 
-  public void keyEntryDone(TransactionRequest transactionRequest, TRANSACTION_TYPE transactionType) {
+  public void keyEntryDone(TransactionRequest transactionRequest, TransactionType transactionType) {
     manualCardEntry.cardDataEntered(transactionRequest, transactionType);
   }
 
@@ -2624,4 +2627,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
   }
+
+  private int getDefaultCloverGoCardEntryMethods() {
+    return Constants.CARD_ENTRY_METHOD_MANUAL |
+      Constants.CARD_ENTRY_METHOD_ICC_CONTACT |
+      Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS;
+  }
+
 }

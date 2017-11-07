@@ -466,10 +466,7 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
       view.findViewById(R.id.ReadCardDataButton).setVisibility(View.GONE);
       view.findViewById(R.id.CustomActivityBox).setVisibility(View.GONE);
 //
-//      view.findViewById(R.id.ManualSwitch).setVisibility(View.GONE);
       view.findViewById(R.id.SwipeSwitch).setVisibility(View.GONE);
-//      view.findViewById(R.id.ChipSwitch).setVisibility(View.GONE);
-//      view.findViewById(R.id.ContactlessSwitch).setVisibility(View.GONE);
 //
       view.findViewById(R.id.forceOfflinePayBox).setVisibility(View.GONE);
       view.findViewById(R.id.allowOfflinePayBox).setVisibility(View.GONE);
@@ -683,9 +680,18 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
   }
 
   private void updateTransactionTypeSwitches() {
-    manualSwitch.setChecked((store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_MANUAL) == Constants.CARD_ENTRY_METHOD_MANUAL);
-    contactlessSwitch.setChecked((store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS) == Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS);
-    chipSwitch.setChecked((store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_ICC_CONTACT) == Constants.CARD_ENTRY_METHOD_ICC_CONTACT);
-    swipeSwitch.setChecked((store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_MAG_STRIPE) == Constants.CARD_ENTRY_METHOD_MAG_STRIPE);
+
+    boolean manualSetting = (store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_MANUAL) == Constants.CARD_ENTRY_METHOD_MANUAL;
+    boolean contactlessSetting = (store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS) == Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS;
+    boolean contactSetting = (store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_ICC_CONTACT) == Constants.CARD_ENTRY_METHOD_ICC_CONTACT;
+    boolean swipeSetting = (store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_MAG_STRIPE) == Constants.CARD_ENTRY_METHOD_MAG_STRIPE;
+
+    // For some reason, doing it like this (below) does NOT work, or seems to work for some settings and not others.  Going with boolean variable above instead which seems reliable.
+    // manualSwitch.setChecked((store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_MANUAL) == Constants.CARD_ENTRY_METHOD_MANUAL);
+
+    manualSwitch.setChecked(manualSetting);
+    contactlessSwitch.setChecked(contactlessSetting);
+    chipSwitch.setChecked(contactSetting);
+    swipeSwitch.setChecked(swipeSetting);
   }
 }

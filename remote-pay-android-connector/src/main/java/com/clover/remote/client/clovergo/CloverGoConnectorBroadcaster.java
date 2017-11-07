@@ -1,7 +1,7 @@
 package com.clover.remote.client.clovergo;
 
 import com.clover.remote.client.MerchantInfo;
-import com.clover.remote.client.clovergo.CloverGoConstants.TRANSACTION_TYPE;
+import com.clover.remote.client.clovergo.CloverGoConstants.TransactionType;
 import com.clover.remote.client.messages.AuthResponse;
 import com.clover.remote.client.messages.CapturePreAuthResponse;
 import com.clover.remote.client.messages.CardApplicationIdentifier;
@@ -70,13 +70,13 @@ public class CloverGoConnectorBroadcaster extends CopyOnWriteArrayList<ICloverGo
     }
   }
 
-  public void notifyOnPaymentTypeRequired(TRANSACTION_TYPE transactionType, int cardEntryMethods, List<ReaderInfo> connectedReaders, ICloverGoConnectorListener.PaymentTypeSelection paymentTypeSelection) {
+  public void notifyOnPaymentTypeRequired(TransactionType transactionType, int cardEntryMethods, List<ReaderInfo> connectedReaders, ICloverGoConnectorListener.PaymentTypeSelection paymentTypeSelection) {
     for (ICloverGoConnectorListener listener : this) {
       listener.onPaymentTypeRequired(transactionType, cardEntryMethods, connectedReaders, paymentTypeSelection);
     }
   }
 
-  public void notifyOnManualCardEntryRequired(TRANSACTION_TYPE transactionType, TransactionRequest transactionRequest, ICloverGoConnector.GoPaymentType goPaymentType,
+  public void notifyOnManualCardEntryRequired(TransactionType transactionType, TransactionRequest transactionRequest, ICloverGoConnector.GoPaymentType goPaymentType,
                                               ReaderInfo.ReaderType readerType, boolean allowDuplicate, ICloverGoConnectorListener.ManualCardEntry manualCardEntry) {
 
     for (ICloverGoConnectorListener listener : this) {

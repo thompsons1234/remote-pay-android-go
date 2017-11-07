@@ -10,7 +10,7 @@ public interface CloverGoConstants {
 
   String TRANSACTION_TYPE_ARG = "TRANSACTION_TYPE_ARG";
 
-  enum TRANSACTION_TYPE {
+  enum TransactionType {
     PRE_AUTH, AUTH, SALE
   }
 }

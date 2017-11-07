@@ -1,7 +1,7 @@
 package com.clover.remote.client.clovergo;
 
 import com.clover.remote.client.ICloverConnectorListener;
-import com.clover.remote.client.clovergo.CloverGoConstants.TRANSACTION_TYPE;
+import com.clover.remote.client.clovergo.CloverGoConstants.TransactionType;
 import com.clover.remote.client.messages.CardApplicationIdentifier;
 import com.clover.remote.client.messages.CloverDeviceEvent;
 import com.clover.remote.client.messages.TransactionRequest;
@@ -39,9 +39,9 @@ public interface ICloverGoConnectorListener extends ICloverConnectorListener {
    */
   void onAidMatch(List<CardApplicationIdentifier> applicationIdentifierList, AidSelection aidSelection);
 
-  void onPaymentTypeRequired(TRANSACTION_TYPE transactionType, int cardEntryMethods, List<ReaderInfo> connectedReaders, PaymentTypeSelection paymentTypeSelection);
+  void onPaymentTypeRequired(TransactionType transactionType, int cardEntryMethods, List<ReaderInfo> connectedReaders, PaymentTypeSelection paymentTypeSelection);
 
-  void onManualCardEntryRequired(TRANSACTION_TYPE transactionType, TransactionRequest saleRequest, ICloverGoConnector.GoPaymentType goPaymentType,
+  void onManualCardEntryRequired(TransactionType transactionType, TransactionRequest saleRequest, ICloverGoConnector.GoPaymentType goPaymentType,
                                  ReaderInfo.ReaderType readerType, boolean allowDuplicate, ManualCardEntry manualCardEntry);
 
   void notifyOnProgressDialog(String title, String message, boolean isCancelable);
@@ -64,7 +64,7 @@ public interface ICloverGoConnectorListener extends ICloverConnectorListener {
    * on manual card data entered (keyed)
    */
   interface ManualCardEntry {
-    void cardDataEntered(TransactionRequest transactionRequest, TRANSACTION_TYPE transactionType);
+    void cardDataEntered(TransactionRequest transactionRequest, TransactionType transactionType);
   }
 
   void onCloverGoDeviceActivity(CloverDeviceEvent deviceEvent);

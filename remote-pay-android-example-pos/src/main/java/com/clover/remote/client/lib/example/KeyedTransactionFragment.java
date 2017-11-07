@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.clover.remote.client.clovergo.CloverGoConstants.TRANSACTION_TYPE;
+import com.clover.remote.client.clovergo.CloverGoConstants.TransactionType;
 import com.clover.remote.client.clovergo.messages.KeyedAuthRequest;
 import com.clover.remote.client.clovergo.messages.KeyedPreAuthRequest;
 import com.clover.remote.client.clovergo.messages.KeyedSaleRequest;
@@ -26,9 +26,9 @@ public class KeyedTransactionFragment extends DialogFragment {
   private final long PRE_AUTH_AMOUNT = 5000L;
 
   private POSStore store;
-  private TRANSACTION_TYPE txType;
+  private TransactionType txType;
 
-  public static KeyedTransactionFragment newInstance(POSStore store, TRANSACTION_TYPE txType) {
+  public static KeyedTransactionFragment newInstance(POSStore store, TransactionType txType) {
     KeyedTransactionFragment fragment = new KeyedTransactionFragment();
     fragment.store = store;
     fragment.txType = txType;
@@ -66,20 +66,20 @@ public class KeyedTransactionFragment extends DialogFragment {
         ((ExamplePOSActivity) getActivity()).showProgressDialog("Keyed Transaction", "Processing Transaction", false);
         getDialog().dismiss();
 
-        if (txType == TRANSACTION_TYPE.SALE) {
+        if (txType == TransactionType.SALE) {
 
           KeyedSaleRequest request = new KeyedSaleRequest(store.getCurrentOrder().getTotal(), IdUtils.getNextId(), cardNumber, expiration, cvv);
           request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
           request.setTipAmount(store.getTipAmount());
           doneKeyEntry(txType, request);
 
-        } else if (txType == TRANSACTION_TYPE.AUTH) {
+        } else if (txType == TransactionType.AUTH) {
 
           KeyedAuthRequest request = new KeyedAuthRequest(store.getCurrentOrder().getTotal(), IdUtils.getNextId(), cardNumber, expiration, cvv);
           request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
           doneKeyEntry(txType, request);
 
-        } else if (txType == TRANSACTION_TYPE.PRE_AUTH) {
+        } else if (txType == TransactionType.PRE_AUTH) {
 
           KeyedPreAuthRequest request = new KeyedPreAuthRequest(PRE_AUTH_AMOUNT, IdUtils.getNextId(), cardNumber, expiration, cvv);
           doneKeyEntry(txType, request);
@@ -90,7 +90,7 @@ public class KeyedTransactionFragment extends DialogFragment {
     return view;
   }
 
-  private void doneKeyEntry(TRANSACTION_TYPE transactionType, TransactionRequest saleRequest) {
+  private void doneKeyEntry(TransactionType transactionType, TransactionRequest saleRequest) {
     ((ExamplePOSActivity) getActivity()).keyEntryDone(saleRequest, transactionType);
   }
 }
