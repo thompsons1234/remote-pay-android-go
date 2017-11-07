@@ -5,7 +5,7 @@ apply plugin: 'com.android.application'
 
 repositories {
   mavenLocal()
-  maven { url "http://artifactory.corp.clover.com:8081/artifactory/repo" }
+//  maven { url "http://artifactory.corp.clover.com:8081/artifactory/repo" }
   mavenCentral()
 }
 
