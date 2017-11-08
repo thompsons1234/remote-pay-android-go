@@ -304,6 +304,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       findViewById(R.id.RefundButton).setVisibility(View.GONE);
       findViewById(R.id.CardsButton).setVisibility(View.GONE);
       findViewById(R.id.PendingButton).setVisibility(View.GONE);
+      findViewById(R.id.BottomPanel).setVisibility(View.GONE);
+      findViewById(R.id.Divider).setVisibility(View.GONE);
 
       apiKey = getIntent().getStringExtra(EXTRA_CLOVER_GO_CONNECTOR_API_KEY);
       secret = getIntent().getStringExtra(EXTRA_CLOVER_GO_CONNECTOR_SECRET);
@@ -1671,7 +1673,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         if (response.isSuccess()) {
           showMessage("Closeout is scheduled.", Toast.LENGTH_SHORT);
         } else {
-          showMessage("Error scheduling closeout: " + response.getResult(), Toast.LENGTH_LONG);
+          showMessage("Error scheduling closeout: " + response.getReason(), Toast.LENGTH_LONG);
         }
       }
 
