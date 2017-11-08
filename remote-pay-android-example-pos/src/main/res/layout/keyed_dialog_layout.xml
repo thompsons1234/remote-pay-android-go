@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/llCardNumber"
@@ -24,14 +25,13 @@
             android:digits="@string/filter_number"
             android:hint="1111 1111 1111 1111"
             android:inputType="numberDecimal"
-            android:maxLength="16" />
+            android:maxLength="16"/>
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/llExpiry"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/llCardNumber"
         android:orientation="horizontal">
 
         <TextView
@@ -48,16 +48,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:digits="@string/filter_number"
-            android:inputType="numberDecimal"
             android:hint="MMYY"
-            android:maxLength="5" />
+            android:inputType="numberDecimal"
+            android:maxLength="5"/>
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/llCvv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/llExpiry"
         android:orientation="horizontal">
 
         <TextView
@@ -72,19 +71,32 @@
             android:id="@+id/cvvEditText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:inputType="numberDecimal"
             android:digits="@string/filter_number"
             android:hint="123"
-            android:maxLength="4" />
+            android:inputType="numberDecimal"
+            android:maxLength="4"/>
     </LinearLayout>
 
-    <Button
-        android:id="@+id/startTransactionBtn"
-        android:layout_width="200dp"
-        android:layout_height="56dp"
-        android:layout_below="@+id/llCvv"
-        android:layout_centerHorizontal="true"
-        android:text="@string/start_transaction_btn"
-        android:textAllCaps="false"
-        android:textSize="18dp" />
-</RelativeLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/quickFill"
+            android:layout_width="200dp"
+            android:layout_height="56dp"
+            android:padding="11dp"
+            android:text="Quick Fill"
+            android:textSize="18dp"/>
+
+        <Button
+            android:id="@+id/startTransactionBtn"
+            android:layout_width="200dp"
+            android:layout_height="56dp"
+            android:padding="11dp"
+            android:text="@string/start_transaction_btn"
+            android:textSize="18dp"/>
+    </LinearLayout>
+</LinearLayout>

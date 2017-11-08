@@ -24,6 +24,9 @@ import com.firstdata.clovergo.domain.utils.CreditCardUtil;
 
 public class KeyedTransactionFragment extends DialogFragment {
   private final long PRE_AUTH_AMOUNT = 5000L;
+  private final String CARD_NUM = "4111111111111111";
+  private final String CARD_EXP = "1220";
+  private final String CARD_CVV = "333";
 
   private POSStore store;
   private TransactionType txType;
@@ -43,6 +46,14 @@ public class KeyedTransactionFragment extends DialogFragment {
     final EditText mCardNumber = (EditText) view.findViewById(R.id.cardNumberEditText);
     final EditText mExpiration = (EditText) view.findViewById(R.id.expirationEditText);
     final EditText mCvv = (EditText) view.findViewById(R.id.cvvEditText);
+    view.findViewById(R.id.quickFill).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        mCardNumber.setText(CARD_NUM);
+        mExpiration.setText(CARD_EXP);
+        mCvv.setText(CARD_CVV);
+      }
+    });
     view.findViewById(R.id.startTransactionBtn).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
