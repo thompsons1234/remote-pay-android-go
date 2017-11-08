@@ -673,7 +673,7 @@ public class CloverGoConnectorImpl {
 
     Log.d(TAG, "auth");
     if (mEmployeeMerchant != null && !mEmployeeMerchant.getMerchant().getFeatures().contains("auths")) {
-      Log.d(TAG, "preauth not supported");
+      Log.d(TAG, "auth not supported");
       mBroadcaster.notifyOnAuthResponse(new AuthResponse(false, ResultCode.UNSUPPORTED));
       return;
     }
@@ -928,7 +928,11 @@ public class CloverGoConnectorImpl {
   }
 
   public void capturePreAuth(final CapturePreAuthRequest capturePreAuthRequest) {
-    mCaptureTransaction.getObservable(capturePreAuthRequest.getPaymentID(), ((double) capturePreAuthRequest.getAmount()) / 100, ((double) capturePreAuthRequest.getTipAmount()) / 100).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<Payment>() {
+    mCaptureTransaction.getObservable(capturePreAuthRequest.getPaymentID(),
+      ((double) capturePreAuthRequest.getAmount()) / 100,
+      ((double) capturePreAuthRequest.getTipAmount()) / 100).
+      subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<Payment>() {
+
       @Override
       public void onSubscribe(Disposable d) {
       }

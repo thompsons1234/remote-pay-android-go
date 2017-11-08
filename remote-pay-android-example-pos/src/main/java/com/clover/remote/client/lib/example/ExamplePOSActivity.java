@@ -1558,6 +1558,15 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           setPaymentStatus(payment, response);
           store.addPreAuth(payment);
           showMessage("PreAuth successfully processed.", Toast.LENGTH_SHORT);
+
+          // Should be clearing order after a preAuth so that capture does not add original preAuth
+          // amount to a capture.  In other words, preAuth is a different kind of transaction
+          // and the capture amount is not really related to it.  So the register should be cleared
+          // before allowing user to add amounts that will be captured.
+          store.createOrder(false);
+          CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
+          currentOrderFragment.setOrder(store.getCurrentOrder());
+
           showPreAuths(null);
 
         } else {
