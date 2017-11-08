@@ -194,7 +194,7 @@ public class CloverGoConnectorImpl {
         url = "https://api-cert.payeezy.com/clovergosdk/v2/";
         break;
       default: // DEMO is default
-        url = "https://api-cat.payeezy.com/clovergosdk/v2/";
+        url = "https://api-qa.payeezy.com/clovergosdk/v2/";
     }
 
     CloverGoSDKApplicationData cloverGoSDKApplicationData = new CloverGoSDKApplicationData(configuration.getApplicationId(), configuration.getAppVersion(), configuration.getContext(), url, configuration.getApiKey(),
@@ -790,7 +790,12 @@ public class CloverGoConnectorImpl {
 
     prepOrder(transactionType, transactionRequest, allowDuplicate);
     prepKeyedCreditCardForTransaction((KeyedRequest) transactionRequest);
-    mAuthOrSaleTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
+
+    if (mLastTransactionRequest instanceof SaleRequest || mLastTransactionRequest instanceof AuthRequest) {
+      mAuthOrSaleTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
+    } else if (mLastTransactionRequest instanceof PreAuthRequest) {
+      mPreAuthTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
+    }
   }
 
   private void prepOrder(TransactionType transactionType, TransactionRequest transactionRequest, boolean allowDuplicate) {
