@@ -295,7 +295,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     configType = getIntent().getStringExtra(EXTRA_CLOVER_CONNECTOR_CONFIG);
     connectionStatusButton = (Button) findViewById(R.id.ConnectionStatusButton);
-    connectionStatusButton.setEnabled(false);
 
     if (CONFIG_TYPE_GO.equals(configType)) {
 
@@ -468,7 +467,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   private void setConnectedStatus(MerchantInfo merchantInfo) {
     connectionStatusButton.setText(String.format(merchantInfo.getDeviceInfo().getModel() + " Connected: %s (%s)", merchantInfo.getDeviceInfo().getSerial(), merchantInfo.getMerchantName()));
-    connectionStatusButton.setEnabled(true);
   }
 
   private void setConnectingStatus() {
@@ -477,7 +475,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   private void setDisconnectedStatus() {
     connectionStatusButton.setText("Disconnected");
-    connectionStatusButton.setEnabled(false);
   }
 
   private void createCloverGoConnector(ReaderInfo.ReaderType readerType) {
@@ -2024,7 +2021,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     if (cloverGoConnector != null && merchantInfoMap.get(RP450) != null) {
       cloverGoConnector.disconnectDevice();
     } else {
-      Toast.makeText(this, "Nothing to disconnect", Toast.LENGTH_SHORT).show();
+      Toast.makeText(this, "No Bluetooth reader found.  To disconnect the RP350 Audio Jack reader, just pull it out of the audio jack.", Toast.LENGTH_SHORT).show();
     }
   }
 
