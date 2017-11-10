@@ -108,6 +108,10 @@ import java.io.StringWriter;
 import java.util.Collections;
 import java.util.List;
 
+import static com.clover.remote.client.Constants.CARD_ENTRY_METHOD_ICC_CONTACT;
+import static com.clover.remote.client.Constants.CARD_ENTRY_METHOD_MAG_STRIPE;
+import static com.clover.remote.client.Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS;
+
 /**
  * Provides the default implementation of the {@link ICloverConnector} interface, connecting to the device specified
  * in the constructor.  This implementation supports the registration of one or more {@link ICloverConnectorListener}
@@ -115,13 +119,7 @@ import java.util.List;
  */
 public class CloverConnector implements ICloverConnector {
 
-  private static final int KIOSK_CARD_ENTRY_METHODS = 1 << 15;
-  public static final int CARD_ENTRY_METHOD_MAG_STRIPE = 0b0001 | 0b0001_00000000 | KIOSK_CARD_ENTRY_METHODS; // 33026
-  public static final int CARD_ENTRY_METHOD_ICC_CONTACT = 0b0010 | 0b0010_00000000 | KIOSK_CARD_ENTRY_METHODS; // 33282
-  public static final int CARD_ENTRY_METHOD_NFC_CONTACTLESS = 0b0100 | 0b0100_00000000 | KIOSK_CARD_ENTRY_METHODS; // 33796
-  public static final int CARD_ENTRY_METHOD_MANUAL = 0b1000 | 0b1000_00000000 | KIOSK_CARD_ENTRY_METHODS; // 34824
   public static final int MAX_PAYLOAD_SIZE = 10000000; // maximum size of the payload of a full message.  if the payload exceeds this, the message will not be sent.
-
   public static final InputOption CANCEL_INPUT_OPTION = new InputOption(KeyPress.ESC, "Cancel");
 
   // This field maintains state for some deprecated logic and should be removed at some point in the future

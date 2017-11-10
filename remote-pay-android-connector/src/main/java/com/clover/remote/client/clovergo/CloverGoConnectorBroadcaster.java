@@ -70,9 +70,9 @@ public class CloverGoConnectorBroadcaster extends CopyOnWriteArrayList<ICloverGo
     }
   }
 
-  public void notifyOnPaymentTypeRequired(TransactionType transactionType, int cardEntryMethods, List<ReaderInfo> connectedReaders, ICloverGoConnectorListener.PaymentTypeSelection paymentTypeSelection) {
+  public void notifyOnPaymentTypeRequired(int cardEntryMethods, List<ReaderInfo> connectedReaders, ICloverGoConnectorListener.PaymentTypeSelection paymentTypeSelection) {
     for (ICloverGoConnectorListener listener : this) {
-      listener.onPaymentTypeRequired(transactionType, cardEntryMethods, connectedReaders, paymentTypeSelection);
+      listener.onPaymentTypeRequired(cardEntryMethods, connectedReaders, paymentTypeSelection);
     }
   }
 

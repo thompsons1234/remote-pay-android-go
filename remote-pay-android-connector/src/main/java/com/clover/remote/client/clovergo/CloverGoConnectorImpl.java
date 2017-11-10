@@ -2,6 +2,7 @@ package com.clover.remote.client.clovergo;
 
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.clover.remote.Challenge;
 import com.clover.remote.client.Constants;
@@ -704,7 +705,7 @@ public class CloverGoConnectorImpl {
     if (cardEntrySwitchIsOn(cardEntryMethods, Constants.CARD_ENTRY_METHOD_MANUAL) ||
         atLeastOneCardReaderAllowedAndConnected(cardEntryMethods, connectedReaders)) {
 
-      mBroadcaster.notifyOnPaymentTypeRequired(transactionType, cardEntryMethods, connectedReaders, new ICloverGoConnectorListener.PaymentTypeSelection() {
+      mBroadcaster.notifyOnPaymentTypeRequired(cardEntryMethods, connectedReaders, new ICloverGoConnectorListener.PaymentTypeSelection() {
         @Override
         public void selectPaymentType(ICloverGoConnector.GoPaymentType goPaymentType, ReaderInfo.ReaderType readerType) {
           continueTransactionAfterPaymentTypeChosen(transactionType, transactionRequest, goPaymentType, readerType, allowDuplicate);

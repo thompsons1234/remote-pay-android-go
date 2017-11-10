@@ -8,8 +8,6 @@ public interface CloverGoConstants {
 
   String CARD_MODE_EMV_CONTACT = "EMV_CONTACT";
 
-  String TRANSACTION_TYPE_ARG = "TRANSACTION_TYPE_ARG";
-
   enum TransactionType {
     PRE_AUTH, AUTH, SALE
   }

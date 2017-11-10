@@ -19,13 +19,11 @@ package com.clover.remote.client.lib.example;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.clover.remote.client.clovergo.CloverGoConstants;
 import com.clover.remote.client.clovergo.ICloverGoConnector;
 
 public class PaymentTypeFragment extends Fragment {
@@ -54,7 +52,6 @@ public class PaymentTypeFragment extends Fragment {
     if (view != null) {
 
       Bundle args = getArguments();
-      final String transactionType = args.getString(CloverGoConstants.TRANSACTION_TYPE_ARG);
       boolean showRP350 = args.getBoolean(AppConstants.PAYMENT_TYPE_RP350, false);
       boolean showRP450 = args.getBoolean(AppConstants.PAYMENT_TYPE_RP450, false);
       boolean showKeyEnter = args.getBoolean(AppConstants.PAYMENT_TYPE_KEYED, false);
@@ -65,7 +62,7 @@ public class PaymentTypeFragment extends Fragment {
         rp450Button.setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
-            continueTransaction(transactionType, ICloverGoConnector.GoPaymentType.RP450);
+            continueTransaction(ICloverGoConnector.GoPaymentType.RP450);
           }
         });
 
@@ -80,7 +77,7 @@ public class PaymentTypeFragment extends Fragment {
         rp350Button.setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
-            continueTransaction(transactionType, ICloverGoConnector.GoPaymentType.RP350);
+            continueTransaction(ICloverGoConnector.GoPaymentType.RP350);
           }
         });
 
@@ -95,7 +92,7 @@ public class PaymentTypeFragment extends Fragment {
         keyEnterButton.setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
-            continueTransaction(transactionType, ICloverGoConnector.GoPaymentType.KEYED);
+            continueTransaction(ICloverGoConnector.GoPaymentType.KEYED);
           }
         });
 
@@ -116,9 +113,9 @@ public class PaymentTypeFragment extends Fragment {
     }
   }
 
-  private void continueTransaction(String transactionType, ICloverGoConnector.GoPaymentType paymentType) {
+  private void continueTransaction(ICloverGoConnector.GoPaymentType paymentType) {
     removeMe();
-    ((ExamplePOSActivity) getActivity()).goPaymentTypeSelected(transactionType, paymentType);
+    ((ExamplePOSActivity) getActivity()).goPaymentTypeSelected(paymentType);
   }
 
   private void removeMe() {

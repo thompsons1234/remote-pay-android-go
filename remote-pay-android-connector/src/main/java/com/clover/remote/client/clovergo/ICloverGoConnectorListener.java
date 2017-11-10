@@ -39,7 +39,7 @@ public interface ICloverGoConnectorListener extends ICloverConnectorListener {
    */
   void onAidMatch(List<CardApplicationIdentifier> applicationIdentifierList, AidSelection aidSelection);
 
-  void onPaymentTypeRequired(TransactionType transactionType, int cardEntryMethods, List<ReaderInfo> connectedReaders, PaymentTypeSelection paymentTypeSelection);
+  void onPaymentTypeRequired(int cardEntryMethods, List<ReaderInfo> connectedReaders, PaymentTypeSelection paymentTypeSelection);
 
   void onManualCardEntryRequired(TransactionType transactionType, TransactionRequest saleRequest, ICloverGoConnector.GoPaymentType goPaymentType,
                                  ReaderInfo.ReaderType readerType, boolean allowDuplicate, ManualCardEntry manualCardEntry);

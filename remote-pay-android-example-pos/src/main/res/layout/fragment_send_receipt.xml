@@ -4,10 +4,11 @@
     android:background="?android:colorBackground">
 
     <TextView
-        android:id="@+id/sendReceiptEditText"
+        android:id="@+id/sendReceiptTitle"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:gravity="center_horizontal"
+        android:textSize="16sp"
         android:text="@string/send_receipt_info_lbl" />
 
     <Button
@@ -32,7 +33,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/sendReceiptEditText"
+        android:layout_below="@+id/sendReceiptTitle"
         android:layout_centerInParent="true"
         android:gravity="center"
         android:layout_above="@+id/noReceiptBtn"

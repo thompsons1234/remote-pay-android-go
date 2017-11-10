@@ -66,7 +66,6 @@ import com.clover.remote.client.MerchantInfo;
 import com.clover.remote.client.USBCloverDeviceConfiguration;
 import com.clover.remote.client.WebSocketCloverDeviceConfiguration;
 import com.clover.remote.client.clovergo.CloverGoConnector;
-import com.clover.remote.client.clovergo.CloverGoConstants;
 import com.clover.remote.client.clovergo.CloverGoConstants.TransactionType;
 import com.clover.remote.client.clovergo.CloverGoDeviceConfiguration;
 import com.clover.remote.client.clovergo.ICloverGoConnector;
@@ -1235,6 +1234,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         hideKeyboard();
         dismissDialog();
 
+        Toast.makeText(ExamplePOSActivity.this, "Transaction Complete", Toast.LENGTH_LONG).show();
+
         SendReceiptFragment fragment = SendReceiptFragment.newInstance(order.getId(), sendReceipt);
         getFragmentManager().beginTransaction().add(R.id.contentContainer, fragment).commit();
       }
@@ -1364,9 +1365,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       }
 
       @Override
-      public void onPaymentTypeRequired(TransactionType transactionType, final int cardEntryMethods, List<ReaderInfo> connectedReaders, final PaymentTypeSelection paymentTypeSelection) {
+      public void onPaymentTypeRequired(final int cardEntryMethods, List<ReaderInfo> connectedReaders, final PaymentTypeSelection paymentTypeSelection) {
         ExamplePOSActivity.this.paymentTypeSelection = paymentTypeSelection;
-        showGoPaymentTypes(transactionType, connectedReaders, cardEntryMethods);
+        showGoPaymentTypes(connectedReaders, cardEntryMethods);
       }
 
       @Override
@@ -1382,7 +1383,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         keyedTransactionFragment.show(fm, FRAGMENT_KEY_ENTRY);
       }
 
-      public void showGoPaymentTypes(TransactionType transactionType, List<ReaderInfo> connectedReaders, int cardEntryMethods) {
+      public void showGoPaymentTypes(List<ReaderInfo> connectedReaders, int cardEntryMethods) {
 
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -1392,15 +1393,13 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
         // Must create new args here.  Because I'm using args properly, not hiding fragment, but removing instead for PaymentTypes
         Bundle args = new Bundle();
-        paymentTypeFragment.setArguments(setGoPaymentTypeArgs(args, transactionType, connectedReaders, cardEntryMethods));
+        paymentTypeFragment.setArguments(setGoPaymentTypeArgs(args, connectedReaders, cardEntryMethods));
         fragmentTransaction.add(R.id.contentContainer, paymentTypeFragment, FRAGMENT_PAYMENT_METHODS);
 
         fragmentTransaction.commit();
       }
 
-      private Bundle setGoPaymentTypeArgs(Bundle args, TransactionType transactionType, List<ReaderInfo> connectedReaders, int cardEntryMethods) {
-
-        args.putSerializable(CloverGoConstants.TRANSACTION_TYPE_ARG, transactionType);
+      private Bundle setGoPaymentTypeArgs(Bundle args, List<ReaderInfo> connectedReaders, int cardEntryMethods) {
 
         if ((cardEntryMethods & Constants.CARD_ENTRY_METHOD_MANUAL) == Constants.CARD_ENTRY_METHOD_MANUAL) {
           args.putBoolean(AppConstants.PAYMENT_TYPE_KEYED, true);
@@ -2550,9 +2549,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     mDialog.show();
   }
 
-  public void goPaymentTypeSelected(String transactionType, ICloverGoConnector.GoPaymentType paymentType) {
+  public void goPaymentTypeSelected(ICloverGoConnector.GoPaymentType paymentType) {
     showRegister(null);
-    Log.d(TAG, "Proceeding with transaction, transactionType: " + transactionType + ", paymentType: " + paymentType.name());
+    Log.d(TAG, "Proceeding with transaction, paymentType: " + paymentType.name());
 
     if (paymentType == ICloverGoConnector.GoPaymentType.RP350) {
       goReaderType = RP350;
