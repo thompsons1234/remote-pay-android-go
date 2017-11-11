@@ -28,6 +28,8 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import com.clover.remote.PendingPaymentEntry;
 import com.clover.remote.client.lib.example.utils.IdUtils;
+import com.clover.sdk.v3.connector.IDisplayConnector;
+import com.clover.sdk.v3.payments.TransactionSettings;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.lib.example.adapter.AvailableItemsAdapter;
 import com.clover.remote.client.lib.example.model.OrderObserver;
@@ -63,13 +65,15 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
   POSStore store;
   ICloverConnector cloverConnector;
+  IDisplayConnector displayConnector;
   Map<POSItem, AvailableItem> itemToAvailableItem = new HashMap<POSItem, AvailableItem>();
 
-  public static RegisterFragment newInstance(POSStore store, ICloverConnector cloverConnector) {
+  public static RegisterFragment newInstance(POSStore store, ICloverConnector cloverConnector, IDisplayConnector displayConnector) {
 
     RegisterFragment fragment = new RegisterFragment();
     fragment.setStore(store);
     fragment.setCloverConnector(cloverConnector);
+    fragment.setDisplayConnector(displayConnector);
 
     Bundle args = new Bundle();
     fragment.setArguments(args);
@@ -156,6 +160,11 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     this.cloverConnector = cloverConnector;
   }
 
+  public void setDisplayConnector (IDisplayConnector displayConnector){
+    this.displayConnector = displayConnector;
+  }
+
+
   @Override
   public void onSaleClicked() {
     String externalPaymentID = IdUtils.getNextId();
@@ -231,6 +240,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     public void newOrderCreated(POSOrder order, boolean userInitiated) {
       if (cloverConnector != null && userInitiated) {
         cloverConnector.showWelcomeScreen();
+        displayConnector.showWelcomeScreen();
       }
       liToDli.clear();
       displayOrder = new DisplayOrder();
@@ -280,6 +290,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
       displayOrder.setLineItems(items);
       updateTotals(posOrder, displayOrder);
       cloverConnector.showDisplayOrder(displayOrder);
+//      displayConnector.showDisplayOrder(displayOrder);
 
     }
 
@@ -304,6 +315,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
       displayOrder.setLineItems(items);
       updateTotals(posOrder, displayOrder);
       cloverConnector.showDisplayOrder(displayOrder);
+//      displayConnector.showDisplayOrder(displayOrder);
     }
 
     @Override
@@ -322,6 +334,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
       dli.setDiscounts(dDiscounts);
       updateTotals(posOrder, displayOrder);
       cloverConnector.showDisplayOrder(displayOrder);
+//      displayConnector.showDisplayOrder(displayOrder);
 
     }
 
