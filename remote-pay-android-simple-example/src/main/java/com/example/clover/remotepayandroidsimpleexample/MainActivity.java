@@ -211,4 +211,5 @@ public class MainActivity extends Activity {
   public static ICloverConnector getCloverConnector (){
     return cloverConnector;
   }
+
 }
