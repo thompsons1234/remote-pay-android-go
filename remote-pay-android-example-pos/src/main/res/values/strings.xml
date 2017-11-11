@@ -73,6 +73,7 @@
   <string name="misc">Misc.</string>
   <string name="_new">New</string>
   <string name="no">No</string>
+  <string name="no_account">There is no Clover account.</string>
   <string name="no_discount">No Discount</string>
   <string name="non_blocking">Non-Blocking</string>
   <string name="ok">Ok</string>
