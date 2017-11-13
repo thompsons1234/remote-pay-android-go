@@ -779,6 +779,17 @@ public class CloverConnector implements ICloverConnector {
   }
 
   @Override
+  public void sendDebugLog(String message) {
+    if (device == null || !isReady) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, null, "In sendCloverDeviceLog: The Clover device is not connected."));
+    } else if (message == null) {
+      broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.VALIDATION_ERROR, 0, null, "In sendCloverDeviceLog: Invalid argument.  Null is not allowed."));
+    } else {
+      device.doSendDebugLog(message);
+    }
+  }
+
+  @Override
   public void showWelcomeScreen() {
     if (device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, null, "In showWelcomeScreen: The Clover device is not connected."));

@@ -38,6 +38,7 @@ import com.clover.remote.message.CardDataResponseMessage;
 import com.clover.remote.message.CashbackSelectedMessage;
 import com.clover.remote.message.CloseoutRequestMessage;
 import com.clover.remote.message.CloseoutResponseMessage;
+import com.clover.remote.message.CloverDeviceLogMessage;
 import com.clover.remote.message.ConfirmPaymentMessage;
 import com.clover.remote.message.CreditPrintMessage;
 import com.clover.remote.message.DeclineCreditPrintMessage;
@@ -1100,6 +1101,11 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   @Override
   public void doTerminalMessage(String text) {
     sendObjectMessage(new TerminalMessage(text));
+  }
+
+  @Override
+  public void doSendDebugLog(String message) {
+    sendObjectMessage(new CloverDeviceLogMessage(message));
   }
 
 

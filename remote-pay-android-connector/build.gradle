@@ -31,7 +31,7 @@ android {
 defaultTasks 'install'
 
 dependencies {
-  compile 'com.clover:clover-remote-interface:211-SNAPSHOT'
+  compile 'com.clover:clover-remote-interface:214-SNAPSHOT'
   compile 'com.clover.sdk:clover-android-sdk:184-SNAPSHOT'
   compile 'com.google.code.gson:gson:2.3.1'
   compile 'com.neovisionaries:nv-websocket-client:1.31'

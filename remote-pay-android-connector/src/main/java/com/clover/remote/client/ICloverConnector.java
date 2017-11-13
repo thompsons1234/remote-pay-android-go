@@ -238,6 +238,15 @@ public interface ICloverConnector extends Serializable {
   void showMessage(String message);
 
   /**
+   * Sends request to the clover device to send the log to the clover server
+   *
+   * @param message The message to display
+   */
+  void sendDebugLog(String message);
+
+
+
+  /**
    * Return the device to the Welcome Screen
    */
   void showWelcomeScreen();
@@ -345,5 +354,6 @@ public interface ICloverConnector extends Serializable {
    * @param request The request details
    */
   void retrievePayment(RetrievePaymentRequest request);
+
 
 }
