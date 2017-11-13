@@ -216,7 +216,7 @@ public class CloverConnector implements ICloverConnector {
         request.setTipAmount(0L);
       }
       try {
-        saleAuth(request, false);
+        saleAuth(request);
       } catch (Exception e) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
@@ -232,7 +232,7 @@ public class CloverConnector implements ICloverConnector {
    *
    * @param request
    */
-  private void saleAuth(TransactionRequest request, boolean suppressTipScreen) throws Exception {
+  private void saleAuth(TransactionRequest request) throws Exception {
     if (device != null && isReady) {
       lastRequest = request;
 
@@ -318,6 +318,9 @@ public class CloverConnector implements ICloverConnector {
         }
         if (req.getTipMode() != null) {
           transactionSettings.setTipMode(getV3TipModeFromRequestTipMode(req.getTipMode()));
+        }
+        else if (req.getDisableTipOnScreen()){
+          transactionSettings.setTipMode(TipMode.NO_TIP);
         }
       }
 
@@ -412,7 +415,7 @@ public class CloverConnector implements ICloverConnector {
       deviceObserver.onFinishCancel(ResultCode.UNSUPPORTED, "Merchant Configuration Validation Error", "In auth: AuthRequest - Vault Card support is not enabled for the payment gateway. Original Request = " + request, TxStartRequestMessage.AUTH_REQUEST);
     } else {
       try {
-        saleAuth(request, true);
+        saleAuth(request);
       } catch (Exception e) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
@@ -440,7 +443,7 @@ public class CloverConnector implements ICloverConnector {
     } else {
 
       try {
-        saleAuth(request, true);
+        saleAuth(request);
       } catch (Exception e) {
         lastRequest = null;
         StringWriter sw = new StringWriter();
