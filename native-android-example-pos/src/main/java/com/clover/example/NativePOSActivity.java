@@ -626,7 +626,6 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
     setContentView(R.layout.activity_example_pos);
     sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     initStore();
-    initDisplayConnector();
   }
 
   private void initDisplayConnector() {
