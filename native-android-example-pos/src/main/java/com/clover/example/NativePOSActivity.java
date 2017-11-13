@@ -16,6 +16,7 @@
 
 package com.clover.example;
 
+import com.clover.connector.sdk.v3.DisplayConnector;
 import com.clover.connector.sdk.v3.PaymentConnector;
 import com.clover.example.model.POSCard;
 import com.clover.example.model.POSDiscount;
@@ -29,6 +30,8 @@ import com.clover.example.model.POSStore;
 import com.clover.example.utils.IdUtils;
 import com.clover.sdk.v3.base.CardData;
 import com.clover.sdk.v3.base.Challenge;
+import com.clover.sdk.v3.connector.IDisplayConnector;
+import com.clover.sdk.v3.connector.IDisplayConnectorListener;
 import com.clover.sdk.v3.payments.CardTransactionState;
 import com.clover.sdk.v3.payments.CardTransactionType;
 import com.clover.sdk.v3.remotepay.AuthResponse;
@@ -60,6 +63,7 @@ import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.Payment;
 import com.clover.sdk.v3.remotepay.TipAdded;
 
+import android.accounts.Account;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -140,6 +144,8 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
 
 
   IPaymentConnector cloverConnector;
+  IDisplayConnector displayConnector;
+
   final IPaymentConnectorListener ccListener = new IPaymentConnectorListener() {
 
     public void onDeviceDisconnected() {
@@ -304,6 +310,7 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
             currentOrderFragment.setOrder(store.getCurrentOrder());
 
             showRegister(null);
+            displayConnector.showWelcomeScreen();
 /*
               SystemClock.sleep(3000);
               cloverConnector.showWelcomeScreen();
@@ -312,6 +319,7 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
         });
       } else {
         showMessage("Auth error:" + response.getResult(), Toast.LENGTH_LONG);
+        displayConnector.showMessage("There was a problem processing the transaction");
 /*
           cloverConnector.showMessage("There was a problem processing the transaction");
           SystemClock.sleep(3000);
@@ -338,6 +346,7 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
           }
         }
       });
+      displayConnector.showWelcomeScreen();
 /*
         SystemClock.sleep(3000);
         cloverConnector.showWelcomeScreen();
@@ -481,6 +490,7 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
       } else { //Handle null payment response
         showMessage("Error: Null SaleResponse", Toast.LENGTH_LONG);
       }
+      displayConnector.showWelcomeScreen();
 /*
         SystemClock.sleep(3000);
         cloverConnector.showWelcomeScreen();
@@ -590,11 +600,14 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
         if (response.getResult() == ResponseCode.CANCEL) {
           showMessage("User canceled the operation", Toast.LENGTH_SHORT);
           //cloverConnector.showWelcomeScreen();
+          displayConnector.showWelcomeScreen();
         } else {
           showMessage("Error capturing card: " + response.getResult(), Toast.LENGTH_LONG);
+          displayConnector.showMessage("Card was not saved");
           //cloverConnector.showMessage("Card was not saved");
           //SystemClock.sleep(4000); //wait 4 seconds
           //cloverConnector.showWelcomeScreen();
+          displayConnector.showWelcomeScreen();
         }
       }
     }
@@ -612,6 +625,47 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
     setContentView(R.layout.activity_example_pos);
     sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     initStore();
+    initDisplayConnector();
+  }
+
+  private void initDisplayConnector() {
+    disposeDisplayConnector();
+    // Retrieve the Clover account
+    Account account = null;
+    account = CloverAccount.getAccount(this);
+
+    // If an account can't be acquired, exit the app
+    if (account == null) {
+      Toast.makeText(this, getString(R.string.no_account), Toast.LENGTH_SHORT).show();
+      finish();
+      return;
+    }
+    Log.d(TAG, String.format("Account is=%s", account));
+    /*
+     * Just listens for connection events.
+     */
+    IDisplayConnectorListener listener = new IDisplayConnectorListener() {
+      @Override
+      public void onDeviceDisconnected() {
+        Log.d(TAG, "onDeviceDisconnected");
+      }
+
+      @Override
+      public void onDeviceConnected() {
+        Log.d(TAG, "onDeviceConnected");
+      }
+    };
+    displayConnector = new DisplayConnector(this, account, listener);
+  }
+
+  /**
+   * Destroy this classes DisplayConnector and dispose of it.
+   */
+  private void disposeDisplayConnector() {
+    if (displayConnector != null) {
+      displayConnector.dispose();
+      displayConnector = null;
+    }
   }
 
   @Override
@@ -912,7 +966,7 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
 
     Fragment fragment = fragmentManager.findFragmentByTag("REGISTER");
     if (fragment == null) {
-      fragment = RegisterFragment.newInstance(store, cloverConnector);
+      fragment = RegisterFragment.newInstance(store, cloverConnector, displayConnector);
       fragmentTransaction.add(R.id.contentContainer, fragment, "REGISTER");
     } else {
       ((RegisterFragment) fragment).setCloverConnector(cloverConnector);

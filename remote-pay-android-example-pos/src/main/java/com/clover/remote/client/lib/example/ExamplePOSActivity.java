@@ -16,7 +16,6 @@
 
 package com.clover.remote.client.lib.example;
 
-import com.clover.connector.sdk.v3.DisplayConnector;
 import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
@@ -90,14 +89,9 @@ import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.message.TipAddedMessage;
-import com.clover.sdk.util.CloverAccount;
-import com.clover.sdk.v3.connector.IDisplayConnectorListener;
 import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.Payment;
 import com.clover.sdk.v3.printer.Printer;
-import com.clover.sdk.v3.connector.IDisplayConnector;
-
-import android.accounts.Account;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -199,7 +193,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   boolean usb = true;
 
   ICloverConnector cloverConnector;
-  IDisplayConnector displayConnector;
 
   POSStore store = new POSStore();
   private AlertDialog pairingCodeDialog;
@@ -307,8 +300,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     }
 
     cloverConnector = CloverConnectorFactory.createICloverConnector(config);
-    initDisplayConnector();
-
     initialize();
 
     FrameLayout frameLayout = (FrameLayout) findViewById(R.id.contentContainer);
@@ -316,7 +307,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     FragmentManager fragmentManager = getFragmentManager();
     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-    RegisterFragment register = RegisterFragment.newInstance(store, cloverConnector, displayConnector);
+    RegisterFragment register = RegisterFragment.newInstance(store, cloverConnector);
 
     fragmentTransaction.add(R.id.contentContainer, register, "REGISTER");
     fragmentTransaction.commit();
@@ -328,46 +319,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     ratingsList = (ListView) ratingsDialog.findViewById(R.id.ratingsList);
     ratingsAdapter = new ArrayAdapter<>(ExamplePOSActivity.this, android.R.layout.simple_list_item_1, new String[0]);
 
-  }
-
-  private void initDisplayConnector() {
-    disposeDisplayConnector();
-    // Retrieve the Clover account
-    Account account = null;
-    account = CloverAccount.getAccount(this);
-
-    // If an account can't be acquired, exit the app
-    if (account == null) {
-      Toast.makeText(this, getString(R.string.no_account), Toast.LENGTH_SHORT).show();
-      finish();
-      return;
-    }
-    Log.d(TAG, String.format("Account is=%s", account));
-    /*
-     * Just listens for connection events.
-     */
-    IDisplayConnectorListener listener = new IDisplayConnectorListener() {
-      @Override
-      public void onDeviceDisconnected() {
-        Log.d(TAG, "onDeviceDisconnected");
-      }
-
-      @Override
-      public void onDeviceConnected() {
-        Log.d(TAG, "onDeviceConnected");
-      }
-    };
-    displayConnector = new DisplayConnector(this, account, listener);
-  }
-
-  /**
-   * Destroy this classes DisplayConnector and dispose of it.
-   */
-  private void disposeDisplayConnector() {
-    if (displayConnector != null) {
-      displayConnector.dispose();
-      displayConnector = null;
-    }
   }
 
   public List<Printer> getPrinters(){
@@ -701,7 +652,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                 showRegister(null);
                 SystemClock.sleep(3000);
                 cloverConnector.showWelcomeScreen();
-                displayConnector.showWelcomeScreen();
               }
               else{
                externalMismatch();
@@ -711,7 +661,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         } else {
           showMessage("Auth error:" + response.getResult(), Toast.LENGTH_LONG);
           cloverConnector.showMessage("There was a problem processing the transaction");
-          displayConnector.showMessage("There was a problem processing the transaction");
           SystemClock.sleep(3000);
         }
       }
@@ -742,7 +691,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         });
         SystemClock.sleep(3000);
         cloverConnector.showWelcomeScreen();
-        displayConnector.showWelcomeScreen();
       }
 
       @Override
@@ -919,7 +867,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         }
         SystemClock.sleep(3000);
         cloverConnector.showWelcomeScreen();
-        displayConnector.showWelcomeScreen();
       }
 
       @Override
@@ -1023,14 +970,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           if (response.getResult() == ResultCode.CANCEL) {
             showMessage("User canceled the operation", Toast.LENGTH_SHORT);
             cloverConnector.showWelcomeScreen();
-            displayConnector.showWelcomeScreen();
           } else {
             showMessage("Error capturing card: " + response.getResult(), Toast.LENGTH_LONG);
             cloverConnector.showMessage("Card was not saved");
-            displayConnector.showMessage("Card was not saved");
             SystemClock.sleep(4000); //wait 4 seconds
             cloverConnector.showWelcomeScreen();
-            displayConnector.showWelcomeScreen();
           }
         }
       }
@@ -1327,7 +1271,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     Fragment fragment = fragmentManager.findFragmentByTag("REGISTER");
     if (fragment == null) {
-      fragment = RegisterFragment.newInstance(store, cloverConnector, displayConnector);
+      fragment = RegisterFragment.newInstance(store, cloverConnector);
       fragmentTransaction.add(R.id.contentContainer, fragment, "REGISTER");
     } else {
       ((RegisterFragment) fragment).setCloverConnector(cloverConnector);
@@ -1522,18 +1466,15 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   public void showMessageClick(View view) {
     cloverConnector.showMessage(((TextView) findViewById(R.id.ShowMessageText)).getText().toString());
-    displayConnector.showMessage(((TextView) findViewById(R.id.ShowMessageText)).getText().toString());
   }
 
   public void showWelcomeMessageClick(View view) {
 
     cloverConnector.showWelcomeScreen();
-    displayConnector.showWelcomeScreen();
   }
 
   public void showThankYouClick(View view) {
     cloverConnector.showThankYouScreen();
-    displayConnector.showThankYouScreen();
   }
 
   public void onOpenCashDrawerClick(View view) {
