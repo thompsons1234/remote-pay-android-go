@@ -626,6 +626,47 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
     setContentView(R.layout.activity_example_pos);
     sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     initStore();
+    initDisplayConnector();
+  }
+
+  private void initDisplayConnector() {
+    disposeDisplayConnector();
+    // Retrieve the Clover account
+    Account account = null;
+    account = CloverAccount.getAccount(this);
+
+    // If an account can't be acquired, exit the app
+    if (account == null) {
+      Toast.makeText(this, getString(R.string.no_account), Toast.LENGTH_SHORT).show();
+      finish();
+      return;
+    }
+    Log.d(TAG, String.format("Account is=%s", account));
+    /*
+     * Just listens for connection events.
+     */
+    IDisplayConnectorListener listener = new IDisplayConnectorListener() {
+      @Override
+      public void onDeviceDisconnected() {
+        Log.d(TAG, "onDeviceDisconnected");
+      }
+
+      @Override
+      public void onDeviceConnected() {
+        Log.d(TAG, "onDeviceConnected");
+      }
+    };
+    displayConnector = new DisplayConnector(this, account, listener);
+  }
+
+  /**
+   * Destroy this classes DisplayConnector and dispose of it.
+   */
+  private void disposeDisplayConnector() {
+    if (displayConnector != null) {
+      displayConnector.dispose();
+      displayConnector = null;
+    }
   }
 
   private void initDisplayConnector() {
