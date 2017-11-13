@@ -1104,7 +1104,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   }
 
   @Override
-  public void doSendCloverDeviceLog(String message) {
+  public void doSendDebugLog(String message) {
     sendObjectMessage(new CloverDeviceLogMessage(message));
   }
 

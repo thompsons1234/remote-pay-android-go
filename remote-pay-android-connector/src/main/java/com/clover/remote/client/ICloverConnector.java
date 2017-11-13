@@ -242,7 +242,7 @@ public interface ICloverConnector extends Serializable {
    *
    * @param message The message to display
    */
-  void sendCloverDeviceLog(String message);
+  void sendDebugLog(String message);
 
 
 

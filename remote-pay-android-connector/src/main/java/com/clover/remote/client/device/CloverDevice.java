@@ -98,7 +98,7 @@ public abstract class CloverDevice {
 
   public abstract void doTerminalMessage(String text);
 
-  public abstract void doSendCloverDeviceLog(String message);
+  public abstract void doSendDebugLog(String message);
 
   public abstract void doPaymentRefund(String orderId, String paymentId, long amount, boolean fullRefund, boolean disablePrinting, boolean disableReceiptSelection);
 
