@@ -75,6 +75,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -605,7 +606,7 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
           showMessage("Error capturing card: " + response.getResult(), Toast.LENGTH_LONG);
           displayConnector.showMessage("Card was not saved");
           //cloverConnector.showMessage("Card was not saved");
-          //SystemClock.sleep(4000); //wait 4 seconds
+          SystemClock.sleep(4000); //wait 4 seconds
           //cloverConnector.showWelcomeScreen();
           displayConnector.showWelcomeScreen();
         }
