@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:text="@string/current_order"
         android:textStyle="bold"
-        android:textSize="@dimen/text_size_list_item"/>
+        android:textSize="24sp"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -60,7 +60,7 @@
     <TextView android:id="@+id/TaxLabel"
         android:layout_gravity="right"/>
     <TextView android:text="@string/total"
-        android:textSize="@dimen/text_size_status"/>
+        android:textSize="24sp"/>
     <TextView android:id="@+id/TotalLabel"
         android:layout_gravity="right"/>
   </GridLayout>
