@@ -27,6 +27,7 @@ android {
 dependencies {
   // Use local project dependency in dev
   compile project(':remote-pay-android-connector')
+  compile 'com.clover.sdk:clover-android-connector-sdk:188-SNAPSHOT'
   // Use published artifact when releasing
   //compile 'com.clover.sdk:clover-android-connector-sdk:1.4'
   compile 'com.clover.sdk:clover-android-connector-sdk:181-SNAPSHOT'
