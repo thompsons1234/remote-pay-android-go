@@ -357,6 +357,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
         displayDiscounts.add(dd);
       }
       displayOrder.setDiscounts(displayDiscounts);
+      displayConnector.showDisplayOrder(displayOrder);
     }
 
     @Override

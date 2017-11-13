@@ -625,7 +625,6 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
     setContentView(R.layout.activity_example_pos);
     sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     initStore();
-    initDisplayConnector();
   }
 
   private void initDisplayConnector() {
@@ -697,7 +696,8 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
       } */
     //cloverConnector = null;
 //    }
-
+    displayConnector.showWelcomeScreen();
+    displayConnector.dispose();
     super.onPause();
   }
 
@@ -713,7 +713,9 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
     }
 
     cloverConnector.initializeConnection();
-    updateComponentsWithNewCloverConnector();
+    initDisplayConnector();
+    updateComponentsWithNewConnectors();
+
 
     //FrameLayout frameLayout = (FrameLayout) findViewById(R.id.contentContainer);
 
@@ -891,12 +893,13 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
     }
   }
 
-  private void updateComponentsWithNewCloverConnector() {
+  private void updateComponentsWithNewConnectors() {
     FragmentManager fragmentManager = getFragmentManager();
 
     RegisterFragment refFragment = (RegisterFragment) fragmentManager.findFragmentByTag("REGISTER");
     if (refFragment != null) {
       refFragment.setCloverConnector(cloverConnector);
+      refFragment.setDisplayConnector(displayConnector);
     }
     OrdersFragment ordersFragment = (OrdersFragment) fragmentManager.findFragmentByTag("ORDERS");
     if (ordersFragment != null) {
@@ -970,6 +973,7 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
       fragmentTransaction.add(R.id.contentContainer, fragment, "REGISTER");
     } else {
       ((RegisterFragment) fragment).setCloverConnector(cloverConnector);
+
       fragmentTransaction.show(fragment);
     }
 
