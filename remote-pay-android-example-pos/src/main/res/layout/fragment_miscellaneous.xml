@@ -270,8 +270,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight=".5"
                 android:onClick="printImageClick"
-                android:text="@string/print_image"
-                />
+                android:text="@string/print_image"/>
         </LinearLayout>
 
         <LinearLayout
@@ -300,8 +299,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight=".5"
                 android:onClick="onGetDeviceStatusClick"
-                android:text="@string/get_device_status"
-                />
+                android:text="@string/get_device_status"/>
         </LinearLayout>
 
         <LinearLayout
@@ -319,8 +317,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight=".5"
                 android:onClick="onReadCardDataClick"
-                android:text="@string/read_card_data"
-                />
+                android:text="@string/read_card_data"/>
 
             <Button
                 android:id="@+id/ResetButton"
@@ -611,6 +608,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/tipModeBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -628,11 +626,11 @@
                 <Spinner
                     android:id="@+id/TipModeSpinner"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-                </Spinner>
+                    android:layout_height="wrap_content"/>
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/saleTipAmountBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -652,11 +650,11 @@
                     android:layout_width="90dp"
                     android:layout_height="wrap_content"
                     android:ems="10"
-                    android:inputType="number"
-                    />
+                    android:inputType="number"/>
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/signatureEntryBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -679,6 +677,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/signatureThresholdBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
@@ -698,8 +697,7 @@
                     android:layout_width="90dp"
                     android:layout_height="wrap_content"
                     android:ems="10"
-                    android:inputType="number"
-                    />
+                    android:inputType="number"/>
             </LinearLayout>
 
             <Switch

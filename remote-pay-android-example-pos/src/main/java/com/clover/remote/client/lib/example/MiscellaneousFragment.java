@@ -16,21 +16,6 @@
 
 package com.clover.remote.client.lib.example;
 
-import com.clover.remote.client.CloverConnector;
-import com.clover.remote.client.Constants;
-import com.clover.remote.client.ICloverConnector;
-import com.clover.remote.client.lib.example.model.OrderObserver;
-import com.clover.remote.client.lib.example.model.POSDiscount;
-import com.clover.remote.client.lib.example.model.POSExchange;
-import com.clover.remote.client.lib.example.model.POSLineItem;
-import com.clover.remote.client.lib.example.model.POSOrder;
-import com.clover.remote.client.lib.example.model.POSPayment;
-import com.clover.remote.client.lib.example.model.POSRefund;
-import com.clover.remote.client.lib.example.model.POSStore;
-import com.clover.remote.client.messages.SaleRequest;
-import com.clover.sdk.v3.payments.DataEntryLocation;
-import com.clover.sdk.v3.printer.Printer;
-
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
@@ -52,7 +37,21 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Switch;
-import org.java_websocket.WebSocket;
+
+import com.clover.remote.client.CloverConnector;
+import com.clover.remote.client.Constants;
+import com.clover.remote.client.ICloverConnector;
+import com.clover.remote.client.lib.example.model.OrderObserver;
+import com.clover.remote.client.lib.example.model.POSDiscount;
+import com.clover.remote.client.lib.example.model.POSExchange;
+import com.clover.remote.client.lib.example.model.POSLineItem;
+import com.clover.remote.client.lib.example.model.POSOrder;
+import com.clover.remote.client.lib.example.model.POSPayment;
+import com.clover.remote.client.lib.example.model.POSRefund;
+import com.clover.remote.client.lib.example.model.POSStore;
+import com.clover.remote.client.messages.SaleRequest;
+import com.clover.sdk.v3.payments.DataEntryLocation;
+import com.clover.sdk.v3.printer.Printer;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -360,7 +359,7 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     }
 
     ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity().getApplicationContext(),
-            android.R.layout.simple_spinner_dropdown_item, values);
+        android.R.layout.simple_spinner_dropdown_item, values);
     tipModeSpinner.setAdapter(adapter);
     tipModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
@@ -472,6 +471,10 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
       view.findViewById(R.id.allowOfflinePayBox).setVisibility(View.GONE);
       view.findViewById(R.id.WelcomeThankYouBox).setVisibility(View.GONE);
       view.findViewById(R.id.acceptOfflinePayBox).setVisibility(View.GONE);
+      view.findViewById(R.id.tipModeBox).setVisibility(View.GONE);
+      view.findViewById(R.id.saleTipAmountBox).setVisibility(View.GONE);
+      view.findViewById(R.id.signatureEntryBox).setVisibility(View.GONE);
+      view.findViewById(R.id.signatureThresholdBox).setVisibility(View.GONE);
 
       view.findViewById(R.id.DisableDuplicateCheckSwitch).setVisibility(View.GONE);
       view.findViewById(R.id.DisableReceiptOptionsSwitch).setVisibility(View.GONE);
@@ -490,40 +493,34 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
   }
 
   @Override
-  public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo){
+  public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
     menu.setHeaderTitle("Printers");
-    if(v == getView().findViewById(R.id.PrintImageButton)){
+    if (v == getView().findViewById(R.id.PrintImageButton)) {
       printCommand = "IMAGE";
-    }
-    else if(v == getView().findViewById(R.id.PrintTextButton)){
+    } else if (v == getView().findViewById(R.id.PrintTextButton)) {
       printCommand = "TEXT";
-    }
-    else if(v == getView().findViewById(R.id.PrintImageURLButton)){
+    } else if (v == getView().findViewById(R.id.PrintImageURLButton)) {
       printCommand = "URL";
-    }
-    else if(v == getView().findViewById(R.id.CashDrawerButton)){
+    } else if (v == getView().findViewById(R.id.CashDrawerButton)) {
       printCommand = "CASH";
     }
-    for(int i = 0; i < printers.size(); i++){
-      menu.add(Menu.NONE, i , Menu.NONE, printers.get(i).getName()+ " - "+ printers.get(i).getId());
+    for (int i = 0; i < printers.size(); i++) {
+      menu.add(Menu.NONE, i, Menu.NONE, printers.get(i).getName() + " - " + printers.get(i).getId());
     }
   }
 
   @Override
-  public boolean onContextItemSelected (MenuItem item) {
+  public boolean onContextItemSelected(MenuItem item) {
     Printer printer = printers.get(item.getItemId());
-    ExamplePOSActivity activity =  (ExamplePOSActivity) getActivity();
+    ExamplePOSActivity activity = (ExamplePOSActivity) getActivity();
     activity.setPrinter(printer);
-    if(printCommand == "IMAGE"){
+    if (printCommand == "IMAGE") {
       activity.printImageClick(null);
-    }
-    else if (printCommand == "TEXT"){
+    } else if (printCommand == "TEXT") {
       activity.printTextClick(null);
-    }
-    else if (printCommand == "URL"){
+    } else if (printCommand == "URL") {
       activity.printImageURLClick(null);
-    }
-    else if(printCommand == "CASH"){
+    } else if (printCommand == "CASH") {
       activity.onOpenCashDrawerClick(null);
     }
     return super.onContextItemSelected(item);
