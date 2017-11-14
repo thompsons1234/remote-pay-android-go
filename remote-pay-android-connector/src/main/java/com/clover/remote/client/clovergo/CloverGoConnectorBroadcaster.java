@@ -132,6 +132,12 @@ public class CloverGoConnectorBroadcaster extends CopyOnWriteArrayList<ICloverGo
     }
   }
 
+  public void notifyVoidPayment(Payment payment, String reason) {
+    for (ICloverGoConnectorListener listener : this) {
+      listener.onVoidPayment(payment, reason);
+    }
+  }
+
   public void notifyOnConfirmPaymentRequest(ConfirmPaymentRequest confirmPaymentRequest) {
     for (ICloverGoConnectorListener listener : this) {
       listener.onConfirmPaymentRequest(confirmPaymentRequest);

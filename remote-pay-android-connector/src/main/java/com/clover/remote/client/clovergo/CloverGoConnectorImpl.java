@@ -15,6 +15,7 @@ import com.clover.remote.client.clovergo.messages.KeyedAuthRequest;
 import com.clover.remote.client.clovergo.messages.KeyedPreAuthRequest;
 import com.clover.remote.client.clovergo.messages.KeyedRequest;
 import com.clover.remote.client.clovergo.messages.KeyedSaleRequest;
+import com.clover.remote.client.clovergo.util.NumberUtil;
 import com.clover.remote.client.lib.R;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.AuthResponse;
@@ -169,10 +170,10 @@ public class CloverGoConnectorImpl {
   private Order mOrder;
   private Payment mPayment;
   private CreditCard mCreditCard;
-
   private TransactionError mTransactionError;
   private EmployeeMerchant mEmployeeMerchant;
-
+  private boolean mLastErrorWasDuplicateTransaction = false;
+  private boolean mLastPaymentWasForPartialAuth = false;
   private String noCardReadersConnected;
 
   public CloverGoConnectorImpl(final CloverGoConnectorBroadcaster broadcaster, CloverGoDeviceConfiguration configuration) {
@@ -245,7 +246,31 @@ public class CloverGoConnectorImpl {
 
         mPayment = payment;
 
-        if (CARD_MODE_EMV_CONTACT.equalsIgnoreCase(mPayment.getCard().getMode())) {
+        // If this is part of a partial auth loop, cut the loop off here and process as one normal payment.
+        // Implementers may process as they see fit.  This is just an example that does not continue
+        // the partial auth flow beyond one payment.
+        if (mLastPaymentWasForPartialAuth && mOrder.getStatus() == Order.STATUS_PARTIAL_PAYMENT) {
+          mOrder.setStatus(Order.STATUS_OPEN);
+          mLastPaymentWasForPartialAuth = false;
+        }
+
+        if (!mLastPaymentWasForPartialAuth && mOrder.getStatus() == Order.STATUS_PARTIAL_PAYMENT) {
+          
+          ConfirmPaymentRequest confirmPaymentRequest = new ConfirmPaymentRequest();
+
+          String challengeMessage = "This card has been approved for " +
+            NumberUtil.getCurrencyString(payment.getAmountCharged()) +
+            " with a remaining balance of " +
+            NumberUtil.getCurrencyString(mOrder.getPendingAuthAmount()) +
+            "\n\nWould you like to authorize this card for partial payment?";
+
+          Challenge[] challenge = {new Challenge(challengeMessage, Challenge.ChallengeType.PARTIAL_AUTH_CHALLENGE, VoidReason.REJECT_PARTIAL_AUTH)};
+          confirmPaymentRequest.setChallenges(challenge);
+
+          mLastPaymentWasForPartialAuth = true;
+          mBroadcaster.notifyOnConfirmPaymentRequest(confirmPaymentRequest);
+
+        } else if (CARD_MODE_EMV_CONTACT.equalsIgnoreCase(mPayment.getCard().getMode())) {
 
           Log.d(TAG, "mPaymentObserver next EMV_CONTACT");
           Map<String, String> data = new HashMap<>();
@@ -282,8 +307,10 @@ public class CloverGoConnectorImpl {
         Log.d(TAG, "mPaymentObserver error");
 
         mTransactionError = TransactionError.convertToError(e);
+        mLastErrorWasDuplicateTransaction = false;
 
         if (DUPLICATE_TRANSACTION.equals(mTransactionError.getCode())) {
+          mLastErrorWasDuplicateTransaction = true;
           ConfirmPaymentRequest confirmPaymentRequest = new ConfirmPaymentRequest();
           Challenge[] challenge = {new Challenge(mTransactionError.getMessage(), Challenge.ChallengeType.DUPLICATE_CHALLENGE, VoidReason.REJECT_DUPLICATE)};
           confirmPaymentRequest.setChallenges(challenge);
@@ -968,14 +995,6 @@ public class CloverGoConnectorImpl {
     });
   }
 
-  public void voidPayment(Payment payment, String reason) {
-    VoidPaymentRequest vpr = new VoidPaymentRequest();
-    vpr.setPaymentId(payment.getPaymentId());
-    vpr.setOrderId(payment.getOrderId());
-    vpr.setVoidReason(reason);
-    voidPayment(vpr);
-  }
-
   public void voidPayment(final VoidPaymentRequest voidPaymentRequest) {
     if (mEmployeeMerchant != null && mEmployeeMerchant.getMerchant().getFeatures().contains("voids")) {
       mVoidTransaction.getObservable(voidPaymentRequest.getOrderId(), voidPaymentRequest.getPaymentId()).subscribeOn(Schedulers.io())
@@ -1097,7 +1116,12 @@ public class CloverGoConnectorImpl {
   }
 
   public void rejectPayment(com.clover.sdk.v3.payments.Payment payment, Challenge challenge) {
-    if (mReaderProgressEvent != null && mReaderProgressEvent.getEventType() == ReaderProgressEvent.EventType.EMV_DATA) {
+    if (mOrder.getStatus() == Order.STATUS_PARTIAL_PAYMENT) {
+      mBroadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.PARTIAL_AUTH_REJECTED, 0, null, "In rejectPayment: Partial auth rejected by user."));
+      mBroadcaster.notifyVoidPayment(mPayment, "Partial Auth Rejected");
+    } else if (mLastErrorWasDuplicateTransaction) {
+      mBroadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.DUPLICATE_TRANSACTION_REJECTED, 0, null, "In rejectPayment: Duplicate transaction rejected by user."));
+    } else if (mReaderProgressEvent != null && mReaderProgressEvent.getEventType() == ReaderProgressEvent.EventType.EMV_DATA) {
       mGetConnectedReaders.getBlockingObservable().subscribe(new Consumer<ReaderInfo>() {
         @Override
         public void accept(@NonNull ReaderInfo readerInfo) throws Exception {

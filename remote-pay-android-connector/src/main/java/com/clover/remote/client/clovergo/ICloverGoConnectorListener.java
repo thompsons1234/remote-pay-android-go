@@ -81,6 +81,8 @@ public interface ICloverGoConnectorListener extends ICloverConnectorListener {
 
   void onSendReceipt(Order order, SendReceipt sendReceipt);
 
+  void onVoidPayment(com.firstdata.clovergo.domain.model.Payment payment, String reason);
+
   interface SendReceipt {
     void sendRequestedReceipt(String email, String phone, String orderId);
 

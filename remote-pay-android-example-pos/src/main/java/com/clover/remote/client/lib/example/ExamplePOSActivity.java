@@ -136,6 +136,7 @@ import com.clover.remote.client.messages.TipAdjustAuthResponse;
 import com.clover.remote.client.messages.TransactionRequest;
 import com.clover.remote.client.messages.VaultCardResponse;
 import com.clover.remote.client.messages.VerifySignatureRequest;
+import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.message.TipAddedMessage;
 import com.clover.sdk.v3.payments.Credit;
@@ -263,11 +264,14 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
             Challenge theChallenge = currentChallenges[challengeIndex + 1];
 
-            switch (theChallenge.type) {
+            switch(theChallenge.type) {
               case DUPLICATE_CHALLENGE:
-                showPaymentConfirmation(paymentConfirmationListener, theChallenge, challengeIndex + 1);
+                showPaymentConfirmation(paymentConfirmationListener, theChallenge,  challengeIndex + 1);
                 break;
 
+              case PARTIAL_AUTH_CHALLENGE:
+                showPartialAuthChallenge(paymentConfirmationListener, theChallenge,  challengeIndex + 1);
+                break;
             }
           }
         });
@@ -1241,6 +1245,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       }
 
       @Override
+      public void onVoidPayment(com.firstdata.clovergo.domain.model.Payment payment, String reason) {
+        voidGoPayment(payment, reason);
+      }
+
+      @Override
       public void onSignatureRequired(com.firstdata.clovergo.domain.model.Payment payment, SignatureCapture signatureCapture) {
         hideKeyboard();
         dismissDialog();
@@ -1478,6 +1487,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       @Override
       public void onDeviceError(CloverDeviceErrorEvent deviceErrorEvent) {
         switch (deviceErrorEvent.getErrorType()) {
+
           case READER_ERROR:
           case CARD_ERROR:
           case READER_TIMEOUT:
@@ -1499,6 +1509,14 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
             showAlertDialog(deviceErrorEvent.getErrorType().name(), deviceErrorEvent.getMessage());
             break;
         }
+      }
+
+      public void voidGoPayment(com.firstdata.clovergo.domain.model.Payment payment, String reason) {
+        VoidPaymentRequest voidPaymentRequest = new VoidPaymentRequest();
+        voidPaymentRequest.setPaymentId(payment.getPaymentId());
+        voidPaymentRequest.setOrderId(payment.getOrderId());
+        voidPaymentRequest.setVoidReason(reason);
+        getCloverConnector().voidPayment(voidPaymentRequest);
       }
 
       @Override
@@ -1662,11 +1680,14 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
             @Override
             public void run() {
 
-              switch (theChallenge.type) {
+              switch(theChallenge.type) {
                 case DUPLICATE_CHALLENGE:
                   showPaymentConfirmation(paymentConfirmationListener, theChallenge, 0);
                   break;
 
+                case PARTIAL_AUTH_CHALLENGE:
+                  showPartialAuthChallenge(paymentConfirmationListener, theChallenge, 0);
+                  break;
               }
             }
           });
@@ -1767,20 +1788,30 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       @Override
       public void onVoidPaymentResponse(VoidPaymentResponse response) {
         if (response.isSuccess()) {
-          boolean done = false;
-          for (POSOrder order : store.getOrders()) {
-            for (POSExchange payment : order.getPayments()) {
-              if (payment instanceof POSPayment) {
-                if (payment.getPaymentID().equals(response.getPaymentId())) {
-                  ((POSPayment) payment).setPaymentStatus(POSPayment.Status.VOIDED);
-                  showMessage("Payment was voided", Toast.LENGTH_SHORT);
-                  done = true;
-                  break;
+
+          // For Clover Go, we are not having the order track payments in this sample app.
+          if (configType.equals(AppConstants.CONFIG_TYPE_GO)) {
+
+            showMessage("Payment was voided", Toast.LENGTH_SHORT);
+
+          } else {
+
+            boolean done = false;
+
+            for (POSOrder order : store.getOrders()) {
+              for (POSExchange payment : order.getPayments()) {
+                if (payment instanceof POSPayment) {
+                  if (payment.getPaymentID().equals(response.getPaymentId())) {
+                    ((POSPayment) payment).setPaymentStatus(POSPayment.Status.VOIDED);
+                    showMessage("Payment was voided", Toast.LENGTH_SHORT);
+                    done = true;
+                    break;
+                  }
                 }
               }
-            }
-            if (done) {
-              break;
+              if (done) {
+                break;
+              }
             }
           }
         } else {
