@@ -64,6 +64,10 @@
             android:label="@string/title_activity_example_pos"
             android:screenOrientation="sensorLandscape">
         </activity>
+        <activity
+            android:name=".WebViewActivity"
+            android:screenOrientation="sensorLandscape">
+        </activity>
 
         <activity
             android:name="com.clover.remote.client.lib.example.qrCode.barcode.BarcodeCaptureActivity"

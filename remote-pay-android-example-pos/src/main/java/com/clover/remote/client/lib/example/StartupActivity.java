@@ -76,12 +76,15 @@ public class StartupActivity extends Activity {
   public static final String CONNECTION_MODE = "CONNECTION_MODE";
   private static final int BARCODE_READER_REQUEST_CODE = 1;
 
+  public static final int OAUTH_REQUEST_CODE = 100;
+  public static final String EXTRA_CLOVER_GO_ACCESS_TOKEN = "EXTRA_CLOVER_GO_ACCESS_TOKEN";
+
   private static final CloverGoDeviceConfiguration.ENV GO_ENV = CloverGoDeviceConfiguration.ENV.DEMO;
   private static final String APP_ID = "com.example.clovergosampleapp"; //com.firstdata.hack2020
   private static final String APP_VERSION = "1.0";
 
   private String mGoApiKey, mGoSecret, mGoAccessToken;
-  private String mOAuthClientId, mOAuthClientSecret, mOAuthEnv, mOAuthUrl, mOAuthApiKey;
+  private String mOAuthClientId, mOAuthClientSecret, mOAuthEnv, mOAuthUrl, mOAuthApiKey, mOAuthTokenUrl;
 
   // Clover devices do not always support the custom Barcode scanner implemented here.
   // They DO have a different capability to scan barcodes.
@@ -116,7 +119,7 @@ public class StartupActivity extends Activity {
       getActionBar().hide();
     }
 
-    TextView version = ((TextView)findViewById(R.id.version));
+    TextView version = ((TextView) findViewById(R.id.version));
     try {
       version.setText("Version : " + getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
     } catch (PackageManager.NameNotFoundException e) {
@@ -198,6 +201,15 @@ public class StartupActivity extends Activity {
         }
       } else Log.e(TAG, String.format(getString(R.string.barcode_error_format),
           CommonStatusCodes.getStatusCodeString(resultCode)));
+    } else if (requestCode == OAUTH_REQUEST_CODE) {
+      setGoParams();
+      String token = data.getStringExtra(EXTRA_CLOVER_GO_ACCESS_TOKEN);
+
+      Intent intent = new Intent();
+      intent.setClass(StartupActivity.this, ExamplePOSActivity.class);
+      populateIntentGoExtras(intent, token);
+
+      startActivity(intent);
     } else super.onActivityResult(requestCode, resultCode, data);
   }
 
@@ -308,14 +320,7 @@ public class StartupActivity extends Activity {
 
     } else if (config.equals(CONFIG_TYPE_GO)) {
       if (Validator.isNetworkConnected(this)) {
-        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
-        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, mGoAccessToken);
-        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_APP_ID, APP_ID);
-        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_APP_VERSION, APP_VERSION);
-        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, mGoApiKey);
-        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, mGoSecret);
-        intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ENV, GO_ENV);
-
+        populateIntentGoExtras(intent, mGoAccessToken);
         startActivity(intent);
       } else {
         showToast("Check internet connection");
@@ -342,6 +347,14 @@ public class StartupActivity extends Activity {
       builder.show();
       return null;
     }
+  }
+
+  public void connectGoWithNewAuthMode(View view) {
+    setGoParams();
+
+    Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
+    intent.putExtra(WebViewActivity.EXTRA_CLOVER_GO_BASE_URL, mOAuthTokenUrl);
+    startActivityForResult(intent, OAUTH_REQUEST_CODE);
   }
 
   public void connectGoWithAuthMode(View view) {
@@ -377,18 +390,10 @@ public class StartupActivity extends Activity {
 
               if (Validator.isNetworkConnected(StartupActivity.this)) {
                 String accessToken = jsonObject.getString("access_token");
-                String config = CONFIG_TYPE_GO;
 
                 Intent intent = new Intent();
                 intent.setClass(StartupActivity.this, ExamplePOSActivity.class);
-                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, config);
-                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, accessToken);
-                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_APP_ID, APP_ID);
-                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_APP_VERSION, APP_VERSION);
-                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, mGoApiKey);
-                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, mGoSecret);
-                intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ENV, GO_ENV);
-
+                populateIntentGoExtras(intent, accessToken);
                 startActivity(intent);
               } else {
                 showToast("Check Internet Connection");
@@ -414,6 +419,16 @@ public class StartupActivity extends Activity {
     mToast.show();
   }
 
+  private void populateIntentGoExtras(Intent intent, String token) {
+    intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, CONFIG_TYPE_GO);
+    intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, token);
+    intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_APP_ID, APP_ID);
+    intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_APP_VERSION, APP_VERSION);
+    intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, mGoApiKey);
+    intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, mGoSecret);
+    intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ENV, GO_ENV);
+  }
+
   private void setGoParams() {
     mOAuthApiKey = "byJiyq2GZNmS6LgtAhr2xGS6gz4dpBYX";
 
@@ -424,6 +439,7 @@ public class StartupActivity extends Activity {
 
       mOAuthClientId = "K66BM82VZ4HAM";//PROD - CloverSDKDemoApp App ID
       mOAuthUrl = "https://clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
+      mOAuthTokenUrl = "https://clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=token";
 
       mOAuthClientSecret = "6e2f4d4c-da09-a42c-fa72-bbd96a5c63aa"; //PROD - CloverSDKDemoApp App Secret
       mOAuthEnv = "www.clover.com";
@@ -437,6 +453,7 @@ public class StartupActivity extends Activity {
       mOAuthUrl = "https://stg1.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
 //    String mOAuthUrl = "https://sandbox.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
 //    String mOAuthUrl = "https://dev14.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
+      mOAuthTokenUrl = "https://stg1.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=token";
 
       mOAuthClientSecret = "fea4a38b-9346-d75c-2f09-1670381a1499";
       mOAuthEnv = "stg1.dev.clover.com";

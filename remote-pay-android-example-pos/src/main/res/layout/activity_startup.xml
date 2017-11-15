@@ -119,7 +119,7 @@
             android:id="@+id/oAuthButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="connectGoWithAuthMode"
+            android:onClick="connectGoWithNewAuthMode"
             android:text="Get OAUTH Token"/>
     </LinearLayout>
 </RelativeLayout>
