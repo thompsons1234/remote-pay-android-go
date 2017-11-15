@@ -1,1 +1,0 @@
-# remote-pay-android-go
