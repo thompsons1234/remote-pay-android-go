@@ -129,21 +129,21 @@ ccGoListener = new ICloverGoConnectorListener() {
   public void onDeviceConnected() {}  
   public void onCloverGoDeviceActivity(final CloverDeviceEvent deviceEvent) {  
     switch (deviceEvent.getEventState()) {
-      case CARD\_SWIPED:
+      case CARD_SWIPED:
       break;
-      case CARD\_TAPPED:
+      case CARD_TAPPED:
       break;
-      case CANCEL\_CARD\_READ:
+      case CANCEL_CARD_READ:
       break;
-      case EMV\_COMPLETE\_DATA:
+      case EMV_COMPLETE_DATA:
       break;
-      case CARD\_INSERTED\_MSG:
+      case CARD_INSERTED_MSG:
       break;
-      case CARD\_REMOVED\_MSG:
+      case CARD_REMOVED_MSG:
       break;
-      case PLEASE\_SEE\_PHONE\_MSG:
+      case PLEASE_SEE_PHONE_MSG:
       break;
-      case READER\_READY:
+      case READER_READY:
       break;
     }
   }
@@ -153,21 +153,21 @@ ccGoListener = new ICloverGoConnectorListener() {
   public void onDeviceReady(final MerchantInfo merchantInfo) {}
   public void onDeviceError(CloverDeviceErrorEvent deviceErrorEvent) {
     switch (deviceErrorEvent.getErrorType()) {
-      case READER\_ERROR:
-      case CARD\_ERROR:
-      case READER\_TIMEOUT:
-      case COMMUNICATION\_ERROR:
-      case LOW\_BATTERY:
-      case PARTIAL\_AUTH\_REJECTED:
-      case DUPLICATE\_TRANSACTION\_REJECTED:
+      case READER_ERROR:
+      case CARD_ERROR:
+      case READER_TIMEOUT:
+      case COMMUNICATION_ERROR:
+      case LOW_BATTERY:
+      case PARTIAL_AUTH_REJECTED:
+      case DUPLICATE_TRANSACTION_REJECTED:
       // notify user
       break;
-      case MULTIPLE\_CONTACT\_LESS\_CARD\_DETECTED\_ERROR:
-      case CONTACT\_LESS\_FAILED\_TRY\_CONTACT\_ERROR:
-      case EMV\_CARD\_SWIPED\_ERROR:
-      case DIP\_FAILED\_ALL\_ATTEMPTS\_ERROR:
-      case DIP\_FAILED\_ERROR:
-      case SWIPE\_FAILED\_ERROR:
+      case MULTIPLE_CONTACT_LESS_CARD_DETECTED_ERROR:
+      case CONTACT_LESS_FAILED_TRY_CONTACT_ERROR:
+      case EMV_CARD_SWIPED_ERROR:
+      case DIP_FAILED_ALL_ATTEMPTS_ERROR:
+      case DIP_FAILED_ERROR:
+      case SWIPE_FAILED_ERROR:
       // show progress to user
       break;
     }
