@@ -1,254 +1,247 @@
-# Clover SDK for Android PoS Integration
 
-Current version: 1.3.2
+![Clover](https://camo.githubusercontent.com/6c829b55aa7851e726e5fc0fd70448a0c00427b2/68747470733a2f2f7777772e636c6f7665722e636f6d2f6173736574732f696d616765732f7075626c69632d736974652f70726573732f636c6f7665725f7072696d6172795f677261795f7267622e706e67)
 
+# Clover SDK for Android POS Integration 
+## Version
+Alpha Release   
+Version: 3.0.0  
 ## Overview
+This SDK allows your Android-based Point-of-Sale (POS) system to communicate with a Clover® payment device and process payments. 
 
-This SDK provides an API with which to allow your Android-based Point-of-Sale (POS) system to interface with a [Clover® Mini device](https://www.clover.com/pos-hardware/mini). From the Mini, merchants can accept payments using: credit, debit, EMV contact and contactless (including Apple Pay), gift cards, EBT (electronic benefit transfer), and more. Learn more about integrations at [clover.com/integrations](https://www.clover.com/integrations).
-
-The Android project includes both a connector and example. To effectively work with the project you'll need:
-- [Gradle](https://gradle.org) (suggested version 3.4).
-- An [Android SDK](http://developer.android.com/sdk/index.html) (17+).
-- An [IDE](http://developer.android.com/tools/studio/index.html), Android Studio works well .
-
-To complete a transaction end to end, we recommend getting a [Clover Mini Dev Kit](http://cloverdevkit.com/collections/devkits/products/clover-mini-dev-kit).
-
-For more developer documentation and information about the Semi-Integration program, please visit our [semi-integration developer documents](https://docs.clover.com/build/integration-overview-requirements/). 
-
-## Release Notes
-# Version 1.3.2
-* QRCode scanning support
-* Fixed several synchronization issues with Web Socket heartbeats and reconnects
-* Miscellaneous bug fixes
-
-# Version 1.3.1
-* Added support for Custom Activities
-* Device status queries to determine the state of the device and payments processed by the device
-  * ICloverConnector
-    * Added
-      * startCustomActivity - start a custom activity on the Clover device and receive a callback when it is done (onCustumActivityResponse)
-      * sendMessageToActivity - send and receive messages to a custom activity running on the Clover device (onMessageFromActivity)
-      * retrievePayment - query and receive the status of a payment on the device by its external id (onRetrievePaymentResponse)
-      * retrieveDeviceStatus - query and receive the status of the device (onRetrieveDeviceStatusResponse)
-  * ICloverConnectorListener
-    * Added
-      * onCustomActivityResponse
-      * onMessageFromActivity
-      * onRetrievePaymentResponse
-      * onRetrieveDeviceStatusResponse
-      
-  * CustomActivity
-    * apk must be approved and then installed via the Clover App Market
-    * clover-cfp-sdk library
-      * Added CloverCFPActivity that can be extended
-      * Added constants for getting/retrieving activity payload CloverCFP interface
-      * Working with Custom Activities...
-        * The action of the activity, as defined in the AndroidManifest, should be passed in as part of the request
-        * A single text payload can be passed in to the request and retrieved in the intent via com.clover.remote.cfp.CFPActivity.EXTRA_PAYLOAD constant. e.g. "com.clover.remote.terminal.remotecontrol.extra.EXTRA_PAYLOAD"
-        * The CustomActivityResponse (onCustomActivityResponse) contains a single text payload, populated from the com.clover.remote.cfp.EXTRA_PAYLOAD extra in the result Intent
-        * Block vs Non-Blocking Activities
-            * A blocking CustomActivity (CustomActivityRequest.setNonBlocking(boolean)) will either need finish itself, or can be exited via ICloverConnector.resetDevice()
-               * For example: Don't want a Sale request to interrupt Collect Customer Information Custom Activity
-            * A non-blocking CustomActivity will finish when a new request is made
-               * For example: Want a Sale request to interrupt showing Ads Custom Activity
-
-  * ResetDevice now calls back to onResetDeviceResponse with the current status
-
-# Version 1.2
-
-* Renamed/Added/Removed a number of API operations and request/response objects to establish
-  better consistency across platforms
+It includes the SDK and an example POS. To work with the project effectively, you will need:
+* Android Studio 2.3.3 & above 
+* Android OS 4.2 (API 17) and above on your device  
   
-  * ICloverConnector (Operations)
-    * Added 
-      * printImageFromURL
-      * initializeConnection (REQUIRED) 
-      * addCloverConnectorListener 
-      * removeCloverConnectorListener
-      * acceptPayment - (REQUIRED) Takes a payment object - possible response to a ConfirmPaymentRequest
-      * rejectPayment - (REQUIRED) Takes a payment object and the challenge that was associated with
-                        the rejection - possible response to a ConfirmPaymentRequest
-      * retrievePendingPayments - retrieves a list of payments that were taken offline and are pending
-                                  server submission/processing.
-    * Renamed
-      * capturePreAuth - formerly captureAuth
-      * showDisplayOrder - formerly displayOrder - this is now the only operation needed 
-        to display/change order information displayed on the mini
-      * removeDisplayOrder - formerly displayOrderDelete
-    * Removed 
-      * displayOrderLineItemAdded - showDisplayOrder now handles this
-      * displayOrderLineItemRemoved - showDisplayOrder now handles this
-      * displayOrderDiscountAdded - showDisplayOrder now handles this
-      * displayOrderDiscountRemoved - showDisplayOrder now handles this
-    * Modified
-      * SaleRequest, AuthRequest, PreAuthRequest and ManualRefund require ExternalId to be set. (REQUIRED)
-        * ExternalId should be unique per transaction allowing the Clover device to detect, and potentially reject, if the same externalID is reused for subsequent transaction requests
-      * changed all device action API calls to return void 
-      * CloverConnecter now requires ApplicationId to be set via configuration/installation of the third party application. This is provided as part of the device configuration that is passed in during the creation of the CloverConnector.
-      * Behavior change for RefundPaymentRequest. In the prior versions, a value of zero for the amount field would trigger a refund of the full payment amount. With the 1.0 version, passing zero in the amount field will trigger a validation failure. Use FullRefund:boolean to specify a full refund amount. NOTE: This will attempt to refund the original (full) payment amount, not the remaining amount, in a partial refund scenario.    
-  * ICloverConnectorListener (Notifications)
-    * Added
-      * onPaymentConfirmation - (REQUIRED) consists of a Payment and a list of challenges/void reasons  
-      * onDeviceError - general callback when there is an error communicating with the device
-      * onPrintManualRefundReceipt - if disablePrinting=true on the request, this will get called to indicate the POS can print this receipt
-      * onPrintManualRefundDeclineReceipt - if disablePrinting=true on the request, this will get called to indicate the POS can print this receipt
-      * onPrintPaymentReceipt - if disablePrinting=true on the request, this will get called to indicate the POS can print this receipt
-      * onPrintPaymentDeclineReceipt - if disablePrinting=true on the request, this will get called to indicate the POS can print this receipt
-      * onPrintPaymentMerchantCopyReceipt - if disablePrinting=true on the request, this will get called to indicate the POS can print this receipt
-      * onPrintRefundPaymentReceipt - if disablePrinting=true on the request, this will get called to indicate the POS can print this receipt
-      * onRetrievePendingPaymentsResponse - called with the list of payments taken on the device that aren't processed on the server yet
-    * Renamed
-      * onDeviceDisconnected - formerly onDisconnected
-      * onDeviceConnected - formerly on onConnected
-      * onDeviceReady - formerly onReady
-      * onTipAdjustAuthResponse - formerly onAuthTipAdjustResponse
-      * onCapturePreAuthResponse - formerly onPreAuthCaptureResponse
-      * onVerifySignatureRequest - formerly onSignatureVerifyRequest
-    * Removed
-      * onTransactionState
-      * onConfigErrorResponse - These are now processed as normal operation responses
-      * onError - now handled by onDeviceError or through normal operation responses
-      * onDebug
-  * Request/Response Objects
-    * Added
-      * ConfirmPaymentRequest - Contains a Payment and a list of "challenges" from the 
-        Clover device during payment operations, if there are questions for the merchant
-        on their willingness to accept whatever risk is associated with that payment's 
-        challenge. 
-      * RetrievePendingPaymentsResponse - Contains a list of PendingPaymentEntry objects,
-                                          which have the paymentId and amount for each 
-                                          payment that has yet to be sent to the server
-                                          for processing.
-      * PrintManualRefundReceiptMessage - Contains the Credit object to be printed
-      * PrintManualRefundDeclineReceiptMessage - Contains the declined Credit object to be printed 
-      * PrintPaymentReceiptMessage - Contains the Order and Payment to be printed
-      * PrintPaymentDeclineReceiptMessage - Contains the declined Payment and reason to be printed
-      * PrintPaymentMerchantCopyReceiptMessage - Contains the payment to be printed
-      * PrintRefundPaymentReceiptMessage - Contains Payment, Refund and Order
-    * Renamed
-      * VerifySignatureRequest - formerly SignatureVerifyRequest
-      * CapturePreAuthRequest - formerly CaptureAuthRequest
-      * VoidPaymentRequest - formerly VoidTransactionRequest
-      * CloseoutRequest - formerly separate field-level parameters
-      * TipAdjustAuthResponse - formerly AuthTipAdjustResponse
-    * Removed
-      * ConfigErrorResponse - These are now processed as normal operation 
-    * Modified
-      * All Response Messages now return the following:​
-        * Success:boolean
-        * Result:enum [SUCCESS|FAIL|CANCEL|ERROR|UNSUPPORTED] FAIL - failed to process with values/properties as-is CANCEL - canceled, retry could work ERROR - un expected exception occurred UNSUPPORTED - merchant config won't allow the request
-        * Reason:String optional information about result value, if not SUCCESS
-        * Message:String optional detail information about the result value, if not success
-      * SaleResponse, AuthResponse and PreAuthResponse have 3 new flags (e.g. The payment gateway may force an AuthRequest to a SaleRequest)
-      * IsSale:boolean - true if the payment is closed
-      * IsAuth:boolean - true if the payment can be tip adjusted before closeout
-      * IsPreAuth:boolean - true if the payment needs to be "captured" before closeout will close it
-* voidPayment operation fix to verify connection status and check for void request
-  acknowledgement from the Clover device prior to issuing a successful response
-* Added DefaultCloverConnectorListener, which automatically accepts signature if a verify
-  signature request is received
-* Behavior change for RefundPaymentRequest - In the prior versions, a value of zero for 
-  the amount field would trigger a refund of the full payment amount. With the 1.1 version, 
-  passing zero in the amount field will trigger a validation failure. 
-  Set fullRefund:boolean to `true` to specify a full refund. NOTE: This will attempt to refund 
-  the original (full) payment amount, not the remaining amount, in a partial refund scenario.
-* CloverConnecter now requires ApplicationId to be set via configuration of the 
-  third party application. This is provided as part of the device configuration 
-  that is passed in during the creation of the CloverConnector.  The String input parameter of
-  "applicationId", which is passed in when instantiating the DefaultCloverDevice, should be 
-  set using the format of <company specific package>:<version> e.g. com.clover.ExamplePOS:1.2
-* Modified remote pay so prompts to take orders offline and flagging duplicate orders appear only in merchant facing mode.
-* Added ability to query pending payments.
-* PreAuthRequest - no longer prompts for signature, signature verification or receipt options on the customer facing device.
-* Changes to support certain transaction level overrides have been included in this version. To facilitate the addition of the new override capabilities, some new options were added to the SaleRequest & TransactionRequest classes.
-  * TransactionRequest - extended by SaleRequest, AuthRequest, PreAuthRequest & ManualRefundRequest
-    * (Long) signatureThreshold was added to enable the override of the signature threshold in the Merchant settings for payments.
-    * (DataEntryLocation) signatureEntryLocation was added to enable the override of the Signature Entry Location in the Merchant Signature Settings for Payments.  Value of NONE will cause the device to skip requesting a signature for the specified transaction.
-    Possible values:
-      * ON_SCREEN
-      * ON_PAPER
-      * NONE
-    * (Boolean) disableReceiptSelection was added to enable bypassing the customer-facing receipt selection screen.
-    * (Boolean) disableDuplicateChecking was added to enable bypassing any duplicate transaction logic and associated requests for confirmation.
-    * (Boolean) autoAcceptPaymentConfirmations was added to enable the automatic acceptance of any payment confirmations that might be applicable for the given transaction (e.g. offline payment confirmation).  This override prevents any payment confirmation requests from being transmitted back to the calling program and continues processing as if a confirmPayment() was initiated by the caller.
-    * (Boolean) autoAcceptSignature was added to enable the automatic acceptance of a signature (on screen or on paper) if applicable for the given transaction.  This override prevents signature confirmation requests from being transmitted back to the calling program and continues processing as if a acceptSignature() was initiated by the caller.
-  * SaleRequest (extends TransactionRequest)
-    * (TipMode) tipMode was added to specify the location from which to accept the tip.  You can now provide a tip up front or specify no tip to override the merchant configured (on screen/on paper) settings. **NOTE** If you desire to take the tip on paper, populate the signatureEntryLocation with ON_PAPER
-    Possible values:
-      * TIP_PROVIDED - tip is included in the request
-      * ON_SCREEN_BEFORE_PAYMENT - valid when requested via Mini or Mobile
-      * NO_TIP - tip will not be requested for this payment
-
-## Getting Connected
-1. Download the USB Pay Display app from the Clover App Market on your Clover Mini Dev Kit.
-2. Open the USB Pay Display app
-3. Run the Clover Connector Android Example POS app on your Android POS device (emulator, device etc.)
-4. You should see the example POS screen and connection state listed. If everything worked you'll get a connected status. If it remains disconnected, you'll want to check that 1) You are connecting the correct cable to the correct connection point on the Clover Mini “hub” - port USB(port with Clover logo). You will need to use the USB cable that the device came with. 2) That your Android devices support “host” or OTG mode, which is required to communicate with the mini, which will operate in “accessory” mode.
+To experience transactions end-to-end from the merchant and customer perspectives, we also recommend ordering a [Clover Go DevKit](http://cloverdevkit.com/collections/devkits/products/clover-all-in-one-developer-kit)
   
-## Working with the SDK
+The SDK enables your custom mobile point-of-sale (POS) to accept card present, EMV compliant payment transactions. 
+Clover Go supports two types of card readersa magnetic stripe, EMV chip-and-signature card reader and an all-in-one card reader that supports Swipe, EMV Dip, and NFC Contactless payments. The SDK is designed to allow merchants to take payments on iOS smartphones and tablets.  
+
+**Core features of the  SDK for Clover Go include:**   
+1. Card Present Transactions – Transactions in which the merchant uses the approved card reader to accept physical credit or debit cards on a connected smartphone or tablet. The Clover Go platform supports the following payment options:  
+   * **Magnetic Stripe Card** – A traditional payment card that has a magnetic stripe.  
+   * **EMV Card** – A payment card containing a computer chip that enhances data security. Clover Go's EMV compliant platform enables the customer or merchant to insert an EMV card into the card reader.  
+   * **NFC Contactless Payment** – A transaction in which a customer leverages an Apple Pay, Samsung Pay, or Android Pay mobile wallets by tapping their mobile device to the card readerNFC Contactless Payment – A transaction in which a customer leverages an Apple Pay, Samsung Pay, or Android Pay mobile wallets by tapping their mobile device to the card reader.    
+
+**The Clover Go SDK currently supports the following payment transactions:**   
+* **Sale** - A transaction used to authorize and capture the payment amount in at the same time. A Sale transaction is final and the amount cannot be adjusted. 
+* **Auth** - A transaction that can be tip-adjusted until it is finalized during a batch closeout. This is a standard model for a restaurant that adjusts the amount to include a tip after a card is charged.  
+* **Void** - A transaction that cancels or fully reverses a payment transaction. 
+* **Refund** - A transaction that credits funds to the account holder.  
+* **PreAuth** - A pre-authorization for a certain amount. 
+* **PreAuth Capture** - A Pre-Auth that has been finalized in order to complete a payment (i.e., a bar tab that has been closed out).   
+* **Partial Auth** - A partial authorization. The payment gateway may return a partial authorization if the transaction amount exceeds the customer’s credit or debit card limit.  
+* **Tip Adjust** - A transaction in which a merchant takes or edits a tip after the customer’s card has been processed (i.e., after the initial Auth transaction).
+
+## Getting Started
+This section will provide some quick steps to get started with the SDK. To integrate with Clover Go devices you will need initialize the CloverGoDeviceConfiguration object with the right initialization values and that includes the accesstoken that you retreive by going through the OAuth flow. You will need to follow these initial steps
+
+### Initial Setup  
+**1. Create Developer Account:** Go to the Clover sandbox developer portal at https://sandbox.dev.clover.com/developers/ and create a developer account.  
+![developer_account](/images/developer-account.png)  
+**2. Create a new application:** Log into developer portal and create a new app - enter app name, unique package name, and check all the clover permissions your application will require to function properly.  
+![create_app](/images/app_create.png)  
+**3. Application Settings/Credentials:** Once your application is created you can note down the App ID and Secret which will be required in your code for OAuth flow.  
+![appid_secret](/images/appid_secret.png)  
+**4.Provide re-direct URL for your OAuth flow:** Enter the redirect URL where Clover should redirect the authorization response to in the site URL field in the Web Configuration settings. The default OAuth response should be "Code".  
+![app_redirect](/images/app_redirect.png)  
+**Note:** The developer portal does not currently accept non-http(s) URL schemes. If you have a custom URL scheme for native iOS and Android applications (such as myPaymentApp://clovergoauthresponse), send an email to Clovergo-Integrations@firstdata.com with your App ID and redirect URL request.  
+  
+**5. Set app permissions:** Your application will require Clover permissions to work correctly. Set your permissions by going to Settings, then Required Permissions menu.    
+![app_permissions](/images/app_permissions.png) 
+  
+**6. Setup your unique application id:** Provide a unique application id for your application, you can use your package name or any identifier that uniquely identifies the transactions of your application. Set this up in the Semi-integrated App section of your application settings.  
+![app_remoteid](/images/app_remoteid.png)  
+  
+Please make sure that your application bundle id is the same as the one defined in this field.
+  
+### OAuth Flow  
+This section describes the OAuth flow steps to get the access token required to initialize the CloverGoDeviceConfiguration object.  
+
+![oauth_flow](/images/oauth_flow.png)  
+**Step 1.** Invoke the Clover Authorize URL from your pos application using the App ID of your application (Step #3 above). This action will prompt the user to log into clover merchant account, once successfuly logged in they will need to approve the app for the first inital login. Authorize URL for Sandbox Environment: https://sandbox.dev.clover.com/oauth/authorize?client_id={app_id}&response_type=code  
+**Step 2.** The user will be redirected to the redirect URL set in step 4 above.    
+**Step 3.** Parse the URI data to get the Merchant ID, Employee ID, Client ID and Code.  
+**Step 4.** Make a REST call that includes the Client ID (it's the app id), secret, and Code from your backend server to get the access token. https://sandbox.dev.clover.com/oauth/token?client_id={appId}&client_secret={appSecret}&code={codeUrlParam}  
+**Note** Please note that the sample application as part of this project provides a hosted service for Step 4. Use your own such service to execute this step.  
+**Step 5.** Parse the response of step 4 and retreive the access token. The access token provides the Merchant and Employee context to the SDK, all transactions processed will be under this context.  
+  
+  
+### Initial Setup
+To integrate SDK in your project, you have two options:  
+#### 1. Clone the remote-pay-android-hackathon repository and add a new module for your app into the project
+  - Clone remote-pay-android-go
+  - Create a new module in the project
+  - When prompted, select Phone & Tablet Module
+  - Android Studio should automatically add your new module in the settings.gradle file. If not, add the module that you created
+  - In your module’s build.gradle file, add the following line under dependencies
+    compile project(':remote-pay-android-connector')      
     
-  ```
-      ICloverConnect cloverConnector = new CloverConnector(new USBCloverDeviceConfiguration(getContext(), "com.yourcompany.app:2.1.1"));
-      cloverConnector.addCloverConnectorListener(new DefaultCloverConnectorListener() {
-          public void onSaleResponse(SaleResponse response) {
-             if(response.isSuccess()) {
-                // do something with response.getPayment()
-             } else {
-                // failure processing
-                // look at response.getResult() to see the reason for the failure
-             }
-          }
-          
-          public void onConfirmPaymentRequest(ConfirmPaymentRequest request) {
-              // will be called if needed by the device to
-              // confirm a payment. e.g. offline, duplicate check, etc.
-              boolean acceptPayment = false; // prompt user, config, etc.
-              if(acceptPayment) {
-                  cloverConnector.acceptPayment(request.getPayment());
-              } else {
-                  cloverConnector.rejectPayment(request.getPayment());
-              }
-          }
-          
-          // wait until this gets called to indicate the device
-          // is ready to communicate
-          public void onDeviceReady(MerchantInfo merchantInfo) {
-              super.onDeviceReady(merchantInfo);
-          }
+#### 2. Clone the remote-pay-android-go repository and copy the necessary modules into your own android project
+  - Create or open your own project
+  - Clone remote-pay-android-hackathon into a separate project
+  - Using Finder (Finder/Explorer) copy the following folders/module into your own project
+    - clover-android-sdk
+    - clover-remote-interface
+    - data
+    - domain
+    - reader
+    - remote-pay-android-connector
+    - roam
+  - Update your settings.gradle file to include the newly added modules. It will look something like the following
+```
+      include ':remote-pay-android-connector', ':reader', ':data', ':domain', ':roam', ':clover-android-sdk', ':clover-remote-interface', ':<your\_app\_module\_here>'
+```
+  - In your project’s build.gradle file under buildscript, make the following changes
+```
+      buildscript {
+        repositories {
+        mavenCentral()
+        jcenter()
       }
-  
-      cloverConnector.initializeConnection();
-      ...
-      // after the connector is ready
-      if(cloverConnector.isReady()) {
-          SaleRequest saleRequest = new SaleRequest(2215, "b1234"); // $22.15 with externalID "b1234"
-          cloverConnector.sale(saleRequest);
+      def mavenPlugin = "com.github.dcendents:android-maven-gradle-plugin:1.5"
+      dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'io.realm:realm-gradle-plugin:3.3.1'
+        classpath mavenPlugin
+        classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.10.0'
       }
-      
-  ```
+```
+  - In your app module’s build.gradle file, add the following line under dependencies
+```
+      compile project(':remote-pay-android-connector')
+```
+### Leveraging SDK within your application
+Use the following in your app
+ICloverGoConnector cloverGo450Connector;  
+ICloverGoConnectorListener ccGoListener;  
+#### 1. Create and implement ICloverGoConnectorListener
+```
+ccGoListener = new new ICloverGoConnectorListener() {
+public void...
+...
+}
+```
+*\*\*\*\* Below are useful and important functions \*\*\*\**
+```
+ccGoListener = new ICloverGoConnectorListener() {  
+  public void onDeviceDisconnected(ReaderInfo readerInfo) {}  
+  public void onDeviceConnected() {}  
+  public void onCloverGoDeviceActivity(final CloverDeviceEvent deviceEvent) {  
+    switch (deviceEvent.getEventState()) {
+      case CARD\_SWIPED:
+      break;
+      case CARD\_TAPPED:
+      break;
+      case CANCEL\_CARD\_READ:
+      break;
+      case EMV\_COMPLETE\_DATA:
+      break;
+      case CARD\_INSERTED\_MSG:
+      break;
+      case CARD\_REMOVED\_MSG:
+      break;
+      case PLEASE\_SEE\_PHONE\_MSG:
+      break;
+      case READER\_READY:
+      break;
+    }
+  }
 
-  
-# Version 0.5
-* Fix performance issue in USB connector
-* Updated action of broadcast messages for USB connect/disconnect/ready
-   * CloverTransport.DEVICE_DISCONNECTED, DEVICE_CONNECTED, DEVICE_READY
-* added resetDevice() to CloverConnector, to reset the clover device state
+  public void onDeviceDiscovered(ReaderInfo readerInfo) {}
+  public void onAidMatch(final List<CardApplicationIdentifier>applicationIdentifiers, final AidSelection aidSelection) {}
+  public void onDeviceReady(final MerchantInfo merchantInfo) {}
+  public void onDeviceError(CloverDeviceErrorEvent deviceErrorEvent) {
+    switch (deviceErrorEvent.getErrorType()) {
+      case READER\_ERROR:
+      case CARD\_ERROR:
+      case READER\_TIMEOUT:
+      case COMMUNICATION\_ERROR:
+      case LOW\_BATTERY:
+      case PARTIAL\_AUTH\_REJECTED:
+      case DUPLICATE\_TRANSACTION\_REJECTED:
+      // notify user
+      break;
+      case MULTIPLE\_CONTACT\_LESS\_CARD\_DETECTED\_ERROR:
+      case CONTACT\_LESS\_FAILED\_TRY\_CONTACT\_ERROR:
+      case EMV\_CARD\_SWIPED\_ERROR:
+      case DIP\_FAILED\_ALL\_ATTEMPTS\_ERROR:
+      case DIP\_FAILED\_ERROR:
+      case SWIPE\_FAILED\_ERROR:
+      // show progress to user
+      break;
+    }
+  }
+  public void onAuthResponse(final AuthResponse response) {}
+  public void onPreAuthResponse(final PreAuthResponse response) {}
+  public void onTipAdjustAuthResponse(TipAdjustAuthResponse response) {}
+  public void onCapturePreAuthResponse(CapturePreAuthResponse response) {}
+  public void onConfirmPaymentRequest(ConfirmPaymentRequest request) {}
+  public void onSaleResponse(final SaleResponse response) {}
+  public void onRefundPaymentResponse(final RefundPaymentResponse response) {}
+  public void onTipAdded(TipAddedMessage message) {}
+  public void onVoidPaymentResponse(VoidPaymentResponse response) {}
+```
 
-# Version 0.4
-* Add support for USB (USBCloverDeviceConfiguration)
-* Add support for offline payments
+#### 2. Initialize SDK with 450 (Bluetooth) Reader
+Parameters (Required) to initialize SDK:
+1.  access Token
+2.  environment
+3.  api key
+4.  secret
+5.  app ID
+```
+CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, goEnv, apiKey, secret, appId).deviceType(ReaderInfo.ReaderType.RP450). allowAutoConnect(false).build();
+ICloverGoConnector cloverGo450Connector = (CloverGoConnector)
+ConnectorFactory.createCloverConnector(config);
+cloverGo450Connector.addCloverGoConnectorListener(ccGoListener);
+cloverGo450Connector.initializeConnection();
+```
+#### 3. Sale transaction
+```
+SaleRequest request = new
+SaleRequest(store.getCurrentOrder().getTotal(), externalPaymentID);
+request.setCardEntryMethods(store.getCardEntryMethods());
+request.setAllowOfflinePayment(store.getAllowOfflinePayment());
+request.setForceOfflinePayment(store.getForceOfflinePayment());
+request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
+request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
+request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
+request.setDisablePrinting(store.getDisablePrinting());
+request.setTipMode(store.getTipMode());
+request.setSignatureEntryLocation(store.getSignatureEntryLocation());
+request.setSignatureThreshold(store.getSignatureThreshold());
+request.setDisableReceiptSelection(store.getDisableReceiptOptions());
+request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
+request.setTipAmount(store.getTipAmount());
+request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
+request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
+cloverGo450Connector.sale(request);
+```
+Required parameters for sale transaction:
+1.  amount – which will be total amount you want to make a transaction  
+2.  externalPaymentID – random unique number for this transaction  
+and other Optional parameters
 
-# Version 0.3
-* Updated support for externalPaymentId in SaleRequest, AuthRequest and PreAuthRequest
-* Added closeout implementation
-* Updated reconnect logic in WebSocketTransport
-* Updated ExamplePOS App
-
-# Version 0.2
-* Update example POS app; should demonstrate all library functions now
-* Update PreAuth, PreAuthCapture, and VaultCard methods in CloverConnector
-
-# Version 0.1
-* Initial capability
-
-
+#### 4.  Auth transaction
+```
+AuthRequest request = new AuthRequest(store.getCurrentOrder().getTotal(), externalPaymentID);
+request.setCardEntryMethods(store.getCardEntryMethods());
+request.setAllowOfflinePayment(store.getAllowOfflinePayment());
+request.setForceOfflinePayment(store.getForceOfflinePayment());
+request.setApproveOfflinePaymentWithoutPrompt(store.getApproveOfflinePaymentWithoutPrompt());
+request.setTippableAmount(store.getCurrentOrder().getTippableAmount());
+request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
+request.setDisablePrinting(store.getDisablePrinting());
+request.setSignatureEntryLocation(store.getSignatureEntryLocation());
+request.setSignatureThreshold(store.getSignatureThreshold());
+request.setDisableReceiptSelection(store.getDisableReceiptOptions());
+request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
+request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
+request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
+cloverConnector.auth(request);
+```
+Required parameters for auth transaction:
+1.  amount – which will be total amount you want to make a transaction
+2.  externalPaymentID – random unique number for this transaction
+and other Optional parameters
