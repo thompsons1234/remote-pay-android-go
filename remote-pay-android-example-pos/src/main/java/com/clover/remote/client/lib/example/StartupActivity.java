@@ -203,6 +203,7 @@ public class StartupActivity extends Activity {
           CommonStatusCodes.getStatusCodeString(resultCode)));
     } else if (data != null && requestCode == OAUTH_REQUEST_CODE) {
       setGoParams();
+      getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).edit().putString(CONNECTION_MODE, CONFIG_TYPE_GO).commit();
       String token = data.getStringExtra(EXTRA_CLOVER_GO_ACCESS_TOKEN);
 
       Intent intent = new Intent();

@@ -176,45 +176,47 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     CardsFragment.OnFragmentInteractionListener, ManualRefundsFragment.OnFragmentInteractionListener, MiscellaneousFragment.OnFragmentInteractionListener,
     ProcessingFragment.OnFragmentInteractionListener, PreAuthFragment.OnFragmentInteractionListener {
 
-  private static final String TAG = "ExamplePOSActivity";
+  // Package name for example custom activities
+  public static final String CUSTOM_ACTIVITY_PACKAGE = "com.clover.cfp.examples.";
   public static final String EXAMPLE_POS_SERVER_KEY = "clover_device_endpoint";
-  public static final int WS_ENDPOINT_ACTIVITY = 123;
-  public static final int SVR_ACTIVITY = 456;
   public static final String EXTRA_CLOVER_CONNECTOR_CONFIG = "EXTRA_CLOVER_CONNECTOR_CONFIG";
   public static final String EXTRA_WS_ENDPOINT = "WS_ENDPOINT";
   public static final String EXTRA_CLEAR_TOKEN = "CLEAR_TOKEN";
-  private static final String DEFAULT_EID = "DFLTEMPLYEE";
-  private static int RESULT_LOAD_IMG = 1;
-  public static List<Printer> printers;
-  private Printer printer;
-  public static String lastPrintRequestId;
-  private int printRequestId = 0;
-
-  // Package name for example custom activities
-  public static final String CUSTOM_ACTIVITY_PACKAGE = "com.clover.cfp.examples.";
-
-  private Dialog ratingsDialog;
-  private ListView ratingsList;
-  private ArrayAdapter<String> ratingsAdapter;
-
   public static final String EXTRA_CLOVER_GO_CONNECTOR_APP_ID = "EXTRA_CLOVER_GO_CONNECTOR_APP_ID";
   public static final String EXTRA_CLOVER_GO_CONNECTOR_APP_VERSION = "EXTRA_CLOVER_GO_CONNECTOR_APP_VERSION";
   public static final String EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN = "EXTRA_CLOVER_GO_CONNECTOR_CONFIG_ACCESS_TOKEN";
   public static final String EXTRA_CLOVER_GO_CONNECTOR_API_KEY = "EXTRA_CLOVER_GO_CONNECTOR_CONFIG_API_KEY";
   public static final String EXTRA_CLOVER_GO_CONNECTOR_SECRET = "EXTRA_CLOVER_GO_CONNECTOR_CONFIG_SECRET";
   public static final String EXTRA_CLOVER_GO_CONNECTOR_ENV = "EXTRA_CLOVER_GO_CONNECTOR_ENV";
+  public static final int WS_ENDPOINT_ACTIVITY = 123;
+  public static final int SVR_ACTIVITY = 456;
 
-  Payment currentPayment = null;
-  Challenge[] currentChallenges = null;
+  private static final String TAG = "ExamplePOSActivity";
+  private static final String DEFAULT_EID = "DFLTEMPLYEE";
+  private static int RESULT_LOAD_IMG = 1;
 
-  boolean usb = true;
+  public static List<Printer> printers;
+  public static String lastPrintRequestId;
 
-  HashMap<ReaderInfo.ReaderType, ICloverGoConnector> cloverGoConnectorMap = new HashMap<>();
-  HashMap<ReaderInfo.ReaderType, MerchantInfo> merchantInfoMap = new HashMap<>();
-  ICloverConnector cloverConnector;
+  private Printer printer;
+  private int printRequestId = 0;
+  private boolean usb = true;
 
-  POSStore store = new POSStore();
   private AlertDialog pairingCodeDialog;
+  private ProgressDialog progressDialog;
+  private Dialog alertDialog;
+  private Dialog ratingsDialog;
+  private ListView ratingsList;
+  private ArrayAdapter<String> ratingsAdapter;
+
+  private Payment currentPayment = null;
+  private Challenge[] currentChallenges = null;
+
+  private HashMap<ReaderInfo.ReaderType, ICloverGoConnector> cloverGoConnectorMap = new HashMap<>();
+  private HashMap<ReaderInfo.ReaderType, MerchantInfo> merchantInfoMap = new HashMap<>();
+  private ICloverConnector cloverConnector;
+
+  private POSStore store;
 
   private transient CloverDeviceEvent.DeviceEventState lastDeviceEvent;
   private SharedPreferences sharedPreferences;
@@ -228,9 +230,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   private String appId;
   private String appVersion;
   private CloverGoDeviceConfiguration.ENV goEnv;
-
-  private ProgressDialog progressDialog;
-  private Dialog alertDialog;
 
   private ArrayList<ReaderInfo> mArrayListReadersList;
   private ArrayList<String> mArrayListReaderString;
@@ -264,13 +263,13 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
             Challenge theChallenge = currentChallenges[challengeIndex + 1];
 
-            switch(theChallenge.type) {
+            switch (theChallenge.type) {
               case DUPLICATE_CHALLENGE:
-                showPaymentConfirmation(paymentConfirmationListener, theChallenge,  challengeIndex + 1);
+                showPaymentConfirmation(paymentConfirmationListener, theChallenge, challengeIndex + 1);
                 break;
 
               case PARTIAL_AUTH_CHALLENGE:
-                showPartialAuthChallenge(paymentConfirmationListener, theChallenge,  challengeIndex + 1);
+                showPartialAuthChallenge(paymentConfirmationListener, theChallenge, challengeIndex + 1);
                 break;
             }
           }
@@ -457,13 +456,13 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       MerchantInfo merchantInfo = merchantInfoMap.get(readerType);
 
       // Need paymentType in addition to goReaderType in case key entered is selected.
-        createCloverGoConnector(readerType);
+      createCloverGoConnector(readerType);
 
-        if (merchantInfo == null) {
-          setDisconnectedStatus();
-        } else {
-          setConnectedStatus(merchantInfo);
-        }
+      if (merchantInfo == null) {
+        setDisconnectedStatus();
+      } else {
+        setConnectedStatus(merchantInfo);
+      }
     }
     updateComponentsWithNewCloverConnector();
   }
@@ -516,6 +515,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   private void initStore() {
+    if (store == null)
+      store = new POSStore();
+
     // initialize store...
     store.addAvailableItem(new POSItem("100", "$1 Gift Card", 100, false, false));
     store.addAvailableItem(new POSItem("101", "$2 Gift Card", 200, false, false));
@@ -1670,7 +1672,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
             @Override
             public void run() {
 
-              switch(theChallenge.type) {
+              switch (theChallenge.type) {
                 case DUPLICATE_CHALLENGE:
                   showPaymentConfirmation(paymentConfirmationListener, theChallenge, 0);
                   break;
@@ -2658,8 +2660,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   private int getDefaultCloverGoCardEntryMethods() {
     return Constants.CARD_ENTRY_METHOD_MANUAL |
-      Constants.CARD_ENTRY_METHOD_ICC_CONTACT |
-      Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS;
+        Constants.CARD_ENTRY_METHOD_ICC_CONTACT |
+        Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS;
   }
 
 }
