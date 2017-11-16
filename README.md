@@ -115,9 +115,9 @@ To integrate SDK in your project, you have two options:
 ### Important sample code to review:
 
   - Once you have your app module created, you can look at the remote-pay-android-example-pos activities, such as StartupActivity and ExamplePOSActivity to see how the Clover and/or Clover Go connectors are created and implemented.  The ExamplePOSActivity also has the listener implementations that you can reference.
-    - Note: The CloverConnector is for use with Clover Mini POS stations.  CloverGoConnectorImpl is for use with standard Android phones and tablets using Clover's Audio Jack (RP350) and Bluetooth (RP450) card readers.
+    - Note: The CloverConnector is for use with Clover Mini POS stations.  CloverGoConnector is for use with standard Android phones and tablets using Clover's Audio Jack (RP350) and Bluetooth (RP450) card readers.
 
-  - The remote-pay-android-connector module contains the connector implementations for both Clover (CloverConnector) and Clover Go (CloverGoConnectorImpl)
+  - The remote-pay-android-connector module contains the connector implementations for both Clover (CloverConnector) and Clover Go (CloverGoConnector)
 
 ### Leveraging SDK within your application
 Use the following in your app
