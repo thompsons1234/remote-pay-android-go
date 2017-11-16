@@ -71,11 +71,11 @@ This section describes the OAuth flow steps to get the access token required to 
 To integrate SDK in your project, you have two options:  
 #### Option 1. Clone the remote-pay-android-go repository and add a new module for your app into the project
   - Clone remote-pay-android-go
-  - Create a new module in the project
+  - Create a new app module in the project
   - When prompted, select Phone & Tablet Module
   - Android Studio should automatically add your new module in the settings.gradle file. If not, add the module that you created
   - In your module’s build.gradle file, add the following line under dependencies
-    compile project(':remote-pay-android-connector')      
+    compile project(':remote-pay-android-connector')     
     
 #### Option 2. Clone the remote-pay-android-go repository and copy the necessary modules into your own android project
   - Create or open your own project
@@ -111,6 +111,14 @@ To integrate SDK in your project, you have two options:
 ```
       compile project(':remote-pay-android-connector')
 ```
+
+### Important sample code to review:
+
+  - Once you have your app module created, you can look at the remote-pay-android-example-pos activities, such as StartupActivity and ExamplePOSActivity to see how the Clover and/or Clover Go connectors are created and implemented.  The ExamplePOSActivity also has the listener implementations that you can reference.
+    - Note: The CloverConnector is for use with Clover Mini POS stations.  CloverGoConnectorImpl is for use with standard Android phones and tablets using Clover's Audio Jack (RP350) and Bluetooth (RP450) card readers.
+
+  - The remote-pay-android-connector module contains the connector implementations for both Clover (CloverConnector) and Clover Go (CloverGoConnectorImpl)
+
 ### Leveraging SDK within your application
 Use the following in your app
 ICloverGoConnector cloverGo450Connector;  
