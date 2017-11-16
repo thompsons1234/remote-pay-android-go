@@ -1868,7 +1868,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     };
 
-    if (goReaderType == RP450 || goReaderType == RP350)
+    if ((goReaderType == RP450 || goReaderType == RP350) && getCloverConnector() instanceof ICloverGoConnector)
       ((ICloverGoConnector) getCloverConnector()).addCloverGoConnectorListener(ccGoListener);
     else {
       getCloverConnector().addCloverConnectorListener(ccListener);

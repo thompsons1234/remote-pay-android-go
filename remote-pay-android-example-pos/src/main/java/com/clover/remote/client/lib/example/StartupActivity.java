@@ -201,7 +201,7 @@ public class StartupActivity extends Activity {
         }
       } else Log.e(TAG, String.format(getString(R.string.barcode_error_format),
           CommonStatusCodes.getStatusCodeString(resultCode)));
-    } else if (requestCode == OAUTH_REQUEST_CODE) {
+    } else if (data != null && requestCode == OAUTH_REQUEST_CODE) {
       setGoParams();
       String token = data.getStringExtra(EXTRA_CLOVER_GO_ACCESS_TOKEN);
 
