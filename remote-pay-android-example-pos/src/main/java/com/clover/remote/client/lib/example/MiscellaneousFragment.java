@@ -62,7 +62,6 @@ import static com.clover.remote.client.lib.example.StartupActivity.CONNECTION_MO
 import static com.clover.remote.client.lib.example.StartupActivity.EXAMPLE_APP_NAME;
 
 public class MiscellaneousFragment extends Fragment implements AdapterView.OnItemSelectedListener {
-  private static final String ARG_STORE = "store";
 
   private POSStore store;
 
@@ -451,9 +450,7 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
       }
     });
 
-    if (!mode.equals(CONFIG_TYPE_GO)) {
-      updateSwitches(view);
-    } else {
+    if (mode.equals(CONFIG_TYPE_GO)) {
 
       view.findViewById(R.id.connectReaderBox).setVisibility(View.VISIBLE);
 
@@ -466,6 +463,7 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
       view.findViewById(R.id.CustomActivityBox).setVisibility(View.GONE);
 
       view.findViewById(R.id.SwipeSwitch).setVisibility(View.GONE);
+      view.findViewById(R.id.ManualSwitch).setVisibility(View.GONE);
 
       view.findViewById(R.id.forceOfflinePayBox).setVisibility(View.GONE);
       view.findViewById(R.id.allowOfflinePayBox).setVisibility(View.GONE);
@@ -488,7 +486,11 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
       view.findViewById(R.id.WelcomeThankYouBox).setVisibility(View.GONE);
 
       updateTransactionTypeSwitches();
+
+    } else {
+      updateSwitches(view);
     }
+
     return view;
   }
 
