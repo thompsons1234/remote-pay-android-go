@@ -1635,7 +1635,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                   store.addPaymentToOrder(payment, store.getCurrentOrder());
                   payment.setPaymentStatus(POSPayment.Status.AUTHORIZED);
                   payment.amount = paymentAmount;
-                  showMessage("Sale successfully processing using Pre Authorization", Toast.LENGTH_LONG);
+                  showMessage("PreAuth Capture Successful", Toast.LENGTH_LONG);
 
                   //TODO: if order isn't fully paid, don't create a new order...
                   store.createOrder(false);
