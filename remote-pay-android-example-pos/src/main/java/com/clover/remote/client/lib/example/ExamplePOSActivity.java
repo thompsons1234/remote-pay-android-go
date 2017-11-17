@@ -1781,31 +1781,24 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       public void onVoidPaymentResponse(VoidPaymentResponse response) {
         if (response.isSuccess()) {
 
-          // For Clover Go, we are not having the order track payments in this sample app.
-          if (configType.equals(AppConstants.CONFIG_TYPE_GO)) {
+          boolean done = false;
 
-            showMessage("Payment was voided", Toast.LENGTH_SHORT);
-
-          } else {
-
-            boolean done = false;
-
-            for (POSOrder order : store.getOrders()) {
-              for (POSExchange payment : order.getPayments()) {
-                if (payment instanceof POSPayment) {
-                  if (payment.getPaymentID().equals(response.getPaymentId())) {
-                    ((POSPayment) payment).setPaymentStatus(POSPayment.Status.VOIDED);
-                    showMessage("Payment was voided", Toast.LENGTH_SHORT);
-                    done = true;
-                    break;
-                  }
+          for (POSOrder order : store.getOrders()) {
+            for (POSExchange payment : order.getPayments()) {
+              if (payment instanceof POSPayment) {
+                if (payment.getPaymentID().equals(response.getPaymentId())) {
+                  ((POSPayment) payment).setPaymentStatus(POSPayment.Status.VOIDED);
+                  showMessage("Payment was voided", Toast.LENGTH_SHORT);
+                  done = true;
+                  break;
                 }
               }
-              if (done) {
-                break;
-              }
+            }
+            if (done) {
+              break;
             }
           }
+
         } else {
           showMessage(getClass().getName() + ":Got VoidPaymentResponse of " + response.getResult(), Toast.LENGTH_LONG);
         }

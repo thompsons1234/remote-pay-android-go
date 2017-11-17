@@ -1117,7 +1117,7 @@ public class CloverGoConnectorImpl {
 
   public void rejectPayment(com.clover.sdk.v3.payments.Payment payment, Challenge challenge) {
     if (mOrder.getStatus() == Order.STATUS_PARTIAL_PAYMENT) {
-      mBroadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.PARTIAL_AUTH_REJECTED, 0, null, "In rejectPayment: Partial auth rejected by user."));
+      mBroadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.PARTIAL_AUTH_REJECTED, 0, null, "In rejectPayment: Partial auth rejected by user.  Payment being voided"));
       mBroadcaster.notifyVoidPayment(mPayment, "Partial Auth Rejected");
     } else if (mLastErrorWasDuplicateTransaction) {
       mBroadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.DUPLICATE_TRANSACTION_REJECTED, 0, null, "In rejectPayment: Duplicate transaction rejected by user."));
