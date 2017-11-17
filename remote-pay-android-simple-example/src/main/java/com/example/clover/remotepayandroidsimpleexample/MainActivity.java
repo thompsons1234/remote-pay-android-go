@@ -205,7 +205,7 @@ public class MainActivity extends Activity {
 
   public void sendDeviceLogs(View view){
     Log.d(TAG, "send device logs clicked");
-    cloverConnector.sendCloverDeviceLog("because");
+    cloverConnector.sendDebugLog("because");
   }
 
   public static ICloverConnector getCloverConnector (){

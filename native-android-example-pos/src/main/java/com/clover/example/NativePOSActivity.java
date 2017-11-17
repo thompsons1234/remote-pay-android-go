@@ -278,11 +278,13 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
     @Override
     public void onRetrievePaymentResponse(RetrievePaymentResponse response) {
       if (response.getSuccess()) {
-        showMessage("Retrieve Payment successful for Payment ID: " + response.getExternalPaymentId(), Toast.LENGTH_LONG);
+        showMessage("Retrieve Payment successful for Payment ID: " + response.getExternalPaymentId()
+                    + " QueryStatus: " + response.getQueryStatus()
+                    + " Payment: " + response.getPayment()
+                    + " reason: " + response.getReason(), Toast.LENGTH_LONG);
       } else {
         showMessage("Retrieve Payment error: " + response.getResult(), Toast.LENGTH_LONG);
       }
-
     }
 
     @Override
