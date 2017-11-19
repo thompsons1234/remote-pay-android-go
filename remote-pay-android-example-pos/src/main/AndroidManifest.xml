@@ -16,8 +16,8 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.clover.remote.client.lib.example"
-          android:versionCode="25"
-          android:versionName="1.25">
+          android:versionCode="26"
+          android:versionName="1.26">
 
     <uses-sdk>
         17
