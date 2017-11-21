@@ -1136,7 +1136,7 @@ public class CloverGoConnectorImpl {
 
   public void sendReceipt(String emailAddress, String phoneNo, String orderId) {
 
-    mSendReceipt.getObservable(emailAddress != null && !emailAddress.isEmpty() ? emailAddress : null, phoneNo != null && !phoneNo.isEmpty() ? phoneNo : null, orderId).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).onErrorComplete().subscribe(new CompletableObserver() {
+    mSendReceipt.getObservable(emailAddress != null && !emailAddress.isEmpty() ? emailAddress : null, phoneNo != null && !phoneNo.isEmpty() ? phoneNo : null, orderId).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(new CompletableObserver() {
 
       @Override
       public void onSubscribe(Disposable d) {
