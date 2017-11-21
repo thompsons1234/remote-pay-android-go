@@ -96,6 +96,12 @@ public class CloverGoConnectorBroadcaster extends CopyOnWriteArrayList<ICloverGo
     }
   }
 
+  public void notifyOnDisplayMessage(String message) {
+    for (ICloverGoConnectorListener listener : this) {
+      listener.onDisplayMessage(message);
+    }
+  }
+
   public void notifyOnDisconnect(ReaderInfo readerInfo) {
     for (ICloverGoConnectorListener listener : this) {
       listener.onDeviceDisconnected(readerInfo);

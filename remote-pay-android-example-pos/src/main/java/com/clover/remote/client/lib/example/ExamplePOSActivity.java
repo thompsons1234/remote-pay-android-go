@@ -1235,6 +1235,12 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     ccGoListener = new ICloverGoConnectorListener() {
+
+      @Override
+      public void onDisplayMessage(String message) {
+        Toast.makeText(ExamplePOSActivity.this, message, Toast.LENGTH_LONG).show();
+      }
+
       @Override
       public void onSendReceipt(Order order, SendReceipt sendReceipt) {
         hideKeyboard();

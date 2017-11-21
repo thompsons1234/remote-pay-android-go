@@ -1135,7 +1135,24 @@ public class CloverGoConnectorImpl {
   }
 
   public void sendReceipt(String emailAddress, String phoneNo, String orderId) {
-    mSendReceipt.getObservable(emailAddress != null && !emailAddress.isEmpty() ? emailAddress : null, phoneNo != null && !phoneNo.isEmpty() ? phoneNo : null, orderId).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).onErrorComplete().subscribe();
+
+    mSendReceipt.getObservable(emailAddress != null && !emailAddress.isEmpty() ? emailAddress : null, phoneNo != null && !phoneNo.isEmpty() ? phoneNo : null, orderId).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).onErrorComplete().subscribe(new CompletableObserver() {
+
+      @Override
+      public void onSubscribe(Disposable d) {
+
+      }
+
+      @Override
+      public void onComplete() {
+        mBroadcaster.notifyOnDisplayMessage("Send receipt successful");
+      }
+
+      @Override
+      public void onError(Throwable e) {
+        mBroadcaster.notifyOnDisplayMessage("Send receipt failed");
+      }
+    });
   }
 
   private void notifySignatureRequired() {
