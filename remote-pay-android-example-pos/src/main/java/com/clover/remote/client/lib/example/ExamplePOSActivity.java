@@ -91,9 +91,7 @@ import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.remote.message.TipAddedMessage;
 import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.Payment;
-import com.clover.sdk.v3.printer.PrintJobStatus;
 import com.clover.sdk.v3.printer.Printer;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -303,6 +301,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     cloverConnector = CloverConnectorFactory.createICloverConnector(config);
 
+    initDisplayConnector();
     initialize();
 
     FrameLayout frameLayout = (FrameLayout) findViewById(R.id.contentContainer);
@@ -1472,6 +1471,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void showWelcomeMessageClick(View view) {
+
     cloverConnector.showWelcomeScreen();
   }
 
