@@ -28,7 +28,6 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import com.clover.remote.PendingPaymentEntry;
 import com.clover.remote.client.lib.example.utils.IdUtils;
-import com.clover.sdk.v3.payments.TransactionSettings;
 import com.clover.remote.client.ICloverConnector;
 import com.clover.remote.client.lib.example.adapter.AvailableItemsAdapter;
 import com.clover.remote.client.lib.example.model.OrderObserver;
@@ -156,7 +155,6 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
   public void setCloverConnector(ICloverConnector cloverConnector) {
     this.cloverConnector = cloverConnector;
   }
-
 
   @Override
   public void onSaleClicked() {
