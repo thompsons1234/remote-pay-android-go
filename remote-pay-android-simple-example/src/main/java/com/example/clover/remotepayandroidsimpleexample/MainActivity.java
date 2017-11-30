@@ -39,7 +39,7 @@ public class MainActivity extends Activity {
   private TextView textConnect;
   private static ICloverConnector cloverConnector;
 
-  private static final String APP_ID = "com.cloverconnector.java.simple.sample:1.3.2";
+  private static final String APP_ID = "com.cloverconnector.java.simple.sample:1.4.0";
   private static final String POS_NAME = "Clover Simple Sample Java";
   private static final String DEVICE_NAME = "Clover Device";
   private AlertDialog pairingCodeDialog;
