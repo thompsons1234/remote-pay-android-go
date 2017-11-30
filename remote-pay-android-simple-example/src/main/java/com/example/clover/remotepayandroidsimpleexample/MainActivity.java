@@ -1,9 +1,9 @@
 package com.example.clover.remotepayandroidsimpleexample;
+import com.clover.remote.client.CloverConnector;
+import com.clover.remote.client.CloverDeviceConfiguration;
 import com.clover.remote.client.DefaultCloverConnectorListener;
 import com.clover.remote.client.ICloverConnector;
-import com.clover.remote.client.CloverConnectorFactory;
 import com.clover.remote.client.MerchantInfo;
-import com.clover.remote.client.CloverDeviceConfiguration;
 import com.clover.remote.client.USBCloverDeviceConfiguration;
 import com.clover.remote.client.WebSocketCloverDeviceConfiguration;
 import com.clover.remote.client.messages.ConfirmPaymentRequest;
@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
     if(cloverConnector == null) {
       connect();
     }
-   }
+  }
 
   @Override
   protected void onDestroy(){
@@ -71,9 +71,8 @@ public class MainActivity extends Activity {
 
   private void connect(){
     Log.d(TAG, "connecting.....");
-    cloverConnector = CloverConnectorFactory.createICloverConnector(getUSBConfiguration());
-
-//    cloverConnector = new CloverConnector(getNetworkConfiguration("192.168.0.123",12345));
+    //cloverConnector = new CloverConnector(getUSBConfiguration());
+    cloverConnector = new CloverConnector(getNetworkConfiguration("10.249.254.214",12345));
     cloverConnector.addCloverConnectorListener(new TestListener(cloverConnector));
     cloverConnector.initializeConnection();
   }
@@ -132,7 +131,7 @@ public class MainActivity extends Activity {
       trustStore.load(trustStoreStream, TRUST_STORE_PASSWORD.toCharArray());
 
       // For WebSocket configuration, we must handle the device pairing via callback
-      return new WebSocketCloverDeviceConfiguration(endpoint, APP_ID, trustStore, POS_NAME, DEVICE_NAME, null) {
+      return new WebSocketCloverDeviceConfiguration(endpoint,APP_ID, trustStore, POS_NAME, DEVICE_NAME, null) {
         @Override
         public void onPairingCode(final String pairingCode) {
           runOnUiThread(new Runnable() {
@@ -204,7 +203,13 @@ public class MainActivity extends Activity {
     startActivity(intent);
   }
 
+  public void sendDeviceLogs(View view){
+    Log.d(TAG, "send device logs clicked");
+//    cloverConnector.sendCloverDeviceLog("because");
+  }
+
   public static ICloverConnector getCloverConnector (){
     return cloverConnector;
   }
+
 }
