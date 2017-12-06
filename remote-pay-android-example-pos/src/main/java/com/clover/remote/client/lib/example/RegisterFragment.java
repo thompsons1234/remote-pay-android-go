@@ -65,6 +65,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
   POSStore store;
   ICloverConnector cloverConnector;
   Map<POSItem, AvailableItem> itemToAvailableItem = new HashMap<POSItem, AvailableItem>();
+  AvailableItemsAdapter availableItemsAdapter;
 
   public static RegisterFragment newInstance(POSStore store, ICloverConnector cloverConnector) {
 
@@ -92,12 +93,10 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
                            Bundle savedInstanceState) {
     // Inflate the layout for this fragment
     View view = inflater.inflate(R.layout.fragment_register, container, false);
-
     GridView gv = (GridView) view.findViewById(R.id.AvailableItems);
-
     gv.setId(R.id.AvailableItems);
 
-    final AvailableItemsAdapter availableItemsAdapter = new AvailableItemsAdapter(view.getContext(), R.id.AvailableItems, new ArrayList<POSItem>(store.getAvailableItems()), store);
+    availableItemsAdapter = new AvailableItemsAdapter(view.getContext(), R.id.AvailableItems, new ArrayList<POSItem>(store.getAvailableItems()), store);
     gv.setAdapter(availableItemsAdapter);
 
     gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -248,6 +247,9 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
       displayOrder.setLineItems(Collections.EMPTY_LIST);
       updateTotals(order, displayOrder);
 
+      if (availableItemsAdapter != null) {
+        availableItemsAdapter.notifyDataSetChanged();
+      }
     }
 
     @Override
