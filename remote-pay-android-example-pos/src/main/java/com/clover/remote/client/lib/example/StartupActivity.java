@@ -80,7 +80,7 @@ public class StartupActivity extends Activity {
   public static final String EXTRA_CLOVER_GO_ACCESS_TOKEN = "EXTRA_CLOVER_GO_ACCESS_TOKEN";
 
   private static final CloverGoDeviceConfiguration.ENV GO_ENV = CloverGoDeviceConfiguration.ENV.DEMO;
-  private static final String APP_ID = "com.example.clovergosampleapp"; //com.firstdata.hack2020
+  private static final String APP_ID = "com.firstdata.clovergo.int"; //com.firstdata.hack2020 //com.example.clovergosampleapp
   private static final String APP_VERSION = "1.0";
 
   private String mGoApiKey, mGoSecret, mGoAccessToken;

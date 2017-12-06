@@ -70,6 +70,10 @@ public class PendingPaymentsFragment extends Fragment {
 
       }
 
+      @Override
+      public void orderSelected(POSOrder order) {
+      }
+
       @Override public void cardAdded(POSCard card) {
 
       }

@@ -31,6 +31,7 @@
         android:layout_marginBottom="11dp"
         android:layout_marginRight="11dp"
         android:onClick="acceptSignature"
+        android:background="@drawable/btn_rounded"
         android:padding="11dp"
         android:text="Accept"/>
 

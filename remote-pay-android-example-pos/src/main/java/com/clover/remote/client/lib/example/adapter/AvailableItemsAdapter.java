@@ -99,6 +99,11 @@ public class AvailableItemsAdapter extends ArrayAdapter<POSItem>
         itemToCount.clear();
       }
 
+      @Override
+      public void orderSelected(POSOrder order) {
+        itemToCount.clear();
+      }
+
       @Override public void cardAdded(POSCard card) {
 
       }

@@ -4,99 +4,101 @@
               android:layout_height="wrap_content"
               android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/llCardNumber"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+  <LinearLayout
+    android:id="@+id/llCardNumber"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/cardNumberText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Card Number"
-            android:textSize="16sp"
-            android:textStyle="bold"/>
+    <TextView
+      android:id="@+id/cardNumberText"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Card Number"
+      android:textSize="16sp"
+      android:textStyle="bold"/>
 
-        <EditText
-            android:id="@+id/cardNumberEditText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:digits="@string/filter_number"
-            android:hint="1111 1111 1111 1111"
-            android:inputType="numberDecimal"
-            android:maxLength="16"/>
-    </LinearLayout>
+    <EditText
+      android:id="@+id/cardNumberEditText"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:digits="@string/filter_number"
+      android:hint="1111 1111 1111 1111"
+      android:inputType="numberDecimal"
+      android:maxLength="16"/>
+  </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/llExpiry"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+  <LinearLayout
+    android:id="@+id/llExpiry"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/expirationText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Expiration"
-            android:textSize="16sp"
-            android:textStyle="bold"/>
+    <TextView
+      android:id="@+id/expirationText"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="Expiration"
+      android:textSize="16sp"
+      android:textStyle="bold"/>
 
 
-        <EditText
-            android:id="@+id/expirationEditText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:digits="@string/filter_number"
-            android:hint="MMYY"
-            android:inputType="numberDecimal"
-            android:maxLength="5"/>
-    </LinearLayout>
+    <EditText
+      android:id="@+id/expirationEditText"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:digits="@string/filter_number"
+      android:hint="MMYY"
+      android:inputType="numberDecimal"
+      android:maxLength="5"/>
+  </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/llCvv"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+  <LinearLayout
+    android:id="@+id/llCvv"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/cvvText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="CVV"
-            android:textSize="16sp"
-            android:textStyle="bold"/>
+    <TextView
+      android:id="@+id/cvvText"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="CVV"
+      android:textSize="16sp"
+      android:textStyle="bold"/>
 
-        <EditText
-            android:id="@+id/cvvEditText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:digits="@string/filter_number"
-            android:hint="123"
-            android:inputType="numberDecimal"
-            android:maxLength="4"/>
-    </LinearLayout>
+    <EditText
+      android:id="@+id/cvvEditText"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:digits="@string/filter_number"
+      android:hint="123"
+      android:inputType="numberDecimal"
+      android:maxLength="4"/>
+  </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:orientation="horizontal">
+  <LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/quickFill"
-            android:layout_width="200dp"
-            android:layout_height="56dp"
-            android:padding="11dp"
-            android:text="Quick Fill"
-            android:textSize="18dp"/>
+    <Button
+      android:id="@+id/quickFill"
+      android:layout_width="200dp"
+      android:layout_height="56dp"
+      android:background="@drawable/btn_rounded"
+      android:padding="11dp"
+      android:text="Quick Fill"
+      android:textSize="18dp"/>
 
-        <Button
-            android:id="@+id/startTransactionBtn"
-            android:layout_width="200dp"
-            android:layout_height="56dp"
-            android:padding="11dp"
-            android:text="@string/start_transaction_btn"
-            android:textSize="18dp"/>
-    </LinearLayout>
+    <Button
+      android:id="@+id/startTransactionBtn"
+      android:layout_width="200dp"
+      android:layout_height="56dp"
+      android:background="@drawable/btn_rounded"
+      android:padding="11dp"
+      android:text="@string/start_transaction_btn"
+      android:textSize="18dp"/>
+  </LinearLayout>
 </LinearLayout>

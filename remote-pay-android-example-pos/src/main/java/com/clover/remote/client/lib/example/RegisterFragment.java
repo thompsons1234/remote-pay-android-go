@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.clover.remote.PendingPaymentEntry;
 import com.clover.remote.client.ICloverConnector;
@@ -187,6 +188,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     store.createOrder(true);
     CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
     currentOrderFragment.setOrder(store.getCurrentOrder());
+    Toast.makeText(getActivity(), "New Order created", Toast.LENGTH_SHORT).show();
   }
 
 
@@ -246,6 +248,40 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
       displayOrder.setLineItems(Collections.EMPTY_LIST);
       updateTotals(order, displayOrder);
 
+    }
+
+    @Override
+    public void orderSelected(POSOrder order) {
+      List<DisplayLineItem> displayLineItemsList;
+      DisplayLineItem displayLineItem;
+
+      liToDli.clear();
+      displayOrder = new DisplayOrder();
+      displayOrder.setLineItems(Collections.EMPTY_LIST);
+
+      for (POSLineItem posLineItem : order.getItems()) {
+        displayLineItem = new DisplayLineItem();
+        displayLineItem.setId(posLineItem.getId());
+        displayLineItem.setName(posLineItem.getItem().getName());
+        displayLineItem.setPrice(CurrencyUtils.format(posLineItem.getPrice(), Locale.getDefault()));
+
+        if (posLineItem.getDiscount() != null && posLineItem.getDiscount().getValue(posLineItem.getPrice()) != posLineItem.getPrice()) {
+          DisplayDiscount dd = new DisplayDiscount();
+          dd.setName(posLineItem.getDiscount().name);
+          dd.setAmount(CurrencyUtils.format(posLineItem.getDiscount().getValue(posLineItem.getPrice()), Locale.getDefault()));
+        }
+
+        liToDli.put(posLineItem, displayLineItem);
+        displayLineItemsList = new ArrayList<>();
+        displayLineItemsList.addAll(displayOrder.getLineItems());
+        displayLineItemsList.add(displayLineItem);
+        displayOrder.setLineItems(displayLineItemsList);
+      }
+
+      updateTotals(order, displayOrder);
+
+      CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
+      currentOrderFragment.setOrder(store.getCurrentOrder());
     }
 
     @Override

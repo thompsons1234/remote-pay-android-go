@@ -22,6 +22,8 @@ import java.util.List;
 
 public interface StoreObserver {
   public abstract void newOrderCreated(POSOrder order, boolean userInitiated);
+  public abstract void orderSelected(POSOrder order);
+
   public abstract void cardAdded(POSCard card);
   public abstract void refundAdded(POSNakedRefund refund);
 
@@ -30,4 +32,3 @@ public interface StoreObserver {
 
   public abstract void pendingPaymentsRetrieved(List<PendingPaymentEntry> pendingPayments);
 }
-

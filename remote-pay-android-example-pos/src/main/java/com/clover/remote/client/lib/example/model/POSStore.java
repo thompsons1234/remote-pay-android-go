@@ -95,6 +95,12 @@ public class POSStore {
     }
   }
 
+  private void notifyOrderSelected(POSOrder posOrder) {
+    for (StoreObserver so : storeObservers) {
+      so.orderSelected(posOrder);
+    }
+  }
+
   public void addPaymentToOrder(POSPayment payment, POSOrder order) {
     order.addPayment(payment);
     paymentIdToPOSPayment.put(payment.paymentID, payment);
@@ -126,6 +132,17 @@ public class POSStore {
 
   public POSOrder getCurrentOrder() {
     return currentOrder;
+  }
+
+  public void setCurrentOrder(POSOrder posOrder) {
+    if (currentOrder != null) {
+      for (OrderObserver oo : orderObservers) {
+        currentOrder.removeObserver(oo);
+        posOrder.addOrderObserver(oo);
+      }
+    }
+    currentOrder = posOrder;
+    notifyOrderSelected(currentOrder);
   }
 
   public Collection<POSItem> getAvailableItems() {

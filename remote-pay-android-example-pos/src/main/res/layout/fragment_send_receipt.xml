@@ -1,70 +1,76 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?android:colorBackground">
+
+  <TextView
+    android:id="@+id/sendReceiptTitle"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?android:colorBackground">
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
+    android:gravity="center_horizontal"
+    android:text="@string/send_receipt_info_lbl"
+    android:textSize="16sp"/>
 
-    <TextView
-        android:id="@+id/sendReceiptTitle"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:gravity="center_horizontal"
-        android:textSize="16sp"
-        android:text="@string/send_receipt_info_lbl" />
+  <Button
+    android:id="@+id/sendReceiptBtn"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_marginBottom="10dp"
+    android:layout_toLeftOf="@+id/noReceiptBtn"
+    android:background="@drawable/btn_rounded"
+    android:text="@string/send_receipt_btn_lbl"
+    android:textColor="#007840"/>
 
-    <Button
-        android:id="@+id/sendReceiptBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/send_receipt_btn_lbl"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="10dp"
-        android:layout_toLeftOf="@+id/noReceiptBtn"/>
+  <Button
+    android:id="@+id/noReceiptBtn"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_alignParentRight="true"
+    android:layout_marginBottom="10dp"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp"
+    android:background="@drawable/btn_rounded"
+    android:text="@string/no_receipt_btn_lbl"
+    android:textColor="#F75F60"/>
 
-    <Button
-        android:id="@+id/noReceiptBtn"
-        android:layout_alignParentRight="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/no_receipt_btn_lbl"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="10dp"
-        android:layout_marginRight="10dp"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/sendReceiptTitle"
-        android:layout_centerInParent="true"
-        android:gravity="center"
-        android:layout_above="@+id/noReceiptBtn"
-        android:orientation="vertical">
-
-
-        <EditText
-            android:id="@+id/sendReceiptPhoneEdit"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:gravity="center_vertical"
-            android:hint="Phone number"
-            android:imeOptions="actionDone"
-            android:inputType="number"
-            android:lines="1"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:maxLength="10"/>
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_above="@+id/noReceiptBtn"
+    android:layout_below="@+id/sendReceiptTitle"
+    android:layout_centerInParent="true"
+    android:gravity="center"
+    android:orientation="vertical">
 
 
-        <EditText
-            android:id="@+id/sendReceiptEmailEdit"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:gravity="center_vertical"
-            android:hint="Email"
-            android:imeOptions="actionDone"
-            android:inputType="textEmailAddress"
-            android:lines="1"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp" />
+    <EditText
+      android:id="@+id/sendReceiptPhoneEdit"
+      android:layout_width="match_parent"
+      android:layout_height="60dp"
+      android:gravity="center_vertical"
+      android:hint="Phone number"
+      android:imeOptions="actionDone"
+      android:inputType="number"
+      android:lines="1"
+      android:maxLength="10"
+      android:paddingLeft="20dp"
+      android:paddingRight="20dp"/>
 
-    </LinearLayout>
+
+    <EditText
+      android:id="@+id/sendReceiptEmailEdit"
+      android:layout_width="match_parent"
+      android:layout_height="60dp"
+      android:gravity="center_vertical"
+      android:hint="Email"
+      android:imeOptions="actionDone"
+      android:inputType="textEmailAddress"
+      android:lines="1"
+      android:paddingLeft="20dp"
+      android:paddingRight="20dp"/>
+
+  </LinearLayout>
 </RelativeLayout>

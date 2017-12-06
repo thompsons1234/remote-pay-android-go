@@ -90,6 +90,10 @@ public class CardsFragment extends Fragment {
 
             }
 
+            @Override
+            public void orderSelected(POSOrder order) {
+            }
+
             @Override public void cardAdded(POSCard card) {
                 final CardsListViewAdapter cardsListViewAdapter = new CardsListViewAdapter(view.getContext(), R.id.CardsListView, store.getCards());
                 new AsyncTask(){

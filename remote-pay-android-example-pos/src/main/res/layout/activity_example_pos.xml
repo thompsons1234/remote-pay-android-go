@@ -28,173 +28,173 @@
                 android:rowCount="4"
                 tools:context="com.clover.remote.client.lib.example.ExamplePOSActivity">
 
-    <HorizontalScrollView
-        android:id="@+id/top_panel_scroll_vw"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <LinearLayout
-            android:id="@+id/TopPanel"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="15sp"
-            android:layout_marginRight="15dp">
-
-            <!--<TextView-->
-                <!--android:id="@+id/ConnectionStatusButton"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_gravity="fill_horizontal|center_vertical"-->
-                <!--android:layout_weight="2"-->
-                <!--android:paddingLeft="11dp"-->
-                <!--android:paddingRight="11dp"-->
-                <!--android:text="@string/disconnected"/>-->
-
-            <Button
-              android:id="@+id/ConnectionStatusButton"
-              android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_marginRight="5sp"
-                android:layout_toStartOf="@+id/RegisterButton"
-                android:background="@drawable/button_border_padding"
-                android:onClick="disconnect450"
-                android:text="@string/disconnected"
-                android:textSize="18sp"/>
-
-            <Button
-                android:id="@+id/RegisterButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_marginRight="5sp"
-                android:layout_toStartOf="@+id/OrdersButton"
-                android:background="@drawable/button_border_padding"
-                android:onClick="showRegister"
-                android:text="@string/register"
-                android:textSize="18sp"/>
-
-            <Button
-                android:id="@+id/OrdersButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_marginRight="5sp"
-                android:layout_toStartOf="@+id/RefundButton"
-                android:background="@drawable/button_border_padding"
-                android:onClick="showOrders"
-                android:text="@string/orders"
-                android:textSize="18sp"/>
-
-            <Button
-                android:id="@+id/RefundButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_marginRight="5sp"
-                android:layout_toStartOf="@+id/CardsButton"
-                android:background="@drawable/button_border_padding"
-                android:onClick="showRefunds"
-                android:text="@string/refund"
-                android:textSize="18sp"
-                android:visibility="visible"/>
-
-            <Button
-                android:id="@+id/CardsButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_marginRight="5sp"
-                android:layout_toStartOf="@+id/PreAuthButton"
-                android:background="@drawable/button_border_padding"
-                android:onClick="showCards"
-                android:text="@string/cards"
-                android:textSize="18sp"
-                android:visibility="visible"/>
-
-            <Button
-                android:id="@+id/PreAuthButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_marginRight="5sp"
-                android:layout_toStartOf="@+id/PendingButton"
-                android:background="@drawable/button_border_padding"
-                android:onClick="showPreAuths"
-                android:text="@string/preauth"
-                android:textSize="18sp"
-                android:visibility="visible"/>
-
-            <Button
-                android:id="@+id/PendingButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_marginRight="5sp"
-                android:layout_toStartOf="@+id/MiscButton"
-                android:background="@drawable/button_border_padding"
-                android:onClick="showPending"
-                android:text="@string/pending"
-                android:textSize="18sp"
-                android:visibility="visible"/>
-
-            <Button
-                android:id="@+id/MiscButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentTop="true"
-                android:layout_marginRight="5sp"
-                android:background="@drawable/button_border_padding"
-                android:onClick="showMisc"
-                android:text="@string/misc"
-                android:textSize="18sp"
-                android:visibility="visible"/>
-        </LinearLayout>
-    </HorizontalScrollView>
-
-    <FrameLayout
-        android:id="@+id/contentContainer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/Divider"
-        android:layout_below="@+id/top_panel_scroll_vw">
-
-    </FrameLayout>
-
-    <View
-        android:id="@+id/Divider"
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:layout_above="@+id/BottomPanel"
-        android:background="@android:color/holo_blue_light"/>
+  <HorizontalScrollView
+    android:id="@+id/top_panel_scroll_vw"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <LinearLayout
-        android:id="@+id/BottomPanel"
-        android:layout_width="match_parent"
+      android:id="@+id/TopPanel"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="15dp"
+      android:layout_marginRight="15dp">
+
+      <!--<TextView-->
+      <!--android:id="@+id/ConnectionStatusButton"-->
+      <!--android:layout_width="wrap_content"-->
+      <!--android:layout_height="wrap_content"-->
+      <!--android:layout_gravity="fill_horizontal|center_vertical"-->
+      <!--android:layout_weight="2"-->
+      <!--android:paddingLeft="11dp"-->
+      <!--android:paddingRight="11dp"-->
+      <!--android:text="@string/disconnected"/>-->
+
+      <Button
+        android:id="@+id/ConnectionStatusButton"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal">
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="5dp"
+        android:layout_toStartOf="@+id/RegisterButton"
+        android:background="@drawable/btn_rounded"
+        android:onClick="disconnect450"
+        android:text="@string/disconnected"
+        android:textSize="18sp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:text="@string/device_status"
-            android:textSize="@dimen/text_size_status"
-            android:textStyle="bold"/>
+      <Button
+        android:id="@+id/RegisterButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="5dp"
+        android:layout_toStartOf="@+id/OrdersButton"
+        android:background="@drawable/btn_rounded"
+        android:onClick="showRegister"
+        android:text="@string/register"
+        android:textSize="18sp"/>
 
-        <LinearLayout
-            android:id="@+id/DeviceOptionsPanel"
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:orientation="horizontal"/>
+      <Button
+        android:id="@+id/OrdersButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="5dp"
+        android:layout_toStartOf="@+id/RefundButton"
+        android:background="@drawable/btn_rounded"
+        android:onClick="showOrders"
+        android:text="@string/orders"
+        android:textSize="18sp"/>
 
-        <TextView
-            android:id="@+id/DeviceStatus"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:text="@string/unknown"
-            android:textSize="@dimen/text_size_status"/>
+      <Button
+        android:id="@+id/RefundButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="5dp"
+        android:layout_toStartOf="@+id/CardsButton"
+        android:background="@drawable/btn_rounded"
+        android:onClick="showRefunds"
+        android:text="@string/refund"
+        android:textSize="18sp"
+        android:visibility="visible"/>
+
+      <Button
+        android:id="@+id/CardsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="5dp"
+        android:layout_toStartOf="@+id/PreAuthButton"
+        android:background="@drawable/btn_rounded"
+        android:onClick="showCards"
+        android:text="@string/cards"
+        android:textSize="18sp"
+        android:visibility="visible"/>
+
+      <Button
+        android:id="@+id/PreAuthButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="5dp"
+        android:layout_toStartOf="@+id/PendingButton"
+        android:background="@drawable/btn_rounded"
+        android:onClick="showPreAuths"
+        android:text="@string/preauth"
+        android:textSize="18sp"
+        android:visibility="visible"/>
+
+      <Button
+        android:id="@+id/PendingButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="5dp"
+        android:layout_toStartOf="@+id/MiscButton"
+        android:background="@drawable/btn_rounded"
+        android:onClick="showPending"
+        android:text="@string/pending"
+        android:textSize="18sp"
+        android:visibility="visible"/>
+
+      <Button
+        android:id="@+id/MiscButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="5dp"
+        android:background="@drawable/btn_rounded"
+        android:onClick="showMisc"
+        android:text="@string/misc"
+        android:textSize="18sp"
+        android:visibility="visible"/>
     </LinearLayout>
+  </HorizontalScrollView>
+
+  <FrameLayout
+    android:id="@+id/contentContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_above="@+id/Divider"
+    android:layout_below="@+id/top_panel_scroll_vw">
+
+  </FrameLayout>
+
+  <View
+    android:id="@+id/Divider"
+    android:layout_width="match_parent"
+    android:layout_height="2dp"
+    android:layout_above="@+id/BottomPanel"
+    android:background="@android:color/holo_blue_light"/>
+
+  <LinearLayout
+    android:id="@+id/BottomPanel"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:orientation="horizontal">
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="fill_parent"
+      android:text="@string/device_status"
+      android:textSize="@dimen/text_size_status"
+      android:textStyle="bold"/>
+
+    <LinearLayout
+      android:id="@+id/DeviceOptionsPanel"
+      android:layout_width="wrap_content"
+      android:layout_height="fill_parent"
+      android:orientation="horizontal"/>
+
+    <TextView
+      android:id="@+id/DeviceStatus"
+      android:layout_width="fill_parent"
+      android:layout_height="fill_parent"
+      android:text="@string/unknown"
+      android:textSize="@dimen/text_size_status"/>
+  </LinearLayout>
 
 </RelativeLayout>

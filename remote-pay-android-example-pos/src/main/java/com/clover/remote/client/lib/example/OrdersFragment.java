@@ -101,8 +101,7 @@ public class OrdersFragment extends Fragment implements OrderObserver {
   }
 
   @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                           Bundle savedInstanceState) {
+  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     // Inflate the layout for this fragment
     view = inflater.inflate(R.layout.fragment_orders, container, false);
 
@@ -127,8 +126,14 @@ public class OrdersFragment extends Fragment implements OrderObserver {
         selectedOrder = posOrder;
         posOrder.addOrderObserver(OrdersFragment.this);
         updateDisplaysForOrder(posOrder);
+
+        if (posOrder.getStatus() == POSOrder.OrderStatus.INITIAL || posOrder.getStatus() == POSOrder.OrderStatus.OPEN) {
+          store.setCurrentOrder(posOrder);
+          Toast.makeText(getActivity(), "Order " + posOrder.id + " set as current order", Toast.LENGTH_SHORT).show();
+        }
       }
     });
+    updateOrderList();
 
     paymentsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override
@@ -305,6 +310,11 @@ public class OrdersFragment extends Fragment implements OrderObserver {
       }
 
       @Override
+      public void orderSelected(POSOrder order) {
+        updateOrderList();
+      }
+
+      @Override
       public void cardAdded(POSCard card) {
 
       }
@@ -379,9 +389,7 @@ public class OrdersFragment extends Fragment implements OrderObserver {
     final List<POSOrder> orders = new ArrayList<POSOrder>(store.getOrders().size());
     List<POSOrder> storeOrders = store.getOrders();
     for (POSOrder currentOrder : storeOrders) {
-      if (currentOrder.getStatus() != POSOrder.OrderStatus.INITIAL) {
         orders.add(currentOrder);
-      }
     }
 
     Collections.sort(orders, new Comparator<POSOrder>() {

@@ -113,6 +113,8 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:layout_centerHorizontal="true"
+      android:layout_marginRight="5dp"
+      android:background="@drawable/btn_rounded"
       android:onClick="connect"
       android:text="Demo Mode"/>
 
@@ -120,6 +122,8 @@
       android:id="@+id/oAuthButton"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
+      android:layout_marginLeft="5dp"
+      android:background="@drawable/btn_rounded"
       android:onClick="connectGoWithNewAuthMode"
       android:text="Get OAUTH Token"/>
   </LinearLayout>
