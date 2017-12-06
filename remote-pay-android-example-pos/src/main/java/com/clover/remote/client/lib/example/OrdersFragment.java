@@ -49,6 +49,7 @@ import com.clover.remote.client.lib.example.model.POSPayment;
 import com.clover.remote.client.lib.example.model.POSRefund;
 import com.clover.remote.client.lib.example.model.POSStore;
 import com.clover.remote.client.lib.example.model.StoreObserver;
+import com.clover.remote.client.messages.DisplayReceiptOptionsRequest;
 import com.clover.remote.client.messages.RefundPaymentRequest;
 import com.clover.remote.client.messages.TipAdjustAuthRequest;
 import com.clover.remote.client.messages.VoidPaymentRequest;
@@ -149,34 +150,36 @@ public class OrdersFragment extends Fragment implements OrderObserver {
           }
           final String[] finalPaymentOptions = options;
           builder.setTitle("Payment Actions").
-                  setItems(finalPaymentOptions, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int index) {
-                      final ICloverConnector cloverConnector = cloverConnectorWeakReference.get();
-                      if (cloverConnector != null) {
-                        final String option = finalPaymentOptions[index];
-                        switch (option) {
-                          case "Void Payment": {
-                            VoidPaymentRequest vpr = new VoidPaymentRequest();
-                            vpr.setPaymentId(posExchange.getPaymentID());
-                            vpr.setOrderId(posExchange.getOrderId());
-                            vpr.setVoidReason(VoidReason.USER_CANCEL.name());
-                            cloverConnector.voidPayment(vpr);
-                            break;
-                          }
-                          case "Refund Payment": {
-                            RefundPaymentRequest rpr = new RefundPaymentRequest();
-                            rpr.setPaymentId(posExchange.getPaymentID());
-                            rpr.setOrderId(posExchange.orderID);
-                            rpr.setFullRefund(true);
-                            cloverConnector.refundPayment(rpr);
-                            break;
-                          }
-                          case "Tip Adjust Payment": {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                            final EditText input = new EditText(getActivity());
-                            input.setInputType(InputType.TYPE_CLASS_NUMBER);
-                            builder.setView(input);
+              setItems(finalPaymentOptions, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int index) {
+                  final ICloverConnector cloverConnector = cloverConnectorWeakReference.get();
+                  if (cloverConnector != null) {
+                    final String option = finalPaymentOptions[index];
+                    switch (option) {
+                      case "Void Payment": {
+                        VoidPaymentRequest vpr = new VoidPaymentRequest();
+                        vpr.setPaymentId(posExchange.getPaymentID());
+                        vpr.setOrderId(posExchange.getOrderId());
+                        vpr.setVoidReason(VoidReason.USER_CANCEL.name());
+                        vpr.setDisablePrinting(store.getDisablePrinting() != null ? store.getDisablePrinting() : false);
+                        vpr.setDisableReceiptSelection(store.getDisableReceiptOptions() != null ? store.getDisableReceiptOptions() : false);cloverConnector.voidPayment(vpr);
+                        break;
+                      }
+                      case "Refund Payment": {
+                        RefundPaymentRequest rpr = new RefundPaymentRequest();
+                        rpr.setPaymentId(posExchange.getPaymentID());
+                        rpr.setOrderId(posExchange.orderID);
+                        rpr.setFullRefund(true);rpr.setDisablePrinting(store.getDisablePrinting() != null ? store.getDisablePrinting() : false);
+                        rpr.setDisableReceiptSelection(store.getDisableReceiptOptions() != null ? store.getDisableReceiptOptions() : false);
+                        cloverConnector.refundPayment(rpr);
+                        break;
+                      }
+                      case "Tip Adjust Payment": {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                        final EditText input = new EditText(getActivity());
+                        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+                        builder.setView(input);
 
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                               @Override
@@ -199,25 +202,29 @@ public class OrdersFragment extends Fragment implements OrderObserver {
                               }
                             });
 
-                            builder.show();
-                            break;
-                          }
-                          case "Receipt Options": {
-                            if (cloverConnector instanceof ICloverGoConnector) {
-                              SendReceiptFragment fragment = SendReceiptFragment.newInstance(posExchange.getOrderId(), (ICloverGoConnector) cloverConnector);
-                              getFragmentManager().beginTransaction().add(R.id.contentContainer, fragment).commit();
+                        builder.show();
+                        break;
+                      }
+                      case "Receipt Options": {
+                        if (cloverConnector instanceof ICloverGoConnector) {
+                          SendReceiptFragment fragment = SendReceiptFragment.newInstance(posExchange.getOrderId(), (ICloverGoConnector) cloverConnector);
+                          getFragmentManager().beginTransaction().add(R.id.contentContainer, fragment).commit();
 
-                            } else {
-                              try {
-                                // Operation not Supported in CloverGO
-                                cloverConnector.displayPaymentReceiptOptions(posExchange.orderID, posExchange.getPaymentID());
-                              } catch (UnsupportedOperationException e) {
-                                Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
-                              }
-                            }
+                        } else {
+                          try {
+                            // Operation not Supported in CloverGO
 
-                            break;
+                            DisplayReceiptOptionsRequest request = new DisplayReceiptOptionsRequest();
+                            request.setOrderId(posExchange.orderID);
+                            request.setPaymentId(posExchange.paymentID);
+                            request.setDisablePrinting(store.getDisablePrinting() != null ? store.getDisablePrinting() : false);
+                            cloverConnector.displayPaymentReceiptOptions(request);
+                          } catch (UnsupportedOperationException e) {
+                            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
                           }
+                        }
+                        break;
+                      }
 
                         }
                       } else {

@@ -127,7 +127,7 @@
                     android:layout_weight="1"
                     android:ems="10"
                     android:inputType="textMultiLine"
-                    android:text="http://www.amerikanbodyart.com/media/stencil%20cupcake.jpg"/>
+                    android:text="http://slodive.com/wp-content/uploads/2013/02/black-and-white-patterns/grooved.jpg"/>
 
                 <Button
                     android:id="@+id/PrintImageURLButton"
@@ -625,7 +625,7 @@
 
                 <Spinner
                     android:id="@+id/TipModeSpinner"
-                    android:layout_width="wrap_content"
+                    android:layout_width="250dp"
                     android:layout_height="wrap_content"/>
             </LinearLayout>
 
@@ -647,7 +647,7 @@
 
                 <EditText
                     android:id="@+id/tipAmount"
-                    android:layout_width="90dp"
+                    android:layout_width="250dp"
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:inputType="number"/>
@@ -671,7 +671,7 @@
 
                 <Spinner
                     android:id="@+id/SignatureEntryLocationSpinner"
-                    android:layout_width="wrap_content"
+                    android:layout_width="250dp"
                     android:layout_height="wrap_content">
                 </Spinner>
             </LinearLayout>
@@ -694,7 +694,7 @@
 
                 <EditText
                     android:id="@+id/signatureThreshold"
-                    android:layout_width="90dp"
+                    android:layout_width="250dp"
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:inputType="number"/>

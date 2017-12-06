@@ -158,7 +158,6 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     this.cloverConnector = cloverConnector;
   }
 
-
   @Override
   public void onSaleClicked() {
 

@@ -57,6 +57,7 @@ import android.widget.Toast;
 import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
+import com.clover.remote.client.CloverConnectorFactory;
 import com.clover.remote.client.CloverDeviceConfiguration;
 import com.clover.remote.client.ConnectorFactory;
 import com.clover.remote.client.Constants;
@@ -292,7 +293,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     initStore();
 
     String posName = "Clover Example POS";
-    String applicationId = posName + ":1.4";
+    String applicationId = posName + ":1.4.0";
     CloverDeviceConfiguration config;
 
     configType = getIntent().getStringExtra(EXTRA_CLOVER_CONNECTOR_CONFIG);
@@ -407,6 +408,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       return;
     }
 
+    cloverConnector = CloverConnectorFactory.createICloverConnector(config);
+
+    initDisplayConnector();
     initialize();
 
     FragmentManager fragmentManager = getFragmentManager();
@@ -2311,31 +2315,57 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public void printTextClick(View view) {
     String[] textLines = ((TextView) findViewById(R.id.PrintTextText)).getText().toString().split("\n");
     List<String> lines = Arrays.asList(textLines);
-    PrintRequest pr = new PrintRequest(lines);
+    if(printer != null){PrintRequest pr = new PrintRequest(lines);
     lastPrintRequestId = String.valueOf(getNextPrintRequestId());
     pr.setPrintRequestId(lastPrintRequestId);
-    if (printer != null) {
-      pr = new PrintRequest(lines, lastPrintRequestId, printer.getId());
-    }
 
-    try {
-      getCloverConnector().print(pr);
-    } catch (UnsupportedOperationException e) {
-      Toast.makeText(ExamplePOSActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-      Log.e("Example POS", e.getMessage());
+      pr = new PrintRequest(lines, lastPrintRequestId, printer.getId());
+
+      try {
+        getCloverConnector().print(pr);
+      } catch (UnsupportedOperationException e) {
+        Toast.makeText(ExamplePOSActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+        Log.e("Example POS", e.getMessage());
+      }
+      printer = null;
+
+    } else {
+
+      try {
+        getCloverConnector().printText(lines);
+      } catch (UnsupportedOperationException e) {
+        Toast.makeText(ExamplePOSActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+        Log.e("Example POS", e.getMessage());
+      }
     }
     updatePrintStatusText();
   }
 
   public void printImageURLClick(View view) {
     String URL = ((TextView) findViewById(R.id.PrintImageURLText)).getText().toString();
-    PrintRequest pr = new PrintRequest(URL);
+    if(printer != null){PrintRequest pr = new PrintRequest(URL);
     lastPrintRequestId = String.valueOf(getNextPrintRequestId());
     pr.setPrintRequestId(lastPrintRequestId);
-    if (printer != null) {
+
       pr = new PrintRequest(URL, lastPrintRequestId, printer.getId());
+
+      try {
+        getCloverConnector().print(pr);
+      } catch (UnsupportedOperationException e) {
+        Toast.makeText(ExamplePOSActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+        Log.e("Example POS", e.getMessage());
+      }
+      printer = null;
+
+    } else {
+
+      try {
+        getCloverConnector().printImageFromURL(URL);
+      } catch (UnsupportedOperationException e) {
+        Toast.makeText(ExamplePOSActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+        Log.e("Example POS", e.getMessage());
+      }
     }
-    getCloverConnector().print(pr);
     updatePrintStatusText();
   }
 
@@ -2361,8 +2391,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public void showWelcomeMessageClick(View view) {
     try {
       // Operation Not Supported in Clove Go
-      getCloverConnector().showWelcomeScreen();
-    } catch (UnsupportedOperationException e) {
+      getCloverConnector().showWelcomeScreen();} catch (UnsupportedOperationException e) {
       Toast.makeText(ExamplePOSActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
       Log.e("Example POS", e.getMessage());
     }
@@ -2418,13 +2447,28 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   public void printImage(String imgDecodableString) {
     Bitmap bitmap = BitmapFactory.decodeFile(imgDecodableString);
-    PrintRequest pr = new PrintRequest(bitmap);
+    if(this.printer != null){PrintRequest pr = new PrintRequest(bitmap);
     lastPrintRequestId = String.valueOf(getNextPrintRequestId());
     pr.setPrintRequestId(lastPrintRequestId);
-    if (this.printer != null) {
+
       pr = new PrintRequest(bitmap, lastPrintRequestId, printer.getId());
+
+      try {
+        getCloverConnector().print(pr);
+      } catch (UnsupportedOperationException e) {
+        Toast.makeText(ExamplePOSActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+        Log.e("Example POS", e.getMessage());
+      }
+      printer = null;
+    } else {
+
+      try {
+        getCloverConnector().printImage(bitmap);
+      } catch (UnsupportedOperationException e) {
+        Toast.makeText(ExamplePOSActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+        Log.e("Example POS", e.getMessage());
+      }
     }
-    getCloverConnector().print(pr);
     updatePrintStatusText();
   }
 

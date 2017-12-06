@@ -72,7 +72,7 @@
         <activity
             android:name="com.clover.remote.client.lib.example.qrCode.barcode.BarcodeCaptureActivity"
             android:label="@string/title_activity_example_pos"
-            android:screenOrientation="sensor">
+            android:screenOrientation="landscape">
         </activity>
 
         <meta-data

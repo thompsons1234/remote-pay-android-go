@@ -19,14 +19,12 @@ package com.clover.remote.client.device;
 import com.clover.common2.payments.PayIntent;
 import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
-import com.clover.remote.client.messages.PrintJobStatusRequest;
-import com.clover.remote.client.messages.PrintRequest;
-import com.clover.remote.client.messages.RetrievePrintersRequest;
 import com.clover.remote.client.transport.ICloverTransport;
 import com.clover.remote.order.DisplayOrder;
 import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Payment;
+import com.clover.sdk.v3.printer.PrintCategory;
 
 import android.graphics.Bitmap;
 import android.util.Log;
@@ -90,7 +88,7 @@ public abstract class CloverDevice {
 
   public abstract void doKeyPress(KeyPress keyPress);
 
-  public abstract void doVoidPayment(Payment payment, VoidReason reason);
+  public abstract void doVoidPayment(Payment payment, VoidReason reason, boolean disablePrinting, boolean disableReceiptSelection);
 
   public abstract void doCaptureAuth(String paymentID, long amount, long tipAmount);
 
@@ -100,7 +98,9 @@ public abstract class CloverDevice {
 
   public abstract void doTerminalMessage(String text);
 
-  public abstract void doPaymentRefund(String orderId, String paymentId, long amount, boolean fullRefund);
+  public abstract void doSendDebugLog(String message);
+
+  public abstract void doPaymentRefund(String orderId, String paymentId, long amount, boolean fullRefund, boolean disablePrinting, boolean disableReceiptSelection);
 
   public abstract void doTipAdjustAuth(String orderId, String paymentId, long amount);
 
@@ -108,7 +108,7 @@ public abstract class CloverDevice {
 
   public abstract void doShowWelcomeScreen();
 
-  public abstract void doShowPaymentReceiptScreen(String orderId, String paymentId);
+  public abstract void doShowPaymentReceiptScreen(String orderId, String paymentId, boolean disablePrinting);
 
   public abstract void doShowThankYouScreen();
 
@@ -118,11 +118,11 @@ public abstract class CloverDevice {
 
   public abstract void doPrintImage(String url, String printRequestId, String printDeviceId);
 
-  public abstract void doPrint(PrintRequest request);
+  public abstract void doPrint(List<Bitmap> img, List<String> urls, List<String> text, String printRequestId, String deviceId);
 
-  public abstract void doRetrievePrinters(RetrievePrintersRequest request);
+  public abstract void doRetrievePrinters(PrintCategory category);
 
-  public abstract void doRetrievePrintJobStatus(PrintJobStatusRequest request);
+  public abstract void doRetrievePrintJobStatus(String requestId);
 
   public abstract void doCloseout(boolean allowOpenTabs, String batchId);
 

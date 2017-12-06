@@ -22,10 +22,7 @@ import com.clover.remote.KeyPress;
 import com.clover.remote.ResultStatus;
 import com.clover.remote.client.CloverConnector;
 import com.clover.remote.client.CloverDeviceConfiguration;
-import com.clover.remote.client.messages.PrintJobStatusRequest;
-import com.clover.remote.client.messages.PrintRequest;
 import com.clover.remote.client.messages.ResultCode;
-import com.clover.remote.client.messages.RetrievePrintersRequest;
 import com.clover.remote.client.transport.ICloverTransport;
 import com.clover.remote.client.transport.ICloverTransportObserver;
 import com.clover.remote.message.AcknowledgementMessage;
@@ -41,6 +38,7 @@ import com.clover.remote.message.CardDataResponseMessage;
 import com.clover.remote.message.CashbackSelectedMessage;
 import com.clover.remote.message.CloseoutRequestMessage;
 import com.clover.remote.message.CloseoutResponseMessage;
+import com.clover.remote.message.CloverDeviceLogMessage;
 import com.clover.remote.message.ConfirmPaymentMessage;
 import com.clover.remote.message.CreditPrintMessage;
 import com.clover.remote.message.DeclineCreditPrintMessage;
@@ -101,6 +99,7 @@ import com.clover.remote.order.operation.OrderDeletedOperation;
 import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Payment;
+import com.clover.sdk.v3.printer.PrintCategory;
 import com.clover.sdk.v3.printer.Printer;
 
 import android.graphics.Bitmap;
@@ -121,7 +120,7 @@ import java.util.Map;
 
 public class DefaultCloverDevice extends CloverDevice implements ICloverTransportObserver {
   private static final String TAG = DefaultCloverDevice.class.getName();
-  private static final String REMOTE_SDK = "com.clover.cloverconnector.android:1.3.2";
+  private static final String REMOTE_SDK = "com.clover.cloverconnector.android:1.4.0";
 
   private Gson gson = new Gson();
   private static int id = 0;
@@ -1047,13 +1046,36 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   }
 
   @Override
-  public void doShowPaymentReceiptScreen(String orderId, String paymentId) {
-    sendObjectMessage(new ShowPaymentReceiptOptionsMessage(orderId, paymentId, 2));
+  public void doShowPaymentReceiptScreen(String orderId, String paymentId, boolean disablePrinting) {
+    sendObjectMessage(new ShowPaymentReceiptOptionsMessage(orderId, paymentId, 2, disablePrinting));
   }
 
   @Override
   public void doKeyPress(KeyPress keyPress) {
     sendObjectMessage(new KeyPressMessage(keyPress));
+  }
+
+  @Override
+  public void doVoidPayment(final Payment payment, final VoidReason reason, boolean disablePrinting, boolean disableReceiptSelection) {
+    synchronized (ackLock) {
+      final String msgId = sendObjectMessage(new VoidPaymentMessage(payment, reason, disablePrinting, disableReceiptSelection));
+
+      AsyncTask<Object, Object, Object> aTask = new AsyncTask<Object, Object, Object>() {
+        @Override
+        protected Object doInBackground(Object[] params) {
+          notifyObserversPaymentVoided(payment, reason, ResultStatus.SUCCESS, null, null);
+          return null;
+        }
+      };
+
+      if (!supportsAcks()) {
+        aTask.execute();
+      } else {
+        // we will send back response after we get an ack
+        msgIdToTask.put(msgId, aTask);
+      }
+    }
+
   }
 
   @Override
@@ -1079,6 +1101,11 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   @Override
   public void doTerminalMessage(String text) {
     sendObjectMessage(new TerminalMessage(text));
+  }
+
+  @Override
+  public void doSendDebugLog(String message) {
+    sendObjectMessage(new CloverDeviceLogMessage(message));
   }
 
 
@@ -1172,16 +1199,16 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   }
 
   @Override
-  public void doPrint(PrintRequest request) {
-    if (request.getText().size() > 0) {
-      doPrintText(request.getText(), request.getPrintRequestId(), request.getPrintDeviceId());
-    } else if (request.getImages().size() > 0) {
-      doPrintImage(request.getImages().get(0), request.getPrintRequestId(), request.getPrintDeviceId());
-    } else if (request.getImageURLs().size() > 0) {
+  public void doPrint(List<Bitmap> images, List<String> urls, List<String> textLines, String requestId, String deviceId) {
+    if (textLines.size() > 0) {
+      doPrintText(textLines, requestId, deviceId);
+    } else if (images.size() > 0) {
+      doPrintImage(images.get(0), requestId, deviceId);
+    } else if (urls.size() > 0) {
       try {
         // Make sure URL is well-formed
-        new URL(request.getImageURLs().get(0));
-        doPrintImage(request.getImageURLs().get(0), request.getPrintRequestId(), request.getPrintDeviceId());
+        new URL(urls.get(0));
+        doPrintImage(urls.get(0), requestId, deviceId);
       } catch (MalformedURLException ex) {
         Log.d(TAG, "In doPrint: PrintRequest had malformed image URL");
       }
@@ -1194,15 +1221,15 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   }
 
   @Override
-  public void doRetrievePrinters(RetrievePrintersRequest request) {
-    RetrievePrintersRequestMessage message = new RetrievePrintersRequestMessage(request.getCategory());
+  public void doRetrievePrinters(PrintCategory category) {
+    RetrievePrintersRequestMessage message = new RetrievePrintersRequestMessage(category);
     sendObjectMessage(message);
 
   }
 
   @Override
-  public void doRetrievePrintJobStatus(PrintJobStatusRequest request) {
-    PrintJobStatusRequestMessage message = new PrintJobStatusRequestMessage(request.getPrintRequestId());
+  public void doRetrievePrintJobStatus(String printRequestId) {
+    PrintJobStatusRequestMessage message = new PrintJobStatusRequestMessage(printRequestId);
     sendObjectMessage(message);
   }
 
@@ -1218,34 +1245,11 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
     sendObjectMessage(ar);
   }
 
-  @Override
-  public void doVoidPayment(final Payment payment, final VoidReason reason) {
-    synchronized (ackLock) {
-      final String msgId = sendObjectMessage(new VoidPaymentMessage(payment, reason));
-
-      AsyncTask<Object, Object, Object> aTask = new AsyncTask<Object, Object, Object>() {
-        @Override
-        protected Object doInBackground(Object[] params) {
-          notifyObserversPaymentVoided(payment, reason, ResultStatus.SUCCESS, null, null);
-          return null;
-        }
-      };
-
-      if (!supportsAcks()) {
-        aTask.execute();
-      } else {
-        // we will send back response after we get an ack
-        msgIdToTask.put(msgId, aTask);
-      }
-    }
-  }
-
-  @Override
-  public void doPaymentRefund(String orderId, String paymentId, long amount, boolean fullAmount) {
+  public void doPaymentRefund(String orderId, String paymentId, long amount, boolean fullRefund, boolean disablePrinting, boolean disableReceiptSelection) {
     /*
      * Need this to get a V2 of refund request
      */
-    RefundRequestMessage refundRequestMessage = new RefundRequestMessage(orderId, paymentId, amount, fullAmount);
+    RefundRequestMessage refundRequestMessage = new RefundRequestMessage(orderId, paymentId, amount, fullRefund, disablePrinting, disableReceiptSelection);
     sendObjectMessage(gson.toJson(refundRequestMessage), Method.REFUND_REQUEST, 2, (String)null);
   }
 

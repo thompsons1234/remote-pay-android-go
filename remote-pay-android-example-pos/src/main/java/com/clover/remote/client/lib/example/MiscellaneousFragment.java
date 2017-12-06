@@ -358,7 +358,7 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     }
 
     ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity().getApplicationContext(),
-        android.R.layout.simple_spinner_dropdown_item, values);
+        R.layout.spinner_item, values);
     tipModeSpinner.setAdapter(adapter);
     tipModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override
@@ -388,7 +388,7 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     }
 
     ArrayAdapter<String> sigAdapter = new ArrayAdapter<>(getActivity().getApplicationContext(),
-        android.R.layout.simple_spinner_dropdown_item, sigValues);
+        R.layout.spinner_item, sigValues);
     signatureEntryLocationSpinner.setAdapter(sigAdapter);
     signatureEntryLocationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
       @Override

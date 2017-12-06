@@ -95,6 +95,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/connectButton"
         android:layout_centerHorizontal="true"
+        android:background="@drawable/button_border_padding"
         android:onClick="scanQRCode"
         android:text="@string/scan_qr_code"/>
 
