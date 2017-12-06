@@ -17,718 +17,718 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
             xmlns:tools="http://schemas.android.com/tools"
             android:id="@+id/MiscParentScrollView"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:fillViewport="false">
 
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
     <LinearLayout
+      android:id="@+id/connectReaderBox"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentTop="true"
+      android:orientation="horizontal"
+      android:visibility="gone"
+      tools:visibility="visible">
+
+      <Button
+        android:id="@+id/reader350Btn"
+        android:layout_width="100dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_weight=".5"
+        android:onClick="connect350Click"
+        android:text="Connect RP350"/>
+
+      <Button
+        android:id="@+id/reader450Btn"
+        android:layout_width="100dp"
+        android:layout_height="match_parent"
+        android:layout_weight=".5"
+        android:onClick="connect450Click"
+        android:text="Connect RP450"/>
+    </LinearLayout>
+
+    <LinearLayout
+      android:id="@+id/APIButtons"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:orientation="vertical">
+
+      <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-
-        <LinearLayout
-            android:id="@+id/connectReaderBox"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:orientation="horizontal"
-            android:visibility="gone"
-            tools:visibility="visible">
-
-            <Button
-                android:id="@+id/reader350Btn"
-                android:layout_width="100dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentLeft="true"
-                android:layout_weight=".5"
-                android:onClick="connect350Click"
-                android:text="Connect RP350"/>
-
-            <Button
-                android:id="@+id/reader450Btn"
-                android:layout_width="100dp"
-                android:layout_height="match_parent"
-                android:layout_weight=".5"
-                android:onClick="connect450Click"
-                android:text="Connect RP450"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/APIButtons"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-            </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/miscContainer1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            tools:visibility="gone">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/ShowMessageText"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/hello_message"/>
-
-                <Button
-                    android:id="@+id/ShowMessageButton"
-                    android:layout_width="200dp"
-                    android:layout_height="wrap_content"
-                    android:onClick="showMessageClick"
-                    android:text="@string/show_message"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/PrintTextText"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ems="10"
-                    android:inputType="textMultiLine"
-                    android:text="@string/print_this"/>
-
-                <Button
-                    android:id="@+id/PrintTextButton"
-                    android:layout_width="200dp"
-                    android:layout_height="wrap_content"
-                    android:onClick="printTextClick"
-                    android:text="@string/print_text"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/PrintImageURLText"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ems="10"
-                    android:inputType="textMultiLine"
-                    android:text="http://slodive.com/wp-content/uploads/2013/02/black-and-white-patterns/grooved.jpg"/>
-
-                <Button
-                    android:id="@+id/PrintImageURLButton"
-                    android:layout_width="200dp"
-                    android:layout_height="wrap_content"
-                    android:onClick="printImageURLClick"
-                    android:text="Print Image from URL"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/QueryPaymentText"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ems="10"
-                    android:inputType="textMultiLine"
-                    android:text="@string/payment_id_example"/>
-
-                <Button
-                    android:id="@+id/QueryPaymentButton"
-                    android:layout_width="200dp"
-                    android:layout_height="wrap_content"
-                    android:onClick="queryPaymentClick"
-                    android:text="@string/query_payment"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/QueryPrintStatusText"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:ems="10"
-                    android:inputType="textMultiLine"/>
-
-                <Button
-                    android:id="@+id/QueryPrintStatus"
-                    android:layout_width="200dp"
-                    android:layout_height="wrap_content"
-                    android:onClick="queryPrintStatusClick"
-                    android:text="@string/get_print_status"/>
-
-            </LinearLayout>
-
-
-        </LinearLayout>
-
-
-        <LinearLayout
-            android:id="@+id/WelcomeThankYouBox"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignRight="@+id/QueryPaymentButton"
-            android:layout_below="@+id/QueryPaymentText"
-            android:layout_toStartOf="@+id/QueryPaymentButton"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/button3"
-                android:layout_width="100dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentLeft="true"
-                android:layout_weight=".5"
-                android:onClick="showWelcomeMessageClick"
-                android:text="@string/show_welcome_message"/>
-
-            <Button
-                android:id="@+id/button4"
-                android:layout_width="100dp"
-                android:layout_height="match_parent"
-                android:layout_weight=".5"
-                android:onClick="showThankYouClick"
-                android:text="@string/show_thank_you"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/CancelCashBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignRight="@+id/WelcomeThankYouBox"
-            android:layout_below="@+id/WelcomeThankYouBox"
-            android:layout_toLeftOf="@+id/PrintTextButton"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/CancelButton"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentLeft="true"
-                android:layout_alignRight="@+id/button3"
-                android:layout_below="@+id/button4"
-                android:layout_weight=".5"
-                android:onClick="onClickCancel"
-                android:text="@string/cancel"/>
-
-            <Button
-                android:id="@+id/CashDrawerButton"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_alignStart="@+id/button4"
-                android:layout_below="@+id/button3"
-                android:layout_weight=".5"
-                android:onClick="onOpenCashDrawerClick"
-                android:text="@string/open_cash_drawer"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/CloseoutBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignRight="@+id/WelcomeThankYouBox"
-            android:layout_below="@+id/CancelCashBox"
-            android:layout_toStartOf="@+id/PrintTextButton"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/CloseoutButton"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentStart="true"
-                android:layout_alignRight="@+id/button3"
-                android:layout_below="@+id/button4"
-                android:layout_weight=".5"
-                android:onClick="onClickCloseout"
-                android:text="@string/closeout_orders"/>
-
-            <Button
-                android:id="@+id/PrintImageButton"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight=".5"
-                android:onClick="printImageClick"
-                android:text="@string/print_image"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ResetBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignRight="@+id/WelcomeThankYouBox"
-            android:layout_below="@+id/CloseoutBox"
-            android:layout_toStartOf="@+id/PrintTextButton"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/GetDeviceStatusButtonCB"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentLeft="true"
-                android:layout_alignRight="@+id/button3"
-                android:layout_below="@+id/button4"
-                android:layout_weight=".5"
-                android:onClick="onGetDeviceStatusCBClick"
-                android:text="@string/get_device_status_resend"/>
-
-            <Button
-                android:id="@+id/GetDeviceStatusButton"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight=".5"
-                android:onClick="onGetDeviceStatusClick"
-                android:text="@string/get_device_status"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ReadCardDataBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignRight="@+id/WelcomeThankYouBox"
-            android:layout_below="@+id/ResetBox"
-            android:layout_toStartOf="@+id/PrintTextButton"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/ReadCardDataButton"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight=".5"
-                android:onClick="onReadCardDataClick"
-                android:text="@string/read_card_data"/>
-
-            <Button
-                android:id="@+id/ResetButton"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_alignParentLeft="true"
-                android:layout_alignRight="@+id/button3"
-                android:layout_below="@+id/button4"
-                android:layout_weight=".5"
-                android:backgroundTint="@color/warning_red"
-                android:onClick="onResetDeviceClick"
-                android:text="@string/reset_device"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/CustomActivityBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignRight="@+id/WelcomeThankYouBox"
-            android:layout_below="@id/ReadCardDataBox"
-            android:background="@drawable/border"
-            android:orientation="vertical"
-            android:padding="10dip"
-            tools:visibility="gone">
-
-            <LinearLayout
-                android:id="@+id/CustomActivityEntry"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:outlineProvider="paddedBounds"
-                android:visibility="visible"
-                >
-
-                <TextView
-                    android:id="@+id/textView7"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight=".5"
-                    android:labelFor="@+id/CustomActivityEntry"
-                    android:text="@string/custom_activities"
-                    android:textSize="24sp"
-                    android:textStyle="normal|bold"/>
-
-                <Switch
-                    android:id="@+id/customActivityBlocking"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight=".5"
-                    android:checked="false"
-                    android:text="@string/non_blocking"/>
-
-                <Spinner
-                    android:id="@+id/activity_id"
-                    android:layout_width="match_parent"
-                    android:layout_height="fill_parent"
-                    android:layout_weight=".5"
-                    android:background="@android:drawable/btn_dropdown"
-                    android:dropDownWidth="match_parent"
-                    android:minHeight="17dp"
-                    android:padding="0dp"
-                    android:spinnerMode="dropdown"/>
-
-                <EditText
-                    android:id="@+id/activity_payload"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_weight=".5"
-                    android:ems="10"
-                    android:inputType="textMultiLine"
-                    android:text="@string/payload_placeholder"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="51dp"
-                    android:orientation="horizontal"
-                    >
-
-                    <Button
-                        android:id="@+id/startCustomActivityButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:onClick="startActivity"
-                        android:text="@string/start"/>
-
-                    <Button
-                        android:id="@+id/sendMessageToActivityButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:onClick="sendMessageToActivity"
-                        android:text="@string/send_message"
-                        android:visibility="invisible"/>
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/TransactionSettings"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignRight="@+id/CancelCashBox"
-            android:layout_below="@+id/CustomActivityBox"
-            android:background="@drawable/border"
-            android:orientation="vertical"
-            android:padding="10dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/textView9"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/transaction_settings"
-                    android:textSize="24sp"
-                    android:textStyle="normal|bold"/>
-
-                <Switch
-                    android:id="@+id/ManualSwitch"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/manual"/>
-
-                <Switch
-                    android:id="@+id/SwipeSwitch"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/swipe"/>
-
-                <Switch
-                    android:id="@+id/ChipSwitch"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/chip"/>
-
-                <Switch
-                    android:id="@+id/ContactlessSwitch"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/contactless"/>
-
-                <LinearLayout
-                    android:id="@+id/forceOfflinePayBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/textView6"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:paddingBottom="3dp"
-                        android:paddingTop="6dp"
-                        android:text="@string/force_offline_payment"
-                        android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-                    <RadioGroup
-                        android:id="@+id/ForceOfflinePaymentRG"
-                        android:layout_width="wrap_content"
-                        android:layout_height="fill_parent"
-                        android:orientation="horizontal">
-
-                        <RadioButton
-                            android:id="@+id/forceOfflineDefault"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="true"
-                            android:text="@string/_default"/>
-
-                        <RadioButton
-                            android:id="@+id/forceOfflineTrue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/yes"/>
-
-                        <RadioButton
-                            android:id="@+id/forceOfflineFalse"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/no"/>
-                    </RadioGroup>
-
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/allowOfflinePayBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/textView5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingBottom="3dp"
-                    android:paddingTop="6dp"
-                    android:text="@string/allow_offline_payments"
-                    android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-                <RadioGroup
-                    android:id="@+id/AcceptOfflinePaymentRG"
-                    android:layout_width="wrap_content"
-                    android:layout_height="fill_parent"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/acceptOfflineDefault"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="@string/_default"/>
-
-                    <RadioButton
-                        android:id="@+id/acceptOfflineTrue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/yes"/>
-
-                    <RadioButton
-                        android:id="@+id/acceptOfflineFalse"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/no"/>
-                </RadioGroup>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/acceptOfflinePayBox"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/textView15"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingBottom="3dp"
-                    android:paddingTop="3dp"
-                    android:text="@string/accept_offline_no_prompt"
-                    android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-                <RadioGroup
-                    android:id="@+id/ApproveOfflineWithoutPromptRG"
-                    android:layout_width="wrap_content"
-                    android:layout_height="fill_parent"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/approveOfflineWithoutPromptDefault"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="@string/_default"/>
-
-                    <RadioButton
-                        android:id="@+id/approveOfflineWithoutPromptTrue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/yes"/>
-
-                    <RadioButton
-                        android:id="@+id/approveOfflineWithoutPromptFalse"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/no"/>
-                </RadioGroup>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/tipModeBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/textView25"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingBottom="3dp"
-                    android:paddingTop="6dp"
-                    android:text="@string/tip_mode"
-                    android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-                <Spinner
-                    android:id="@+id/TipModeSpinner"
-                    android:layout_width="250dp"
-                    android:layout_height="wrap_content"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/saleTipAmountBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/textView99"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingBottom="3dp"
-                    android:paddingTop="6dp"
-                    android:text="@string/sale_tip_amount"
-                    android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-                <EditText
-                    android:id="@+id/tipAmount"
-                    android:layout_width="250dp"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:inputType="number"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/signatureEntryBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/textView35"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingBottom="3dp"
-                    android:paddingTop="6dp"
-                    android:text="@string/signature_entry_location"
-                    android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-                <Spinner
-                    android:id="@+id/SignatureEntryLocationSpinner"
-                    android:layout_width="250dp"
-                    android:layout_height="wrap_content">
-                </Spinner>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/signatureThresholdBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/textView26"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingBottom="3dp"
-                    android:paddingTop="6dp"
-                    android:text="@string/signature_threshold"
-                    android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-                <EditText
-                    android:id="@+id/signatureThreshold"
-                    android:layout_width="250dp"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:inputType="number"/>
-            </LinearLayout>
-
-            <Switch
-                android:id="@+id/DisableDuplicateCheckSwitch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/disable_duplicate_payment_checking"/>
-
-            <Switch
-                android:id="@+id/DisableReceiptOptionsSwitch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/disable_device_receipt_options"/>
-
-            <Switch
-                android:id="@+id/PrintingSwitch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/disable_device_printing"/>
-
-            <Switch
-                android:id="@+id/AutomaticSignatureConfirmationSwitch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/automatically_confirm_signature"/>
-
-            <Switch
-                android:id="@+id/AutomaticPaymentConfirmationSwitch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/automatically_confirm_payment_challenges"/>
-        </LinearLayout>
+      </LinearLayout>
     </LinearLayout>
+
+    <LinearLayout
+      android:id="@+id/miscContainer1"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      tools:visibility="gone">
+
+      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+          android:id="@+id/ShowMessageText"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/hello_message"/>
+
+        <Button
+          android:id="@+id/ShowMessageButton"
+          android:layout_width="200dp"
+          android:layout_height="wrap_content"
+          android:onClick="showMessageClick"
+          android:text="@string/show_message"/>
+      </LinearLayout>
+
+      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+          android:id="@+id/PrintTextText"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:ems="10"
+          android:inputType="textMultiLine"
+          android:text="@string/print_this"/>
+
+        <Button
+          android:id="@+id/PrintTextButton"
+          android:layout_width="200dp"
+          android:layout_height="wrap_content"
+          android:onClick="printTextClick"
+          android:text="@string/print_text"/>
+      </LinearLayout>
+
+      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+          android:id="@+id/PrintImageURLText"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:ems="10"
+          android:inputType="textMultiLine"
+          android:text="http://slodive.com/wp-content/uploads/2013/02/black-and-white-patterns/grooved.jpg"/>
+
+        <Button
+          android:id="@+id/PrintImageURLButton"
+          android:layout_width="200dp"
+          android:layout_height="wrap_content"
+          android:onClick="printImageURLClick"
+          android:text="Print Image from URL"/>
+      </LinearLayout>
+
+      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+          android:id="@+id/QueryPaymentText"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:ems="10"
+          android:inputType="textMultiLine"
+          android:text="@string/payment_id_example"/>
+
+        <Button
+          android:id="@+id/QueryPaymentButton"
+          android:layout_width="200dp"
+          android:layout_height="wrap_content"
+          android:onClick="queryPaymentClick"
+          android:text="@string/query_payment"/>
+
+      </LinearLayout>
+
+      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+          android:id="@+id/QueryPrintStatusText"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:ems="10"
+          android:inputType="textMultiLine"/>
+
+        <Button
+          android:id="@+id/QueryPrintStatus"
+          android:layout_width="200dp"
+          android:layout_height="wrap_content"
+          android:onClick="queryPrintStatusClick"
+          android:text="@string/get_print_status"/>
+
+      </LinearLayout>
+
+
+    </LinearLayout>
+
+
+    <LinearLayout
+      android:id="@+id/WelcomeThankYouBox"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignRight="@+id/QueryPaymentButton"
+      android:layout_below="@+id/QueryPaymentText"
+      android:layout_toStartOf="@+id/QueryPaymentButton"
+      android:orientation="horizontal">
+
+      <Button
+        android:id="@+id/button3"
+        android:layout_width="100dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_weight=".5"
+        android:onClick="showWelcomeMessageClick"
+        android:text="@string/show_welcome_message"/>
+
+      <Button
+        android:id="@+id/button4"
+        android:layout_width="100dp"
+        android:layout_height="match_parent"
+        android:layout_weight=".5"
+        android:onClick="showThankYouClick"
+        android:text="@string/show_thank_you"/>
+    </LinearLayout>
+
+    <LinearLayout
+      android:id="@+id/CancelCashBox"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignRight="@+id/WelcomeThankYouBox"
+      android:layout_below="@+id/WelcomeThankYouBox"
+      android:layout_toLeftOf="@+id/PrintTextButton"
+      android:orientation="horizontal">
+
+      <Button
+        android:id="@+id/CancelButton"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignRight="@+id/button3"
+        android:layout_below="@+id/button4"
+        android:layout_weight=".5"
+        android:onClick="onClickCancel"
+        android:text="@string/cancel"/>
+
+      <Button
+        android:id="@+id/CashDrawerButton"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_alignStart="@+id/button4"
+        android:layout_below="@+id/button3"
+        android:layout_weight=".5"
+        android:onClick="onOpenCashDrawerClick"
+        android:text="@string/open_cash_drawer"/>
+    </LinearLayout>
+
+    <LinearLayout
+      android:id="@+id/CloseoutBox"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignRight="@+id/WelcomeThankYouBox"
+      android:layout_below="@+id/CancelCashBox"
+      android:layout_toStartOf="@+id/PrintTextButton"
+      android:orientation="horizontal">
+
+      <Button
+        android:id="@+id/CloseoutButton"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/button3"
+        android:layout_below="@+id/button4"
+        android:layout_weight=".5"
+        android:onClick="onClickCloseout"
+        android:text="@string/closeout_orders"/>
+
+      <Button
+        android:id="@+id/PrintImageButton"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight=".5"
+        android:onClick="printImageClick"
+        android:text="@string/print_image"/>
+    </LinearLayout>
+
+    <LinearLayout
+      android:id="@+id/ResetBox"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignRight="@+id/WelcomeThankYouBox"
+      android:layout_below="@+id/CloseoutBox"
+      android:layout_toStartOf="@+id/PrintTextButton"
+      android:orientation="horizontal">
+
+      <Button
+        android:id="@+id/GetDeviceStatusButtonCB"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignRight="@+id/button3"
+        android:layout_below="@+id/button4"
+        android:layout_weight=".5"
+        android:onClick="onGetDeviceStatusCBClick"
+        android:text="@string/get_device_status_resend"/>
+
+      <Button
+        android:id="@+id/GetDeviceStatusButton"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight=".5"
+        android:onClick="onGetDeviceStatusClick"
+        android:text="@string/get_device_status"/>
+    </LinearLayout>
+
+    <LinearLayout
+      android:id="@+id/ReadCardDataBox"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignRight="@+id/WelcomeThankYouBox"
+      android:layout_below="@+id/ResetBox"
+      android:layout_toStartOf="@+id/PrintTextButton"
+      android:orientation="horizontal">
+
+      <Button
+        android:id="@+id/ReadCardDataButton"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight=".5"
+        android:onClick="onReadCardDataClick"
+        android:text="@string/read_card_data"/>
+
+      <Button
+        android:id="@+id/ResetButton"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignRight="@+id/button3"
+        android:layout_below="@+id/button4"
+        android:layout_weight=".5"
+        android:backgroundTint="@color/warning_red"
+        android:onClick="onResetDeviceClick"
+        android:text="@string/reset_device"/>
+    </LinearLayout>
+
+    <LinearLayout
+      android:id="@+id/CustomActivityBox"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignRight="@+id/WelcomeThankYouBox"
+      android:layout_below="@id/ReadCardDataBox"
+      android:background="@drawable/border"
+      android:orientation="vertical"
+      android:padding="10dip"
+      tools:visibility="gone">
+
+      <LinearLayout
+        android:id="@+id/CustomActivityEntry"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:outlineProvider="paddedBounds"
+        android:visibility="visible"
+        >
+
+        <TextView
+          android:id="@+id/textView7"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_weight=".5"
+          android:labelFor="@+id/CustomActivityEntry"
+          android:text="@string/custom_activities"
+          android:textSize="24sp"
+          android:textStyle="normal|bold"/>
+
+        <Switch
+          android:id="@+id/customActivityBlocking"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_weight=".5"
+          android:checked="false"
+          android:text="@string/non_blocking"/>
+
+        <Spinner
+          android:id="@+id/activity_id"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:layout_weight=".5"
+          android:background="@android:drawable/btn_dropdown"
+          android:dropDownWidth="match_parent"
+          android:minHeight="17dp"
+          android:padding="0dp"
+          android:spinnerMode="dropdown"/>
+
+        <EditText
+          android:id="@+id/activity_payload"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_horizontal"
+          android:layout_weight=".5"
+          android:ems="10"
+          android:inputType="textMultiLine"
+          android:text="@string/payload_placeholder"/>
+
+        <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="51dp"
+          android:orientation="horizontal"
+          >
+
+          <Button
+            android:id="@+id/startCustomActivityButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="startActivity"
+            android:text="@string/start"/>
+
+          <Button
+            android:id="@+id/sendMessageToActivityButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="sendMessageToActivity"
+            android:text="@string/send_message"
+            android:visibility="invisible"/>
+
+        </LinearLayout>
+
+      </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+      android:id="@+id/TransactionSettings"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentLeft="true"
+      android:layout_alignRight="@+id/CancelCashBox"
+      android:layout_below="@+id/CustomActivityBox"
+      android:background="@drawable/border"
+      android:orientation="vertical"
+      android:padding="10dp">
+
+      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+          android:id="@+id/textView9"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/transaction_settings"
+          android:textSize="24sp"
+          android:textStyle="normal|bold"/>
+
+        <Switch
+          android:id="@+id/ManualSwitch"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/manual"/>
+
+        <Switch
+          android:id="@+id/SwipeSwitch"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/swipe"/>
+
+        <Switch
+          android:id="@+id/ChipSwitch"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/chip"/>
+
+        <Switch
+          android:id="@+id/ContactlessSwitch"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="@string/contactless"/>
+
+        <LinearLayout
+          android:id="@+id/forceOfflinePayBox"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:layout_weight="1"
+          android:orientation="horizontal">
+
+          <TextView
+            android:id="@+id/textView6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingBottom="3dp"
+            android:paddingTop="6dp"
+            android:text="@string/force_offline_payment"
+            android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+          <RadioGroup
+            android:id="@+id/ForceOfflinePaymentRG"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <RadioButton
+              android:id="@+id/forceOfflineDefault"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:checked="true"
+              android:text="@string/_default"/>
+
+            <RadioButton
+              android:id="@+id/forceOfflineTrue"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/yes"/>
+
+            <RadioButton
+              android:id="@+id/forceOfflineFalse"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="@string/no"/>
+          </RadioGroup>
+
+        </LinearLayout>
+      </LinearLayout>
+
+      <LinearLayout
+        android:id="@+id/allowOfflinePayBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+          android:id="@+id/textView5"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:paddingBottom="3dp"
+          android:paddingTop="6dp"
+          android:text="@string/allow_offline_payments"
+          android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+        <RadioGroup
+          android:id="@+id/AcceptOfflinePaymentRG"
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:orientation="horizontal">
+
+          <RadioButton
+            android:id="@+id/acceptOfflineDefault"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/_default"/>
+
+          <RadioButton
+            android:id="@+id/acceptOfflineTrue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/yes"/>
+
+          <RadioButton
+            android:id="@+id/acceptOfflineFalse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no"/>
+        </RadioGroup>
+
+      </LinearLayout>
+
+      <LinearLayout
+        android:id="@+id/acceptOfflinePayBox"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <TextView
+          android:id="@+id/textView15"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:paddingBottom="3dp"
+          android:paddingTop="3dp"
+          android:text="@string/accept_offline_no_prompt"
+          android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+        <RadioGroup
+          android:id="@+id/ApproveOfflineWithoutPromptRG"
+          android:layout_width="wrap_content"
+          android:layout_height="match_parent"
+          android:orientation="horizontal">
+
+          <RadioButton
+            android:id="@+id/approveOfflineWithoutPromptDefault"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/_default"/>
+
+          <RadioButton
+            android:id="@+id/approveOfflineWithoutPromptTrue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/yes"/>
+
+          <RadioButton
+            android:id="@+id/approveOfflineWithoutPromptFalse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no"/>
+        </RadioGroup>
+      </LinearLayout>
+
+      <LinearLayout
+        android:id="@+id/tipModeBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+          android:id="@+id/textView25"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:paddingBottom="3dp"
+          android:paddingTop="6dp"
+          android:text="@string/tip_mode"
+          android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+        <Spinner
+          android:id="@+id/TipModeSpinner"
+          android:layout_width="250dp"
+          android:layout_height="wrap_content"/>
+      </LinearLayout>
+
+      <LinearLayout
+        android:id="@+id/saleTipAmountBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+          android:id="@+id/textView99"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:paddingBottom="3dp"
+          android:paddingTop="6dp"
+          android:text="@string/sale_tip_amount"
+          android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+        <EditText
+          android:id="@+id/tipAmount"
+          android:layout_width="250dp"
+          android:layout_height="wrap_content"
+          android:ems="10"
+          android:inputType="number"/>
+      </LinearLayout>
+
+      <LinearLayout
+        android:id="@+id/signatureEntryBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+          android:id="@+id/textView35"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:paddingBottom="3dp"
+          android:paddingTop="6dp"
+          android:text="@string/signature_entry_location"
+          android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+        <Spinner
+          android:id="@+id/SignatureEntryLocationSpinner"
+          android:layout_width="250dp"
+          android:layout_height="wrap_content">
+        </Spinner>
+      </LinearLayout>
+
+      <LinearLayout
+        android:id="@+id/signatureThresholdBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+          android:id="@+id/textView26"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:paddingBottom="3dp"
+          android:paddingTop="6dp"
+          android:text="@string/signature_threshold"
+          android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+        <EditText
+          android:id="@+id/signatureThreshold"
+          android:layout_width="250dp"
+          android:layout_height="wrap_content"
+          android:ems="10"
+          android:inputType="number"/>
+      </LinearLayout>
+
+      <Switch
+        android:id="@+id/DisableDuplicateCheckSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/disable_duplicate_payment_checking"/>
+
+      <Switch
+        android:id="@+id/DisableReceiptOptionsSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/disable_device_receipt_options"/>
+
+      <Switch
+        android:id="@+id/PrintingSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/disable_device_printing"/>
+
+      <Switch
+        android:id="@+id/AutomaticSignatureConfirmationSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/automatically_confirm_signature"/>
+
+      <Switch
+        android:id="@+id/AutomaticPaymentConfirmationSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/automatically_confirm_payment_challenges"/>
+    </LinearLayout>
+  </LinearLayout>
 </ScrollView>

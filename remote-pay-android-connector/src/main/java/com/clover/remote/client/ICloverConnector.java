@@ -16,23 +16,25 @@
 
 package com.clover.remote.client;
 
+import android.graphics.Bitmap;
+
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.CapturePreAuthRequest;
 import com.clover.remote.client.messages.CloseoutRequest;
 import com.clover.remote.client.messages.CustomActivityRequest;
-import com.clover.remote.client.messages.OpenCashDrawerRequest;
-import com.clover.remote.client.messages.PrintJobStatusRequest;
-import com.clover.remote.client.messages.PrintRequest;
 import com.clover.remote.client.messages.DisplayReceiptOptionsRequest;
-import com.clover.remote.client.messages.RetrievePaymentRequest;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.MessageToActivity;
+import com.clover.remote.client.messages.OpenCashDrawerRequest;
 import com.clover.remote.client.messages.PreAuthRequest;
+import com.clover.remote.client.messages.PrintJobStatusRequest;
+import com.clover.remote.client.messages.PrintRequest;
 import com.clover.remote.client.messages.ReadCardDataRequest;
 import com.clover.remote.client.messages.RefundPaymentRequest;
 import com.clover.remote.client.messages.RetrieveDeviceStatusRequest;
+import com.clover.remote.client.messages.RetrievePaymentRequest;
 import com.clover.remote.client.messages.RetrievePrintersRequest;
 import com.clover.remote.client.messages.SaleRequest;
 import com.clover.remote.client.messages.TipAdjustAuthRequest;
@@ -40,8 +42,6 @@ import com.clover.remote.client.messages.VerifySignatureRequest;
 import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.remote.order.DisplayOrder;
 import com.clover.sdk.v3.payments.Payment;
-
-import android.graphics.Bitmap;
 
 import java.io.Serializable;
 import java.util.List;
@@ -103,7 +103,7 @@ public interface ICloverConnector extends Serializable {
   /**
    * If payment confirmation is required during a Sale, this method rejects the payment
    *
-   * @param payment Payment to reject
+   * @param payment   Payment to reject
    * @param challenge The challenge which resulted in payment rejection
    */
   void rejectPayment(Payment payment, Challenge challenge);
@@ -217,8 +217,8 @@ public interface ICloverConnector extends Serializable {
    * Print an image on the Clover Mini printer
    *
    * @param image An image to print
-   *
-   * NOTE:  This method is not implemented for the Java SDK.  Use {@link #printImageFromURL(String)} instead.
+   *              <p>
+   *              NOTE:  This method is not implemented for the Java SDK.  Use {@link #printImageFromURL(String)} instead.
    */
   @Deprecated
   void printImage(Bitmap image);
@@ -245,7 +245,6 @@ public interface ICloverConnector extends Serializable {
   void sendDebugLog(String message);
 
 
-
   /**
    * Return the device to the Welcome Screen
    */
@@ -260,7 +259,7 @@ public interface ICloverConnector extends Serializable {
    * Display the payment receipt screen for the orderId/paymentId combination.
    *
    * @param paymentId The ID of the payment to print a receipt for
-   * @param orderId The ID of the order to print a receipt for
+   * @param orderId   The ID of the order to print a receipt for
    */
   @Deprecated
   void displayPaymentReceiptOptions(String orderId, String paymentId);
@@ -354,6 +353,4 @@ public interface ICloverConnector extends Serializable {
    * @param request The request details
    */
   void retrievePayment(RetrievePaymentRequest request);
-
-
 }

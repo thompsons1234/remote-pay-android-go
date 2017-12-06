@@ -16,12 +16,10 @@
 
 package com.clover.remote.client.messages;
 
-import com.clover.remote.client.messages.BaseRequest;
-
 /**
  * Request object to refund a payment, either partially or fully
  */
-@SuppressWarnings(value="unused")
+@SuppressWarnings(value = "unused")
 public class DisplayReceiptOptionsRequest extends BaseRequest {
   private String orderId;
   private String paymentId;

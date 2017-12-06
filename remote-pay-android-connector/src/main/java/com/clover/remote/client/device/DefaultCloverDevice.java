@@ -16,6 +16,11 @@
 
 package com.clover.remote.client.device;
 
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
+import android.util.Base64;
+import android.util.Log;
+
 import com.clover.common2.payments.PayIntent;
 import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
@@ -101,11 +106,6 @@ import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Payment;
 import com.clover.sdk.v3.printer.PrintCategory;
 import com.clover.sdk.v3.printer.Printer;
-
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
-import android.util.Base64;
-import android.util.Log;
 import com.google.gson.Gson;
 
 import java.io.ByteArrayOutputStream;
@@ -134,10 +134,10 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
 
   public DefaultCloverDevice(CloverDeviceConfiguration configuration) {
     this(configuration.getMessagePackageName(), configuration.getCloverTransport(), configuration.getApplicationId());
-    if(configuration.getMaxMessageCharacters() < 1000) {
+    if (configuration.getMaxMessageCharacters() < 1000) {
       Log.d(TAG, "Message size is too small, reverting to 1000");
     }
-    maxMessageSizeInChars = Math.max(1000,configuration.getMaxMessageCharacters());
+    maxMessageSizeInChars = Math.max(1000, configuration.getMaxMessageCharacters());
   }
 
   public DefaultCloverDevice(String packageName, ICloverTransport transport, String applicationId) {
@@ -592,8 +592,6 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
       }
     }.execute();
   }
-
-
 
 
   private void notifyObserversPrintPayment(final PaymentPrintMessage ppm, final String message) {
@@ -1112,7 +1110,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   @Override
   public void doOpenCashDrawer(String reason, String deviceId) {
     Printer printer = null;
-    if(deviceId != null){
+    if (deviceId != null) {
       printer = new Printer();
       printer.setId(deviceId);
     }
@@ -1139,7 +1137,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   @Override
   public void doPrintText(List<String> textLines, String printRequestId, String printDeviceId) {
     Printer printer = null;
-    if(printDeviceId != null){
+    if (printDeviceId != null) {
       printer = new Printer();
       printer.setId(printDeviceId);
     }
@@ -1158,23 +1156,22 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   @Override
   public void doPrintImage(Bitmap bitmap, String printRequestId, String printDeviceId) {
     Printer printer = null;
-    if(printDeviceId != null){
+    if (printDeviceId != null) {
       printer = new Printer();
       printer.setId(printDeviceId);
     }
 
-    if(remoteMessageVersion > 1){
+    if (remoteMessageVersion > 1) {
       // Base 64 Attachment processing, the attachment is already base64 encoded before chunking
 
       // Does Base 64 Fragment processing, the attachment is a bitmap that will be chunked, then encoded
-      ImagePrintMessage ipm = new ImagePrintMessage((Bitmap)null,printRequestId, printer);
+      ImagePrintMessage ipm = new ImagePrintMessage((Bitmap) null, printRequestId, printer);
       String message = ipm.toJsonString();
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
       bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
       byte[] data = stream.toByteArray();
       sendObjectMessage(message, Method.PRINT_IMAGE, 2, data);
-    }
-    else{
+    } else {
       ImagePrintMessage ipm = new ImagePrintMessage(bitmap, printRequestId, null);
       sendObjectMessage(ipm);
     }
@@ -1185,11 +1182,11 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   public void doPrintImage(String url, String printRequestId, String printDeviceId) {
     if (remoteMessageVersion > 1) {
       Printer printer = null;
-      if(printDeviceId != null){
+      if (printDeviceId != null) {
         printer = new Printer();
         printer.setId(printDeviceId);
       }
-      ImagePrintMessage ipm = new ImagePrintMessage((String)null, printRequestId, printer);
+      ImagePrintMessage ipm = new ImagePrintMessage((String) null, printRequestId, printer);
       String message = ipm.toJsonString();
       sendObjectMessage(message, Method.PRINT_IMAGE, 2, url);
     } else {
@@ -1212,8 +1209,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
       } catch (MalformedURLException ex) {
         Log.d(TAG, "In doPrint: PrintRequest had malformed image URL");
       }
-    }
-    else{
+    } else {
       //here because printRequest was empty or has a new content type we don't yet handle
       Log.d(TAG, "In doPrint: PrintRequest had no content or an unhandled content type");
     }
@@ -1250,7 +1246,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
      * Need this to get a V2 of refund request
      */
     RefundRequestMessage refundRequestMessage = new RefundRequestMessage(orderId, paymentId, amount, fullRefund, disablePrinting, disableReceiptSelection);
-    sendObjectMessage(gson.toJson(refundRequestMessage), Method.REFUND_REQUEST, 2, (String)null);
+    sendObjectMessage(gson.toJson(refundRequestMessage), Method.REFUND_REQUEST, 2, (String) null);
   }
 
   @Override
@@ -1386,21 +1382,20 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   }
 
   private void sendRemoteMessage(RemoteMessage remoteMessage, int version, byte[] attachmentData) {
-    if(version > 1){ // we can send fragments
-      if(attachmentData != null || remoteMessage.payload.length() > CloverConnector.MAX_PAYLOAD_SIZE) {
+    if (version > 1) { // we can send fragments
+      if (attachmentData != null || remoteMessage.payload.length() > CloverConnector.MAX_PAYLOAD_SIZE) {
         if (attachmentData.length > CloverConnector.MAX_PAYLOAD_SIZE) {
           Log.d(getClass().getName(), "Error sending message - payload size is greater than the maximum allowed");
-        }
-        else {
+        } else {
           int fragmentIndex = 0;
           String payload = remoteMessage.payload;
           int payloadStart = 0;
           int payloadEnd = Math.min(maxMessageSizeInChars, payload.length());
 
           //send and fragment payload
-          while(payloadStart < payloadEnd){
+          while (payloadStart < payloadEnd) {
             String payloadS = payload.substring(payloadStart, payloadEnd);
-            sendMessageFragment(new RemoteMessage.Builder(remoteMessage), payloadS, null, fragmentIndex++, ((payloadStart > payloadEnd)&& attachmentData == null));
+            sendMessageFragment(new RemoteMessage.Builder(remoteMessage), payloadS, null, fragmentIndex++, ((payloadStart > payloadEnd) && attachmentData == null));
             payloadStart += maxMessageSizeInChars;
           }
 
@@ -1408,18 +1403,16 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
           int start = 0;
           int count = attachmentData.length;
           while (start < count) {
-            byte[] chunkData = Arrays.copyOfRange(attachmentData, start, start+Math.min(maxMessageSizeInChars, count - start));
+            byte[] chunkData = Arrays.copyOfRange(attachmentData, start, start + Math.min(maxMessageSizeInChars, count - start));
             start += maxMessageSizeInChars;
             String attachment = Base64.encodeToString(chunkData, Base64.DEFAULT);
             sendMessageFragment(new RemoteMessage.Builder(remoteMessage), null, attachment, fragmentIndex++, (start > count));
           }
         }
-      }
-      else{
+      } else {
         sendRemoteMessage(gson.toJson(remoteMessage));
       }
-    }
-    else{ //don't need to fragment
+    } else { //don't need to fragment
       sendRemoteMessage(gson.toJson(remoteMessage));
     }
 
@@ -1427,32 +1420,29 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   }
 
   private void sendRemoteMessage(RemoteMessage remoteMessage, int version, String attachmentUrl) {
-    if(version > 1){ // we can send fragments
-      if(attachmentUrl != null || remoteMessage.payload.length() > CloverConnector.MAX_PAYLOAD_SIZE) {
+    if (version > 1) { // we can send fragments
+      if (attachmentUrl != null || remoteMessage.payload.length() > CloverConnector.MAX_PAYLOAD_SIZE) {
         if (attachmentUrl.length() > CloverConnector.MAX_PAYLOAD_SIZE) {
           Log.d(getClass().getName(), "Error sending message - payload size is greater than the maximum allowed");
-        }
-        else {
+        } else {
           int fragmentIndex = 0;
           String payload = remoteMessage.payload;
           int payloadStart = 0;
           int payloadEnd = Math.min(maxMessageSizeInChars, payload.length());
 
           //send and fragment payload
-          while(payloadStart < payloadEnd){
+          while (payloadStart < payloadEnd) {
             String payloadS = payload.substring(payloadStart, payloadEnd);
-            sendMessageFragment(new RemoteMessage.Builder(remoteMessage), payloadS, null, fragmentIndex++, ((payloadStart > payloadEnd)&& attachmentUrl == null));
+            sendMessageFragment(new RemoteMessage.Builder(remoteMessage), payloadS, null, fragmentIndex++, ((payloadStart > payloadEnd) && attachmentUrl == null));
             payloadStart += maxMessageSizeInChars;
           }
 
           new RetrieveUrlTask().execute(attachmentUrl, remoteMessage, fragmentIndex);
         }
-      }
-      else{
+      } else {
         sendRemoteMessage(gson.toJson(remoteMessage));
       }
-    }
-    else{ //don't need to fragment
+    } else { //don't need to fragment
       sendRemoteMessage(gson.toJson(remoteMessage));
     }
 
@@ -1461,9 +1451,9 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   class RetrieveUrlTask extends AsyncTask<Object, Void, Void> {
     protected Void doInBackground(Object... params) {
       InputStream input = null;
-      int fragmentIndex = (int)params[2];
+      int fragmentIndex = (int) params[2];
       try {
-        input = new URL((String)params[0]).openStream();
+        input = new URL((String) params[0]).openStream();
         byte[] buffer = new byte[1024];
         int bytesRead = input.read(buffer);
 
@@ -1471,22 +1461,18 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
           byte[] actualBuffer = Arrays.copyOf(buffer, bytesRead);
           String attachment = Base64.encodeToString(actualBuffer, Base64.DEFAULT);
           bytesRead = input.read(buffer);
-          sendMessageFragment(new RemoteMessage.Builder((RemoteMessage)params[1]), null, attachment, fragmentIndex++, (bytesRead == -1));
+          sendMessageFragment(new RemoteMessage.Builder((RemoteMessage) params[1]), null, attachment, fragmentIndex++, (bytesRead == -1));
         }
-      }
-      catch (MalformedURLException e) {
+      } catch (MalformedURLException e) {
         e.printStackTrace();
-      }
-      catch (IOException io){
+      } catch (IOException io) {
         io.printStackTrace();
-      }
-      finally {
-        try{
-          if(input != null) {
+      } finally {
+        try {
+          if (input != null) {
             input.close();
           }
-        }
-        catch (IOException e){
+        } catch (IOException e) {
           //ignore
         }
 
@@ -1497,7 +1483,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   }
 
 
-  private void sendMessageFragment(RemoteMessage.Builder remoteMessage, String payload, String attachmentFragment, int fragmentIndex, boolean isLastMessage){
+  private void sendMessageFragment(RemoteMessage.Builder remoteMessage, String payload, String attachmentFragment, int fragmentIndex, boolean isLastMessage) {
     //changes for fragment
     remoteMessage.setPayload(payload);
     remoteMessage.setAttachment(attachmentFragment);

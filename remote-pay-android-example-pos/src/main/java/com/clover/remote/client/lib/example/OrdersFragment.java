@@ -163,14 +163,16 @@ public class OrdersFragment extends Fragment implements OrderObserver {
                         vpr.setOrderId(posExchange.getOrderId());
                         vpr.setVoidReason(VoidReason.USER_CANCEL.name());
                         vpr.setDisablePrinting(store.getDisablePrinting() != null ? store.getDisablePrinting() : false);
-                        vpr.setDisableReceiptSelection(store.getDisableReceiptOptions() != null ? store.getDisableReceiptOptions() : false);cloverConnector.voidPayment(vpr);
+                        vpr.setDisableReceiptSelection(store.getDisableReceiptOptions() != null ? store.getDisableReceiptOptions() : false);
+                        cloverConnector.voidPayment(vpr);
                         break;
                       }
                       case "Refund Payment": {
                         RefundPaymentRequest rpr = new RefundPaymentRequest();
                         rpr.setPaymentId(posExchange.getPaymentID());
                         rpr.setOrderId(posExchange.orderID);
-                        rpr.setFullRefund(true);rpr.setDisablePrinting(store.getDisablePrinting() != null ? store.getDisablePrinting() : false);
+                        rpr.setFullRefund(true);
+                        rpr.setDisablePrinting(store.getDisablePrinting() != null ? store.getDisablePrinting() : false);
                         rpr.setDisableReceiptSelection(store.getDisableReceiptOptions() != null ? store.getDisableReceiptOptions() : false);
                         cloverConnector.refundPayment(rpr);
                         break;
@@ -181,26 +183,26 @@ public class OrdersFragment extends Fragment implements OrderObserver {
                         input.setInputType(InputType.TYPE_CLASS_NUMBER);
                         builder.setView(input);
 
-                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                              @Override
-                              public void onClick(DialogInterface dialog, int which) {
-                                double val = Double.parseDouble(input.getText().toString());
-                                long value = (long) val;
+                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                          @Override
+                          public void onClick(DialogInterface dialog, int which) {
+                            double val = Double.parseDouble(input.getText().toString());
+                            long value = (long) val;
 
-                                TipAdjustAuthRequest taar = new TipAdjustAuthRequest();
-                                taar.setPaymentId(posExchange.getPaymentID());
-                                taar.setOrderId(posExchange.getOrderId());
-                                taar.setTipAmount(value);
-                                cloverConnector.tipAdjustAuth(taar);
-                                dialog.dismiss();
-                              }
-                            });
-                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                              @Override
-                              public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                              }
-                            });
+                            TipAdjustAuthRequest taar = new TipAdjustAuthRequest();
+                            taar.setPaymentId(posExchange.getPaymentID());
+                            taar.setOrderId(posExchange.getOrderId());
+                            taar.setTipAmount(value);
+                            cloverConnector.tipAdjustAuth(taar);
+                            dialog.dismiss();
+                          }
+                        });
+                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                          @Override
+                          public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                          }
+                        });
 
                         builder.show();
                         break;
@@ -226,12 +228,12 @@ public class OrdersFragment extends Fragment implements OrderObserver {
                         break;
                       }
 
-                        }
-                      } else {
-                        Toast.makeText(getActivity().getBaseContext(), "Clover Connector is null", Toast.LENGTH_LONG).show();
-                      }
                     }
-                  });
+                  } else {
+                    Toast.makeText(getActivity().getBaseContext(), "Clover Connector is null", Toast.LENGTH_LONG).show();
+                  }
+                }
+              });
           final Dialog dlg = builder.create();
           dlg.show();
         }
@@ -283,7 +285,7 @@ public class OrdersFragment extends Fragment implements OrderObserver {
       mListener = (OnFragmentInteractionListener) activity;
     } catch (ClassCastException e) {
       throw new ClassCastException(activity.toString()
-              + " must implement OnFragmentInteractionListener");
+          + " must implement OnFragmentInteractionListener");
     }
   }
 

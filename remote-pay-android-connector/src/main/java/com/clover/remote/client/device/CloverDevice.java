@@ -16,6 +16,9 @@
 
 package com.clover.remote.client.device;
 
+import android.graphics.Bitmap;
+import android.util.Log;
+
 import com.clover.common2.payments.PayIntent;
 import com.clover.remote.Challenge;
 import com.clover.remote.KeyPress;
@@ -25,9 +28,6 @@ import com.clover.sdk.v3.order.Order;
 import com.clover.sdk.v3.order.VoidReason;
 import com.clover.sdk.v3.payments.Payment;
 import com.clover.sdk.v3.printer.PrintCategory;
-
-import android.graphics.Bitmap;
-import android.util.Log;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

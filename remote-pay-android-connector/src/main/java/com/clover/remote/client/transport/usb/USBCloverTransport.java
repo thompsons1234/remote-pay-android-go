@@ -16,17 +16,17 @@
 
 package com.clover.remote.client.transport.usb;
 
-import com.clover.remote.client.transport.CloverTransport;
-import com.clover.remote.client.transport.usb.pos.PosUsbRemoteProtocolService;
-import com.clover.remote.client.transport.usb.pos.RemoteUsbManager;
-import com.clover.remote.client.transport.usb.pos.UsbAccessorySetupUsbManager;
-
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
+
+import com.clover.remote.client.transport.CloverTransport;
+import com.clover.remote.client.transport.usb.pos.PosUsbRemoteProtocolService;
+import com.clover.remote.client.transport.usb.pos.RemoteUsbManager;
+import com.clover.remote.client.transport.usb.pos.UsbAccessorySetupUsbManager;
 
 import java.nio.channels.NotYetConnectedException;
 
@@ -136,7 +136,7 @@ public class USBCloverTransport extends CloverTransport {
   @Override
   public void dispose() {
     super.dispose();
-    if(context != null) {
+    if (context != null) {
       try {
         context.unregisterReceiver(messageBroadcastReceiver);
       } catch (Exception ex) {

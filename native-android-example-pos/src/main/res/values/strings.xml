@@ -144,9 +144,6 @@
     <item>wss</item>
   </string-array>
 
-
-  <item type="id" name="button_exit"/>
-
-
+  <item name="button_exit" type="id"/>
 
 </resources>

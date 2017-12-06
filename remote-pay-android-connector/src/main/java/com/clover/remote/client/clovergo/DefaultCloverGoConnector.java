@@ -9,6 +9,7 @@ import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.CapturePreAuthRequest;
 import com.clover.remote.client.messages.CloseoutRequest;
 import com.clover.remote.client.messages.CustomActivityRequest;
+import com.clover.remote.client.messages.DisplayReceiptOptionsRequest;
 import com.clover.remote.client.messages.ManualRefundRequest;
 import com.clover.remote.client.messages.MessageToActivity;
 import com.clover.remote.client.messages.OpenCashDrawerRequest;
@@ -27,7 +28,6 @@ import com.clover.remote.client.messages.VoidPaymentRequest;
 import com.clover.remote.order.DisplayOrder;
 import com.clover.sdk.v3.payments.Payment;
 import com.firstdata.clovergo.domain.model.ReaderInfo;
-import com.firstdata.clovergo.domain.usecase.GetConnectedReaders;
 
 import java.util.List;
 
@@ -77,6 +77,11 @@ public class DefaultCloverGoConnector implements ICloverGoConnector {
   }
 
   @Override
+  public void sendDebugLog(String message) {
+
+  }
+
+  @Override
   public void showWelcomeScreen() {
 
   }
@@ -88,6 +93,11 @@ public class DefaultCloverGoConnector implements ICloverGoConnector {
 
   @Override
   public void displayPaymentReceiptOptions(String orderId, String paymentId) {
+
+  }
+
+  @Override
+  public void displayPaymentReceiptOptions(DisplayReceiptOptionsRequest request) {
 
   }
 

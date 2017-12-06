@@ -28,9 +28,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 import com.clover.remote.PendingPaymentEntry;
-import com.clover.remote.client.lib.example.utils.IdUtils;
 import com.clover.remote.client.ICloverConnector;
-import com.clover.remote.client.clovergo.ICloverGoConnector;
 import com.clover.remote.client.lib.example.adapter.AvailableItemsAdapter;
 import com.clover.remote.client.lib.example.model.OrderObserver;
 import com.clover.remote.client.lib.example.model.POSCard;
@@ -45,6 +43,7 @@ import com.clover.remote.client.lib.example.model.POSRefund;
 import com.clover.remote.client.lib.example.model.POSStore;
 import com.clover.remote.client.lib.example.model.StoreObserver;
 import com.clover.remote.client.lib.example.utils.CurrencyUtils;
+import com.clover.remote.client.lib.example.utils.IdUtils;
 import com.clover.remote.client.messages.AuthRequest;
 import com.clover.remote.client.messages.SaleRequest;
 import com.clover.remote.order.DisplayDiscount;
@@ -123,7 +122,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     } catch (ClassCastException e) {
 
       throw new ClassCastException(activity.toString()
-        + " must implement OnFragmentInteractionListener: " + activity.getClass().getName());
+          + " must implement OnFragmentInteractionListener: " + activity.getClass().getName());
     }
   }
 

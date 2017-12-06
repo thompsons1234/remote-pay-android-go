@@ -16,53 +16,6 @@
 
 package com.clover.example;
 
-import com.clover.connector.sdk.v3.DisplayConnector;
-import com.clover.connector.sdk.v3.PaymentConnector;
-import com.clover.example.model.POSCard;
-import com.clover.example.model.POSDiscount;
-import com.clover.example.model.POSExchange;
-import com.clover.example.model.POSItem;
-import com.clover.example.model.POSNakedRefund;
-import com.clover.example.model.POSOrder;
-import com.clover.example.model.POSPayment;
-import com.clover.example.model.POSRefund;
-import com.clover.example.model.POSStore;
-import com.clover.example.utils.IdUtils;
-import com.clover.sdk.v3.base.CardData;
-import com.clover.sdk.v3.base.Challenge;
-import com.clover.sdk.v3.connector.IDisplayConnector;
-import com.clover.sdk.v3.connector.IDisplayConnectorListener;
-import com.clover.sdk.v3.payments.CardTransactionState;
-import com.clover.sdk.v3.payments.CardTransactionType;
-import com.clover.sdk.v3.remotepay.AuthResponse;
-import com.clover.sdk.v3.remotepay.CapturePreAuthResponse;
-import com.clover.sdk.v3.remotepay.CloseoutRequest;
-import com.clover.sdk.v3.remotepay.CloseoutResponse;
-import com.clover.sdk.v3.remotepay.ConfirmPaymentRequest;
-import com.clover.sdk.v3.remotepay.ManualRefundRequest;
-import com.clover.sdk.v3.remotepay.ManualRefundResponse;
-import com.clover.sdk.v3.remotepay.PaymentResponse;
-import com.clover.sdk.v3.remotepay.PreAuthRequest;
-import com.clover.sdk.v3.remotepay.PreAuthResponse;
-import com.clover.sdk.v3.remotepay.ReadCardDataRequest;
-import com.clover.sdk.v3.remotepay.ReadCardDataResponse;
-import com.clover.sdk.v3.remotepay.RefundPaymentResponse;
-import com.clover.sdk.v3.remotepay.ResponseCode;
-import com.clover.sdk.v3.remotepay.RetrievePaymentRequest;
-import com.clover.sdk.v3.remotepay.RetrievePaymentResponse;
-import com.clover.sdk.v3.remotepay.RetrievePendingPaymentsResponse;
-import com.clover.sdk.v3.remotepay.SaleResponse;
-import com.clover.sdk.v3.remotepay.TipAdjustAuthResponse;
-import com.clover.sdk.v3.remotepay.VaultCardResponse;
-import com.clover.sdk.v3.remotepay.VerifySignatureRequest;
-import com.clover.sdk.v3.remotepay.VoidPaymentResponse;
-import com.clover.sdk.util.CloverAccount;
-import com.clover.sdk.v3.connector.IPaymentConnector;
-import com.clover.sdk.v3.connector.IPaymentConnectorListener;
-import com.clover.sdk.v3.payments.Credit;
-import com.clover.sdk.v3.payments.Payment;
-import com.clover.sdk.v3.remotepay.TipAdded;
-
 import android.accounts.Account;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -84,10 +37,56 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.clover.connector.sdk.v3.DisplayConnector;
+import com.clover.connector.sdk.v3.PaymentConnector;
+import com.clover.example.model.POSCard;
+import com.clover.example.model.POSDiscount;
+import com.clover.example.model.POSExchange;
+import com.clover.example.model.POSItem;
+import com.clover.example.model.POSNakedRefund;
+import com.clover.example.model.POSOrder;
+import com.clover.example.model.POSPayment;
+import com.clover.example.model.POSRefund;
+import com.clover.example.model.POSStore;
+import com.clover.example.utils.IdUtils;
+import com.clover.sdk.util.CloverAccount;
+import com.clover.sdk.v3.base.CardData;
+import com.clover.sdk.v3.base.Challenge;
+import com.clover.sdk.v3.connector.IDisplayConnector;
+import com.clover.sdk.v3.connector.IDisplayConnectorListener;
+import com.clover.sdk.v3.connector.IPaymentConnector;
+import com.clover.sdk.v3.connector.IPaymentConnectorListener;
+import com.clover.sdk.v3.payments.CardTransactionState;
+import com.clover.sdk.v3.payments.CardTransactionType;
+import com.clover.sdk.v3.payments.Credit;
+import com.clover.sdk.v3.payments.Payment;
+import com.clover.sdk.v3.remotepay.AuthResponse;
+import com.clover.sdk.v3.remotepay.CapturePreAuthResponse;
+import com.clover.sdk.v3.remotepay.CloseoutRequest;
+import com.clover.sdk.v3.remotepay.CloseoutResponse;
+import com.clover.sdk.v3.remotepay.ConfirmPaymentRequest;
+import com.clover.sdk.v3.remotepay.ManualRefundRequest;
+import com.clover.sdk.v3.remotepay.ManualRefundResponse;
+import com.clover.sdk.v3.remotepay.PaymentResponse;
+import com.clover.sdk.v3.remotepay.PreAuthRequest;
+import com.clover.sdk.v3.remotepay.PreAuthResponse;
+import com.clover.sdk.v3.remotepay.ReadCardDataRequest;
+import com.clover.sdk.v3.remotepay.ReadCardDataResponse;
+import com.clover.sdk.v3.remotepay.RefundPaymentResponse;
+import com.clover.sdk.v3.remotepay.ResponseCode;
+import com.clover.sdk.v3.remotepay.RetrievePaymentRequest;
+import com.clover.sdk.v3.remotepay.RetrievePaymentResponse;
+import com.clover.sdk.v3.remotepay.RetrievePendingPaymentsResponse;
+import com.clover.sdk.v3.remotepay.SaleResponse;
+import com.clover.sdk.v3.remotepay.TipAdded;
+import com.clover.sdk.v3.remotepay.TipAdjustAuthResponse;
+import com.clover.sdk.v3.remotepay.VaultCardResponse;
+import com.clover.sdk.v3.remotepay.VerifySignatureRequest;
+import com.clover.sdk.v3.remotepay.VoidPaymentResponse;
 
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -286,9 +285,9 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
     public void onRetrievePaymentResponse(RetrievePaymentResponse response) {
       if (response.getSuccess()) {
         showMessage("Retrieve Payment successful for Payment ID: " + response.getExternalPaymentId()
-                    + " QueryStatus: " + response.getQueryStatus()
-                    + " Payment: " + response.getPayment()
-                    + " reason: " + response.getReason(), Toast.LENGTH_LONG);
+            + " QueryStatus: " + response.getQueryStatus()
+            + " Payment: " + response.getPayment()
+            + " reason: " + response.getReason(), Toast.LENGTH_LONG);
       } else {
         showMessage("Retrieve Payment error: " + response.getResult(), Toast.LENGTH_LONG);
       }
@@ -726,7 +725,7 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
 
 
     // Restore state members from saved instance
-    store = (POSStore)savedInstanceState.getSerializable("POSStore");
+    store = (POSStore) savedInstanceState.getSerializable("POSStore");
     initStore();
   }
 
@@ -866,7 +865,7 @@ public class NativePOSActivity extends Activity implements CurrentOrderFragment.
   }
 
   private void setPaymentStatus(POSPayment payment, PaymentResponse response) {
-    if (response.hasPayment()){
+    if (response.hasPayment()) {
       if (response.getPayment().getCardTransaction().hasType()) {
         CardTransactionType type = response.getPayment().getCardTransaction().getType();
         if (type.equals(CardTransactionType.AUTH)) {

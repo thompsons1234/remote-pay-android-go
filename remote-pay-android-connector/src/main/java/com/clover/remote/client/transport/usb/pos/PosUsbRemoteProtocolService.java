@@ -16,12 +16,6 @@
 
 package com.clover.remote.client.transport.usb.pos;
 
-import com.clover.remote.client.transport.CloverTransport;
-import com.clover.remote.client.transport.usb.USBCloverTransportService;
-import com.clover.remote.client.transport.usb.UsbCloverManager;
-
-import android.app.Notification;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +25,10 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.Log;
+
+import com.clover.remote.client.transport.CloverTransport;
+import com.clover.remote.client.transport.usb.USBCloverTransportService;
+import com.clover.remote.client.transport.usb.UsbCloverManager;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -111,10 +109,10 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
       }
     });
 
-    if(sendQueue != null) {
+    if (sendQueue != null) {
       sendQueue.stop();
     }
-    if(readQueue != null) {
+    if (readQueue != null) {
       readQueue.stop();
     }
 
@@ -172,7 +170,7 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
       // device service and would have terminated normally.
       mBgHandler.post(mConnectUsbRunnable);
       Log.d(TAG, "onStartCommand, The intent was null. Calling mConnectUsbRunnable to re-initiate the usb connection"
-                   + " after system kill/restart of service.");
+          + " after system kill/restart of service.");
     }
     return START_STICKY; // if the service is killed by the OS, it will restart automatically
   }
@@ -262,10 +260,10 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
   }
 
   private synchronized void disconnectUsb() {
-    if(sendQueue != null) {
+    if (sendQueue != null) {
       sendQueue.stop();
     }
-    if(readQueue != null) {
+    if (readQueue != null) {
       readQueue.stop();
     }
     if (mRemoteUsbManager == null) {
@@ -315,7 +313,7 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
 
   private void broadcastStatus() {
     String msg = CloverTransport.DEVICE_DISCONNECTED;
-    switch(currentStatus) {
+    switch (currentStatus) {
       case TERMINAL_DISCONNECTED: {
         msg = CloverTransport.DEVICE_DISCONNECTED;
         break;
@@ -363,7 +361,7 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
     public void stop() {
       ExecutorService temp = svc;
       svc = null;
-      if(temp != null) {
+      if (temp != null) {
         temp.shutdown();
       }
     }

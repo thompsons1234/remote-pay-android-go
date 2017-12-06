@@ -1,12 +1,4 @@
 package com.example.clover.remotepayandroidsimpleexample;
-import com.clover.remote.client.CloverConnector;
-import com.clover.remote.client.CloverDeviceConfiguration;
-import com.clover.remote.client.DefaultCloverConnectorListener;
-import com.clover.remote.client.ICloverConnector;
-import com.clover.remote.client.MerchantInfo;
-import com.clover.remote.client.USBCloverDeviceConfiguration;
-import com.clover.remote.client.WebSocketCloverDeviceConfiguration;
-import com.clover.remote.client.messages.ConfirmPaymentRequest;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -16,6 +8,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.clover.remote.client.CloverConnector;
+import com.clover.remote.client.CloverDeviceConfiguration;
+import com.clover.remote.client.DefaultCloverConnectorListener;
+import com.clover.remote.client.ICloverConnector;
+import com.clover.remote.client.MerchantInfo;
+import com.clover.remote.client.USBCloverDeviceConfiguration;
+import com.clover.remote.client.WebSocketCloverDeviceConfiguration;
+import com.clover.remote.client.messages.ConfirmPaymentRequest;
+
 import java.io.InputStream;
 import java.net.URI;
 import java.security.KeyStore;
@@ -24,12 +25,12 @@ import java.security.SecureRandom;
 /**
  * This example class illustrates how to create and terminate a connection to a clover device.
  * The dialog which occurs is:
- *    1) Create CloverConnector based upon the specified configuration
- *    2) Register the CloverConnectorListener with the CloverConnector
- *    3) Initialize the CloverConnector via initializeConnection() method
- *      a) If network connection configured, input the pairing code provided by the device callback
- *    4) Handle onDeviceReady() callback from device indicating connection was made
- *    5) Close the underlying connection via dispose() method
+ * 1) Create CloverConnector based upon the specified configuration
+ * 2) Register the CloverConnectorListener with the CloverConnector
+ * 3) Initialize the CloverConnector via initializeConnection() method
+ * a) If network connection configured, input the pairing code provided by the device callback
+ * 4) Handle onDeviceReady() callback from device indicating connection was made
+ * 5) Close the underlying connection via dispose() method
  */
 
 
@@ -51,33 +52,33 @@ public class MainActivity extends Activity {
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    textConnect = (TextView)findViewById(R.id.connector_text);
+    textConnect = (TextView) findViewById(R.id.connector_text);
     cloverConnector = null;
   }
 
   @Override
-  protected void onResume(){
+  protected void onResume() {
     super.onResume();
-    if(cloverConnector == null) {
+    if (cloverConnector == null) {
       connect();
     }
   }
 
   @Override
-  protected void onDestroy(){
+  protected void onDestroy() {
     super.onDestroy();
     exit();
   }
 
-  private void connect(){
+  private void connect() {
     Log.d(TAG, "connecting.....");
     //cloverConnector = new CloverConnector(getUSBConfiguration());
-    cloverConnector = new CloverConnector(getNetworkConfiguration("10.249.254.214",12345));
+    cloverConnector = new CloverConnector(getNetworkConfiguration("10.249.254.214", 12345));
     cloverConnector.addCloverConnectorListener(new TestListener(cloverConnector));
     cloverConnector.initializeConnection();
   }
 
-  private void connected(){
+  private void connected() {
     runOnUiThread(new Runnable() {
       @Override
       public void run() {
@@ -86,8 +87,8 @@ public class MainActivity extends Activity {
     });
   }
 
-  private void exit(){
-    Log.d(TAG,"exiting");
+  private void exit() {
+    Log.d(TAG, "exiting");
     cloverConnector.dispose();
     textConnect.setText(R.string.disconnected);
     synchronized (this) {
@@ -125,13 +126,13 @@ public class MainActivity extends Activity {
     Integer dvcPort = port != null ? port : Integer.valueOf(12345);
     try {
       URI endpoint = new URI("wss://" + ip + ":" + dvcPort + "/remote_pay");
-      KeyStore trustStore  = KeyStore.getInstance("PKCS12");
+      KeyStore trustStore = KeyStore.getInstance("PKCS12");
       InputStream trustStoreStream = CloverDeviceConfiguration.class.getResourceAsStream("/certs/clover_cacerts.p12");
       String TRUST_STORE_PASSWORD = "clover";
       trustStore.load(trustStoreStream, TRUST_STORE_PASSWORD.toCharArray());
 
       // For WebSocket configuration, we must handle the device pairing via callback
-      return new WebSocketCloverDeviceConfiguration(endpoint,APP_ID, trustStore, POS_NAME, DEVICE_NAME, null) {
+      return new WebSocketCloverDeviceConfiguration(endpoint, APP_ID, trustStore, POS_NAME, DEVICE_NAME, null) {
         @Override
         public void onPairingCode(final String pairingCode) {
           runOnUiThread(new Runnable() {
@@ -182,33 +183,33 @@ public class MainActivity extends Activity {
     return sb.toString();
   }
 
-  public void showMessage(View view){
+  public void showMessage(View view) {
     Log.d(TAG, "show message called");
     Intent intent = new Intent();
     intent.setClass(this, ShowMessageActivity.class);
     startActivity(intent);
   }
 
-  public void makeSale(View view){
+  public void makeSale(View view) {
     Log.d(TAG, "make sale called");
     Intent intent = new Intent();
     intent.setClass(this, MakeSaleActivity.class);
     startActivity(intent);
   }
 
-  public void makeRefund(View view){
+  public void makeRefund(View view) {
     Log.d(TAG, "make refund called");
     Intent intent = new Intent();
     intent.setClass(this, MakeRefundActivity.class);
     startActivity(intent);
   }
 
-  public void sendDeviceLogs(View view){
+  public void sendDeviceLogs(View view) {
     Log.d(TAG, "send device logs clicked");
     cloverConnector.sendDebugLog("because");
   }
 
-  public static ICloverConnector getCloverConnector (){
+  public static ICloverConnector getCloverConnector() {
     return cloverConnector;
   }
 

@@ -16,9 +16,16 @@
 
 package com.clover.example;
 
-import com.clover.sdk.v3.base.PendingPaymentEntry;
-import com.clover.sdk.v3.connector.IDisplayConnector;
-import com.clover.sdk.v3.connector.IPaymentConnector;
+import android.app.Activity;
+import android.app.Fragment;
+import android.net.Uri;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.GridView;
+
 import com.clover.example.adapter.AvailableItemsAdapter;
 import com.clover.example.model.OrderObserver;
 import com.clover.example.model.POSCard;
@@ -34,22 +41,15 @@ import com.clover.example.model.POSStore;
 import com.clover.example.model.StoreObserver;
 import com.clover.example.utils.CurrencyUtils;
 import com.clover.example.utils.IdUtils;
-import com.clover.sdk.v3.payments.TipMode;
-import com.clover.sdk.v3.remotepay.AuthRequest;
-import com.clover.sdk.v3.remotepay.SaleRequest;
+import com.clover.sdk.v3.base.PendingPaymentEntry;
+import com.clover.sdk.v3.connector.IDisplayConnector;
+import com.clover.sdk.v3.connector.IPaymentConnector;
 import com.clover.sdk.v3.order.DisplayDiscount;
 import com.clover.sdk.v3.order.DisplayLineItem;
 import com.clover.sdk.v3.order.DisplayOrder;
-
-import android.app.Activity;
-import android.app.Fragment;
-import android.net.Uri;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.GridView;
+import com.clover.sdk.v3.payments.TipMode;
+import com.clover.sdk.v3.remotepay.AuthRequest;
+import com.clover.sdk.v3.remotepay.SaleRequest;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -96,7 +96,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     // Inflate the layout for this fragment
     View view = inflater.inflate(R.layout.fragment_register, container, false);
 
-    GridView gv = (GridView)view.findViewById(R.id.AvailableItems);
+    GridView gv = (GridView) view.findViewById(R.id.AvailableItems);
 
     gv.setId(R.id.AvailableItems);
 
@@ -104,7 +104,8 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     gv.setAdapter(availableItemsAdapter);
 
     gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-      @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+      @Override
+      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         POSItem item = availableItemsAdapter.getItem(position);
         onItemSelected(item);
       }
@@ -125,7 +126,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     } catch (ClassCastException e) {
 
       throw new ClassCastException(activity.toString()
-                                   + " must implement OnFragmentInteractionListener: " + activity.getClass().getName());
+          + " must implement OnFragmentInteractionListener: " + activity.getClass().getName());
     }
   }
 
@@ -160,7 +161,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     this.cloverConnector = cloverConnector;
   }
 
-  public void setDisplayConnector (IDisplayConnector displayConnector){
+  public void setDisplayConnector(IDisplayConnector displayConnector) {
     this.displayConnector = displayConnector;
   }
 
@@ -257,20 +258,24 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
     }
 
-    @Override public void refundAdded(POSNakedRefund refund) {
+    @Override
+    public void refundAdded(POSNakedRefund refund) {
 
     }
 
 
-    @Override public void preAuthAdded(POSPayment payment) {
+    @Override
+    public void preAuthAdded(POSPayment payment) {
 
     }
 
-    @Override public void preAuthRemoved(POSPayment payment) {
+    @Override
+    public void preAuthRemoved(POSPayment payment) {
 
     }
 
-    @Override public void pendingPaymentsRetrieved(List<PendingPaymentEntry> pendingPayments) {
+    @Override
+    public void pendingPaymentsRetrieved(List<PendingPaymentEntry> pendingPayments) {
 
     }
 

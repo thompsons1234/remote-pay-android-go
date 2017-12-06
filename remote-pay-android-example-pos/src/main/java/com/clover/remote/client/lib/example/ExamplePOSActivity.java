@@ -321,7 +321,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
     } else if (CONFIG_TYPE_USB.equals(configType)) {
       config = new USBCloverDeviceConfiguration(this, applicationId);
-      cloverConnector = ConnectorFactory.createCloverConnector(config);
+      cloverConnector = CloverConnectorFactory.createICloverConnector(config);
     } else if (CONFIG_TYPE_WS.equals(configType)) {
 
       String serialNumber = "Aisle 3";
@@ -402,15 +402,12 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           });
         }
       };
-      cloverConnector = ConnectorFactory.createCloverConnector(config);
+      cloverConnector = CloverConnectorFactory.createICloverConnector(config);
     } else {
       finish();
       return;
     }
 
-    cloverConnector = CloverConnectorFactory.createICloverConnector(config);
-
-    initDisplayConnector();
     initialize();
 
     FragmentManager fragmentManager = getFragmentManager();
@@ -2315,9 +2312,10 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public void printTextClick(View view) {
     String[] textLines = ((TextView) findViewById(R.id.PrintTextText)).getText().toString().split("\n");
     List<String> lines = Arrays.asList(textLines);
-    if(printer != null){PrintRequest pr = new PrintRequest(lines);
-    lastPrintRequestId = String.valueOf(getNextPrintRequestId());
-    pr.setPrintRequestId(lastPrintRequestId);
+    if (printer != null) {
+      PrintRequest pr = new PrintRequest(lines);
+      lastPrintRequestId = String.valueOf(getNextPrintRequestId());
+      pr.setPrintRequestId(lastPrintRequestId);
 
       pr = new PrintRequest(lines, lastPrintRequestId, printer.getId());
 
@@ -2343,9 +2341,10 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   public void printImageURLClick(View view) {
     String URL = ((TextView) findViewById(R.id.PrintImageURLText)).getText().toString();
-    if(printer != null){PrintRequest pr = new PrintRequest(URL);
-    lastPrintRequestId = String.valueOf(getNextPrintRequestId());
-    pr.setPrintRequestId(lastPrintRequestId);
+    if (printer != null) {
+      PrintRequest pr = new PrintRequest(URL);
+      lastPrintRequestId = String.valueOf(getNextPrintRequestId());
+      pr.setPrintRequestId(lastPrintRequestId);
 
       pr = new PrintRequest(URL, lastPrintRequestId, printer.getId());
 
@@ -2391,7 +2390,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public void showWelcomeMessageClick(View view) {
     try {
       // Operation Not Supported in Clove Go
-      getCloverConnector().showWelcomeScreen();} catch (UnsupportedOperationException e) {
+      getCloverConnector().showWelcomeScreen();
+    } catch (UnsupportedOperationException e) {
       Toast.makeText(ExamplePOSActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
       Log.e("Example POS", e.getMessage());
     }
@@ -2447,9 +2447,10 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   public void printImage(String imgDecodableString) {
     Bitmap bitmap = BitmapFactory.decodeFile(imgDecodableString);
-    if(this.printer != null){PrintRequest pr = new PrintRequest(bitmap);
-    lastPrintRequestId = String.valueOf(getNextPrintRequestId());
-    pr.setPrintRequestId(lastPrintRequestId);
+    if (this.printer != null) {
+      PrintRequest pr = new PrintRequest(bitmap);
+      lastPrintRequestId = String.valueOf(getNextPrintRequestId());
+      pr.setPrintRequestId(lastPrintRequestId);
 
       pr = new PrintRequest(bitmap, lastPrintRequestId, printer.getId());
 
