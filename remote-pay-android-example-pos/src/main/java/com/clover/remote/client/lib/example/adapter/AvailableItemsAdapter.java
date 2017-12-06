@@ -47,13 +47,16 @@ public class AvailableItemsAdapter extends ArrayAdapter<POSItem>
 {
   POSStore store;
   Map<POSItem, Integer> itemToCount = new HashMap<POSItem, Integer>();
+  LayoutInflater layoutInflater;
 
   public AvailableItemsAdapter(Context context, int resource) {
     super(context, resource);
+    layoutInflater = LayoutInflater.from(context);
   }
 
   public AvailableItemsAdapter(Context context, int resource, List<POSItem> items, POSStore store) {
     super(context, resource, items);
+    layoutInflater = LayoutInflater.from(context);
     this.store = store;
 
     this.store.addCurrentOrderObserver(new OrderObserver() {
@@ -126,39 +129,47 @@ public class AvailableItemsAdapter extends ArrayAdapter<POSItem>
     });
   }
 
+  static class ViewHolder {
+    TextView name;
+    TextView price;
+    TextView itemBadge;
+  }
+
   @Override
   public View getView(int position, View convertView, ViewGroup parent) {
 
-    View v = convertView;
+    ViewHolder viewHolder;
 
-    if (v == null) {
-      LayoutInflater vi;
-      vi = LayoutInflater.from(getContext());
-      v = vi.inflate(R.layout.fragment_available_item, null);
+    if (convertView == null) {
+
+      convertView = layoutInflater.inflate(R.layout.fragment_available_item, null);
+
+      viewHolder = new ViewHolder();
+      viewHolder.name = (TextView)convertView.findViewById(R.id.ItemNameLabel);
+      viewHolder.price = (TextView)convertView.findViewById(R.id.ItemNamePrice);
+      viewHolder.itemBadge = (TextView)convertView.findViewById(R.id.ItemBadge);
+      convertView.setTag(viewHolder);
+    } else {
+      viewHolder = (ViewHolder) convertView.getTag();
     }
 
     POSItem posItem = getItem(position);
 
-
     if (posItem != null) {
-      TextView nameField = (TextView) v.findViewById(R.id.ItemNameLabel);
-      TextView priceField = (TextView) v.findViewById(R.id.ItemNamePrice);
 
-
-      nameField.setText(posItem.getName());
-      priceField.setText(CurrencyUtils.format(posItem.getPrice(), Locale.getDefault()));
+      viewHolder.name.setText(posItem.getName());
+      viewHolder.price.setText(CurrencyUtils.format(posItem.getPrice(), Locale.getDefault()));
 
       Integer count = itemToCount.get(posItem);
-      TextView tv = (TextView)v.findViewById(R.id.ItemBadge);
+
       if(count != null && count > 0) {
-        tv.setVisibility(View.VISIBLE);
-        tv.setText(count.toString());
+        viewHolder.itemBadge.setVisibility(View.VISIBLE);
+        viewHolder.itemBadge.setText(count.toString());
       } else {
-        tv.setVisibility(View.GONE);
-        notifyDataSetChanged();
+        viewHolder.itemBadge.setVisibility(View.GONE);
       }
     }
 
-    return v;
+    return convertView;
   }
 }
