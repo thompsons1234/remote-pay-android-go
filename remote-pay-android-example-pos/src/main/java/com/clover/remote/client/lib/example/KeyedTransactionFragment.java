@@ -1,11 +1,13 @@
 package com.clover.remote.client.lib.example;
 
+import android.app.Dialog;
 import android.app.DialogFragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -23,7 +25,6 @@ import com.firstdata.clovergo.domain.utils.CreditCardUtil;
  */
 
 public class KeyedTransactionFragment extends DialogFragment {
-  private final long PRE_AUTH_AMOUNT = 5000L;
   private final String CARD_NUM = "4111111111111111";
   private final String CARD_EXP = "1220";
   private final String CARD_CVV = "333";
@@ -92,13 +93,22 @@ public class KeyedTransactionFragment extends DialogFragment {
 
         } else if (txType == TransactionType.PRE_AUTH) {
 
-          KeyedPreAuthRequest request = new KeyedPreAuthRequest(PRE_AUTH_AMOUNT, IdUtils.getNextId(), cardNumber, expiration, cvv);
+          KeyedPreAuthRequest request = new KeyedPreAuthRequest(((ExamplePOSActivity) getActivity()).getPreAuthAmount(), IdUtils.getNextId(), cardNumber, expiration, cvv);
           doneKeyEntry(txType, request);
         }
       }
     });
 
     return view;
+  }
+
+  @Override
+  public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+    Dialog dialog = super.onCreateDialog(savedInstanceState);
+
+    dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+    return dialog;
   }
 
   private void doneKeyEntry(TransactionType transactionType, TransactionRequest saleRequest) {

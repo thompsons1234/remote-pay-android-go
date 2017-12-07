@@ -237,6 +237,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   private ArrayAdapter<String> mReaderArrayAdapter;
   private ReaderInfo.ReaderType goReaderType = RP450;
   private String configType;
+  private long preAuthAmount;
 
   private Button connectionStatusButton;
 
@@ -2416,10 +2417,11 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   public void preauthCardClick(View view) {
+    hideKeyboard();
     String externalPaymentID = IdUtils.getNextId();
     Log.d(TAG, "ExternalPaymentID:" + externalPaymentID);
     store.getCurrentOrder().setPendingPaymentId(externalPaymentID);
-    PreAuthRequest request = new PreAuthRequest(5000L, externalPaymentID);
+    PreAuthRequest request = new PreAuthRequest(preAuthAmount, externalPaymentID);
     request.setCardEntryMethods(store.getCardEntryMethods());
     request.setDisablePrinting(store.getDisablePrinting());
     request.setSignatureEntryLocation(store.getSignatureEntryLocation());
@@ -2638,8 +2640,15 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     manualCardEntry.cardDataEntered(transactionRequest, transactionType);
   }
 
-  private ICloverConnector getCloverConnector() {
+  public void setPreAuthAmount(long amount) {
+    preAuthAmount = amount;
+  }
 
+  public long getPreAuthAmount() {
+    return preAuthAmount > 0 ? preAuthAmount : 5000L;
+  }
+
+  private ICloverConnector getCloverConnector() {
     // Default
     ICloverConnector connector;
 

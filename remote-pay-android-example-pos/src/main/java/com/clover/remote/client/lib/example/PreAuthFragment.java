@@ -24,15 +24,19 @@ import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
+
 import com.clover.remote.PendingPaymentEntry;
 import com.clover.remote.client.ICloverConnector;
-import com.clover.remote.client.lib.example.adapter.CardsListViewAdapter;
 import com.clover.remote.client.lib.example.adapter.PreAuthListViewAdapter;
 import com.clover.remote.client.lib.example.model.POSCard;
 import com.clover.remote.client.lib.example.model.POSNakedRefund;
@@ -46,14 +50,14 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 public class PreAuthFragment extends Fragment {
-  private static final String ARG_STORE = "store";
-
   private POSStore store;
 
   private OnFragmentInteractionListener mListener;
 
   private WeakReference<ICloverConnector> cloverConnectorWeakReference;
+
   private ListView preAuthsListView;
+  private EditText preAuthAmountEditTxt;
 
   public static PreAuthFragment newInstance(POSStore store, ICloverConnector cloverConnector) {
     PreAuthFragment fragment = new PreAuthFragment();
@@ -70,16 +74,18 @@ public class PreAuthFragment extends Fragment {
     // Required empty public constructor
   }
 
-  @Override public void onCreate(Bundle savedInstanceState) {
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
   }
 
-  @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-    final View view = inflater.inflate(R.layout.fragment_preauth, container, false);
+  @Override
+  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    View view = inflater.inflate(R.layout.fragment_preauth, container, false);
 
     store.addStoreObserver(new StoreObserver() {
-      @Override public void newOrderCreated(POSOrder order, boolean userInitiated) {
+      @Override
+      public void newOrderCreated(POSOrder order, boolean userInitiated) {
 
       }
 
@@ -87,41 +93,50 @@ public class PreAuthFragment extends Fragment {
       public void orderSelected(POSOrder order) {
       }
 
-      @Override public void cardAdded(POSCard card) {
+      @Override
+      public void cardAdded(POSCard card) {
 
       }
 
-      @Override public void refundAdded(POSNakedRefund refund) {
+      @Override
+      public void refundAdded(POSNakedRefund refund) {
 
       }
 
-      @Override public void preAuthAdded(POSPayment payment) {
+      @Override
+      public void preAuthAdded(POSPayment payment) {
         new AsyncTask() {
-          @Override protected Object doInBackground(Object[] params) {
+          @Override
+          protected Object doInBackground(Object[] params) {
             return null;
           }
 
-          @Override protected void onPostExecute(Object o) {
-            final PreAuthListViewAdapter cardsListViewAdapter = new PreAuthListViewAdapter(view.getContext(), R.id.PreAuthListView, store.getPreAuths());
+          @Override
+          protected void onPostExecute(Object o) {
+            final PreAuthListViewAdapter cardsListViewAdapter = new PreAuthListViewAdapter(getActivity(), R.id.PreAuthListView, store.getPreAuths());
             preAuthsListView.setAdapter(cardsListViewAdapter);
           }
         }.execute();
       }
 
-      @Override public void preAuthRemoved(POSPayment payment) {
+      @Override
+      public void preAuthRemoved(POSPayment payment) {
         new AsyncTask() {
-          @Override protected Object doInBackground(Object[] params) {
+          @Override
+          protected Object doInBackground(Object[] params) {
             return null;
           }
 
-          @Override protected void onPostExecute(Object o) {
-            final PreAuthListViewAdapter cardsListViewAdapter = new PreAuthListViewAdapter(view.getContext(), R.id.PreAuthListView, store.getPreAuths());
+          @Override
+          protected void onPostExecute(Object o) {
+            final PreAuthListViewAdapter cardsListViewAdapter = new PreAuthListViewAdapter(getActivity(), R.id.PreAuthListView, store.getPreAuths());
             preAuthsListView.setAdapter(cardsListViewAdapter);
           }
         }.execute();
       }
 
-      @Override public void pendingPaymentsRetrieved(List<PendingPaymentEntry> pendingPayments) {
+      @Override
+      public void pendingPaymentsRetrieved(List<PendingPaymentEntry> pendingPayments) {
 
       }
     });
@@ -131,16 +146,17 @@ public class PreAuthFragment extends Fragment {
     preAuthsListView.setAdapter(cardsListViewAdapter);
 
     preAuthsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-      @Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+      @Override
+      public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         final POSPayment posPayment = (POSPayment) preAuthsListView.getItemAtPosition(position);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        String[] paymentOptions = null;
 
-        String[] payOptions = new String[] { "Pay for current order" };
+        String[] payOptions = new String[]{"Pay for current order"};
 
         builder.setTitle("Pay With PreAuth").
             setItems(payOptions, new DialogInterface.OnClickListener() {
-              @Override public void onClick(DialogInterface dialog, int index) {
+              @Override
+              public void onClick(DialogInterface dialog, int index) {
                 final ICloverConnector cloverConnector = cloverConnectorWeakReference.get();
                 if (cloverConnector != null) {
 
@@ -165,6 +181,28 @@ public class PreAuthFragment extends Fragment {
       }
     });
 
+    preAuthAmountEditTxt = (EditText) view.findViewById(R.id.preAuthAmountEditTxt);
+    preAuthAmountEditTxt.setText("" + ((ExamplePOSActivity) getActivity()).getPreAuthAmount());
+    preAuthAmountEditTxt.addTextChangedListener(new TextWatcher() {
+      @Override
+      public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+      }
+
+      @Override
+      public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+      }
+
+      @Override
+      public void afterTextChanged(Editable editable) {
+        String amount = editable.toString();
+
+        if (!TextUtils.isEmpty(amount))
+          ((ExamplePOSActivity) getActivity()).setPreAuthAmount(Long.valueOf(editable.toString()));
+        else
+          ((ExamplePOSActivity) getActivity()).setPreAuthAmount(5000L);
+      }
+    });
+
     return view;
   }
 
@@ -174,7 +212,8 @@ public class PreAuthFragment extends Fragment {
     }
   }
 
-  @Override public void onAttach(Activity activity) {
+  @Override
+  public void onAttach(Activity activity) {
     super.onAttach(activity);
     try {
       mListener = (OnFragmentInteractionListener) activity;
@@ -183,7 +222,8 @@ public class PreAuthFragment extends Fragment {
     }
   }
 
-  @Override public void onDetach() {
+  @Override
+  public void onDetach() {
     super.onDetach();
     mListener = null;
   }
@@ -199,5 +239,4 @@ public class PreAuthFragment extends Fragment {
   public void setCloverConnector(ICloverConnector cloverConnector) {
     cloverConnectorWeakReference = new WeakReference<ICloverConnector>(cloverConnector);
   }
-
 }
