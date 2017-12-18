@@ -521,11 +521,15 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       store = new POSStore();
 
     // initialize store...
-    store.addAvailableItem(new POSItem("100", "$1 Gift Card", 100, false, false));
-    store.addAvailableItem(new POSItem("101", "$2 Gift Card", 200, false, false));
-    store.addAvailableItem(new POSItem("102", "$3 Gift Card", 300, false, false));
-    store.addAvailableItem(new POSItem("103", "$5 Gift Card", 500, false, false));
-    store.addAvailableItem(new POSItem("104", "$10 Gift Card", 1000, false, false));
+    store.addAvailableItem(new POSItem("100", "$0.01 Gift Card", 1, false, false));
+    store.addAvailableItem(new POSItem("101", "$0.02 Gift Card", 2, false, false));
+    store.addAvailableItem(new POSItem("102", "$0.10 Gift Card", 10, false, false));
+    store.addAvailableItem(new POSItem("103", "$1 Gift Card", 100, false, false));
+    store.addAvailableItem(new POSItem("104", "$2 Gift Card", 200, false, false));
+    store.addAvailableItem(new POSItem("105", "$3 Gift Card", 300, false, false));
+    store.addAvailableItem(new POSItem("106", "$5 Gift Card", 500, false, false));
+    store.addAvailableItem(new POSItem("107", "$10 Gift Card", 1000, false, false));
+    store.addAvailableItem(new POSItem("108", "$100 Gift Card", 10000, false, false));
 
     store.addAvailableItem(new POSItem("0", "Chicken Nuggets", 539, true, true));
     store.addAvailableItem(new POSItem("1", "Hamburger", 699, true, true));
