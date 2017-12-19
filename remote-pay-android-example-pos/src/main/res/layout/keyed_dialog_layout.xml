@@ -77,7 +77,7 @@
     android:maxLength="4"/>
 
   <LinearLayout
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_below="@+id/cvvText"
     android:layout_gravity="center_horizontal"
@@ -86,19 +86,21 @@
 
     <Button
       android:id="@+id/quickFill"
-      android:layout_width="200dp"
-      android:layout_height="56dp"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
       android:background="@drawable/btn_rounded"
       android:text="Quick Fill"
-      android:textSize="18dp"/>
+      android:textSize="16sp"/>
 
     <Button
       android:id="@+id/startTransactionBtn"
-      android:layout_width="200dp"
-      android:layout_height="56dp"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
       android:layout_marginLeft="11dp"
+      android:layout_weight="1"
       android:background="@drawable/btn_rounded"
       android:text="@string/start_transaction_btn"
-      android:textSize="18dp"/>
+      android:textSize="16sp"/>
   </LinearLayout>
 </RelativeLayout>

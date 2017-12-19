@@ -39,6 +39,12 @@ public class KeyedTransactionFragment extends DialogFragment {
     return fragment;
   }
 
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setStyle(DialogFragment.STYLE_NORMAL, R.style.CustomDialog);
+  }
+
   @Nullable
   @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -100,15 +106,6 @@ public class KeyedTransactionFragment extends DialogFragment {
     });
 
     return view;
-  }
-
-  @Override
-  public Dialog onCreateDialog(Bundle savedInstanceState) {
-
-    Dialog dialog = super.onCreateDialog(savedInstanceState);
-
-    dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-    return dialog;
   }
 
   private void doneKeyEntry(TransactionType transactionType, TransactionRequest saleRequest) {

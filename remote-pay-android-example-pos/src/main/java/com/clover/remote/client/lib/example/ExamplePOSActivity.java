@@ -1662,7 +1662,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
             }
           }
         } else {
-          showMessage("PreAuth Capture Error: Payment failed with response code = " + response.getResult() + " and reason: " + response.getReason(), Toast.LENGTH_LONG);
+          showMessage(response.getMessage(), Toast.LENGTH_LONG);
         }
       }
 
