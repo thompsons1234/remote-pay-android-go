@@ -2,7 +2,6 @@ package com.clover.remote.client.clovergo;
 
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.clover.remote.Challenge;
 import com.clover.remote.client.Constants;
@@ -246,16 +245,7 @@ public class CloverGoConnectorImpl {
 
         mPayment = payment;
 
-        // If this is part of a partial auth loop, cut the loop off here and process as one normal payment.
-        // Implementers may process as they see fit.  This is just an example that does not continue
-        // the partial auth flow beyond one payment.
-        if (mLastPaymentWasForPartialAuth && mOrder.getStatus() == Order.STATUS_PARTIAL_PAYMENT) {
-          mOrder.setStatus(Order.STATUS_OPEN);
-          mLastPaymentWasForPartialAuth = false;
-        }
-
         if (!mLastPaymentWasForPartialAuth && mOrder.getStatus() == Order.STATUS_PARTIAL_PAYMENT) {
-          
           ConfirmPaymentRequest confirmPaymentRequest = new ConfirmPaymentRequest();
 
           String challengeMessage = "This card has been approved for " +
@@ -1106,7 +1096,17 @@ public class CloverGoConnectorImpl {
 
   public void acceptPayment(com.clover.sdk.v3.payments.Payment payment) {
     mOrder.allowDuplicates = true;
-    if (mLastTransactionRequest instanceof KeyedSaleRequest || mLastTransactionRequest instanceof KeyedAuthRequest) {
+
+    // User has accepted the partial auth challenge and at this point, they should proceed with the signature
+    // or send receipt process. Since payment has already been processed and accepted, don't try to make another
+    // transaction.
+    if (mOrder.getStatus() == Order.STATUS_PARTIAL_PAYMENT) {
+      if (mOrder.getPayments().get(0).getCard().isSignatureRequired())
+        notifySignatureRequired();
+      else
+        notifySendReceipt();
+
+    } else if (mLastTransactionRequest instanceof KeyedSaleRequest || mLastTransactionRequest instanceof KeyedAuthRequest) {
       mAuthOrSaleTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
     } else if (mLastTransactionRequest instanceof KeyedPreAuthRequest) {
       mPreAuthTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
