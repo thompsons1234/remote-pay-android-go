@@ -1749,6 +1749,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       @Override
       public void onRefundPaymentResponse(final RefundPaymentResponse response) {
+        dismissDialog();
         if (response.isSuccess()) {
           POSRefund refund = new POSRefund(response.getRefund().getId(), response.getPaymentId(), response.getOrderId(), "DEFAULT", response.getRefund().getAmount());
           boolean done = false;
@@ -1770,15 +1771,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
             }
           }
         } else {
-          runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-              AlertDialog.Builder builder = new AlertDialog.Builder(ExamplePOSActivity.this);
-              builder.setTitle("Refund Error").setMessage("There was an error refunding the payment");
-              builder.create().show();
-              Log.d(getClass().getName(), "Got refund response of " + response.getReason());
-            }
-          });
+          showAlertDialog("Refund Error", response.getMessage());
         }
       }
 

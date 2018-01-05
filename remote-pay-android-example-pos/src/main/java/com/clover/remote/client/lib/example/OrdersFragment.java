@@ -145,11 +145,22 @@ public class OrdersFragment extends Fragment implements OrderObserver {
 
         if (posExchange instanceof POSPayment) {
           if (((POSPayment) posExchange).getPaymentStatus() == POSPayment.Status.AUTHORIZED) {
-            //TODO: Remove Receipt Option for CLover GO
-            options = new String[]{"Void Payment", "Refund Payment", "Tip Adjust Payment", "Receipt Options"};
+            options = new String[]{"Void Payment", "Full Refund Payment", "Partial Refund Payment", "Tip Adjust Payment", "Receipt Options"};
           } else if (((POSPayment) posExchange).getPaymentStatus() == POSPayment.Status.PAID) {
-            //TODO: Remove Receipt Option for CLover GO
-            options = new String[]{"Void Payment", "Refund Payment", "Receipt Options"};
+            options = new String[]{"Void Payment", "Full Refund Payment", "Partial Refund Payment", "Receipt Options"};
+          } else if (((POSPayment) posExchange).getPaymentStatus() == POSPayment.Status.REFUNDED) {
+            long totalRefund = 0;
+            for (POSExchange posExchange1 : ((POSPayment) posExchange).getOrder().getPayments()) {
+              if (posExchange1 instanceof POSRefund) {
+                totalRefund += posExchange1.getAmount();
+              }
+            }
+
+            if (posExchange.getAmount() != totalRefund) {
+              options = new String[]{"Void Payment", "Partial Refund Payment", "Receipt Options"};
+            } else {
+              options = new String[]{"Receipt Options"};
+            }
           } else {
             return;
           }
@@ -172,7 +183,7 @@ public class OrdersFragment extends Fragment implements OrderObserver {
                         cloverConnector.voidPayment(vpr);
                         break;
                       }
-                      case "Refund Payment": {
+                      case "Full Refund Payment": {
                         RefundPaymentRequest rpr = new RefundPaymentRequest();
                         rpr.setPaymentId(posExchange.getPaymentID());
                         rpr.setOrderId(posExchange.orderID);
@@ -182,6 +193,10 @@ public class OrdersFragment extends Fragment implements OrderObserver {
                         cloverConnector.refundPayment(rpr);
                         break;
                       }
+                      case "Partial Refund Payment":
+                        PartialRefundFragment partialRefundFragment = PartialRefundFragment.newInstance(store, posExchange, cloverConnectorWeakReference);
+                        partialRefundFragment.show(getFragmentManager(), "FRAGMENT_PARTIAL_REFUND");
+                        break;
                       case "Tip Adjust Payment": {
                         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                         final EditText input = new EditText(getActivity());

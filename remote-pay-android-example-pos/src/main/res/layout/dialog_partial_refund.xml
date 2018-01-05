@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="11dp">
+
+  <TextView
+    android:id="@+id/refundAmountLabel"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginRight="22dp"
+    android:layout_marginTop="22dp"
+    android:text="Refund Amount"
+    android:textSize="18sp"
+    android:textStyle="bold"/>
+
+  <EditText
+    android:id="@+id/partialRefundAmountEditTxt"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignBottom="@+id/refundAmountLabel"
+    android:layout_alignParentRight="true"
+    android:layout_toRightOf="@+id/refundAmountLabel"
+    android:digits="@string/filter_number"
+    android:imeOptions="actionNext"
+    android:inputType="numberDecimal"
+    android:maxLength="16"
+    android:nextFocusForward="@id/expirationEditText"/>
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/refundAmountLabel"
+    android:layout_gravity="center_horizontal"
+    android:layout_marginTop="11dp"
+    android:orientation="horizontal">
+
+    <Button
+      android:id="@+id/partialRefundBtn"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:background="@drawable/btn_rounded"
+      android:text="Refund"
+      android:textSize="16sp"/>
+
+    <Button
+      android:id="@+id/partialRefundCancelBtn"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="11dp"
+      android:layout_weight="1"
+      android:background="@drawable/btn_rounded"
+      android:text="Cancel"
+      android:textSize="16sp"/>
+  </LinearLayout>
+</RelativeLayout>
