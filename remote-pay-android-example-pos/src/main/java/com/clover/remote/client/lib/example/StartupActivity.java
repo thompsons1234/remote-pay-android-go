@@ -83,8 +83,8 @@ public class StartupActivity extends Activity {
   public static final String EXTRA_CLOVER_GO_ACCESS_TOKEN = "EXTRA_CLOVER_GO_ACCESS_TOKEN";
 
   private static final CloverGoDeviceConfiguration.ENV GO_ENV = CloverGoDeviceConfiguration.ENV.DEMO;
-  private static final String APP_ID = "com.firstdata.clovergo.int"; //com.firstdata.hack2020 //com.example.clovergosampleapp
-  private static final String APP_VERSION = "1.0";
+  private static final String APP_ID = "<put your APP ID here>";
+  private static final String APP_VERSION = "<put your APP VERSION here>";
 
   private String mGoApiKey, mGoSecret, mGoAccessToken;
   private String mOAuthClientId, mOAuthClientSecret, mOAuthEnv, mOAuthUrl, mOAuthApiKey, mOAuthTokenUrl;
@@ -444,45 +444,18 @@ public class StartupActivity extends Activity {
   }
 
   private void setGoParams() {
-    mOAuthApiKey = "byJiyq2GZNmS6LgtAhr2xGS6gz4dpBYX";
 
-    if (GO_ENV == CloverGoDeviceConfiguration.ENV.LIVE) {
-      mGoApiKey = "mexbZJX5D3fa5kje1dZmrJVKOyAF9w8F";
-      mGoSecret = "6hak16ff8e76r4565ab988f5d986a911e36f0f2347e3fv3eb719478c98e89io0";
-      mGoAccessToken = "dd18d9a6-4bea-47e3-7d40-3ab8b0d61c29";
+    mOAuthApiKey = "<put your key here>";
 
-      mOAuthClientId = "K66BM82VZ4HAM";//PROD - CloverSDKDemoApp App ID
-      mOAuthUrl = "https://clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
-      mOAuthTokenUrl = "https://clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=token";
+    mGoApiKey = "<put your key here>";
+    mGoSecret = "<put your secret here>";
+    mGoAccessToken = "<put your token here>";
 
-      mOAuthClientSecret = "6e2f4d4c-da09-a42c-fa72-bbd96a5c63aa"; //PROD - CloverSDKDemoApp App Secret
-      mOAuthEnv = "www.clover.com";
+    mOAuthClientId = "<put your Client ID here>";
+    mOAuthUrl = "https://clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
+    mOAuthTokenUrl = "https://clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=token";
 
-    } else if (GO_ENV == CloverGoDeviceConfiguration.ENV.SANDBOX) {
-      mGoApiKey = "HmfK34t0BUT4erbXYmFp8c9t4qzIaxUj";
-      mGoSecret = "6cd46cffo876r4565qb988f58pn6a911e3rg35m3hj678v3eb719478c98fea98i";
-      mGoAccessToken = "";
-
-
-      mOAuthClientId = "2GTVF12F8JRC8";
-      mOAuthUrl = "https://sandbox.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
-      mOAuthTokenUrl = "https://sandbox.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=token";
-
-      mOAuthClientSecret = "b08b2299-0ea4-1764-73e8-d85cacb4bc04";
-      mOAuthEnv = "sandbox.dev.clover.com";
-
-    } else if (GO_ENV == CloverGoDeviceConfiguration.ENV.DEMO) {
-      mGoApiKey = "Lht4CAQq8XxgRikjxwE71JE20by5dzlY";
-      mGoSecret = "7ebgf6ff8e98d1565ab988f5d770a911e36f0f2347e3ea4eb719478c55e74d9g";
-      mGoAccessToken = "533238e2-dbd7-98d8-ff6b-3e953d028e30";
-
-      mOAuthClientId = "1AST2ETARGG7C";
-      mOAuthUrl = "https://stg1.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
-      mOAuthTokenUrl = "https://stg1.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=token";
-
-      mOAuthClientSecret = "fea4a38b-9346-d75c-2f09-1670381a1499";
-      mOAuthEnv = "stg1.dev.clover.com";
-
-    }
+    mOAuthClientSecret = "<put your secret here>";
+    mOAuthEnv = "www.clover.com";
   }
 }
