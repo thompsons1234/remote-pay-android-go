@@ -77,6 +77,9 @@ public class StartupActivity extends Activity {
   private static final int BARCODE_READER_REQUEST_CODE = 1;
 
   public static final int OAUTH_REQUEST_CODE = 100;
+  public static final int OAUTH_REQUEST_TOKEN = 101;
+  public static final String EXTRA_CLOVER_GO_CODE = "EXTRA_CLOVER_GO_CODE";
+  public static final String EXTRA_CLOVER_GO_CLIENT = "EXTRA_CLOVER_GO_CLIENT";
   public static final String EXTRA_CLOVER_GO_ACCESS_TOKEN = "EXTRA_CLOVER_GO_ACCESS_TOKEN";
 
   private static final CloverGoDeviceConfiguration.ENV GO_ENV = CloverGoDeviceConfiguration.ENV.DEMO;
@@ -202,6 +205,13 @@ public class StartupActivity extends Activity {
       } else Log.e(TAG, String.format(getString(R.string.barcode_error_format),
           CommonStatusCodes.getStatusCodeString(resultCode)));
     } else if (data != null && requestCode == OAUTH_REQUEST_CODE) {
+      getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).edit().putString(CONNECTION_MODE, CONFIG_TYPE_GO).commit();
+
+      String clientId = data.getStringExtra(EXTRA_CLOVER_GO_CLIENT);
+      String code = data.getStringExtra(EXTRA_CLOVER_GO_CODE);
+      getAccessToken(clientId, code);
+
+    } else if (data != null && requestCode == OAUTH_REQUEST_TOKEN) {
       setGoParams();
       getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).edit().putString(CONNECTION_MODE, CONFIG_TYPE_GO).commit();
       String token = data.getStringExtra(EXTRA_CLOVER_GO_ACCESS_TOKEN);
@@ -211,7 +221,9 @@ public class StartupActivity extends Activity {
       populateIntentGoExtras(intent, token);
 
       startActivity(intent);
-    } else super.onActivityResult(requestCode, resultCode, data);
+    } else {
+      super.onActivityResult(requestCode, resultCode, data);
+    }
   }
 
   @Override
@@ -354,8 +366,8 @@ public class StartupActivity extends Activity {
     setGoParams();
 
     Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
-    intent.putExtra(WebViewActivity.EXTRA_CLOVER_GO_BASE_URL, mOAuthTokenUrl);
-    startActivityForResult(intent, OAUTH_REQUEST_CODE);
+    intent.putExtra(WebViewActivity.EXTRA_CLOVER_GO_TOKEN_URL, mOAuthTokenUrl);
+    startActivityForResult(intent, OAUTH_REQUEST_TOKEN);
   }
 
   public void connectGoWithAuthMode(View view) {
@@ -365,8 +377,9 @@ public class StartupActivity extends Activity {
       getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).edit().putString(CONNECTION_MODE, CONFIG_TYPE_GO).commit();
     }
 
-    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mOAuthUrl));
-    startActivity(intent);
+    Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
+    intent.putExtra(WebViewActivity.EXTRA_CLOVER_GO_CODE_URL, mOAuthUrl);
+    startActivityForResult(intent, OAUTH_REQUEST_CODE);
   }
 
   private void getAccessToken(String clientId, String code) {
@@ -445,19 +458,31 @@ public class StartupActivity extends Activity {
       mOAuthClientSecret = "6e2f4d4c-da09-a42c-fa72-bbd96a5c63aa"; //PROD - CloverSDKDemoApp App Secret
       mOAuthEnv = "www.clover.com";
 
-    } else {
+    } else if (GO_ENV == CloverGoDeviceConfiguration.ENV.SANDBOX) {
+      mGoApiKey = "HmfK34t0BUT4erbXYmFp8c9t4qzIaxUj";
+      mGoSecret = "6cd46cffo876r4565qb988f58pn6a911e3rg35m3hj678v3eb719478c98fea98i";
+      mGoAccessToken = "";
+
+
+      mOAuthClientId = "2GTVF12F8JRC8";
+      mOAuthUrl = "https://sandbox.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
+      mOAuthTokenUrl = "https://sandbox.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=token";
+
+      mOAuthClientSecret = "b08b2299-0ea4-1764-73e8-d85cacb4bc04";
+      mOAuthEnv = "sandbox.dev.clover.com";
+
+    } else if (GO_ENV == CloverGoDeviceConfiguration.ENV.DEMO) {
       mGoApiKey = "Lht4CAQq8XxgRikjxwE71JE20by5dzlY";
       mGoSecret = "7ebgf6ff8e98d1565ab988f5d770a911e36f0f2347e3ea4eb719478c55e74d9g";
       mGoAccessToken = "533238e2-dbd7-98d8-ff6b-3e953d028e30";
 
       mOAuthClientId = "1AST2ETARGG7C";
       mOAuthUrl = "https://stg1.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
-//    String mOAuthUrl = "https://sandbox.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
-//    String mOAuthUrl = "https://dev14.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
       mOAuthTokenUrl = "https://stg1.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=token";
 
       mOAuthClientSecret = "fea4a38b-9346-d75c-2f09-1670381a1499";
       mOAuthEnv = "stg1.dev.clover.com";
+
     }
   }
 }

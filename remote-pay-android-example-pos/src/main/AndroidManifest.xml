@@ -16,8 +16,8 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.clover.remote.client.lib.example"
-          android:versionCode="34"
-          android:versionName="1.34">
+          android:versionCode="35"
+          android:versionName="1.35">
 
   <uses-sdk>
     17
@@ -42,7 +42,7 @@
     <activity
       android:name=".StartupActivity"
       android:label="@string/title_activity_example_pos"
-      android:launchMode="singleTop"
+      android:launchMode="singleInstance"
       android:screenOrientation="landscape"
       android:windowSoftInputMode="stateHidden">
       <intent-filter>
