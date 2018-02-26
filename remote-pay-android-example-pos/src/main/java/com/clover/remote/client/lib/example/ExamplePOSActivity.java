@@ -71,7 +71,6 @@ import com.clover.remote.client.clovergo.CloverGoConstants.TransactionType;
 import com.clover.remote.client.clovergo.CloverGoDeviceConfiguration;
 import com.clover.remote.client.clovergo.ICloverGoConnector;
 import com.clover.remote.client.clovergo.ICloverGoConnectorListener;
-import com.clover.remote.client.clovergo.messages.GoPayment;
 import com.clover.remote.client.clovergo.util.DeviceUtil;
 import com.clover.remote.client.lib.example.messages.ConversationQuestionMessage;
 import com.clover.remote.client.lib.example.messages.ConversationResponseMessage;
@@ -1541,7 +1540,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           runOnUiThread(new Runnable() {
             @Override
             public void run() {
-              GoPayment _payment = (GoPayment) response.getPayment();
+              Payment _payment = response.getPayment();
               POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), "DFLTEMPLYEE", _payment.getAmount(), _payment.getTipAmount() != null ? _payment.getTipAmount() : 0, _payment.getCashbackAmount() != null ? _payment.getCashbackAmount() : 0);
               setPaymentStatus(payment, response);
               store.addPaymentToOrder(payment, store.getCurrentOrder());
@@ -1580,7 +1579,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         dismissDialog();
 
         if (response.isSuccess()) {
-          GoPayment _payment = (GoPayment) response.getPayment();
+          Payment _payment = response.getPayment();
           POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), "DFLTEMPLYEE", _payment.getAmount(), _payment.getTipAmount() != null ? _payment.getTipAmount() : 0,
               _payment.getCashbackAmount() != null ? _payment.getCashbackAmount() : 0);
           setPaymentStatus(payment, response);
@@ -1714,7 +1713,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         if (response != null) {
           if (response.isSuccess()) { // Handle cancel response
             if (response.getPayment() != null) {
-              GoPayment _payment = (GoPayment) response.getPayment();
+              Payment _payment = response.getPayment();
               POSPayment payment = new POSPayment(_payment.getId(), _payment.getExternalPaymentId(), _payment.getOrder().getId(), "DFLTEMPLYEE", _payment.getAmount(), _payment.getTipAmount() != null ? _payment.getTipAmount() : 0, _payment.getCashbackAmount() != null ? _payment.getCashbackAmount() : 0);
               setPaymentStatus(payment, response);
 
