@@ -1546,6 +1546,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
               store.addPaymentToOrder(payment, store.getCurrentOrder());
               showMessage("Auth successfully processed.", Toast.LENGTH_SHORT);
 
+              showPaymentInfo(_payment);
+
               store.createOrder(false);
               CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
               currentOrderFragment.setOrder(store.getCurrentOrder());
@@ -1585,6 +1587,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           setPaymentStatus(payment, response);
           store.addPreAuth(payment);
           showMessage("PreAuth successfully processed.", Toast.LENGTH_SHORT);
+
+          showPaymentInfo(_payment);
+
           showPreAuths(null);
 
         } else {
@@ -1719,6 +1724,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
               store.addPaymentToOrder(payment, store.getCurrentOrder());
               showMessage("Sale successfully processed", Toast.LENGTH_SHORT);
+
+              showPaymentInfo(_payment);
+
               store.createOrder(false);
               CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
               currentOrderFragment.setOrder(store.getCurrentOrder());
@@ -1875,6 +1883,21 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     }
 
     updateComponentsWithNewCloverConnector();
+  }
+
+  private void showPaymentInfo(Payment payment) {
+    showAlertDialog("Payment Info",
+            "Payment ID: " + payment.getId()
+                    + "\nPayment External ID: " + payment.getExternalPaymentId()
+                    + "\nOrder ID: " + payment.getOrder().getId()
+                    + "\nAmount: " + payment.getAmount()
+                    + "\nCard Holder Name: " + payment.getCardTransaction().getCardholderName()
+                    + "\nCard Type: " + payment.getCardTransaction().getCardType()
+                    + "\nTransaction Type: " + payment.getCardTransaction().getType()
+                    + "\nEntry Type: " + payment.getCardTransaction().getEntryType()
+                    + "\nAuth Code: " + payment.getCardTransaction().getAuthCode()
+                    + "\nFirst 6: " + payment.getCardTransaction().getFirst6()
+                    + "\nLast 4: " + payment.getCardTransaction().getLast4());
   }
 
   private void showStatus(String msg) {
