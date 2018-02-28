@@ -21,7 +21,6 @@ import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.util.AttributeSet;
 
-// created this subclass so I could programmatically open the dialog
 public class CustomEditTextPreference extends EditTextPreference {
 
   public CustomEditTextPreference(Context ctx) {

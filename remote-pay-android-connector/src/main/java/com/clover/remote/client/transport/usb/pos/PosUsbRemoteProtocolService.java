@@ -47,7 +47,7 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
   public static final String ACTION_USB_CONNECT = "com.clover.remote.usb.intent.ACTION_USB_CONNECT";
   public static final String ACTION_USB_DISCONNECT = "com.clover.remote.usb.intent.ACTION_USB_DISCONNECT";
 
-  public static final String ACTION_USB_REQUEST_MESSAGE = "com.clover.remote.usb.intent.CLOVER_USB_TRANSPORT_REQUEST";// this just asks for the usb device status. Asks to resend status if it is listening
+  public static final String ACTION_USB_REQUEST_MESSAGE = "com.clover.remote.usb.intent.CLOVER_USB_TRANSPORT_REQUEST";
   public static final String ACTION_USB_SEND_MESSAGE = "com.clover.remote.usb.intent.CLOVER_USB_TRANSPORT_SEND";
   public static final String ACTION_USB_RECEIVE_MESSAGE = "com.clover.remote.usb.intent.CLOVER_USB_TRANSPORT_RECEIVE";
   public static final String EXTRA_MESSAGE = "com.clover.remote.Message";
@@ -121,7 +121,6 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
     try {
       getContext().unregisterReceiver(broadcastReceiver);
     } catch (IllegalArgumentException iae) {
-      // not registered here?
     }
   }
 
@@ -163,23 +162,17 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
         mBgHandler.post(mDisconnectUsbRunnable);
       }
     } else {
-      // We need to re-establish connectivity.  A null intent signifies that the service was killed by the OS
-      // and was automatically restarted when system resources were available.  This call performs the same
-      // reconnect logic that is invoked when you start/run UsbPayDisplay activity manually and assumes the
-      // payment device is still connected.  Otherwise, we would have received a disconnect call from the USB
-      // device service and would have terminated normally.
       mBgHandler.post(mConnectUsbRunnable);
       Log.d(TAG, "onStartCommand, The intent was null. Calling mConnectUsbRunnable to re-initiate the usb connection"
           + " after system kill/restart of service.");
     }
-    return START_STICKY; // if the service is killed by the OS, it will restart automatically
+    return START_STICKY;
   }
 
   private final Runnable mSetupUsbRunnable = new Runnable() {
     @Override
     public void run() {
       if (setupUsb()) {
-        // need to check the connect...
       }
     }
   };
@@ -223,7 +216,7 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
   private synchronized void connectUsb() {
     if (mRemoteUsbManager != null && mRemoteUsbManager.isConnected()) {
       Log.d(TAG, "Already have a connection, just return.");
-      return; // ready!
+      return;
     }
 
     Log.d(TAG, "connectUsb");
@@ -235,10 +228,8 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
 
       getContext().registerReceiver(broadcastReceiver, getIntentFilter());
 
-      // Give the terminal time to prepare itself to receive messages after the connection is open
       SystemClock.sleep(1000);
 
-      // setup the processing queues for usb...
       sendQueue.start();
       readQueue.start();
 
@@ -346,7 +337,6 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
               mRemoteUsbManager.sendString(msg);
             }
           } catch (IOException | InterruptedException e) {
-            // Do nothing
           }
         }
       });
@@ -387,7 +377,6 @@ public class PosUsbRemoteProtocolService extends PosRemoteProtocolService implem
                 getContext().sendBroadcast(intent);
               }
             } catch (IOException | InterruptedException ie) {
-              //
             }
           } while (!shutdown);
         }

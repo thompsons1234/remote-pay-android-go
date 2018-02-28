@@ -8,10 +8,8 @@ import java.util.HashMap;
 
 public class ConnectorFactory {
 
-  // To Support RP350 and RP450 reader connected at the same time
   private static HashMap<ReaderInfo.ReaderType, CloverGoConnector> cloverGoConnectorMap = new HashMap<>();
 
-  //TODO: Merge Create connector method and Initialize SDK without Reader Type
   public static ICloverConnector createCloverConnector(CloverDeviceConfiguration configuration) {
 
     if (configuration instanceof CloverGoDeviceConfiguration) {

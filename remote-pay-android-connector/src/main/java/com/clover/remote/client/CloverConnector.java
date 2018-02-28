@@ -120,16 +120,13 @@ import static com.clover.remote.client.Constants.CARD_ENTRY_METHOD_NFC_CONTACTLE
  */
 public class CloverConnector implements ICloverConnector {
 
-  public static final int MAX_PAYLOAD_SIZE = 10000000; // maximum size of the payload of a full message.  if the payload exceeds this, the message will not be sent.
+  public static final int MAX_PAYLOAD_SIZE = 10000000;
   public static final InputOption CANCEL_INPUT_OPTION = new InputOption(KeyPress.ESC, "Cancel");
 
-  // This field maintains state for some deprecated logic and should be removed at some point in the future
-  // when we are comfortable that there are no longer any backward compatibility issues
   @Deprecated
   private Object lastRequest;
 
-  // manual is not enabled by default
-  private final int cardEntryMethods = CARD_ENTRY_METHOD_MAG_STRIPE | CARD_ENTRY_METHOD_ICC_CONTACT | CARD_ENTRY_METHOD_NFC_CONTACTLESS;// | CARD_ENTRY_METHOD_MANUAL;
+  private final int cardEntryMethods = CARD_ENTRY_METHOD_MAG_STRIPE | CARD_ENTRY_METHOD_ICC_CONTACT | CARD_ENTRY_METHOD_NFC_CONTACTLESS;
 
   private CloverDevice device;
   private final InnerDeviceObserver deviceObserver;
@@ -236,7 +233,7 @@ public class CloverConnector implements ICloverConnector {
       PayIntent.Builder builder = new PayIntent.Builder();
       TransactionSettings transactionSettings = new TransactionSettings();
 
-      builder.transactionType(request.getType()); // difference between sale, auth and auth(preAuth)
+      builder.transactionType(request.getType());
       builder.amount(request.getAmount());
       builder.vaultedCard(request.getVaultedCard());
       builder.externalPaymentId(request.getExternalId().trim());
@@ -261,7 +258,6 @@ public class CloverConnector implements ICloverConnector {
       String paymentRequestType = null;
       if (request instanceof PreAuthRequest) {
         paymentRequestType = TxStartRequestMessage.PREAUTH_REQUEST;
-        // nothing extra as of now
       } else if (request instanceof AuthRequest) {
         paymentRequestType = TxStartRequestMessage.AUTH_REQUEST;
         AuthRequest req = (AuthRequest) request;
@@ -284,12 +280,11 @@ public class CloverConnector implements ICloverConnector {
         if (req.getDisableCashback() != null) {
           transactionSettings.setDisableCashBack(req.getDisableCashback());
         }
-        transactionSettings.setTipMode(com.clover.sdk.v3.payments.TipMode.ON_PAPER); // overriding TipMode, since it's an Auth request
+        transactionSettings.setTipMode(com.clover.sdk.v3.payments.TipMode.ON_PAPER);
       } else if (request instanceof SaleRequest) {
         paymentRequestType = TxStartRequestMessage.SALE_REQUEST;
         SaleRequest req = (SaleRequest) request;
 
-        // shared with AuthRequest
         if (req.getAllowOfflinePayment() != null) {
           transactionSettings.setAllowOfflinePayment(req.getAllowOfflinePayment());
         }
@@ -306,7 +301,6 @@ public class CloverConnector implements ICloverConnector {
           builder.taxAmount(req.getTaxAmount());
         }
 
-        // SaleRequest
         if (req.getTippableAmount() != null) {
           transactionSettings.setTippableAmount(req.getTippableAmount());
         }
@@ -323,7 +317,7 @@ public class CloverConnector implements ICloverConnector {
       builder.transactionSettings(transactionSettings);
       PayIntent payIntent = builder.build();
 
-      device.doTxStart(payIntent, null, paymentRequestType); //
+      device.doTxStart(payIntent, null, paymentRequestType);
 
     }
   }
@@ -562,7 +556,7 @@ public class CloverConnector implements ICloverConnector {
   }
 
   @Override
-  public void manualRefund(ManualRefundRequest request) // NakedRefund is a Transaction, with just negative amount
+  public void manualRefund(ManualRefundRequest request)
   {
     TransactionSettings transactionSettings = new TransactionSettings();
     lastRequest = request;
@@ -626,7 +620,6 @@ public class CloverConnector implements ICloverConnector {
     } else {
       TransactionSettings transactionSettings = new TransactionSettings();
       transactionSettings.setCardEntryMethods(request.getCardEntryMethods() != null ? request.getCardEntryMethods() : cardEntryMethods);
-      // create pay intent...
       PayIntent.Builder builder = new PayIntent.Builder();
       builder.transactionType(PayIntent.TransactionType.DATA);
       builder.transactionSettings(transactionSettings);
@@ -732,7 +725,7 @@ public class CloverConnector implements ICloverConnector {
   }
 
   @Override
-  public void printImage(Bitmap bitmap) //Bitmap img
+  public void printImage(Bitmap bitmap)
   {
     if (device == null || !isReady) {
       broadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, null, "In printImage: The Clover device is not connected."));
@@ -943,7 +936,6 @@ public class CloverConnector implements ICloverConnector {
       }
       boolean duplicate = result.equals(TxStartResponseResult.DUPLICATE);
       try {
-        // Use the messageInfo if it exists, to determine the request type
         if (messageInfo != null) {
           if (messageInfo.equals(TxStartRequestMessage.PREAUTH_REQUEST)) {
             PreAuthResponse response = new PreAuthResponse(false, ResultCode.FAIL);
@@ -991,8 +983,6 @@ public class CloverConnector implements ICloverConnector {
             cloverConnector.broadcaster.notifyOnManualRefundResponse(response);
           }
         } else {
-          // This is deprecated logic and should be removed at some point in the future
-          // when we are comfortable that there are no longer any backward compatibility issues
           if (cloverConnector.lastRequest instanceof PreAuthRequest) {
             PreAuthResponse response = new PreAuthResponse(false, ResultCode.FAIL);
             if (duplicate) {
@@ -1112,7 +1102,6 @@ public class CloverConnector implements ICloverConnector {
 
     @Override
     public void onPartialAuth(long partialAmount) {
-      //TODO: For future use
     }
 
     @Override
@@ -1132,7 +1121,6 @@ public class CloverConnector implements ICloverConnector {
       cloverConnector.broadcaster.notifyOnTipAdjustAuthResponse(response);
     }
 
-    // convenience, used for failure only
     private void onAuthTipAdjusted(ResultCode resultCode, String reason, String message) {
       TipAdjustAuthResponse taar = new TipAdjustAuthResponse(resultCode == ResultCode.SUCCESS, resultCode);
       taar.setPaymentId(null);
@@ -1144,17 +1132,14 @@ public class CloverConnector implements ICloverConnector {
 
     @Override
     public void onCashbackSelected(long cashbackAmount) {
-      //TODO: For future use
     }
 
     @Override
     public void onKeyPressed(KeyPress keyPress) {
-      //TODO: For future use
     }
 
     @Override
     public void onPaymentRefundResponse(String orderId, String paymentId, Refund refund, TxState code, ErrorCode reason, String message) {
-      // hold the response for finishOk for the refund. See comments in onFinishOk(Refund)
       boolean success = code == TxState.SUCCESS;
       RefundPaymentResponse prr = new RefundPaymentResponse(success, success ? ResultCode.SUCCESS : ResultCode.FAIL);
       prr.setOrderId(orderId);
@@ -1164,7 +1149,7 @@ public class CloverConnector implements ICloverConnector {
         prr.setReason(reason.toString());
       }
       prr.setMessage(message);
-      lastPRR = prr; // set this so we have the appropriate information for when onFinish(Refund) is called
+      lastPRR = prr;
     }
 
     @Override
@@ -1201,10 +1186,9 @@ public class CloverConnector implements ICloverConnector {
 
     @Override
     public void onFinishOk(Payment payment, Signature2 signature2, String messageInfo) {
-      cloverConnector.showThankYouScreen(); //need to do this first, so Listener implementation can replace the screen as desired
+      cloverConnector.showThankYouScreen();
       Object lastReq = cloverConnector.lastRequest;
       cloverConnector.lastRequest = null;
-      // Use messageInfo if it exists, to determine the original requested type
       if (messageInfo != null) {
         if (messageInfo.equals(TxStartRequestMessage.PREAUTH_REQUEST)) {
           PreAuthResponse response = new PreAuthResponse(true, ResultCode.SUCCESS);
@@ -1224,8 +1208,7 @@ public class CloverConnector implements ICloverConnector {
         } else {
           Log.e(getClass().getSimpleName(), String.format("Failed to pair this response: %s", payment) + ".  Request Type: " + messageInfo);
         }
-      } else {  // This is deprecated logic and should be removed at some point in the future
-        // when we are comfortable that there are no longer any backward compatibility issues
+      } else {
         if (lastReq instanceof PreAuthRequest) {
           PreAuthResponse response = new PreAuthResponse(true, ResultCode.SUCCESS);
           response.setPayment(payment);
@@ -1262,11 +1245,6 @@ public class CloverConnector implements ICloverConnector {
       cloverConnector.lastRequest = null;
       RefundPaymentResponse lastRefundResponse = lastPRR;
       lastPRR = null;
-      // Since finishOk is the more appropriate/consistent location in the "flow" to
-      // publish the RefundResponse (like SaleResponse, AuthResponse, etc., rather
-      // than after the server call, which calls onPaymetRefund),
-      // we will hold on to the response from
-      // onRefundResponse (Which has more information than just the refund) and publish it here
       if (refund.getOrderRef() != null) {
         RefundPaymentResponse response = new RefundPaymentResponse(true, ResultCode.SUCCESS);
         response.setOrderId(refund.getOrderRef().getId());
@@ -1289,7 +1267,6 @@ public class CloverConnector implements ICloverConnector {
       cloverConnector.showWelcomeScreen();
       Object lastReq = cloverConnector.lastRequest;
       cloverConnector.lastRequest = null;
-      // Use messageInfo if it exists, to determine the original requested type
       if (messageInfo != null) {
         if (messageInfo.equals(TxStartRequestMessage.PREAUTH_REQUEST)) {
           onFinishCancelPreAuth(result, reason, message);
@@ -1304,8 +1281,6 @@ public class CloverConnector implements ICloverConnector {
           lastPRR = null;
         }
       } else {
-        // This is deprecated logic and should be removed at some point in the future
-        // when we are comfortable that there are no longer any backward compatibility issues
         if (lastReq instanceof PreAuthRequest) {
           onFinishCancelPreAuth(result, reason, message);
         } else if (lastReq instanceof SaleRequest) {
@@ -1503,7 +1478,6 @@ public class CloverConnector implements ICloverConnector {
 
     @Override
     public void onMessageAck(String messageId) {
-      // TODO: for future use
     }
 
     @Override

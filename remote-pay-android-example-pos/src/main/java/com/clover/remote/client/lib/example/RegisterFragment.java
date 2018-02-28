@@ -80,7 +80,6 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
 
   public RegisterFragment() {
-    // Required empty public constructor
   }
 
   @Override
@@ -91,7 +90,6 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
                            Bundle savedInstanceState) {
-    // Inflate the layout for this fragment
     View view = inflater.inflate(R.layout.fragment_register, container, false);
     GridView gv = (GridView) view.findViewById(R.id.AvailableItems);
     gv.setId(R.id.AvailableItems);
@@ -216,7 +214,6 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
   @Override
   public void onSelectLineItem() {
-    //
   }
 
   @Override
@@ -373,7 +370,6 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
       dli.setQuantity("" + lineItem.getQuantity());
       dli.setPrice(CurrencyUtils.format(lineItem.getPrice(), Locale.getDefault()));
       List<DisplayDiscount> dDiscounts = new ArrayList<DisplayDiscount>();
-      //dli.getDiscounts().clear();
       if (lineItem.getDiscount() != null && lineItem.getDiscount().getValue(lineItem.getPrice()) != lineItem.getPrice()) {
         DisplayDiscount dd = new DisplayDiscount();
         dd.setName(lineItem.getDiscount().name);

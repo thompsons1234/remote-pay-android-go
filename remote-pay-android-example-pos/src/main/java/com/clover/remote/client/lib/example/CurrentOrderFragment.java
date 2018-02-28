@@ -59,7 +59,6 @@ public class CurrentOrderFragment extends Fragment implements OrderObserver {
   }
 
   public CurrentOrderFragment() {
-    // Required empty public constructor
   }
 
   @Override
@@ -96,7 +95,6 @@ public class CurrentOrderFragment extends Fragment implements OrderObserver {
 
     currentOrderItemsListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener(){
       @Override public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        // prompt for delete...
         final POSLineItem lineItem = (POSLineItem)currentOrderItemsListView.getItemAtPosition(position);
         String thisTheseLabel = lineItem.getQuantity() == 1 ? "this" : "these";
 
@@ -110,7 +108,7 @@ public class CurrentOrderFragment extends Fragment implements OrderObserver {
             })
             .setNegativeButton("No", null)
             .show();
-        return true; // consume the event
+        return true;
       }
     });
 

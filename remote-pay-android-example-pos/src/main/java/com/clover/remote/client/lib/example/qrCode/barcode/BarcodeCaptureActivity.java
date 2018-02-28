@@ -29,10 +29,8 @@ import java.io.IOException;
 public final class BarcodeCaptureActivity extends Activity
     implements BarcodeTracker.BarcodeGraphicTrackerCallback {
 
-  // Constants used to pass extra data in the intent
   public static final String BarcodeObject = "Barcode";
   private static final String TAG = "Barcode-reader";
-  // Intent request code to handle updating play services if needed.
   private static final int RC_HANDLE_GMS = 9001;
   private CameraSource mCameraSource;
   private CameraSourcePreview mPreview;
@@ -50,8 +48,7 @@ public final class BarcodeCaptureActivity extends Activity
     boolean autoFocus = true;
     boolean useFlash = false;
 
-    // Check for the camera permission before accessing the camera.
-    int rc = PackageManager.PERMISSION_GRANTED; // ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+    int rc = PackageManager.PERMISSION_GRANTED;
     if (rc == PackageManager.PERMISSION_GRANTED) {
       createCameraSource(autoFocus, useFlash);
     } else {
@@ -79,10 +76,6 @@ public final class BarcodeCaptureActivity extends Activity
   private void createCameraSource(boolean autoFocus, boolean useFlash) {
     Context context = getApplicationContext();
 
-    // A barcode detector is created to track barcodes.  An associated multi-processor instance
-    // is set to receive the barcode detection results, track the barcodes, and maintain
-    // graphics for each barcode on screen.  The factory is used by the multi-processor to
-    // create a separate tracker instance for each barcode.
     BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(context)
         .setBarcodeFormats(Barcode.ALL_FORMATS)
         .build();
@@ -90,19 +83,8 @@ public final class BarcodeCaptureActivity extends Activity
     barcodeDetector.setProcessor(new MultiProcessor.Builder<>(barcodeFactory).build());
 
     if (!barcodeDetector.isOperational()) {
-      // Note: The first time that an app using the barcode or face API is installed on a
-      // device, GMS will download a native libraries to the device in order to do detection.
-      // Usually this completes before the app is run for the first time.  But if that
-      // download has not yet completed, then the above call will not detect any barcodes
-      // and/or faces.
-      //
-      // isOperational() can be used to check if the required native libraries are currently
-      // available.  The detectors will automatically become operational once the library
-      // downloads complete on device.
       Log.w(TAG, "Detector dependencies are not yet available.");
 
-      // Check for low storage.  If there is low storage, the native library will not be
-      // downloaded, so detection will not become operational.
       IntentFilter lowstorageFilter = new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW);
       boolean hasLowStorage = registerReceiver(null, lowstorageFilter) != null;
 
@@ -113,9 +95,6 @@ public final class BarcodeCaptureActivity extends Activity
       }
     }
 
-    // Creates and starts the camera.  Note that this uses a higher resolution in comparison
-    // to other detection examples to enable the barcode detector to detect small barcodes
-    // at long distances.
     DisplayMetrics metrics = new DisplayMetrics();
     getWindowManager().getDefaultDisplay().getMetrics(metrics);
 
@@ -124,7 +103,6 @@ public final class BarcodeCaptureActivity extends Activity
         .setRequestedPreviewSize(metrics.widthPixels / 2, metrics.heightPixels / 2)
         .setRequestedFps(24.0f);
 
-    // make sure that auto focus is an available option
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
       builder = builder.setFocusMode(
           autoFocus ? Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE : null);
@@ -135,14 +113,12 @@ public final class BarcodeCaptureActivity extends Activity
         .build();
   }
 
-  // Restarts the camera
   @Override
   protected void onResume() {
     super.onResume();
     startCameraSource();
   }
 
-  // Stops the camera
   @Override
   protected void onPause() {
     super.onPause();
@@ -169,7 +145,6 @@ public final class BarcodeCaptureActivity extends Activity
    * again when the camera source is created.
    */
   private void startCameraSource() throws SecurityException {
-    // check that the device has play services available.
     int code = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(
         getApplicationContext());
     if (code != ConnectionResult.SUCCESS) {

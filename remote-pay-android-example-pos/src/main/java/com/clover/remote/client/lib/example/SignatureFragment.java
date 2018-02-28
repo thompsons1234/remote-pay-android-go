@@ -54,7 +54,6 @@ public class SignatureFragment extends Fragment {
   }
 
   public SignatureFragment() {
-    // Required empty public constructor
   }
 
   @Override
@@ -66,7 +65,6 @@ public class SignatureFragment extends Fragment {
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
                            Bundle savedInstanceState) {
-    // Inflate the layout for this fragment
     final View view = inflater.inflate(R.layout.fragment_signature, container, false);
 
     if (view != null) {
@@ -123,7 +121,6 @@ public class SignatureFragment extends Fragment {
   public void onAttach(Activity activity) {
     super.onAttach(activity);
     try {
-      //TODO: check Go Example
       mListener = (SignatureFragment.OnFragmentInteractionListener) activity;
     } catch (ClassCastException e) {
       throw new ClassCastException(activity.toString()

@@ -62,7 +62,7 @@ public class PosUsbBroadcastReceiver extends BroadcastReceiver {
         if (mUsbManager.hasPermission(device)) {
           runnable.run();
         } else {
-          requestPermission(device, runnable, context); // this probably needs to be removed, as this will probably fail in a BroadcastReceiver
+          requestPermission(device, runnable, context);
         }
         return;
       }
@@ -81,7 +81,7 @@ public class PosUsbBroadcastReceiver extends BroadcastReceiver {
         if (mUsbManager.hasPermission(device)) {
           runnable.run();
         } else {
-          requestPermission(device, runnable, context); // this probably needs to be removed, as this will probably fail in a BroadcastReceiver
+          requestPermission(device, runnable, context);
         }
         return;
       } else if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
@@ -96,7 +96,7 @@ public class PosUsbBroadcastReceiver extends BroadcastReceiver {
         if (true || mUsbManager.hasPermission(device)) {
           runnable.run();
         } else {
-          requestPermission(device, runnable, context); // this probably needs to be removed, as this will probably fail in a BroadcastReceiver
+          requestPermission(device, runnable, context);
         }
         return;
 

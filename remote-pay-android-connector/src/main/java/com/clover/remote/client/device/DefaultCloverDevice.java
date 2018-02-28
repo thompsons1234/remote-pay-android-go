@@ -159,8 +159,6 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
 
   @Override
   public void onDeviceReady(ICloverTransport transport) {
-    // now that the device is ready, let's send it a discovery request. the discovery response should trigger
-    // the callback for the device observer that it is connected and able to communicate
     Log.d(getClass().getSimpleName(), "Sending Discovery Request");
     doDiscoveryRequest();
   }
@@ -246,9 +244,6 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
           notifyObserversPartialAuth(partialAuth, rMessage.payload);
           break;
         case PAYMENT_VOIDED:
-          // currently this only gets called during a TX, so falls outside our current process flow
-          //PaymentVoidedMessage vpMessage = (PaymentVoidedMessage) Message.fromJsonString(rMessage.payload);
-          //notifyObserversPaymentVoided(vpMessage.payment, vpMessage.voidReason, ResultStatus.SUCCESS, null, null);
           break;
         case TIP_ADDED:
           TipAddedMessage tipMessage = (TipAddedMessage) Message.fromJsonString(rMessage.payload);
@@ -271,13 +266,10 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
           notifyObserversVerifySignature(vsigMsg, rMessage.payload);
           break;
         case REFUND_RESPONSE:
-          // for now, deprecating and refund is handled in finish_ok
-          // finish_ok also get this message after a receipt, but it doesn't have all the information
           refRespMsg = (RefundResponseMessage) Message.fromJsonString(rMessage.payload);
           notifyObserversPaymentRefundResponse(refRespMsg, rMessage.payload);
           break;
         case REFUND_REQUEST:
-          //Outbound no-op
           break;
         case TIP_ADJUST_RESPONSE:
           TipAdjustResponseMessage tipAdjustMsg = (TipAdjustResponseMessage) Message.fromJsonString(rMessage.payload);
@@ -312,22 +304,16 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
           notifyObserversActivityResponse(arm, rMessage.payload);
           break;
         case DISCOVERY_REQUEST:
-          //Outbound no-op
           break;
         case ORDER_ACTION_ADD_DISCOUNT:
-          //Outbound no-op
           break;
         case ORDER_ACTION_ADD_LINE_ITEM:
-          //Outbound no-op
           break;
         case ORDER_ACTION_REMOVE_LINE_ITEM:
-          //Outbound no-op
           break;
         case ORDER_ACTION_REMOVE_DISCOUNT:
-          //Outbound no-op
           break;
         case PRINT_IMAGE:
-          //Outbound no-op
           break;
         case GET_PRINTERS_REQUEST:
           break;
@@ -335,13 +321,11 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
           GetPrintersResponseMessage rpr = (GetPrintersResponseMessage) Message.fromJsonString(rMessage.payload);
           notifyObserversRetrievePrinterResponse(rpr);
         case PRINT_JOB_STATUS_REQUEST:
-          //Outbound no-op
           break;
         case PRINT_JOB_STATUS_RESPONSE:
           PrintJobStatusResponseMessage pjsr = (PrintJobStatusResponseMessage) Message.fromJsonString(rMessage.payload);
           notifyObserversPrintJobStatus(pjsr);
         case PRINT_TEXT:
-          //Outbound no-op
           break;
         case PRINT_CREDIT:
           CreditPrintMessage cpm = (CreditPrintMessage) Message.fromJsonString(rMessage.payload);
@@ -368,55 +352,34 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
           notifyObserversPrintMessage(rppm, rMessage.payload);
           break;
         case SHOW_ORDER_SCREEN:
-          //Outbound no-op
           break;
         case SHOW_THANK_YOU_SCREEN:
-          //Outbound no-op
           break;
         case SHOW_WELCOME_SCREEN:
-          //Outbound no-op
           break;
         case SIGNATURE_VERIFIED:
-          //Outbound no-op
           break;
         case TERMINAL_MESSAGE:
-          //Outbound no-op
           break;
         case TX_START:
-          //Outbound no-op
           break;
         case VOID_PAYMENT:
-          //Outbound no-op
           break;
         case CAPTURE_PREAUTH:
-          //Outbound no-op
           break;
         case LAST_MSG_REQUEST:
-          //Outbound no-op
           break;
         case LAST_MSG_RESPONSE:
-          //Outbound no-op
           break;
         case TIP_ADJUST:
-          //Outbound no-op
           break;
         case OPEN_CASH_DRAWER:
-          //Outbound no-op
           break;
         case SHOW_PAYMENT_RECEIPT_OPTIONS:
-          //Outbound no-op
           break;
-//        case SHOW_REFUND_RECEIPT_OPTIONS:
-//          //Outbound no-op
-//          break;
-//        case SHOW_MANUAL_REFUND_RECEIPT_OPTIONS:
-//          //Outbound no-op
-//          break;
         case VAULT_CARD:
-          //Outbound no-op
           break;
         case CLOSEOUT_REQUEST:
-          //Outbound no-op
           break;
         case RETRIEVE_DEVICE_STATUS_REQUEST:
           break;
@@ -447,7 +410,6 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
       if (ackTask != null) {
         ackTask.execute();
       }
-      // go ahead and notify listeners of the ACK
       new AsyncTask<Object, Object, Object>() {
         @Override
         protected Object doInBackground(Object[] params) {
@@ -1069,7 +1031,6 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
       if (!supportsAcks()) {
         aTask.execute();
       } else {
-        // we will send back response after we get an ack
         msgIdToTask.put(msgId, aTask);
       }
     }
@@ -1162,9 +1123,6 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
     }
 
     if (remoteMessageVersion > 1) {
-      // Base 64 Attachment processing, the attachment is already base64 encoded before chunking
-
-      // Does Base 64 Fragment processing, the attachment is a bitmap that will be chunked, then encoded
       ImagePrintMessage ipm = new ImagePrintMessage((Bitmap) null, printRequestId, printer);
       String message = ipm.toJsonString();
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -1203,14 +1161,12 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
       doPrintImage(images.get(0), requestId, deviceId);
     } else if (urls.size() > 0) {
       try {
-        // Make sure URL is well-formed
         new URL(urls.get(0));
         doPrintImage(urls.get(0), requestId, deviceId);
       } catch (MalformedURLException ex) {
         Log.d(TAG, "In doPrint: PrintRequest had malformed image URL");
       }
     } else {
-      //here because printRequest was empty or has a new content type we don't yet handle
       Log.d(TAG, "In doPrint: PrintRequest had no content or an unhandled content type");
     }
 
@@ -1382,7 +1338,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   }
 
   private void sendRemoteMessage(RemoteMessage remoteMessage, int version, byte[] attachmentData) {
-    if (version > 1) { // we can send fragments
+    if (version > 1) {
       if (attachmentData != null || remoteMessage.payload.length() > CloverConnector.MAX_PAYLOAD_SIZE) {
         if (attachmentData.length > CloverConnector.MAX_PAYLOAD_SIZE) {
           Log.d(getClass().getName(), "Error sending message - payload size is greater than the maximum allowed");
@@ -1392,14 +1348,12 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
           int payloadStart = 0;
           int payloadEnd = Math.min(maxMessageSizeInChars, payload.length());
 
-          //send and fragment payload
           while (payloadStart < payloadEnd) {
             String payloadS = payload.substring(payloadStart, payloadEnd);
             sendMessageFragment(new RemoteMessage.Builder(remoteMessage), payloadS, null, fragmentIndex++, ((payloadStart > payloadEnd) && attachmentData == null));
             payloadStart += maxMessageSizeInChars;
           }
 
-          //fragment and send attachment
           int start = 0;
           int count = attachmentData.length;
           while (start < count) {
@@ -1412,7 +1366,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
       } else {
         sendRemoteMessage(gson.toJson(remoteMessage));
       }
-    } else { //don't need to fragment
+    } else {
       sendRemoteMessage(gson.toJson(remoteMessage));
     }
 
@@ -1420,7 +1374,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
   }
 
   private void sendRemoteMessage(RemoteMessage remoteMessage, int version, String attachmentUrl) {
-    if (version > 1) { // we can send fragments
+    if (version > 1) {
       if (attachmentUrl != null || remoteMessage.payload.length() > CloverConnector.MAX_PAYLOAD_SIZE) {
         if (attachmentUrl.length() > CloverConnector.MAX_PAYLOAD_SIZE) {
           Log.d(getClass().getName(), "Error sending message - payload size is greater than the maximum allowed");
@@ -1430,7 +1384,6 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
           int payloadStart = 0;
           int payloadEnd = Math.min(maxMessageSizeInChars, payload.length());
 
-          //send and fragment payload
           while (payloadStart < payloadEnd) {
             String payloadS = payload.substring(payloadStart, payloadEnd);
             sendMessageFragment(new RemoteMessage.Builder(remoteMessage), payloadS, null, fragmentIndex++, ((payloadStart > payloadEnd) && attachmentUrl == null));
@@ -1442,7 +1395,7 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
       } else {
         sendRemoteMessage(gson.toJson(remoteMessage));
       }
-    } else { //don't need to fragment
+    } else {
       sendRemoteMessage(gson.toJson(remoteMessage));
     }
 
@@ -1473,7 +1426,6 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
             input.close();
           }
         } catch (IOException e) {
-          //ignore
         }
 
       }
@@ -1484,7 +1436,6 @@ public class DefaultCloverDevice extends CloverDevice implements ICloverTranspor
 
 
   private void sendMessageFragment(RemoteMessage.Builder remoteMessage, String payload, String attachmentFragment, int fragmentIndex, boolean isLastMessage) {
-    //changes for fragment
     remoteMessage.setPayload(payload);
     remoteMessage.setAttachment(attachmentFragment);
     remoteMessage.setAttachmentEncoding("BASE64.FRAGMENT");

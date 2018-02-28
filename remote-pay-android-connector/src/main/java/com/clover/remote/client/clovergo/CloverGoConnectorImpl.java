@@ -182,7 +182,6 @@ public class CloverGoConnectorImpl {
     Log.d(TAG, "CloverGoConnectorImpl env=" + configuration.getEnv());
     mBroadcaster = broadcaster;
 
-    // Getting this string here so we don't hold on to context
     noCardReadersConnected = configuration.getContext().getString(R.string.no_card_readers_connected_no_keyenter_allowed);
 
     CloverGoDeviceConfiguration.ENV env = configuration.getEnv();
@@ -280,7 +279,6 @@ public class CloverGoConnectorImpl {
           } else {
             Log.d(TAG, "mPaymentObserver next EMV_CONTACT non-extra");
             data.put("Result", "01");
-            //TODO: Coordinate with Arjun what/when to fix here when authCode is null. This crashes if null
             data.put("Auth_Code", HexUtils.convertASCII2HexaDecimal(mPayment.getCard().getAuthCode()));
             data.put("Authorization_Response", "3030");
 
@@ -482,11 +480,6 @@ public class CloverGoConnectorImpl {
             break;
 
           case CUSTOMER_VALIDATION_REQ:
-            // TODO:IAN look into this...
-//            deviceEvent = new CloverDeviceEvent();
-//            deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.PLEASE_SEE_PHONE_MSG); // check if correct event state used
-//            deviceEvent.setMessage("Card Removed");
-//            mBroadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
             break;
 
           case SWIPE_DATA:
@@ -788,7 +781,6 @@ public class CloverGoConnectorImpl {
 
     Log.d(TAG, "continueTransactionAfterPaymentTypeChosen");
 
-    // Now, still need callback for KeyEntry, yes?
     if (goPaymentType == ICloverGoConnector.GoPaymentType.KEYED) {
 
       mBroadcaster.notifyOnManualCardEntryRequired(transactionType, transactionRequest, goPaymentType, readerType, allowDuplicate, new ICloverGoConnectorListener.ManualCardEntry() {
@@ -845,7 +837,6 @@ public class CloverGoConnectorImpl {
     }
     mOrder.setExternalPaymentId(transactionRequest.getExternalId());
     mOrder.allowDuplicates = allowDuplicate;
-    //TODO: setTax amount in Order
   }
 
   private void prepKeyedCreditCardForTransaction(KeyedRequest keyedRequest) {

@@ -176,7 +176,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     CardsFragment.OnFragmentInteractionListener, ManualRefundsFragment.OnFragmentInteractionListener, MiscellaneousFragment.OnFragmentInteractionListener,
     ProcessingFragment.OnFragmentInteractionListener, PreAuthFragment.OnFragmentInteractionListener {
 
-  // Package name for example custom activities
   public static final String CUSTOM_ACTIVITY_PACKAGE = "com.clover.cfp.examples.";
   public static final String EXAMPLE_POS_SERVER_KEY = "clover_device_endpoint";
   public static final String EXTRA_CLOVER_CONNECTOR_CONFIG = "EXTRA_CLOVER_CONNECTOR_CONFIG";
@@ -372,8 +371,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           runOnUiThread(new Runnable() {
             @Override
             public void run() {
-              // If we previously created a dialog and the pairing failed, reuse
-              // the dialog previously created so that we don't get a stack of dialogs
               if (pairingCodeDialog != null) {
                 pairingCodeDialog.setMessage("Enter pairing code: " + pairingCode);
               } else {
@@ -554,17 +551,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     store.addAvailableDiscount(new POSDiscount("None", 0));
 
     store.createOrder(false);
-    // Per Transaction Settings defaults
-    //store.setTipMode(SaleRequest.TipMode.ON_SCREEN_BEFORE_PAYMENT);
-    //store.setSignatureEntryLocation(DataEntryLocation.ON_PAPER);
-    //store.setDisablePrinting(false);
-    //store.setDisableReceiptOptions(false);
-    //store.setDisableDuplicateChecking(false);
-    //store.setAllowOfflinePayment(false);
-    //store.setForceOfflinePayment(false);
-    //store.setApproveOfflinePaymentWithoutPrompt(true);
-    //store.setAutomaticSignatureConfirmation(true);
-    //store.setAutomaticPaymentConfirmation(true);
   }
 
   @Override
@@ -576,15 +562,12 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     }
     if (requestCode == RESULT_LOAD_IMG && resultCode == RESULT_OK
         && null != data) {
-      // Get the Image from data
 
       Uri selectedImage = data.getData();
       String[] filePathColumn = {MediaStore.Images.Media.DATA};
 
-      // Get the cursor
       Cursor cursor = getContentResolver().query(selectedImage,
           filePathColumn, null, null, null);
-      // Move to first row
       cursor.moveToFirst();
 
       int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
@@ -895,7 +878,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                 POSPayment posPayment = (POSPayment) exchange;
                 if (exchange.getPaymentID().equals(response.getPaymentId())) {
                   posPayment.setTipAmount(response.getTipAmount());
-                  // TODO: should the stats be updated?
                   updatedTip = true;
                   break;
                 }
@@ -927,7 +909,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                   payment.amount = paymentAmount;
                   showMessage("PreAuth Capture Successful", Toast.LENGTH_LONG);
 
-                  //TODO: if order isn't fully paid, don't create a new order...
                   store.createOrder(false);
                   CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
                   currentOrderFragment.setOrder(store.getCurrentOrder());
@@ -966,7 +947,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       @Override
       public void onMessageFromActivity(MessageFromActivity message) {
-        //showMessage("Custom Activity Message Received for actionId: " + message.actionId + " with payload: " + message.payload, Toast.LENGTH_LONG);
         PayloadMessage payloadMessage = new Gson().fromJson(message.getPayload(), PayloadMessage.class);
         switch (payloadMessage.messageType) {
           case REQUEST_RATINGS:
@@ -1153,7 +1133,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           } else {
             showMessage("Error capturing card: " + response.getResult(), Toast.LENGTH_LONG);
             getCloverConnector().showMessage("Card was not saved");
-            SystemClock.sleep(4000); //wait 4 seconds
+            SystemClock.sleep(4000);
             getCloverConnector().showWelcomeScreen();
           }
         }
@@ -1413,7 +1393,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
         PaymentTypeFragment paymentTypeFragment = new PaymentTypeFragment();
 
-        // Must create new args here.  Because I'm using args properly, not hiding fragment, but removing instead for PaymentTypes
         Bundle args = new Bundle();
         paymentTypeFragment.setArguments(setGoPaymentTypeArgs(args, connectedReaders, cardEntryMethods));
         fragmentTransaction.add(R.id.contentContainer, paymentTypeFragment, FRAGMENT_PAYMENT_METHODS);
@@ -1429,7 +1408,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
         for (ReaderInfo connectedReader : connectedReaders) {
 
-          // Checking if connected again here in case it disconnected on the way to this logic
           if (connectedReader.isConnected()) {
             if (connectedReader.getReaderType() == RP350 &&
                 ((cardEntryMethods & Constants.CARD_ENTRY_METHOD_ICC_CONTACT) == Constants.CARD_ENTRY_METHOD_ICC_CONTACT)) {
@@ -1565,7 +1543,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           });
         } else {
           showAlertDialog(response.getReason(), response.getMessage());
-          // showMessage("Auth error:" + response.getResult(), Toast.LENGTH_LONG);
           try {
             getCloverConnector().showMessage("There was a problem processing the transaction");
           } catch (UnsupportedOperationException e) {
@@ -1621,7 +1598,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                 POSPayment posPayment = (POSPayment) exchange;
                 if (exchange.getPaymentID().equals(response.getPaymentId())) {
                   posPayment.setTipAmount(response.getTipAmount());
-                  // TODO: should the stats be updated?
                   updatedTip = true;
                   break;
                 }
@@ -1653,7 +1629,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
                   payment.amount = paymentAmount;
                   showMessage("PreAuth Capture Successful", Toast.LENGTH_LONG);
 
-                  //TODO: if order isn't fully paid, don't create a new order...
                   store.createOrder(false);
                   CurrentOrderFragment currentOrderFragment = (CurrentOrderFragment) getFragmentManager().findFragmentById(R.id.PendingOrder);
                   currentOrderFragment.setOrder(store.getCurrentOrder());
@@ -1676,7 +1651,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
       @Override
       public void onConfirmPaymentRequest(ConfirmPaymentRequest request) {
-        //TODO: Discuss Clover GO doesn't return Payment Object on Duplicate Transaction
         if (/*request.getPayment() == null ||*/ request.getChallenges() == null) {
           showMessage("Error: The ConfirmPaymentRequest was missing the payment and/or challenges.", Toast.LENGTH_LONG);
         } else {
@@ -1763,7 +1737,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           for (POSOrder order : store.getOrders()) {
             for (POSExchange payment : order.getPayments()) {
               if (payment instanceof POSPayment) {
-                //TODO: Changed to support clover go - //if (payment.getPaymentID().equals(response.getRefund().getPayment().getId())) {
                 if (payment.getPaymentID().equals(response.getPaymentId())) {
                   ((POSPayment) payment).setPaymentStatus(POSPayment.Status.REFUNDED);
                   store.addRefundToOrder(refund, order);
@@ -2011,15 +1984,9 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   private void handleRatings(String payload) {
-    //showMessage(payload, Toast.LENGTH_SHORT);
     RatingsMessage ratingsMessage = (RatingsMessage) PayloadMessage.fromJsonString(payload);
     Rating[] ratingsPayload = ratingsMessage.ratings;
     showRatingsDialog(ratingsPayload);
-    //for (Rating rating:ratingsPayload
-    //     ) {
-    //  String ratingString = "Rating ID: " + rating.id + " - " + rating.question + " Rating value: " + Integer.toString(rating.value);
-    //  showMessage(ratingString, Toast.LENGTH_SHORT);
-    //}
   }
 
   private void handleCustomerLookup(String payload) {
@@ -2545,7 +2512,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     boolean nonBlocking = ((Switch) findViewById(R.id.customActivityBlocking)).isChecked();
     car.setNonBlocking(nonBlocking);
 
-    //If the custom activity is conversational, pass in the messageTo and messageFrom action string arrays
     if (activityId.equals("com.clover.cfp.examples.BasicConversationalExample")) {
       Button messageButton = (Button) findViewById(R.id.sendMessageToActivityButton);
       if (messageButton != null) {
@@ -2668,7 +2634,6 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   }
 
   private ICloverConnector getCloverConnector() {
-    // Default
     ICloverConnector connector;
 
     if (CONFIG_TYPE_GO.equals(configType) && goReaderType != null && cloverGoConnectorMap.get(goReaderType) != null) {

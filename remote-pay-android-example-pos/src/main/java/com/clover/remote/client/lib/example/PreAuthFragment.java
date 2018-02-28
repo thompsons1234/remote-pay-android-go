@@ -71,7 +71,6 @@ public class PreAuthFragment extends Fragment {
   }
 
   public PreAuthFragment() {
-    // Required empty public constructor
   }
 
   @Override

@@ -40,7 +40,6 @@ public class ExamplePOSSettingsActivity extends PreferenceActivity implements Sh
   @Override
   protected void onResume() {
     super.onResume();
-    // Set up a listener whenever a key changes
     getPreferenceScreen().getSharedPreferences()
         .registerOnSharedPreferenceChangeListener(this);
   }
@@ -48,7 +47,6 @@ public class ExamplePOSSettingsActivity extends PreferenceActivity implements Sh
   @Override
   protected void onPause() {
     super.onPause();
-    // Unregister the listener whenever a key changes
     getPreferenceScreen().getSharedPreferences()
         .unregisterOnSharedPreferenceChangeListener(this);
   }

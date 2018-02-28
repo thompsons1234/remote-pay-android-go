@@ -118,7 +118,6 @@ public class CameraSourcePreview extends ViewGroup {
             }
         }
 
-        // Swap width and height sizes when in portrait, since it will be rotated 90 degrees
         if (isPortraitMode()) {
             int tmp = previewWidth;
             previewWidth = previewHeight;
@@ -135,10 +134,6 @@ public class CameraSourcePreview extends ViewGroup {
         float widthRatio = (float) viewWidth / (float) previewWidth;
         float heightRatio = (float) viewHeight / (float) previewHeight;
 
-        // To fill the view with the camera preview, while also preserving the correct aspect ratio,
-        // it is usually necessary to slightly oversize the child and to crop off portions along one
-        // of the dimensions.  We scale up based on the dimension requiring the most correction, and
-        // compute a crop offset for the other dimension.
         if (widthRatio > heightRatio) {
             childWidth = viewWidth;
             childHeight = (int) ((float) previewHeight * widthRatio);
@@ -150,8 +145,6 @@ public class CameraSourcePreview extends ViewGroup {
         }
 
         for (int i = 0; i < getChildCount(); ++i) {
-            // One dimension will be cropped.  We shift child over or up by this offset and adjust
-            // the size to maintain the proper aspect ratio.
             getChildAt(i).layout(
                     -1 * childXOffset, -1 * childYOffset,
                     childWidth - childXOffset, childHeight - childYOffset);

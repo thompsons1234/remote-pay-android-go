@@ -147,7 +147,6 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
   }
 
   public MiscellaneousFragment() {
-    // Required empty public constructor
   }
 
   @Override
@@ -157,7 +156,6 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    // Inflate the layout for this fragment
     View view = inflater.inflate(R.layout.fragment_miscellaneous, container, false);
 
     String mode = getActivity().getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).getString(CONNECTION_MODE, "");
@@ -183,7 +181,6 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
 
     customActivityId = ((Spinner) view.findViewById(R.id.activity_id));
 
-    // Get a reference to the AutoCompleteTextView in the layout and assign the auto-complete choices.
     String[] samples = getResources().getStringArray(R.array.customIds);
     ArrayAdapter<String> customAdapter = new ArrayAdapter<>(this.getActivity().getBaseContext(), android.R.layout.simple_spinner_item, samples);
     customAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -308,36 +305,6 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
         }
       }
     };
-
-    // Defaults for testing sign on paper with no Clover printing or receipt options screen
-    // Also allow offline payments without any prompt
-    // This setup would be used if you want the most minimal interaction with the mini
-    // (i.e. payment only)
-    //
-    //store.setTipMode(SaleRequest.TipMode.NO_TIP);
-    //store.setSignatureEntryLocation(DataEntryLocation.ON_PAPER);
-    //store.setCloverHandlesReceipts(false);
-    //store.setDisableReceiptOptions(true);
-    //store.setDisableDuplicateChecking(true);
-    //store.setAllowOfflinePayment(true);
-    //store.setApproveOfflinePaymentWithoutPrompt(true);
-    //store.setAutomaticSignatureConfirmation(true);
-    //store.setAutomaticPaymentConfirmation(true);
-
-    // Defaults for testing sign on screen before payment with Clover printing and receipt options screen
-    // Also allow offline payments, but prompt for acceptance
-    // This setup would be used if you want the completely automated interaction with the mini
-    // (i.e. tip on screen, payment, signature, receipt option and mini printing)
-    //
-    //store.setTipMode(TipMode.ON_SCREEN_BEFORE_PAYMENT);
-    //store.setSignatureEntryLocation(DataEntryLocation.ON_SCREEN);
-    //store.setCloverHandlesReceipts(true);
-    //store.setDisableReceiptOptions(false);
-    //store.setDisableDuplicateChecking(false);
-    //store.setAllowOfflinePayment(true);
-    //store.setApproveOfflinePaymentWithoutPrompt(false);
-    //store.setAutomaticSignatureConfirmation(false);
-    //store.setAutomaticPaymentConfirmation(false);
 
     manualSwitch.setOnCheckedChangeListener(changeListener);
     swipeSwitch.setOnCheckedChangeListener(changeListener);
@@ -684,9 +651,6 @@ public class MiscellaneousFragment extends Fragment implements AdapterView.OnIte
     boolean contactlessSetting = (store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS) == Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS;
     boolean contactSetting = (store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_ICC_CONTACT) == Constants.CARD_ENTRY_METHOD_ICC_CONTACT;
     boolean swipeSetting = (store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_MAG_STRIPE) == Constants.CARD_ENTRY_METHOD_MAG_STRIPE;
-
-    // For some reason, doing it like this (below) does NOT work, or seems to work for some settings and not others.  Going with boolean variable above instead which seems reliable.
-    // manualSwitch.setChecked((store.getCardEntryMethods() & Constants.CARD_ENTRY_METHOD_MANUAL) == Constants.CARD_ENTRY_METHOD_MANUAL);
 
     manualSwitch.setChecked(manualSetting);
     contactlessSwitch.setChecked(contactlessSetting);

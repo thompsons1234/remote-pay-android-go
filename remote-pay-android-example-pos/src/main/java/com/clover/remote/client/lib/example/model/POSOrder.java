@@ -88,7 +88,7 @@ public class POSOrder {
     if (discount != null) {
       tippableAmount = discount.appliedTo(tippableAmount);
     }
-    return tippableAmount + getTaxAmount(); // shuold match Total if there aren't any "non-tippable" items
+    return tippableAmount + getTaxAmount();
 
   }
 
@@ -124,12 +124,6 @@ public class POSOrder {
   }
 
 
-  /// <summary>
-  /// manages adding a POSItem to an order. If the POSItem already exists, the quantity is just incremented
-  /// </summary>
-  /// <param name="i"></param>
-  /// <param name="quantity"></param>
-  /// <returns>The POSLineItem for the POSItem. Will either return a new one, or an exising with its quantity incremented</returns>
   public POSLineItem addItem(POSItem i, int quantity) {
     boolean exists = false;
     POSLineItem targetItem = null;
@@ -138,7 +132,6 @@ public class POSOrder {
         exists = true;
         lineI.incrementQuantity(quantity);
         targetItem = lineI;
-        //notifyObserverItemChanged(targetItem);
         break;
       }
     }
@@ -201,7 +194,6 @@ public class POSOrder {
     notifyObserverRefundAdded(refund);
   }
 
-  ///TODO: As per Clover GO example - public OrderStatus getStatus() {
   public POSOrder.OrderStatus getStatus() {
 
     if (items.size() == 0 && payments.size() == 0) {

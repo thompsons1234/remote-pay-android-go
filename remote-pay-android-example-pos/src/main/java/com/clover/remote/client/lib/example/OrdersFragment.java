@@ -84,7 +84,6 @@ public class OrdersFragment extends Fragment implements OrderObserver {
   }
 
   public OrdersFragment() {
-    // Required empty public constructor
   }
 
   @Override
@@ -102,7 +101,6 @@ public class OrdersFragment extends Fragment implements OrderObserver {
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    // Inflate the layout for this fragment
     view = inflater.inflate(R.layout.fragment_orders, container, false);
 
     itemsListView = (ListView) view.findViewById(R.id.ItemsGridView);
@@ -291,7 +289,6 @@ public class OrdersFragment extends Fragment implements OrderObserver {
     });
   }
 
-  // TODO: Rename method, update argument and hook method into UI event
   public void onButtonPressed(Uri uri) {
     if (mListener != null) {
       mListener.onFragmentInteraction(uri);
@@ -474,7 +471,6 @@ public class OrdersFragment extends Fragment implements OrderObserver {
    * >Communicating with Other Fragments</a> for more information.
    */
   public interface OnFragmentInteractionListener {
-    // TODO: Update argument type and name
     public void onFragmentInteraction(Uri uri);
   }
 

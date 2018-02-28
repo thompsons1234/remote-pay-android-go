@@ -43,11 +43,9 @@ public class RemoteUsbManager extends UsbCloverManager<Void> {
 
   private static final int REMOTE_STRING_MAGIC_START_TOKEN = 0xcc771122;
   private static final int REMOTE_STRING_LENGTH_MAX = 4 * 1024 * 1024;
-  private static final int REMOTE_STRING_HEADER_BYTE_COUNT = 4 + 4; // 2 ints
+  private static final int REMOTE_STRING_HEADER_BYTE_COUNT = 4 + 4;
 
-  // Defined by AOA
   private static final int MAX_PACKET_BYTES = 16384;
-  // Size of a short
   private static final int PACKET_HEADER_SIZE = 2;
 
   public RemoteUsbManager(Context context) {
@@ -69,21 +67,17 @@ public class RemoteUsbManager extends UsbCloverManager<Void> {
     return findDevice(usbManager, VENDOR_PRODUCT_IDS) != null;
   }
 
-  // See init.maplecutter.usb.rc in platform for more info
   public static final Pair<Integer, Integer>[] VENDOR_PRODUCT_IDS = new Pair[]{
-      // Somehow related to the Mobile - Don't remove
-      Pair.create(0x18d1, 0x2d00), // google accessory usb device
-      Pair.create(0x18d1, 0x2d01), // google adb,accessory usb device
+      Pair.create(0x18d1, 0x2d00),
+      Pair.create(0x18d1, 0x2d01),
 
-      // Production devices
-      Pair.create(0x28f3, 0x2002), // leafcutter accessory usb device
-      Pair.create(0x28f3, 0x3002), // maplecutter accessory usb device
-      Pair.create(0x28f3, 0x4002), // bayleaf accessory usb device
+      Pair.create(0x28f3, 0x2002),
+      Pair.create(0x28f3, 0x3002),
+      Pair.create(0x28f3, 0x4002),
 
-      // Development devices
-      Pair.create(0x28f3, 0x2004), // leafcutter adb,accessory usb device
-      Pair.create(0x28f3, 0x3004), // maplecutter adb,accessory usb device
-      Pair.create(0x28f3, 0x4004), // bayleaf adb,accessory usb device
+      Pair.create(0x28f3, 0x2004),
+      Pair.create(0x28f3, 0x3004),
+      Pair.create(0x28f3, 0x4004),
   };
 
   @Override
@@ -97,7 +91,6 @@ public class RemoteUsbManager extends UsbCloverManager<Void> {
       Log.d(TAG, String.format("Checking interface match: %s", usbInterface));
     }
 
-    // Specified to avoid using ADB interface
     if (usbInterface.getInterfaceClass() == 0xff
         && usbInterface.getInterfaceSubclass() == 0xff
         && usbInterface.getInterfaceProtocol() == 0) {
@@ -109,7 +102,7 @@ public class RemoteUsbManager extends UsbCloverManager<Void> {
 
   @Override
   protected int getReadTimeOut() {
-    return -1; // No timeout, wait forever
+    return -1;
   }
 
   @Override
@@ -176,7 +169,6 @@ public class RemoteUsbManager extends UsbCloverManager<Void> {
       DataInputStream dis = new DataInputStream(new ByteArrayInputStream(inputData));
 
       if (outputStream.size() == 0) {
-        // Start packet
         final int startInt = dis.readInt();
         if (startInt != REMOTE_STRING_MAGIC_START_TOKEN) {
           Log.e(TAG, "Invalid start token: " + Integer.toHexString(startInt));
@@ -193,7 +185,6 @@ public class RemoteUsbManager extends UsbCloverManager<Void> {
 
         outputStream.write(inputData, REMOTE_STRING_HEADER_BYTE_COUNT, numBytesRead - REMOTE_STRING_HEADER_BYTE_COUNT);
       } else {
-        // Continuation packet
         outputStream.write(inputData, 0, numBytesRead);
       }
 

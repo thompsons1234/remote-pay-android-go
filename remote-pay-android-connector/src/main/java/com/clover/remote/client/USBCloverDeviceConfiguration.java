@@ -75,16 +75,13 @@ public class USBCloverDeviceConfiguration implements CloverDeviceConfiguration, 
     PackageManager pm = context.getPackageManager();
     try {
       pm.getPackageInfo("com.clover.remote.protocol.usb", PackageManager.GET_ACTIVITIES);
-      // getPackageInfo will throw an exception if it isn't found
       Intent disableIntent = new Intent();
       disableIntent.setComponent(new ComponentName("com.clover.remote.protocol.usb", "com.clover.remote.protocol.usb.pos.EnablePosReceiver"));
       disableIntent.putExtra("enabled", false);
       context.sendBroadcast(disableIntent);
     } catch (PackageManager.NameNotFoundException nnfe) {
-      // com.clover.remote.protocol.usb isn't installed, so we don't have to disable the USB Pay Display components
       Log.d(TAG, "USB Pay Display not found");
     } catch (Exception e) {
-      // just to prevent some unforeseen exception from preventing the transport from initializing
       Log.e(TAG, "Unexpected error trying to check for and disable USB Pay Display: ", e);
     }
 

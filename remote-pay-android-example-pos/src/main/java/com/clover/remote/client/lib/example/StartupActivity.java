@@ -82,16 +82,19 @@ public class StartupActivity extends Activity {
   public static final String EXTRA_CLOVER_GO_CLIENT = "EXTRA_CLOVER_GO_CLIENT";
   public static final String EXTRA_CLOVER_GO_ACCESS_TOKEN = "EXTRA_CLOVER_GO_ACCESS_TOKEN";
 
-  private static final CloverGoDeviceConfiguration.ENV GO_ENV = CloverGoDeviceConfiguration.ENV.DEMO;
+  /**
+   * IMPORTANT: Set these values correctly
+   * GO_ENV - e.g. demo, sandbox, prod
+   * APP_ID - your app's ID
+   * APP_VERSION - your app's version
+   */
+  private static final CloverGoDeviceConfiguration.ENV GO_ENV = CloverGoDeviceConfiguration.ENV.SANDBOX;
   private static final String APP_ID = "<put your APP ID here>";
   private static final String APP_VERSION = "<put your APP VERSION here>";
 
   private String mGoApiKey, mGoSecret, mGoAccessToken;
   private String mOAuthClientId, mOAuthClientSecret, mOAuthEnv, mOAuthUrl, mOAuthApiKey, mOAuthTokenUrl;
 
-  // Clover devices do not always support the custom Barcode scanner implemented here.
-  // They DO have a different capability to scan barcodes.
-  // We do a switch based on the platform to allow the example app to run on station.
   private BarcodeScanner cloverBarcodeScanner;
   private BroadcastReceiver cloverBarcodeReceiver = new BroadcastReceiver() {
     @Override
@@ -155,7 +158,6 @@ public class StartupActivity extends Activity {
       }
     });
 
-    // initialize...
     TextView textView = (TextView) findViewById(R.id.lanPayDisplayAddress);
     String url = this.getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).getString(LAN_PAY_DISPLAY_URL, "wss://192.168.1.101:12345/remote_pay");
 
@@ -168,7 +170,6 @@ public class StartupActivity extends Activity {
     ((RadioButton) findViewById(R.id.usbRadioButton)).setChecked(!CONFIG_TYPE_LAN.equals(mode));
     ((RadioButton) findViewById(R.id.goRadioButton)).setChecked(CONFIG_TYPE_GO.equalsIgnoreCase(mode));
 
-    // Switch out the barcode scanner for the Clover Devices
     if (Platform.isClover()) {
       cloverBarcodeScanner = new BarcodeScanner(this);
     }
@@ -177,7 +178,6 @@ public class StartupActivity extends Activity {
   @Override
   protected void onResume() {
     super.onResume();
-    // If this is a clover device register the listener
     if (cloverBarcodeScanner != null) {
       registerCloverBarcodeScanner();
     }
@@ -186,7 +186,6 @@ public class StartupActivity extends Activity {
   @Override
   protected void onPause() {
     super.onPause();
-    // If this is a clover device unregister the listener
     if (cloverBarcodeScanner != null) {
       unregisterCloverBarcodeScanner();
     }
@@ -194,8 +193,6 @@ public class StartupActivity extends Activity {
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    // For non-clover devices this is how the generic barcode scanner
-    // returns the scanned barcode
     if (requestCode == BARCODE_READER_REQUEST_CODE) {
       if (resultCode == CommonStatusCodes.SUCCESS) {
         if (data != null) {
@@ -269,11 +266,9 @@ public class StartupActivity extends Activity {
 
   public void scanQRCode(View view) {
     if (cloverBarcodeScanner == null) {
-      // not clover, try the generic way
       Intent intent = new Intent(getApplicationContext(), BarcodeCaptureActivity.class);
       startActivityForResult(intent, BARCODE_READER_REQUEST_CODE);
     } else {
-      // It is a Clover device, use the Clover version
       Bundle extras = new Bundle();
       extras.putBoolean(Intents.EXTRA_LED_ON, false);
       extras.putBoolean(Intents.EXTRA_SCAN_QR_CODE, true);
@@ -313,7 +308,7 @@ public class StartupActivity extends Activity {
       config = CONFIG_TYPE_USB;
       editor.putString(CONNECTION_MODE, CONFIG_TYPE_USB);
       editor.apply();
-    } else { // (group.getCheckedRadioButtonId() == R.id.lanRadioButton)
+    } else {
       String uriStr = ((TextView) findViewById(R.id.lanPayDisplayAddress)).getText().toString();
       config = CONFIG_TYPE_WS;
       uri = parseValidateAndStoreURI(uriStr);
@@ -445,17 +440,38 @@ public class StartupActivity extends Activity {
 
   private void setGoParams() {
 
-    mOAuthApiKey = "<put your key here>";
-
+    /**
+     * These should be provided to you.
+     */
     mGoApiKey = "<put your key here>";
     mGoSecret = "<put your secret here>";
-    mGoAccessToken = "<put your token here>";
 
+    /**
+     * App ID found in developer portal app settings.
+     * App secret found in developer portal app settings.
+     */
     mOAuthClientId = "<put your Client ID here>";
+    mOAuthClientSecret = "<put your secret here>";
+
+    /**
+     * Update the URLs accordingly based on the environment you want to point to
+     * e.g. sandbox.dev.clover.com or www.clover.com
+     */
+    mOAuthEnv = "www.clover.com";
     mOAuthUrl = "https://clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
     mOAuthTokenUrl = "https://clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=token";
 
-    mOAuthClientSecret = "<put your secret here>";
-    mOAuthEnv = "www.clover.com";
+
+    /**
+     * This is used for demo purposes. You can generate an access token and hardcode it here so
+     * that you can use the same access token repeatedly.
+     */
+    mGoAccessToken = "<put your token here>";
+
+    /**
+     * This is not required and is intended for demo purposes only. Each client needs to have their
+     * own implementation of getting the access token using the code generated by Clover.
+     */
+    mOAuthApiKey = "<put your key here>";
   }
 }

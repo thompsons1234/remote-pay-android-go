@@ -36,7 +36,6 @@ public class ProcessingFragment extends Fragment {
   }
 
   public ProcessingFragment() {
-    // Required empty public constructor
   }
 
   @Override

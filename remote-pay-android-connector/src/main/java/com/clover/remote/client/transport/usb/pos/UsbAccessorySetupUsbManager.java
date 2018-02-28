@@ -59,22 +59,18 @@ public class UsbAccessorySetupUsbManager extends UsbCloverManager<Void> {
     return findDevice(usbManager, VENDOR_PRODUCT_IDS) != null;
   }
 
-  // See init.maplecutter.usb.rc in platform for more info
   public static final Pair<Integer, Integer>[] VENDOR_PRODUCT_IDS = new Pair[]{
-      // Development devices
-      Pair.create(0x28f3, 0x2000), // leafcutter adb device
-      Pair.create(0x28f3, 0x3000), // maplecutter adb device
-      Pair.create(0x28f3, 0x4000), // bayleaf adb device
+      Pair.create(0x28f3, 0x2000),
+      Pair.create(0x28f3, 0x3000),
+      Pair.create(0x28f3, 0x4000),
 
-      // Development devices (probably never used)
-      Pair.create(0x28f3, 0x2001), // leafcutter rndis,adb device
-      Pair.create(0x28f3, 0x3001), // maplecutter rndis,adb device
-      Pair.create(0x28f3, 0x4001), // bayleaf rndis,adb device
+      Pair.create(0x28f3, 0x2001),
+      Pair.create(0x28f3, 0x3001),
+      Pair.create(0x28f3, 0x4001),
 
-      // Production devices
-      Pair.create(0x28f3, 0x2003), // leafcutter cloverusb device
-      Pair.create(0x28f3, 0x3003), // maplecutter cloverusb device
-      Pair.create(0x28f3, 0x4003), // bayleaf cloverusb device
+      Pair.create(0x28f3, 0x2003),
+      Pair.create(0x28f3, 0x3003),
+      Pair.create(0x28f3, 0x4003),
   };
 
   @Override
@@ -101,7 +97,6 @@ public class UsbAccessorySetupUsbManager extends UsbCloverManager<Void> {
         throw new UsbConnectException("Unable to start accessory mode, open failed");
       }
     } finally {
-      // Always disconnect immediately
       disconnect();
     }
   }
@@ -154,8 +149,6 @@ public class UsbAccessorySetupUsbManager extends UsbCloverManager<Void> {
     if (!sendAccessoryString(ACCESSORY_STRING_VERSION, Build.VERSION.INCREMENTAL)) {
       return false;
     }
-    // For now the Android platform won't accept this string because it doesn't start with http or https and
-    // the popup won't show up
     if (!sendAccessoryString(ACCESSORY_STRING_URI, "market://details?id=com.clover.remote.protocol.usb")) {
       return false;
     }

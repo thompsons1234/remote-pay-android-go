@@ -167,7 +167,6 @@ public class CloverGoConnector extends DefaultCloverGoConnector {
 
   @Override
   public void resetDevice() {
-    //TODO:
   }
 
   /////////////////////////////////////////////////////////////////////////////////////////////

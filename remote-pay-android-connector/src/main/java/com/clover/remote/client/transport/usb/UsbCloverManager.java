@@ -132,7 +132,6 @@ public abstract class UsbCloverManager<T> {
    * Called before a connection is attempted, does nothing by default and may be overridden.
    */
   protected void onPreConnect() {
-    // Do nothing
   }
 
   private void connect() throws UsbConnectException {
@@ -290,7 +289,6 @@ public abstract class UsbCloverManager<T> {
    * Called after disconnect is complete, does nothing by default and may be overridden.
    */
   protected void onPostDisconnect() {
-    // Do nothing
   }
 
   public final boolean isConnected() {
@@ -328,7 +326,6 @@ public abstract class UsbCloverManager<T> {
    * Called when a transfer error occurs, does nothing by default and may be overridden.
    */
   protected void onTransferError() {
-    // Do nothing
   }
 
   private int bulkWrite(byte[] data, T params) throws IOException, InterruptedException {
@@ -356,10 +353,8 @@ public abstract class UsbCloverManager<T> {
         Log.v(TAG, String.format("[write] requesting transfer of %s bytes", writePacket.length));
       }
 
-      // Load member variable into local variable for handling asynchronous closing of the connection
       UsbDeviceConnection localConnection = mConnection;
       if (localConnection == null) {
-        // Connection closed underneath
         throw new IOException("Connection closed - [write] interrupted");
       }
 
@@ -371,7 +366,6 @@ public abstract class UsbCloverManager<T> {
       }
 
       if (bulkTransferResultSize < 0) {
-        // This may be due to physical disconnect, wait for an interrupt before erring out
         Thread.sleep(2000);
         totalBytesTransferred = -1;
         break;
@@ -412,10 +406,8 @@ public abstract class UsbCloverManager<T> {
         Log.v(TAG, "[read] requesting transfer");
       }
 
-      // Load member variable into local variable for handling asynchronous closing of the connection
       UsbDeviceConnection localConnection = mConnection;
       if (localConnection == null) {
-        // Connection closed underneath
         throw new IOException("Connection closed - [read] interrupted");
       }
       int numBytesRead = localConnection.bulkTransfer(mEndpointIn, mReadBuffer, getReadSize(), getReadTimeOut());
@@ -425,12 +417,9 @@ public abstract class UsbCloverManager<T> {
       }
 
       if (numBytesRead < 0) {
-        // This may be due to physical disconnect, wait for an interrupt before erring out
         Thread.sleep(2000);
         return null;
       } else if (numBytesRead == 0) {
-        // Ignore ZLP (Zero Length Packet) sent by recent versions of USB accessory driver, shouldn't actually ever
-        // happen since our protocol avoids it
         continue;
       }
 

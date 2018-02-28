@@ -29,12 +29,10 @@ import com.clover.remote.client.clovergo.ICloverGoConnector;
 public class PaymentTypeFragment extends Fragment {
 
   public PaymentTypeFragment() {
-    // Required empty public constructor
   }
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    // Inflate the layout for this fragment
     final View view = inflater.inflate(R.layout.fragment_go_payment_type, container, false);
     return view;
   }

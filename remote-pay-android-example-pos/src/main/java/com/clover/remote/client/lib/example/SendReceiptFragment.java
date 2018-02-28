@@ -39,7 +39,6 @@ public class SendReceiptFragment extends Fragment {
   }
 
   public SendReceiptFragment() {
-    // Required empty public constructor
   }
 
   @Override

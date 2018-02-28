@@ -32,7 +32,7 @@ public class POSItem {
     this.name = name;
     this.price = price;
     this.taxable = taxable;
-    this.tippable = tippable; //
+    this.tippable = tippable;
   }
 
   public String getName() {

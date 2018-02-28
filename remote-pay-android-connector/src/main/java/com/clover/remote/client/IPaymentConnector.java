@@ -99,7 +99,7 @@ public interface IPaymentConnector {
    *
    * @param request - A ManualRefundRequest object
    **/
-  void manualRefund(ManualRefundRequest request); // NakedRefund is a Transaction, with just negative amount
+  void manualRefund(ManualRefundRequest request);
 
   /**
    * Vault card information. Requests the mini capture card information and request a payment token from the payment gateway.

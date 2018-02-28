@@ -25,7 +25,6 @@ public class CloverGoDeviceConfiguration implements CloverDeviceConfiguration {
   private long scanPeriod = 30000;
   private boolean allowDuplicate = false;
   private boolean autoConnect = false;
-  //TODO: Device Type
   private ReaderInfo.ReaderType readerType = ReaderInfo.ReaderType.RP450;
 
   private CloverGoDeviceConfiguration(Context context, String accessToken, ENV env, String apiKey, String secret, String appId, String appVersion) {
@@ -60,7 +59,6 @@ public class CloverGoDeviceConfiguration implements CloverDeviceConfiguration {
 
   @Override
   public CloverTransport getCloverTransport() {
-    // TODO: do we need this still?
     return null;
   }
 
@@ -156,8 +154,6 @@ public class CloverGoDeviceConfiguration implements CloverDeviceConfiguration {
      */
     public Builder allowAutoConnect(boolean autoConnect) {
       mCLoCloverGoConfiguration.autoConnect = autoConnect;
-      //if (autoConnect)
-      //   cloverGoConnector.registerActivityCallbacks();
       return this;
     }
 
@@ -169,8 +165,6 @@ public class CloverGoDeviceConfiguration implements CloverDeviceConfiguration {
      */
     public Builder deviceType(ReaderInfo.ReaderType readerType) {
       mCLoCloverGoConfiguration.readerType = readerType;
-      //if (autoConnect)
-      //   cloverGoConnector.registerActivityCallbacks();
       return this;
     }
 

@@ -24,8 +24,8 @@ public class VoidPaymentRequest extends BaseRequest {
   private String paymentId;
   private String voidReason;
 
-  private String employeeId;//optional TODO: Revisit
-  private String orderId; //optional TODO: Revisit
+  private String employeeId;//optional
+  private String orderId; //optional
   private boolean disablePrinting; //optional
   private boolean disableReceiptSelection; //optional
 

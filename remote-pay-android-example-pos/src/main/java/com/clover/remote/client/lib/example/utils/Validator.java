@@ -20,7 +20,6 @@ public class Validator {
     }
 
     public static boolean validatePhoneNumberInput(String phoneNumber) {
-        // Strip out non-numerics
         String numberString = phoneNumber.replaceAll("[^\\d]", "");
         boolean isValidPhoneNumber = numberString.length() >= 10 && Patterns.PHONE.matcher(numberString).matches();
         return isValidPhoneNumber;
