@@ -43,7 +43,8 @@ public class PendingPaymentsFragment extends Fragment {
   private WeakReference<ICloverConnector> cloverConnectorWeakReference;
 
   ListView pendingPaymentsListView;
-  List<PendingPaymentEntry> pendingPayments;
+  //Changed PendingPaymentsEntry to POSCard because CardsListViewAdapter is expecting a list of POSCard
+  List<POSCard> pendingPayments;
   private POSStore store;
 
   public static PendingPaymentsFragment newInstance(POSStore store, ICloverConnector cloverConnector) {
@@ -108,7 +109,7 @@ public class PendingPaymentsFragment extends Fragment {
     return view;
   }
 
-  public void setPendingPayments(List<PendingPaymentEntry> pendingPayments) {
+  public void setPendingPayments(List<POSCard> pendingPayments) {
     this.pendingPayments = pendingPayments;
   }
 
