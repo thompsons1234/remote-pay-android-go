@@ -16,13 +16,7 @@
 
 package com.clover.remote.client.lib.example;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.app.ProgressDialog;
+import android.app.*;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -38,106 +32,24 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.Spinner;
-import android.widget.Switch;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.view.*;
+import android.widget.*;
 import com.clover.remote.CardData;
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
-import com.clover.remote.client.CloverConnectorFactory;
-import com.clover.remote.client.CloverDeviceConfiguration;
-import com.clover.remote.client.ConnectorFactory;
-import com.clover.remote.client.Constants;
-import com.clover.remote.client.ICloverConnector;
-import com.clover.remote.client.ICloverConnectorListener;
-import com.clover.remote.client.MerchantInfo;
-import com.clover.remote.client.USBCloverDeviceConfiguration;
-import com.clover.remote.client.WebSocketCloverDeviceConfiguration;
+import com.clover.remote.client.*;
 import com.clover.remote.client.clovergo.CloverGoConnector;
 import com.clover.remote.client.clovergo.CloverGoConstants.TransactionType;
 import com.clover.remote.client.clovergo.CloverGoDeviceConfiguration;
 import com.clover.remote.client.clovergo.ICloverGoConnector;
 import com.clover.remote.client.clovergo.ICloverGoConnectorListener;
 import com.clover.remote.client.clovergo.util.DeviceUtil;
-import com.clover.remote.client.lib.example.messages.ConversationQuestionMessage;
-import com.clover.remote.client.lib.example.messages.ConversationResponseMessage;
-import com.clover.remote.client.lib.example.messages.CustomerInfo;
-import com.clover.remote.client.lib.example.messages.CustomerInfoMessage;
-import com.clover.remote.client.lib.example.messages.PayloadMessage;
-import com.clover.remote.client.lib.example.messages.PhoneNumberMessage;
-import com.clover.remote.client.lib.example.messages.Rating;
-import com.clover.remote.client.lib.example.messages.RatingsMessage;
-import com.clover.remote.client.lib.example.model.POSCard;
-import com.clover.remote.client.lib.example.model.POSDiscount;
-import com.clover.remote.client.lib.example.model.POSExchange;
-import com.clover.remote.client.lib.example.model.POSItem;
-import com.clover.remote.client.lib.example.model.POSNakedRefund;
-import com.clover.remote.client.lib.example.model.POSOrder;
-import com.clover.remote.client.lib.example.model.POSPayment;
-import com.clover.remote.client.lib.example.model.POSRefund;
-import com.clover.remote.client.lib.example.model.POSStore;
+import com.clover.remote.client.lib.example.messages.*;
+import com.clover.remote.client.lib.example.model.*;
 import com.clover.remote.client.lib.example.utils.CurrencyUtils;
 import com.clover.remote.client.lib.example.utils.DialogHelper;
 import com.clover.remote.client.lib.example.utils.IdUtils;
-import com.clover.remote.client.messages.AuthResponse;
-import com.clover.remote.client.messages.CapturePreAuthResponse;
-import com.clover.remote.client.messages.CardApplicationIdentifier;
-import com.clover.remote.client.messages.CloseoutRequest;
-import com.clover.remote.client.messages.CloseoutResponse;
-import com.clover.remote.client.messages.CloverDeviceErrorEvent;
-import com.clover.remote.client.messages.CloverDeviceEvent;
-import com.clover.remote.client.messages.ConfirmPaymentRequest;
-import com.clover.remote.client.messages.CustomActivityRequest;
-import com.clover.remote.client.messages.CustomActivityResponse;
-import com.clover.remote.client.messages.ManualRefundRequest;
-import com.clover.remote.client.messages.ManualRefundResponse;
-import com.clover.remote.client.messages.MessageFromActivity;
-import com.clover.remote.client.messages.MessageToActivity;
-import com.clover.remote.client.messages.OpenCashDrawerRequest;
-import com.clover.remote.client.messages.PaymentResponse;
-import com.clover.remote.client.messages.PreAuthRequest;
-import com.clover.remote.client.messages.PreAuthResponse;
-import com.clover.remote.client.messages.PrintJobStatusRequest;
-import com.clover.remote.client.messages.PrintJobStatusResponse;
-import com.clover.remote.client.messages.PrintManualRefundDeclineReceiptMessage;
-import com.clover.remote.client.messages.PrintManualRefundReceiptMessage;
-import com.clover.remote.client.messages.PrintPaymentDeclineReceiptMessage;
-import com.clover.remote.client.messages.PrintPaymentMerchantCopyReceiptMessage;
-import com.clover.remote.client.messages.PrintPaymentReceiptMessage;
-import com.clover.remote.client.messages.PrintRefundPaymentReceiptMessage;
-import com.clover.remote.client.messages.PrintRequest;
-import com.clover.remote.client.messages.ReadCardDataRequest;
-import com.clover.remote.client.messages.ReadCardDataResponse;
-import com.clover.remote.client.messages.RefundPaymentResponse;
-import com.clover.remote.client.messages.ResetDeviceResponse;
-import com.clover.remote.client.messages.ResultCode;
-import com.clover.remote.client.messages.RetrieveDeviceStatusRequest;
-import com.clover.remote.client.messages.RetrieveDeviceStatusResponse;
-import com.clover.remote.client.messages.RetrievePaymentRequest;
-import com.clover.remote.client.messages.RetrievePaymentResponse;
-import com.clover.remote.client.messages.RetrievePendingPaymentsResponse;
-import com.clover.remote.client.messages.RetrievePrintersRequest;
-import com.clover.remote.client.messages.RetrievePrintersResponse;
-import com.clover.remote.client.messages.SaleResponse;
-import com.clover.remote.client.messages.TipAdjustAuthResponse;
-import com.clover.remote.client.messages.TransactionRequest;
-import com.clover.remote.client.messages.VaultCardResponse;
-import com.clover.remote.client.messages.VerifySignatureRequest;
-import com.clover.remote.client.messages.VoidPaymentRequest;
-import com.clover.remote.client.messages.VoidPaymentResponse;
+import com.clover.remote.client.messages.*;
 import com.clover.remote.message.TipAddedMessage;
 import com.clover.sdk.v3.payments.Credit;
 import com.clover.sdk.v3.payments.Payment;
@@ -146,27 +58,16 @@ import com.crashlytics.android.Crashlytics;
 import com.firstdata.clovergo.domain.model.Order;
 import com.firstdata.clovergo.domain.model.ReaderInfo;
 import com.google.gson.Gson;
+import io.fabric.sdk.android.Fabric;
 
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.security.KeyStore;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.prefs.Preferences;
 
-import io.fabric.sdk.android.Fabric;
-
-import static com.clover.remote.client.lib.example.AppConstants.CONFIG_TYPE_GO;
-import static com.clover.remote.client.lib.example.AppConstants.CONFIG_TYPE_USB;
-import static com.clover.remote.client.lib.example.AppConstants.CONFIG_TYPE_WS;
-import static com.clover.remote.client.lib.example.AppConstants.FRAGMENT_KEY_ENTRY;
-import static com.clover.remote.client.lib.example.AppConstants.FRAGMENT_PAYMENT_METHODS;
-import static com.clover.remote.client.lib.example.AppConstants.PAYMENT_TYPE_RP350;
-import static com.clover.remote.client.lib.example.AppConstants.PAYMENT_TYPE_RP450;
+import static com.clover.remote.client.lib.example.AppConstants.*;
 import static com.firstdata.clovergo.domain.model.ReaderInfo.ReaderType.RP350;
 import static com.firstdata.clovergo.domain.model.ReaderInfo.ReaderType.RP450;
 
@@ -188,6 +89,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   public static final String EXTRA_CLOVER_GO_CONNECTOR_API_KEY = "EXTRA_CLOVER_GO_CONNECTOR_CONFIG_API_KEY";
   public static final String EXTRA_CLOVER_GO_CONNECTOR_SECRET = "EXTRA_CLOVER_GO_CONNECTOR_CONFIG_SECRET";
   public static final String EXTRA_CLOVER_GO_CONNECTOR_ENV = "EXTRA_CLOVER_GO_CONNECTOR_ENV";
+  public static final String EXTRA_CLOVER_GO_CONNECTOR_QUICK_CHIP = "EXTRA_CLOVER_GO_CONNECTOR_QUICK_CHIP";
   public static final int WS_ENDPOINT_ACTIVITY = 123;
   public static final int SVR_ACTIVITY = 456;
 
@@ -230,6 +132,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
   private String appId;
   private String appVersion;
   private CloverGoDeviceConfiguration.ENV goEnv;
+  private boolean quickChip;
 
   private ArrayList<ReaderInfo> mArrayListReadersList;
   private ArrayList<String> mArrayListReaderString;
@@ -315,6 +218,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       appId = getIntent().getStringExtra(EXTRA_CLOVER_GO_CONNECTOR_APP_ID);
       appVersion = getIntent().getStringExtra(EXTRA_CLOVER_GO_CONNECTOR_APP_VERSION);
       goEnv = (CloverGoDeviceConfiguration.ENV) getIntent().getSerializableExtra(EXTRA_CLOVER_GO_CONNECTOR_ENV);
+      quickChip = getIntent().getBooleanExtra(EXTRA_CLOVER_GO_CONNECTOR_QUICK_CHIP, false);
 
       initializeReader(RP450);
       cloverConnector = cloverGoConnectorMap.get(RP450);
@@ -444,7 +348,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       @Override
       public void onClick(DialogInterface dialog, int which) {
         dialog.dismiss();
-        ExamplePOSActivity.super.onBackPressed();
+        ExamplePOSActivity.this.finish();
       }
     });
     confirmationDialog.show();
@@ -485,7 +389,12 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
     goReaderType = readerType;
 
     if (cloverGoConnectorMap.get(readerType) == null) {
-      CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration.Builder(getApplicationContext(), accessToken, goEnv, apiKey, secret, appId, appVersion).deviceType(readerType).allowAutoConnect(false).build();
+      CloverGoDeviceConfiguration config = new CloverGoDeviceConfiguration
+          .Builder(getApplicationContext(), accessToken, goEnv, apiKey, secret, appId, appVersion)
+          .deviceType(readerType)
+          .allowAutoConnect(false)
+          .enableQuickChip(quickChip)
+          .build();
       ICloverGoConnector cloverGoConnector = (CloverGoConnector) ConnectorFactory.createCloverConnector(config);
       cloverGoConnectorMap.put(readerType, cloverGoConnector);
       cloverGoConnector.addCloverGoConnectorListener(ccGoListener);
@@ -1887,17 +1796,17 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
 
   private void showPaymentInfo(Payment payment) {
     showAlertDialog("Payment Info",
-            "Payment ID: " + payment.getId()
-                    + "\nPayment External ID: " + payment.getExternalPaymentId()
-                    + "\nOrder ID: " + payment.getOrder().getId()
-                    + "\nAmount: " + payment.getAmount()
-                    + "\nCard Holder Name: " + payment.getCardTransaction().getCardholderName()
-                    + "\nCard Type: " + payment.getCardTransaction().getCardType()
-                    + "\nTransaction Type: " + payment.getCardTransaction().getType()
-                    + "\nEntry Type: " + payment.getCardTransaction().getEntryType()
-                    + "\nAuth Code: " + payment.getCardTransaction().getAuthCode()
-                    + "\nFirst 6: " + payment.getCardTransaction().getFirst6()
-                    + "\nLast 4: " + payment.getCardTransaction().getLast4());
+        "Payment ID: " + payment.getId()
+            + "\nPayment External ID: " + payment.getExternalPaymentId()
+            + "\nOrder ID: " + payment.getOrder().getId()
+            + "\nAmount: " + payment.getAmount()
+            + "\nCard Holder Name: " + payment.getCardTransaction().getCardholderName()
+            + "\nCard Type: " + payment.getCardTransaction().getCardType()
+            + "\nTransaction Type: " + payment.getCardTransaction().getType()
+            + "\nEntry Type: " + payment.getCardTransaction().getEntryType()
+            + "\nAuth Code: " + payment.getCardTransaction().getAuthCode()
+            + "\nFirst 6: " + payment.getCardTransaction().getFirst6()
+            + "\nLast 4: " + payment.getCardTransaction().getLast4());
   }
 
   private void showStatus(String msg) {
@@ -2735,5 +2644,4 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
         Constants.CARD_ENTRY_METHOD_ICC_CONTACT |
         Constants.CARD_ENTRY_METHOD_NFC_CONTACTLESS;
   }
-
 }

@@ -2,91 +2,26 @@ package com.clover.remote.client.clovergo;
 
 import android.text.TextUtils;
 import android.util.Log;
-
 import com.clover.remote.Challenge;
 import com.clover.remote.client.Constants;
 import com.clover.remote.client.MerchantInfo;
 import com.clover.remote.client.clovergo.CloverGoConstants.TransactionType;
 import com.clover.remote.client.clovergo.di.CloverGoSDKApplicationData;
-import com.clover.remote.client.clovergo.messages.BillingAddress;
-import com.clover.remote.client.clovergo.messages.KeyedAuthRequest;
-import com.clover.remote.client.clovergo.messages.KeyedPreAuthRequest;
-import com.clover.remote.client.clovergo.messages.KeyedRequest;
-import com.clover.remote.client.clovergo.messages.KeyedSaleRequest;
+import com.clover.remote.client.clovergo.messages.*;
 import com.clover.remote.client.clovergo.util.NumberUtil;
 import com.clover.remote.client.lib.R;
-import com.clover.remote.client.messages.AuthRequest;
-import com.clover.remote.client.messages.AuthResponse;
-import com.clover.remote.client.messages.CapturePreAuthRequest;
-import com.clover.remote.client.messages.CapturePreAuthResponse;
-import com.clover.remote.client.messages.CardApplicationIdentifier;
-import com.clover.remote.client.messages.CloseoutRequest;
-import com.clover.remote.client.messages.CloseoutResponse;
-import com.clover.remote.client.messages.CloverDeviceErrorEvent;
-import com.clover.remote.client.messages.CloverDeviceEvent;
-import com.clover.remote.client.messages.ConfirmPaymentRequest;
-import com.clover.remote.client.messages.PreAuthRequest;
-import com.clover.remote.client.messages.PreAuthResponse;
-import com.clover.remote.client.messages.RefundPaymentRequest;
-import com.clover.remote.client.messages.RefundPaymentResponse;
-import com.clover.remote.client.messages.ResultCode;
-import com.clover.remote.client.messages.SaleRequest;
-import com.clover.remote.client.messages.SaleResponse;
-import com.clover.remote.client.messages.TipAdjustAuthRequest;
-import com.clover.remote.client.messages.TipAdjustAuthResponse;
-import com.clover.remote.client.messages.TransactionRequest;
-import com.clover.remote.client.messages.VoidPaymentRequest;
-import com.clover.remote.client.messages.VoidPaymentResponse;
+import com.clover.remote.client.messages.*;
 import com.clover.sdk.v3.base.Reference;
 import com.clover.sdk.v3.order.VoidReason;
-import com.clover.sdk.v3.payments.CardEntryType;
-import com.clover.sdk.v3.payments.CardTransaction;
-import com.clover.sdk.v3.payments.CardTransactionType;
-import com.clover.sdk.v3.payments.CardType;
-import com.clover.sdk.v3.payments.Result;
-import com.firstdata.clovergo.domain.model.CreditCard;
-import com.firstdata.clovergo.domain.model.EmployeeMerchant;
-import com.firstdata.clovergo.domain.model.EmvCard;
+import com.clover.sdk.v3.payments.*;
+import com.firstdata.clovergo.domain.model.*;
 import com.firstdata.clovergo.domain.model.Error;
-import com.firstdata.clovergo.domain.model.Order;
 import com.firstdata.clovergo.domain.model.Payment;
-import com.firstdata.clovergo.domain.model.ReaderError;
-import com.firstdata.clovergo.domain.model.ReaderInfo;
-import com.firstdata.clovergo.domain.model.ReaderProgressEvent;
-import com.firstdata.clovergo.domain.model.RefundSuccess;
-import com.firstdata.clovergo.domain.model.TransactionError;
 import com.firstdata.clovergo.domain.rx.EventBus;
 import com.firstdata.clovergo.domain.rx.ReusableObserver;
-import com.firstdata.clovergo.domain.usecase.AddTips;
-import com.firstdata.clovergo.domain.usecase.AuthTransaction;
-import com.firstdata.clovergo.domain.usecase.CancelCardRead;
-import com.firstdata.clovergo.domain.usecase.CaptureSignature;
-import com.firstdata.clovergo.domain.usecase.CaptureTransaction;
-import com.firstdata.clovergo.domain.usecase.CloseOut;
-import com.firstdata.clovergo.domain.usecase.ConnectToReader;
-import com.firstdata.clovergo.domain.usecase.DisconnectReader;
-import com.firstdata.clovergo.domain.usecase.GetConnectedReaders;
-import com.firstdata.clovergo.domain.usecase.GetSDKMerchantsInfo;
-import com.firstdata.clovergo.domain.usecase.PreAuthTransaction;
-import com.firstdata.clovergo.domain.usecase.ReadCard;
-import com.firstdata.clovergo.domain.usecase.RefundTransaction;
-import com.firstdata.clovergo.domain.usecase.SaleTransaction;
-import com.firstdata.clovergo.domain.usecase.ScanForReaders;
-import com.firstdata.clovergo.domain.usecase.SendReceipt;
-import com.firstdata.clovergo.domain.usecase.VoidTransaction;
-import com.firstdata.clovergo.domain.usecase.WriteToCard;
+import com.firstdata.clovergo.domain.usecase.*;
 import com.google.android.gms.iid.InstanceID;
 import com.roam.roamreaderunifiedapi.utils.HexUtils;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.inject.Inject;
-
 import io.reactivex.CompletableObserver;
 import io.reactivex.CompletableSource;
 import io.reactivex.Observable;
@@ -98,6 +33,9 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
+
+import javax.inject.Inject;
+import java.util.*;
 
 import static com.clover.remote.client.clovergo.CloverGoConstants.CARD_MODE_EMV_CONTACT;
 import static com.firstdata.clovergo.domain.model.ReaderInfo.ReaderType.RP350;
@@ -173,9 +111,14 @@ public class CloverGoConnectorImpl {
   private Payment mPayment;
   private CreditCard mCreditCard;
   private TransactionError mTransactionError;
+  private ConfirmPaymentRequest mConfirmPaymentRequest;
+  private Challenge[] mChallenges;
   private EmployeeMerchant mEmployeeMerchant;
   private boolean mLastErrorWasDuplicateTransaction = false;
   private boolean mLastPaymentWasForPartialAuth = false;
+  private boolean isQuickChip;
+  private boolean isQuickChipCardRemoved;
+
   private String noCardReadersConnected;
 
   public CloverGoConnectorImpl(final CloverGoConnectorBroadcaster broadcaster, CloverGoDeviceConfiguration configuration) {
@@ -200,6 +143,8 @@ public class CloverGoConnectorImpl {
       default: // DEMO is default
         url = "https://api-qa.payeezy.com/clovergosdk/v2/";
     }
+
+    isQuickChip = configuration.isQuickChip();
 
     CloverGoSDKApplicationData cloverGoSDKApplicationData = new CloverGoSDKApplicationData(configuration.getApplicationId(), configuration.getAppVersion(), configuration.getContext(), url, configuration.getApiKey(),
         configuration.getSecret(), configuration.getAccessToken(), InstanceID.getInstance(configuration.getContext()).getId());
@@ -249,6 +194,7 @@ public class CloverGoConnectorImpl {
         mPayment = payment;
 
         if (!mLastPaymentWasForPartialAuth && mOrder.getStatus() == Order.STATUS_PARTIAL_PAYMENT) {
+          Log.d(TAG, "mPaymentObserver next PARTIAL AUTH");
           ConfirmPaymentRequest confirmPaymentRequest = new ConfirmPaymentRequest();
 
           String challengeMessage = "This card has been approved for " +
@@ -263,7 +209,7 @@ public class CloverGoConnectorImpl {
           mLastPaymentWasForPartialAuth = true;
           mBroadcaster.notifyOnConfirmPaymentRequest(confirmPaymentRequest);
 
-        } else if (CARD_MODE_EMV_CONTACT.equalsIgnoreCase(mPayment.getCard().getMode())) {
+        } else if (!isQuickChip && CARD_MODE_EMV_CONTACT.equalsIgnoreCase(mPayment.getCard().getMode())) {
 
           Log.d(TAG, "mPaymentObserver next EMV_CONTACT");
           Map<String, String> data = new HashMap<>();
@@ -287,10 +233,15 @@ public class CloverGoConnectorImpl {
           }
           mWriteToCard.getObservable(mLastTransactionReader, data).subscribe();
 
+        } else if (isQuickChip && !isQuickChipCardRemoved && !(mLastTransactionRequest instanceof KeyedRequest)) {
+          Log.d(TAG, "mPaymentObserver next EMV_CONTACT " + isQuickChip + " " + isQuickChipCardRemoved);
+          // don't do anything and wait for card to be removed
+
         } else if (mPayment.getCard().isSignatureRequired()) {
+          Log.d(TAG, "mPaymentObserver next do signature");
           notifySignatureRequired();
         } else {
-          Log.d(TAG, "mPaymentObserver next non-EMV_CONTACT");
+          Log.d(TAG, "mPaymentObserver next do receipt");
           notifySendReceipt();
         }
       }
@@ -303,16 +254,23 @@ public class CloverGoConnectorImpl {
         mLastErrorWasDuplicateTransaction = false;
 
         if (DUPLICATE_TRANSACTION.equals(mTransactionError.getCode())) {
+          Log.d(TAG, "mPaymentObserver error duplicate");
           mLastErrorWasDuplicateTransaction = true;
-          ConfirmPaymentRequest confirmPaymentRequest = new ConfirmPaymentRequest();
-          Challenge[] challenge = {new Challenge(mTransactionError.getMessage(), Challenge.ChallengeType.DUPLICATE_CHALLENGE, VoidReason.REJECT_DUPLICATE)};
-          confirmPaymentRequest.setChallenges(challenge);
-          mBroadcaster.notifyOnConfirmPaymentRequest(confirmPaymentRequest);
+          mConfirmPaymentRequest = new ConfirmPaymentRequest();
+          mChallenges = new Challenge[]{new Challenge(mTransactionError.getMessage(),
+              Challenge.ChallengeType.DUPLICATE_CHALLENGE,
+              VoidReason.REJECT_DUPLICATE)};
+          mConfirmPaymentRequest.setChallenges(mChallenges);
+
+          if (!isQuickChip || isQuickChipCardRemoved ||  mLastTransactionRequest instanceof KeyedRequest)
+            mBroadcaster.notifyOnConfirmPaymentRequest(mConfirmPaymentRequest);
+
           return;
         } else if ((CHARGE_DECLINED.equals(mTransactionError.getCode()) ||
             CHARGE_DECLINED_REFERRAL.equals(mTransactionError.getCode())) &&
             mReaderProgressEvent != null &&
             mReaderProgressEvent.getEventType() == ReaderProgressEvent.EventType.EMV_DATA) {
+          Log.d(TAG, "mPaymentObserver error declined");
 
           mGetConnectedReaders.getBlockingObservable().subscribe(new Consumer<ReaderInfo>() {
             @Override
@@ -335,7 +293,9 @@ public class CloverGoConnectorImpl {
           });
           return;
         }
-        notifyErrorResponse();
+
+        if (!isQuickChip)
+          notifyErrorResponse();
 
       }
     };
@@ -406,20 +366,38 @@ public class CloverGoConnectorImpl {
             deviceEvent = new CloverDeviceEvent();
             deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.EMV_COMPLETE);
             deviceEvent.setMessage("Please remove card");
-            mBroadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
 
-            if (!(readerProgressEvent.getData().get("status").equalsIgnoreCase("Success") && "TC".equalsIgnoreCase(readerProgressEvent.getData().get("cryptogram_information_data")))) {
-              Log.d(TAG, "mProgressObserver next " + readerProgressEvent.getEventType() + " success and tc crypto");
+            if (!isQuickChip) {
+              if (!(readerProgressEvent.getData().get("status").equalsIgnoreCase("Success") && "TC".equalsIgnoreCase(
+                  readerProgressEvent.getData().get("cryptogram_information_data")))) {
+                Log.d(TAG, "mProgressObserver next " + readerProgressEvent.getEventType() + " success and tc crypto");
 
-              if (mPayment != null) {
-                Log.d(TAG, "mProgressObserver next " + readerProgressEvent.getEventType() + " success and tc crypto and payment not null");
-                mVoidTransaction.getObservable(mPayment.getOrderId(), mPayment.getPaymentId()).subscribeOn(Schedulers.io()).subscribe();
-                mPayment = null;
-                mTransactionError = new TransactionError("chip_decline", "Transaction declined - Chip Decline");
+                if (mPayment != null) {
+                  Log.d(TAG,
+                      "mProgressObserver next " + readerProgressEvent.getEventType() + " success and tc crypto and payment not null");
+
+                  mVoidTransaction.getObservable(mPayment.getOrderId(), mPayment.getPaymentId())
+                      .subscribeOn(Schedulers.io())
+                      .subscribe();
+                  mPayment = null;
+                  mTransactionError = new TransactionError("chip_decline", "Transaction declined - Chip Decline");
+                }
+              }
+            } else if (isQuickChipCardRemoved) {
+              if (mPayment == null) {
+                deviceEvent.setMessage("Processing Transaction");
+              } else {
+                if (mPayment.getCard().isSignatureRequired()) {
+                  notifySignatureRequired();
+                } else {
+                  notifyPaymentResponse();
+                }
               }
             }
+            mBroadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
             break;
           case CARD_REMOVED:
+            isQuickChipCardRemoved = !isQuickChip ? false : true;
             deviceEvent = new CloverDeviceEvent();
             deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.CARD_REMOVED);
             deviceEvent.setMessage("Card Removed");
@@ -432,8 +410,15 @@ public class CloverGoConnectorImpl {
               else
                 notifyPaymentResponse();
             } else if (mTransactionError != null) {
-              Log.d(TAG, "mProgressObserver next " + readerProgressEvent.getEventType() + " transaction error not null");
-              notifyErrorResponse();
+              if (mLastErrorWasDuplicateTransaction) {
+                mBroadcaster.notifyOnConfirmPaymentRequest(mConfirmPaymentRequest);
+              } else {
+                Log.d(TAG,
+                    "mProgressObserver next " + readerProgressEvent.getEventType() + " transaction error not null");
+                notifyErrorResponse();
+              }
+            } else if (isQuickChip) {
+              // do nothing and wait
             } else {
               Log.d(TAG, "mProgressObserver next " + readerProgressEvent.getEventType() + " error");
               mTransactionError = new TransactionError("unknown_error", "unknown_error");
@@ -492,11 +477,11 @@ public class CloverGoConnectorImpl {
           case SWIPE_DATA:
             Map<String, String> swipeData = readerProgressEvent.getData();
             emvCard = new EmvCard(swipeData.get("ksn"),
-                    swipeData.get("encryptedTrack"),
-                    swipeData.get("track1"),
-                    swipeData.get("track2"),
-                    swipeData.get("pan"),
-                    swipeData.get("pos_entry_mode"));
+                swipeData.get("encryptedTrack"),
+                swipeData.get("track1"),
+                swipeData.get("track2"),
+                swipeData.get("pan"),
+                swipeData.get("pos_entry_mode"));
             deviceEvent = new CloverDeviceEvent();
             deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.CARD_SWIPED);
             deviceEvent.setMessage("Processing transaction");
@@ -520,7 +505,14 @@ public class CloverGoConnectorImpl {
           Log.d(TAG, "mProgressObserver next SWIPE_DATA/EMV_DATE confirmed");
           mPayment = null;
           mTransactionError = null;
-          CloverGoConnectorImpl.this.mReaderProgressEvent = readerProgressEvent;
+          mReaderProgressEvent = readerProgressEvent;
+
+          if (isQuickChip) {
+            Map<String, String> data = new HashMap<>();
+            data.put("Result", "01");
+            data.put("Authorization_Response", "5A33");
+            mWriteToCard.getObservable(mLastTransactionReader, data).subscribe();
+          }
 
           if (mLastTransactionRequest instanceof SaleRequest) {
             Log.d(TAG, "mProgressObserver next SWIPE_DATA/EMV_DATE SaleRequest");
@@ -1105,35 +1097,45 @@ public class CloverGoConnectorImpl {
   }
 
   public void acceptPayment(com.clover.sdk.v3.payments.Payment payment) {
+    Log.d(TAG, "acceptPayment");
     mOrder.allowDuplicates = true;
 
     // User has accepted the partial auth challenge and at this point, they should proceed with the signature
     // or send receipt process. Since payment has already been processed and accepted, don't try to make another
     // transaction.
     if (mOrder.getStatus() == Order.STATUS_PARTIAL_PAYMENT) {
+      Log.d(TAG, "acceptPayment partial pay");
       if (mOrder.getPayments().get(0).getCard().isSignatureRequired())
         notifySignatureRequired();
       else
         notifySendReceipt();
 
     } else if (mLastTransactionRequest instanceof KeyedSaleRequest) {
+      Log.d(TAG, "acceptPayment do keyed sale");
       mSaleTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
     } else if (mLastTransactionRequest instanceof KeyedAuthRequest) {
+      Log.d(TAG, "acceptPayment do keyed auth");
       mAuthTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
     } else if (mLastTransactionRequest instanceof KeyedPreAuthRequest) {
+      Log.d(TAG, "acceptPayment do keyed preauth");
       mPreAuthTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
     } else {
+      Log.d(TAG, "acceptPayment eventbus post " + mReaderProgressEvent.getEventType().name() + " " + mReaderProgressEvent.getMessage());
       EventBus.post(mReaderProgressEvent);
     }
   }
 
   public void rejectPayment(com.clover.sdk.v3.payments.Payment payment, Challenge challenge) {
+    Log.d(TAG, "rejectPayment");
     if (mOrder.getStatus() == Order.STATUS_PARTIAL_PAYMENT) {
+      Log.d(TAG, "rejectPayment STATUS_PARTIAL_PAYMENT");
       mBroadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.PARTIAL_AUTH_REJECTED, 0, null, "In rejectPayment: Partial auth rejected by user.  Payment being voided"));
       mBroadcaster.notifyVoidPayment(mPayment, "Partial Auth Rejected");
     } else if (mLastErrorWasDuplicateTransaction) {
+      Log.d(TAG, "rejectPayment mLastErrorWasDuplicateTransaction");
       mBroadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.DUPLICATE_TRANSACTION_REJECTED, 0, null, "In rejectPayment: Duplicate transaction rejected by user."));
     } else if (mReaderProgressEvent != null && mReaderProgressEvent.getEventType() == ReaderProgressEvent.EventType.EMV_DATA) {
+      Log.d(TAG, "rejectPayment EMV_DATA");
       mGetConnectedReaders.getBlockingObservable().subscribe(new Consumer<ReaderInfo>() {
         @Override
         public void accept(@NonNull ReaderInfo readerInfo) throws Exception {
@@ -1221,7 +1223,7 @@ public class CloverGoConnectorImpl {
 
     String cardNumber = card.getCardNumber();
     cardTransaction.setFirst6(cardNumber.substring(0, 6));
-    cardTransaction.setLast4(cardNumber.substring(cardNumber.length()-4));
+    cardTransaction.setLast4(cardNumber.substring(cardNumber.length() - 4));
 
     if (mLastTransactionRequest instanceof SaleRequest) {
       Log.d(TAG, "notifyPaymentResponse SaleRequest");
@@ -1259,6 +1261,11 @@ public class CloverGoConnectorImpl {
   }
 
   private void clearReferenceData() {
+    mChallenges = null;
+    mConfirmPaymentRequest = null;
+    mLastErrorWasDuplicateTransaction = false;
+
+    isQuickChipCardRemoved = false;
     mReaderProgressEvent = null;
     mCreditCard = null;
     mLastTransactionReader = null;

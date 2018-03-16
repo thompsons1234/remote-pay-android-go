@@ -19,11 +19,7 @@ package com.clover.remote.client.lib.example;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,12 +27,7 @@ import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
 import com.clover.remote.client.clovergo.CloverGoDeviceConfiguration;
 import com.clover.remote.client.lib.example.qrCode.barcode.BarcodeCaptureActivity;
 import com.clover.remote.client.lib.example.rest.ApiClient;
@@ -49,24 +40,19 @@ import com.clover.sdk.v3.scanner.BarcodeScanner;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
-
+import io.fabric.sdk.android.Fabric;
+import okhttp3.ResponseBody;
 import org.json.JSONException;
 import org.json.JSONObject;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import io.fabric.sdk.android.Fabric;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-import static com.clover.remote.client.lib.example.AppConstants.CONFIG_TYPE_GO;
-import static com.clover.remote.client.lib.example.AppConstants.CONFIG_TYPE_LAN;
-import static com.clover.remote.client.lib.example.AppConstants.CONFIG_TYPE_USB;
-import static com.clover.remote.client.lib.example.AppConstants.CONFIG_TYPE_WS;
+import static com.clover.remote.client.lib.example.AppConstants.*;
 
 public class StartupActivity extends Activity {
 
@@ -74,6 +60,7 @@ public class StartupActivity extends Activity {
   public static final String EXAMPLE_APP_NAME = "EXAMPLE_APP";
   public static final String LAN_PAY_DISPLAY_URL = "LAN_PAY_DISPLAY_URL";
   public static final String CONNECTION_MODE = "CONNECTION_MODE";
+  public static final String QUICK_CHIP_MODE = "QUICK_CHIP_MODE";
   private static final int BARCODE_READER_REQUEST_CODE = 1;
 
   public static final int OAUTH_REQUEST_CODE = 100;
@@ -88,6 +75,7 @@ public class StartupActivity extends Activity {
 
   private String mGoApiKey, mGoSecret, mGoAccessToken;
   private String mOAuthClientId, mOAuthClientSecret, mOAuthEnv, mOAuthUrl, mOAuthApiKey, mOAuthTokenUrl;
+  private boolean quickChip;
 
   // Clover devices do not always support the custom Barcode scanner implemented here.
   // They DO have a different capability to scan barcodes.
@@ -134,6 +122,7 @@ public class StartupActivity extends Activity {
       public void onCheckedChanged(RadioGroup group, int checkedId) {
         TextView textView = (TextView) findViewById(R.id.lanPayDisplayAddress);
         textView.setEnabled(checkedId == R.id.lanRadioButton);
+        textView.setVisibility(checkedId == R.id.lanRadioButton ? View.VISIBLE : View.GONE);
         if (checkedId == R.id.goRadioButton) {
           findViewById(R.id.llGoModes).setVisibility(View.VISIBLE);
           findViewById(R.id.connectButton).setVisibility(View.GONE);
@@ -154,6 +143,15 @@ public class StartupActivity extends Activity {
         return true;
       }
     });
+
+    Switch quickChipSwitch = ((Switch) findViewById(R.id.quickChipSwitch));
+    quickChipSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+      @Override
+      public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+        quickChip = isChecked;
+      }
+    });
+    quickChipSwitch.setChecked(getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).getBoolean(QUICK_CHIP_MODE, false));
 
     // initialize...
     TextView textView = (TextView) findViewById(R.id.lanPayDisplayAddress);
@@ -218,9 +216,8 @@ public class StartupActivity extends Activity {
 
       Intent intent = new Intent();
       intent.setClass(StartupActivity.this, ExamplePOSActivity.class);
-      populateIntentGoExtras(intent, token);
+      startActivityWithGo(intent, token);
 
-      startActivity(intent);
     } else {
       super.onActivityResult(requestCode, resultCode, data);
     }
@@ -333,8 +330,8 @@ public class StartupActivity extends Activity {
 
     } else if (config.equals(CONFIG_TYPE_GO)) {
       if (Validator.isNetworkConnected(this)) {
-        populateIntentGoExtras(intent, mGoAccessToken);
-        startActivity(intent);
+        startActivityWithGo(intent, mGoAccessToken);
+
       } else {
         showToast("Check internet connection");
 
@@ -407,8 +404,8 @@ public class StartupActivity extends Activity {
 
                 Intent intent = new Intent();
                 intent.setClass(StartupActivity.this, ExamplePOSActivity.class);
-                populateIntentGoExtras(intent, accessToken);
-                startActivity(intent);
+                startActivityWithGo(intent, accessToken);
+
               } else {
                 showToast("Check Internet Connection");
               }
@@ -433,7 +430,7 @@ public class StartupActivity extends Activity {
     mToast.show();
   }
 
-  private void populateIntentGoExtras(Intent intent, String token) {
+  private void startActivityWithGo(Intent intent, String token) {
     intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_CONNECTOR_CONFIG, CONFIG_TYPE_GO);
     intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ACCESS_TOKEN, token);
     intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_APP_ID, APP_ID);
@@ -441,6 +438,12 @@ public class StartupActivity extends Activity {
     intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_API_KEY, mGoApiKey);
     intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_SECRET, mGoSecret);
     intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_ENV, GO_ENV);
+    intent.putExtra(ExamplePOSActivity.EXTRA_CLOVER_GO_CONNECTOR_QUICK_CHIP, quickChip);
+
+    getSharedPreferences(EXAMPLE_APP_NAME, Context.MODE_PRIVATE).edit().putBoolean(QUICK_CHIP_MODE, quickChip).commit();
+
+    startActivity(intent);
+    finish();
   }
 
   private void setGoParams() {
@@ -461,7 +464,7 @@ public class StartupActivity extends Activity {
     } else if (GO_ENV == CloverGoDeviceConfiguration.ENV.SANDBOX) {
       mGoApiKey = "HmfK34t0BUT4erbXYmFp8c9t4qzIaxUj";
       mGoSecret = "6cd46cffo876r4565qb988f58pn6a911e3rg35m3hj678v3eb719478c98fea98i";
-      mGoAccessToken = "";
+      mGoAccessToken = "942f04a1-9c9d-c2ed-91f9-a6bb2f740f1e";
 
 
       mOAuthClientId = "2GTVF12F8JRC8";
