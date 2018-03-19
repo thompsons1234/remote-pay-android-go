@@ -2,26 +2,90 @@ package com.clover.remote.client.clovergo;
 
 import android.text.TextUtils;
 import android.util.Log;
+
 import com.clover.remote.Challenge;
 import com.clover.remote.client.Constants;
 import com.clover.remote.client.MerchantInfo;
 import com.clover.remote.client.clovergo.CloverGoConstants.TransactionType;
 import com.clover.remote.client.clovergo.di.CloverGoSDKApplicationData;
-import com.clover.remote.client.clovergo.messages.*;
+import com.clover.remote.client.clovergo.messages.BillingAddress;
+import com.clover.remote.client.clovergo.messages.KeyedRequest;
 import com.clover.remote.client.clovergo.util.NumberUtil;
 import com.clover.remote.client.lib.R;
-import com.clover.remote.client.messages.*;
+import com.clover.remote.client.messages.AuthRequest;
+import com.clover.remote.client.messages.AuthResponse;
+import com.clover.remote.client.messages.CapturePreAuthRequest;
+import com.clover.remote.client.messages.CapturePreAuthResponse;
+import com.clover.remote.client.messages.CardApplicationIdentifier;
+import com.clover.remote.client.messages.CloseoutRequest;
+import com.clover.remote.client.messages.CloseoutResponse;
+import com.clover.remote.client.messages.CloverDeviceErrorEvent;
+import com.clover.remote.client.messages.CloverDeviceEvent;
+import com.clover.remote.client.messages.ConfirmPaymentRequest;
+import com.clover.remote.client.messages.PaymentResponse;
+import com.clover.remote.client.messages.PreAuthRequest;
+import com.clover.remote.client.messages.PreAuthResponse;
+import com.clover.remote.client.messages.RefundPaymentRequest;
+import com.clover.remote.client.messages.RefundPaymentResponse;
+import com.clover.remote.client.messages.ResultCode;
+import com.clover.remote.client.messages.SaleRequest;
+import com.clover.remote.client.messages.SaleResponse;
+import com.clover.remote.client.messages.TipAdjustAuthRequest;
+import com.clover.remote.client.messages.TipAdjustAuthResponse;
+import com.clover.remote.client.messages.TransactionRequest;
+import com.clover.remote.client.messages.VoidPaymentRequest;
+import com.clover.remote.client.messages.VoidPaymentResponse;
 import com.clover.sdk.v3.base.Reference;
 import com.clover.sdk.v3.order.VoidReason;
-import com.clover.sdk.v3.payments.*;
-import com.firstdata.clovergo.domain.model.*;
+import com.clover.sdk.v3.payments.CardEntryType;
+import com.clover.sdk.v3.payments.CardTransaction;
+import com.clover.sdk.v3.payments.CardTransactionType;
+import com.clover.sdk.v3.payments.CardType;
+import com.clover.sdk.v3.payments.Result;
+import com.firstdata.clovergo.domain.model.CreditCard;
+import com.firstdata.clovergo.domain.model.EmployeeMerchant;
+import com.firstdata.clovergo.domain.model.EmvCard;
 import com.firstdata.clovergo.domain.model.Error;
+import com.firstdata.clovergo.domain.model.Order;
 import com.firstdata.clovergo.domain.model.Payment;
+import com.firstdata.clovergo.domain.model.ReaderError;
+import com.firstdata.clovergo.domain.model.ReaderInfo;
+import com.firstdata.clovergo.domain.model.ReaderProgressEvent;
+import com.firstdata.clovergo.domain.model.RefundSuccess;
+import com.firstdata.clovergo.domain.model.Tender;
+import com.firstdata.clovergo.domain.model.TransactionError;
 import com.firstdata.clovergo.domain.rx.EventBus;
 import com.firstdata.clovergo.domain.rx.ReusableObserver;
-import com.firstdata.clovergo.domain.usecase.*;
+import com.firstdata.clovergo.domain.usecase.AddTips;
+import com.firstdata.clovergo.domain.usecase.AuthTransaction;
+import com.firstdata.clovergo.domain.usecase.CancelCardRead;
+import com.firstdata.clovergo.domain.usecase.CaptureSignature;
+import com.firstdata.clovergo.domain.usecase.CaptureTransaction;
+import com.firstdata.clovergo.domain.usecase.CloseOut;
+import com.firstdata.clovergo.domain.usecase.ConnectToReader;
+import com.firstdata.clovergo.domain.usecase.DisconnectReader;
+import com.firstdata.clovergo.domain.usecase.GetConnectedReaders;
+import com.firstdata.clovergo.domain.usecase.GetSDKMerchantsInfo;
+import com.firstdata.clovergo.domain.usecase.PreAuthTransaction;
+import com.firstdata.clovergo.domain.usecase.ReadCard;
+import com.firstdata.clovergo.domain.usecase.RefundTransaction;
+import com.firstdata.clovergo.domain.usecase.SaleTransaction;
+import com.firstdata.clovergo.domain.usecase.ScanForReaders;
+import com.firstdata.clovergo.domain.usecase.SendReceipt;
+import com.firstdata.clovergo.domain.usecase.VoidTransaction;
+import com.firstdata.clovergo.domain.usecase.WriteToCard;
 import com.google.android.gms.iid.InstanceID;
 import com.roam.roamreaderunifiedapi.utils.HexUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import io.reactivex.CompletableObserver;
 import io.reactivex.CompletableSource;
 import io.reactivex.Observable;
@@ -33,9 +97,6 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
-
-import javax.inject.Inject;
-import java.util.*;
 
 import static com.clover.remote.client.clovergo.CloverGoConstants.CARD_MODE_EMV_CONTACT;
 import static com.firstdata.clovergo.domain.model.ReaderInfo.ReaderType.RP350;
@@ -262,7 +323,7 @@ public class CloverGoConnectorImpl {
               VoidReason.REJECT_DUPLICATE)};
           mConfirmPaymentRequest.setChallenges(mChallenges);
 
-          if (!isQuickChip || isQuickChipCardRemoved ||  mLastTransactionRequest instanceof KeyedRequest)
+          if (!isQuickChip || isQuickChipCardRemoved || mLastTransactionRequest instanceof KeyedRequest)
             mBroadcaster.notifyOnConfirmPaymentRequest(mConfirmPaymentRequest);
 
           return;
@@ -294,8 +355,9 @@ public class CloverGoConnectorImpl {
           return;
         }
 
-        if (!isQuickChip)
-          notifyErrorResponse();
+        if (!isQuickChip) {
+          notifyErrorResponse(ResultCode.FAIL, mTransactionError.getCode(), mTransactionError.getMessage());
+        }
 
       }
     };
@@ -415,14 +477,14 @@ public class CloverGoConnectorImpl {
               } else {
                 Log.d(TAG,
                     "mProgressObserver next " + readerProgressEvent.getEventType() + " transaction error not null");
-                notifyErrorResponse();
+                notifyErrorResponse(ResultCode.FAIL, mTransactionError.getCode(), mTransactionError.getMessage());
               }
             } else if (isQuickChip) {
               // do nothing and wait
             } else {
               Log.d(TAG, "mProgressObserver next " + readerProgressEvent.getEventType() + " error");
               mTransactionError = new TransactionError("unknown_error", "unknown_error");
-              notifyErrorResponse();
+              notifyErrorResponse(ResultCode.FAIL, mTransactionError.getCode(), mTransactionError.getMessage());
             }
             break;
           case LIST_APPLICATION_IDENTIFIERS:
@@ -514,16 +576,7 @@ public class CloverGoConnectorImpl {
             mWriteToCard.getObservable(mLastTransactionReader, data).subscribe();
           }
 
-          if (mLastTransactionRequest instanceof SaleRequest) {
-            Log.d(TAG, "mProgressObserver next SWIPE_DATA/EMV_DATE SaleRequest");
-            mSaleTransaction.getObservable(mOrder, emvCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
-          } else if (mLastTransactionRequest instanceof AuthRequest) {
-            Log.d(TAG, "mProgressObserver next SWIPE_DATA/EMV_DATE AuthRequest");
-            mAuthTransaction.getObservable(mOrder, emvCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
-          } else if (mLastTransactionRequest instanceof PreAuthRequest) {
-            Log.d(TAG, "mProgressObserver next SWIPE_DATA/EMV_DATE PreAuthRequest");
-            mPreAuthTransaction.getObservable(mOrder, emvCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
-          }
+          doTransaction(emvCard);
         }
       }
     };
@@ -676,11 +729,10 @@ public class CloverGoConnectorImpl {
   }
 
   public void preAuth(PreAuthRequest preAuthRequest, final ReaderInfo.ReaderType readerType, boolean allowDuplicate) {
-
     Log.d(TAG, "preauth");
+
     if (mEmployeeMerchant != null && !mEmployeeMerchant.getMerchant().getFeatures().contains("preAuths")) {
-      Log.d(TAG, "preauth not supported");
-      mBroadcaster.notifyOnPreAuthResponse(new PreAuthResponse(false, ResultCode.UNSUPPORTED));
+      notifyErrorResponse(ResultCode.UNSUPPORTED, "", "");
       return;
     }
 
@@ -688,11 +740,10 @@ public class CloverGoConnectorImpl {
   }
 
   public void auth(final AuthRequest authRequest, final ReaderInfo.ReaderType readerType, boolean allowDuplicate) {
-
     Log.d(TAG, "auth");
+
     if (mEmployeeMerchant != null && !mEmployeeMerchant.getMerchant().getFeatures().contains("auths")) {
-      Log.d(TAG, "auth not supported");
-      mBroadcaster.notifyOnAuthResponse(new AuthResponse(false, ResultCode.UNSUPPORTED));
+      notifyErrorResponse(ResultCode.UNSUPPORTED, "", "");
       return;
     }
 
@@ -700,12 +751,10 @@ public class CloverGoConnectorImpl {
   }
 
   public void sale(final SaleRequest saleRequest, final boolean allowDuplicate) {
-
     Log.d(TAG, "sale");
 
     if (mEmployeeMerchant != null && !mEmployeeMerchant.getMerchant().getFeatures().contains("sales")) {
-      Log.d(TAG, "sale not supported");
-      mBroadcaster.notifyOnSaleResponse(new SaleResponse(false, ResultCode.UNSUPPORTED));
+      notifyErrorResponse(ResultCode.UNSUPPORTED, "", "");
       return;
     }
 
@@ -809,13 +858,7 @@ public class CloverGoConnectorImpl {
     prepOrder(transactionType, transactionRequest, allowDuplicate);
     prepKeyedCreditCardForTransaction((KeyedRequest) transactionRequest);
 
-    if (mLastTransactionRequest instanceof SaleRequest) {
-      mSaleTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
-    } else if (mLastTransactionRequest instanceof AuthRequest) {
-      mAuthTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
-    } else if (mLastTransactionRequest instanceof PreAuthRequest) {
-      mPreAuthTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
-    }
+    doTransaction(mCreditCard);
   }
 
   private void prepOrder(TransactionType transactionType, TransactionRequest transactionRequest, boolean allowDuplicate) {
@@ -883,25 +926,7 @@ public class CloverGoConnectorImpl {
       @Override
       public void onError(Throwable e) {
         Log.d(TAG, "startCardReaderTransaction error");
-        if (mLastTransactionRequest instanceof SaleRequest) {
-          Log.d(TAG, "startCardReaderTransaction error SaleRequest");
-          SaleResponse saleResponse = new SaleResponse(false, ResultCode.CANCEL);
-          saleResponse.setMessage("Connect Reader");
-          saleResponse.setReason("Reader Not Connected");
-          mBroadcaster.notifyOnSaleResponse(saleResponse);
-        } else if (mLastTransactionRequest instanceof AuthRequest) {
-          Log.d(TAG, "startCardReaderTransaction error AuthRequest");
-          AuthResponse authResponse = new AuthResponse(false, ResultCode.CANCEL);
-          authResponse.setMessage("Connect Reader");
-          authResponse.setReason("Reader Not Connected");
-          mBroadcaster.notifyOnAuthResponse(authResponse);
-        } else if (mLastTransactionRequest instanceof PreAuthRequest) {
-          Log.d(TAG, "startCardReaderTransaction error PreAuthRequest");
-          PreAuthResponse preAuthResponse = new PreAuthResponse(false, ResultCode.CANCEL);
-          preAuthResponse.setMessage("Connect Reader");
-          preAuthResponse.setReason("Reader Not Connected");
-          mBroadcaster.notifyOnPreAuthResponse(preAuthResponse);
-        }
+        notifyErrorResponse(ResultCode.CANCEL, "Reader Not Connected", "Connect Reader");
       }
 
       @Override
@@ -909,6 +934,22 @@ public class CloverGoConnectorImpl {
         Log.d(TAG, "startCardReaderTransaction complete");
       }
     });
+  }
+
+  private void doTransaction(Tender tender) {
+    if (mLastTransactionRequest instanceof SaleRequest) {
+      Log.d(TAG, "doTransaction SaleRequest");
+      mSaleTransaction.getObservable(mOrder, tender).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
+
+    } else if (mLastTransactionRequest instanceof AuthRequest) {
+      Log.d(TAG, "doTransaction AuthRequest");
+      mAuthTransaction.getObservable(mOrder, tender).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
+
+    } else if (mLastTransactionRequest instanceof PreAuthRequest) {
+      Log.d(TAG, "doTransaction PreAuthRequest");
+      mPreAuthTransaction.getObservable(mOrder, tender).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
+
+    }
   }
 
   public void tipAdjustAuth(final TipAdjustAuthRequest authTipAdjustRequest) {
@@ -1110,15 +1151,9 @@ public class CloverGoConnectorImpl {
       else
         notifySendReceipt();
 
-    } else if (mLastTransactionRequest instanceof KeyedSaleRequest) {
-      Log.d(TAG, "acceptPayment do keyed sale");
-      mSaleTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
-    } else if (mLastTransactionRequest instanceof KeyedAuthRequest) {
-      Log.d(TAG, "acceptPayment do keyed auth");
-      mAuthTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
-    } else if (mLastTransactionRequest instanceof KeyedPreAuthRequest) {
-      Log.d(TAG, "acceptPayment do keyed preauth");
-      mPreAuthTransaction.getObservable(mOrder, mCreditCard).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(mPaymentObserver);
+    } else if (mLastTransactionRequest instanceof KeyedRequest) {
+      doTransaction(mCreditCard);
+
     } else {
       Log.d(TAG, "acceptPayment eventbus post " + mReaderProgressEvent.getEventType().name() + " " + mReaderProgressEvent.getMessage());
       EventBus.post(mReaderProgressEvent);
@@ -1271,26 +1306,31 @@ public class CloverGoConnectorImpl {
     mLastTransactionReader = null;
   }
 
-  private void notifyErrorResponse() {
+  private void notifyErrorResponse(ResultCode resultCode, String reason, String message) {
     if (mLastTransactionRequest instanceof SaleRequest) {
-      Log.d(TAG, "notifyErrorResponse SaleRequest" + mTransactionError.getMessage());
-      SaleResponse response = new SaleResponse(false, ResultCode.FAIL);
-      response.setReason(mTransactionError.getCode());
-      response.setMessage(mTransactionError.getMessage());
+      Log.d(TAG, "notifyErrorResponse SaleRequest" + message);
+      SaleResponse response = new SaleResponse(false, resultCode);
+      setPaymentResponseReasonMessage(response, reason, message);
       mBroadcaster.notifyOnSaleResponse(response);
+
     } else if (mLastTransactionRequest instanceof AuthRequest) {
-      Log.d(TAG, "notifyErrorResponse AuthRequest" + mTransactionError.getMessage());
-      AuthResponse response = new AuthResponse(false, ResultCode.FAIL);
-      response.setReason(mTransactionError.getCode());
-      response.setMessage(mTransactionError.getMessage());
+      Log.d(TAG, "notifyErrorResponse AuthRequest" + message);
+      AuthResponse response = new AuthResponse(false, resultCode);
+      setPaymentResponseReasonMessage(response, reason, message);
       mBroadcaster.notifyOnAuthResponse(response);
+
     } else if (mLastTransactionRequest instanceof PreAuthRequest) {
-      Log.d(TAG, "notifyErrorResponse PreAuthRequest" + mTransactionError.getMessage());
-      PreAuthResponse response = new PreAuthResponse(false, ResultCode.FAIL);
-      response.setReason(mTransactionError.getCode());
-      response.setMessage(mTransactionError.getMessage());
+      Log.d(TAG, "notifyErrorResponse PreAuthRequest" + message);
+      PreAuthResponse response = new PreAuthResponse(false, resultCode);
+      setPaymentResponseReasonMessage(response, reason, message);
       mBroadcaster.notifyOnPreAuthResponse(response);
+
     }
+  }
+
+  private void setPaymentResponseReasonMessage(PaymentResponse paymentResponse, String reason, String message) {
+    paymentResponse.setReason(reason);
+    paymentResponse.setMessage(message);
   }
 
   public void cancelReaderTransaction(final ReaderInfo.ReaderType readerType) {
