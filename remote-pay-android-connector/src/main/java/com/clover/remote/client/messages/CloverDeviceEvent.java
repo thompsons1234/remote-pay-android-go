@@ -93,6 +93,9 @@ public class CloverDeviceEvent {
     CARD_REMOVED,
     PLEASE_SEE_PHONE_MSG,
     READER_READY,
+    UPDATE_STARTED,
+    UPDATE_COMPLETED,
+
   }
 
   private DeviceEventState eventState;

@@ -1221,6 +1221,12 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
           case CARD_INSERTED:
             showProgressDialog("Card Inserted", deviceEvent.getMessage(), false);
             break;
+          case UPDATE_STARTED:
+            showProgressDialog("Reader Update", deviceEvent.getMessage(), false);
+            break;
+          case UPDATE_COMPLETED:
+            showAlertDialog("Reader Update", "Please disconnect and reconnect your reader.");
+            break;
           case CANCEL_CARD_READ:
             showMessage(deviceEvent.getMessage(), Toast.LENGTH_LONG);
             break;
@@ -1242,8 +1248,8 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       }
 
       @Override
-      public void onGetMerchantInfoResponse(boolean isSuccess) {
-        if (isSuccess) {
+      public void onGetMerchantInfoResponse(MerchantInfo merchantInfo) {
+        if (merchantInfo != null) {
           dismissDialog();
         } else {
           showAlertDialog("Merchant Info Error", "Could not retrieve merchant info. Please try again later.");

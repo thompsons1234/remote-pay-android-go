@@ -1,6 +1,7 @@
 package com.clover.remote.client.clovergo;
 
 import com.clover.remote.client.ICloverConnectorListener;
+import com.clover.remote.client.MerchantInfo;
 import com.clover.remote.client.clovergo.CloverGoConstants.TransactionType;
 import com.clover.remote.client.messages.CardApplicationIdentifier;
 import com.clover.remote.client.messages.CloverDeviceEvent;
@@ -71,7 +72,7 @@ public interface ICloverGoConnectorListener extends ICloverConnectorListener {
 
   void onGetMerchantInfo();
 
-  void onGetMerchantInfoResponse(boolean isSuccess);
+  void onGetMerchantInfoResponse(MerchantInfo merchantInfo);
 
   void onSignatureRequired(Payment payment, SignatureCapture signatureCapture);
 

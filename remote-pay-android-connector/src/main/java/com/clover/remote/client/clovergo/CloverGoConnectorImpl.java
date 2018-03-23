@@ -72,6 +72,7 @@ import com.firstdata.clovergo.domain.usecase.RefundTransaction;
 import com.firstdata.clovergo.domain.usecase.SaleTransaction;
 import com.firstdata.clovergo.domain.usecase.ScanForReaders;
 import com.firstdata.clovergo.domain.usecase.SendReceipt;
+import com.firstdata.clovergo.domain.usecase.UpdateReader;
 import com.firstdata.clovergo.domain.usecase.VoidTransaction;
 import com.firstdata.clovergo.domain.usecase.WriteToCard;
 import com.google.android.gms.iid.InstanceID;
@@ -167,6 +168,8 @@ public class CloverGoConnectorImpl {
   DisconnectReader disconnectReader;
   @Inject
   CancelCardRead cancelCardRead;
+  @Inject
+  UpdateReader updateReader;
 
   private Order mOrder;
   private Payment mPayment;
@@ -179,6 +182,8 @@ public class CloverGoConnectorImpl {
   private boolean mLastPaymentWasForPartialAuth = false;
   private boolean isQuickChip;
   private boolean isQuickChipCardRemoved;
+
+  private ReaderInfo mConnectedReaderInfo;
 
   private String noCardReadersConnected;
 
@@ -235,14 +240,14 @@ public class CloverGoConnectorImpl {
       public void onNext(EmployeeMerchant employeeMerchant) {
         Log.d(TAG, "mEmployeeMerchantObserver next");
         mEmployeeMerchant = employeeMerchant;
-        mBroadcaster.notifyOnGetMerchantInfoResponse(true);
+        mBroadcaster.notifyOnGetMerchantInfoResponse(getMerchantInfo(null));
       }
 
       @Override
       public void onError(Throwable e) {
         Log.d(TAG, "mEmployeeMerchantObserver error");
         super.onError(e);
-        mBroadcaster.notifyOnGetMerchantInfoResponse(false);
+        mBroadcaster.notifyOnGetMerchantInfoResponse(null);
       }
     };
 
@@ -377,14 +382,13 @@ public class CloverGoConnectorImpl {
 
               @Override
               public void onNext(EmployeeMerchant employeeMerchant) {
-                mBroadcaster.notifyOnGetMerchantInfoResponse(true);
                 mEmployeeMerchant = employeeMerchant;
-                mBroadcaster.notifyOnReady(getMerchantInfo(readerInfo, employeeMerchant));
+                mConnectedReaderInfo = readerInfo;
+                updateReader.getObservable(readerInfo).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe();
               }
 
               @Override
               public void onError(Throwable e) {
-                mBroadcaster.notifyOnGetMerchantInfoResponse(false);
                 disconnectDevice(readerInfo.getReaderType());
                 mBroadcaster.notifyOnDeviceError(new CloverDeviceErrorEvent(CloverDeviceErrorEvent.CloverDeviceErrorType.COMMUNICATION_ERROR, 0, null, e.getMessage()));
               }
@@ -394,7 +398,8 @@ public class CloverGoConnectorImpl {
               }
             });
           } else {
-            mBroadcaster.notifyOnReady(getMerchantInfo(readerInfo, mEmployeeMerchant));
+            mConnectedReaderInfo = readerInfo;
+            updateReader.getObservable(readerInfo).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe();
           }
         } else {
           Log.d(TAG, "mReaderInfoObserver next not connected");
@@ -412,6 +417,26 @@ public class CloverGoConnectorImpl {
         Log.d(TAG, "mProgressObserver next " + readerProgressEvent.getEventType() + " " + readerProgressEvent.getMessage());
 
         switch (readerProgressEvent.getEventType()) {
+          case NO_UPDATE:
+            mBroadcaster.notifyOnReady(getMerchantInfo(mConnectedReaderInfo));
+            break;
+          case UPDATE_COMPLETE:
+            deviceEvent = new CloverDeviceEvent();
+            deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.UPDATE_COMPLETED);
+            deviceEvent.setMessage("Reader update completed");
+            mBroadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
+            mBroadcaster.notifyOnReady(getMerchantInfo(null));
+
+            if (mConnectedReaderInfo.getReaderType() == RP350)
+              disconnectDevice(mConnectedReaderInfo.getReaderType());
+
+            break;
+          case UPDATE_BEGAN:
+            deviceEvent = new CloverDeviceEvent();
+            deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.UPDATE_STARTED);
+            deviceEvent.setMessage("Updating reader");
+            mBroadcaster.notifyOnCloverGoDeviceActivity(deviceEvent);
+            break;
           case CARD_INSERTED:
             deviceEvent = new CloverDeviceEvent();
             deviceEvent.setEventState(CloverDeviceEvent.DeviceEventState.CARD_INSERTED);
@@ -638,7 +663,7 @@ public class CloverGoConnectorImpl {
     };
   }
 
-  private MerchantInfo getMerchantInfo(ReaderInfo readerInfo, EmployeeMerchant employeeMerchant) {
+  private MerchantInfo getMerchantInfo(ReaderInfo readerInfo) {
     boolean supportsSales = false;
     boolean supportAuths = false;
     boolean supportsPreAuths = false;
@@ -646,6 +671,7 @@ public class CloverGoConnectorImpl {
     boolean supportsManualRefunds = false;
     boolean supportsVoids = false;
     boolean supportsTipAdjust = false;
+
     for (String feature : mEmployeeMerchant.getMerchant().getFeatures()) {
       switch (feature) {
         case "auths":
@@ -673,10 +699,13 @@ public class CloverGoConnectorImpl {
       }
     }
 
+    String readerBtName = readerInfo == null ? "" : readerInfo.getBluetoothName();
+    String readerSerialNo = readerInfo == null ? "" : readerInfo.getSerialNo();
+    String readerType = readerInfo == null ? "" : readerInfo.getReaderType().name();
+
     return new MerchantInfo(mEmployeeMerchant.getMerchant().getId(), mEmployeeMerchant.getMerchant().getName(),
         supportsSales, supportAuths, supportsPreAuths, supportsVaultCards, supportsManualRefunds, supportsVoids,
-        supportsTipAdjust, readerInfo.getBluetoothName(), readerInfo.getSerialNo(), readerInfo.getReaderType().name());
-
+        supportsTipAdjust, readerBtName, readerSerialNo, readerType);
   }
 
   public void initializeConnection(ReaderInfo.ReaderType readerType) {
@@ -720,6 +749,7 @@ public class CloverGoConnectorImpl {
   public void disconnectDevice(ReaderInfo.ReaderType readerType) {
     Log.d(TAG, "disconnectDevice");
     disconnectReader.getObservable(readerType).onErrorComplete().subscribe();
+    mConnectedReaderInfo = null;
   }
 
   public void stopDeviceScan() {
