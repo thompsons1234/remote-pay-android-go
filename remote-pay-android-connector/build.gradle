@@ -33,28 +33,28 @@ android {
 defaultTasks 'install'
 
 dependencies {
-
-    compile project(':clover-remote-interface')
-    compile project(':clover-android-sdk')
-
     compile 'com.google.code.gson:gson:2.3.1'
     compile 'com.neovisionaries:nv-websocket-client:1.31'
     testCompile 'junit:junit:4.12'
 
-    //CloverGo Depenencies
+    //CloverGo Dependencies
     compile 'com.google.android.gms:play-services-gcm:10.2.6'
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.9'
-    compile "com.firstdata.clovergo:data:$cloverGoSDKVersion-SNAPSHOT@aar"
     compile 'com.squareup.okhttp3:okhttp:3.5.0'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-jackson:2.1.0'
-    compile "com.firstdata.clovergo:domain:$cloverGoSDKVersion-SNAPSHOT"
     compile 'com.squareup.retrofit2:adapter-rxjava2:2.2.0'
     compile 'io.reactivex.rxjava2:rxjava:2.0.6'
     compile 'com.google.dagger:dagger:2.9'
+
+    compile "com.firstdata.clovergo:data:$cloverGoSDKVersion-SNAPSHOT@aar"
+    compile "com.firstdata.clovergo:domain:$cloverGoSDKVersion-SNAPSHOT"
     compile "com.firstdata.clovergo:reader:$cloverGoSDKVersion-SNAPSHOT@aar"
+
     compile project(':roam')
+    compile project(':clover-remote-interface')
+    compile project(':clover-android-sdk')
 }
 
 apply plugin: 'signing'
@@ -68,7 +68,7 @@ task androidJavadocs(type: Javadoc, dependsOn: 'assembleRelease') {
     }
     source = android.sourceSets.main.java.srcDirs
 
-    include '**/CloverGoConnector.java', '**/DefaultCloverGoConnector.java', '**/ICloverGoConnector.java',
+    include '**/CloverGoConnector.java', '**/ICloverGoConnector.java',
             '**/ICloverConnector.java', '**/ReaderInfo.java', '**/CloverGoDeviceConfiguration.java',
             '**/SaleRequest.java', '**/com/clover/sdk/v3/payments/Payment.java', '**/Challenge.java',
             '**/AuthRequest.java', '**/PreAuthRequest.java', '**/TipAdjustAuthRequest.java',

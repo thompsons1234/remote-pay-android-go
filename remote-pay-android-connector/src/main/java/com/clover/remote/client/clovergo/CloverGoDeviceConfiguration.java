@@ -5,7 +5,6 @@ package com.clover.remote.client.clovergo;
  */
 
 import android.content.Context;
-
 import com.clover.remote.client.CloverDeviceConfiguration;
 import com.clover.remote.client.transport.CloverTransport;
 import com.firstdata.clovergo.domain.model.ReaderInfo;
@@ -25,6 +24,8 @@ public class CloverGoDeviceConfiguration implements CloverDeviceConfiguration {
   private long scanPeriod = 30000;
   private boolean allowDuplicate = false;
   private boolean autoConnect = false;
+  private boolean enableQuickChip = false;
+  //TODO: Device Type
   private ReaderInfo.ReaderType readerType = ReaderInfo.ReaderType.RP450;
 
   private CloverGoDeviceConfiguration(Context context, String accessToken, ENV env, String apiKey, String secret, String appId, String appVersion) {
@@ -103,6 +104,10 @@ public class CloverGoDeviceConfiguration implements CloverDeviceConfiguration {
     return autoConnect;
   }
 
+  public boolean isQuickChip() {
+    return enableQuickChip;
+  }
+
   public ReaderInfo.ReaderType getReaderType() {
     return readerType;
   }
@@ -165,6 +170,17 @@ public class CloverGoDeviceConfiguration implements CloverDeviceConfiguration {
      */
     public Builder deviceType(ReaderInfo.ReaderType readerType) {
       mCLoCloverGoConfiguration.readerType = readerType;
+      return this;
+    }
+
+    /**
+     * Toggles settings to perform EMV quick chip transactions instead of the normal EMV transaction flow. Optional setting. Default is false (Normal EMV transaction flow)
+     *
+     * @param enableQuickChip Boolean field whether to allow quick chip
+     * @return CloverGoBuilder instance
+     */
+    public Builder enableQuickChip(boolean enableQuickChip) {
+      mCLoCloverGoConfiguration.enableQuickChip = enableQuickChip;
       return this;
     }
 

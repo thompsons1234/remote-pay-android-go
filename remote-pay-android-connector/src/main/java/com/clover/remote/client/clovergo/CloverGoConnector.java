@@ -1,21 +1,10 @@
 package com.clover.remote.client.clovergo;
 
 import android.graphics.Bitmap;
-
 import com.clover.remote.Challenge;
 import com.clover.remote.InputOption;
-import com.clover.remote.client.messages.AuthRequest;
-import com.clover.remote.client.messages.CapturePreAuthRequest;
-import com.clover.remote.client.messages.CloseoutRequest;
-import com.clover.remote.client.messages.CustomActivityRequest;
-import com.clover.remote.client.messages.ManualRefundRequest;
-import com.clover.remote.client.messages.PreAuthRequest;
-import com.clover.remote.client.messages.ReadCardDataRequest;
-import com.clover.remote.client.messages.RefundPaymentRequest;
-import com.clover.remote.client.messages.SaleRequest;
-import com.clover.remote.client.messages.TipAdjustAuthRequest;
-import com.clover.remote.client.messages.VerifySignatureRequest;
-import com.clover.remote.client.messages.VoidPaymentRequest;
+import com.clover.remote.client.ICloverConnectorListener;
+import com.clover.remote.client.messages.*;
 import com.clover.remote.order.DisplayOrder;
 import com.firstdata.clovergo.domain.model.ReaderInfo;
 
@@ -25,8 +14,9 @@ import java.util.List;
  * Created by Akhani, Avdhesh on 4/18/17.
  */
 
-public class CloverGoConnector extends DefaultCloverGoConnector {
+public class CloverGoConnector implements ICloverGoConnector {
 
+  private CloverGoConnectorBroadcaster broadcaster = new CloverGoConnectorBroadcaster();
   private CloverGoDeviceConfiguration cloverGoDeviceConfiguration;
   private static CloverGoConnectorImpl cloverGoConnectorImpl;
 
@@ -44,6 +34,18 @@ public class CloverGoConnector extends DefaultCloverGoConnector {
   @Override
   public void initializeConnection() {
     cloverGoConnectorImpl.initializeConnection(cloverGoDeviceConfiguration.getReaderType());
+  }
+
+  @Override
+  public void addCloverGoConnectorListener(ICloverGoConnectorListener listener) {
+    if (listener != null)
+      broadcaster.add(listener);
+  }
+
+  @Override
+  public void removeCloverGoConnectorListener(ICloverGoConnectorListener listener) {
+    broadcaster.remove(listener);
+
   }
 
   /**
@@ -176,6 +178,54 @@ public class CloverGoConnector extends DefaultCloverGoConnector {
    * Not supported in Clover Go
    */
   @Override
+  public void addCloverConnectorListener(ICloverConnectorListener listener) throws UnsupportedOperationException {
+    throw new UnsupportedOperationException("Operation Not supported in Clover Go");
+  }
+
+  /**
+   * Not supported in Clover Go
+   */
+  @Override
+  public void removeCloverConnectorListener(ICloverConnectorListener listener) throws UnsupportedOperationException {
+    throw new UnsupportedOperationException("Operation Not supported in Clover Go");
+  }
+
+  /**
+   * Not supported in Clover Go
+   */
+  @Override
+  public void print(PrintRequest request) throws UnsupportedOperationException {
+    throw new UnsupportedOperationException("Operation Not supported in Clover Go");
+  }
+
+  /**
+   * Not supported in Clover Go
+   */
+  @Override
+  public void retrievePrinters(RetrievePrintersRequest request) throws UnsupportedOperationException {
+    throw new UnsupportedOperationException("Operation Not supported in Clover Go");
+  }
+
+  /**
+   * Not supported in Clover Go
+   */
+  @Override
+  public void retrievePrintJobStatus(PrintJobStatusRequest request) throws UnsupportedOperationException {
+    throw new UnsupportedOperationException("Operation Not supported in Clover Go");
+  }
+
+  /**
+   * Not supported in Clover Go
+   */
+  @Override
+  public void openCashDrawer(OpenCashDrawerRequest request) throws UnsupportedOperationException {
+    throw new UnsupportedOperationException("Operation Not supported in Clover Go");
+  }
+
+  /**
+   * Not supported in Clover Go
+   */
+  @Override
   public void acceptSignature(VerifySignatureRequest request) throws UnsupportedOperationException {
     throw new UnsupportedOperationException("Operation Not supported in Clover Go");
   }
@@ -224,6 +274,14 @@ public class CloverGoConnector extends DefaultCloverGoConnector {
    * Not supported in Clover Go
    */
   @Override
+  public void sendMessageToActivity(MessageToActivity request) throws UnsupportedOperationException {
+    throw new UnsupportedOperationException("Operation Not supported in Clover Go");
+  }
+
+  /**
+   * Not supported in Clover Go
+   */
+  @Override
   public void startCustomActivity(CustomActivityRequest request) throws UnsupportedOperationException {
     throw new UnsupportedOperationException("Operation Not supported in Clover Go");
   }
@@ -232,7 +290,31 @@ public class CloverGoConnector extends DefaultCloverGoConnector {
    * Not supported in Clover Go
    */
   @Override
+  public void retrieveDeviceStatus(RetrieveDeviceStatusRequest request) throws UnsupportedOperationException {
+    throw new UnsupportedOperationException("Operation Not supported in Clover Go");
+  }
+
+  /**
+   * Not supported in Clover Go
+   */
+  @Override
+  public void retrievePayment(RetrievePaymentRequest request) throws UnsupportedOperationException {
+    throw new UnsupportedOperationException("Operation Not supported in Clover Go");
+  }
+
+  /**
+   * Not supported in Clover Go
+   */
+  @Override
   public void showMessage(String message) throws UnsupportedOperationException {
+    throw new UnsupportedOperationException("Operation Not supported in Clover Go");
+  }
+
+  /**
+   * Not supported in Clover Go
+   */
+  @Override
+  public void sendDebugLog(String message) throws UnsupportedOperationException {
     throw new UnsupportedOperationException("Operation Not supported in Clover Go");
   }
 
@@ -257,6 +339,14 @@ public class CloverGoConnector extends DefaultCloverGoConnector {
    */
   @Override
   public void displayPaymentReceiptOptions(String orderId, String paymentId) throws UnsupportedOperationException {
+    throw new UnsupportedOperationException("Operation Not supported in Clover Go");
+  }
+
+  /**
+   * Not supported in Clover Go
+   */
+  @Override
+  public void displayPaymentReceiptOptions(DisplayReceiptOptionsRequest request) throws UnsupportedOperationException {
     throw new UnsupportedOperationException("Operation Not supported in Clover Go");
   }
 

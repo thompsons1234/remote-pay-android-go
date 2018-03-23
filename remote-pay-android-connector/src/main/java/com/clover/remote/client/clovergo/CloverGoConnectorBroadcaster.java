@@ -162,9 +162,9 @@ public class CloverGoConnectorBroadcaster extends CopyOnWriteArrayList<ICloverGo
     }
   }
 
-  public void notifyOnGetMerchantInfoResponse(boolean isSuccess) {
+  public void notifyOnGetMerchantInfoResponse(MerchantInfo merchantInfo) {
     for (ICloverGoConnectorListener listener : this) {
-      listener.onGetMerchantInfoResponse(isSuccess);
+      listener.onGetMerchantInfoResponse(merchantInfo);
     }
   }
 
