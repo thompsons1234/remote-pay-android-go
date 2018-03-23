@@ -25,7 +25,6 @@ public class CloverGoDeviceConfiguration implements CloverDeviceConfiguration {
   private boolean allowDuplicate = false;
   private boolean autoConnect = false;
   private boolean enableQuickChip = false;
-  //TODO: Device Type
   private ReaderInfo.ReaderType readerType = ReaderInfo.ReaderType.RP450;
 
   private CloverGoDeviceConfiguration(Context context, String accessToken, ENV env, String apiKey, String secret, String appId, String appVersion) {
