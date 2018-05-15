@@ -89,17 +89,20 @@ public class KeyedTransactionFragment extends DialogFragment {
           KeyedSaleRequest request = new KeyedSaleRequest(store.getCurrentOrder().getTotal(), IdUtils.getNextId(), cardNumber, expiration, cvv);
           request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
           request.setTipAmount(store.getTipAmount());
+          request.setNote(store.getPaymentNote());
           doneKeyEntry(txType, request);
 
         } else if (txType == TransactionType.AUTH) {
 
           KeyedAuthRequest request = new KeyedAuthRequest(store.getCurrentOrder().getTotal(), IdUtils.getNextId(), cardNumber, expiration, cvv);
           request.setTaxAmount(store.getCurrentOrder().getTaxAmount());
+          request.setNote(store.getPaymentNote());
           doneKeyEntry(txType, request);
 
         } else if (txType == TransactionType.PRE_AUTH) {
 
           KeyedPreAuthRequest request = new KeyedPreAuthRequest(((ExamplePOSActivity) getActivity()).getPreAuthAmount(), IdUtils.getNextId(), cardNumber, expiration, cvv);
+          request.setNote(store.getPaymentNote());
           doneKeyEntry(txType, request);
         }
       }

@@ -2028,6 +2028,7 @@ public class ExamplePOSActivity extends Activity implements CurrentOrderFragment
       fragmentTransaction.add(R.id.contentContainer, fragment, "REGISTER");
     } else {
       ((RegisterFragment) fragment).setCloverConnector(getCloverConnector());
+      ((RegisterFragment) fragment).clearViews();
       fragmentTransaction.show(fragment);
     }
 

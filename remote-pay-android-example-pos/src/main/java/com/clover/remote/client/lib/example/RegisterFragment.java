@@ -25,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.Toast;
 
@@ -66,6 +67,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
   ICloverConnector cloverConnector;
   Map<POSItem, AvailableItem> itemToAvailableItem = new HashMap<POSItem, AvailableItem>();
   AvailableItemsAdapter availableItemsAdapter;
+  private EditText mPaymentNote;
 
   public static RegisterFragment newInstance(POSStore store, ICloverConnector cloverConnector) {
 
@@ -91,6 +93,7 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
   public View onCreateView(LayoutInflater inflater, ViewGroup container,
                            Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.fragment_register, container, false);
+    mPaymentNote = (EditText) view.findViewById(R.id.payment_note_et);
     GridView gv = (GridView) view.findViewById(R.id.AvailableItems);
     gv.setId(R.id.AvailableItems);
 
@@ -132,6 +135,10 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
 
   public interface OnFragmentInteractionListener {
     public void onFragmentInteraction(Uri uri);
+  }
+
+  public void clearViews() {
+    mPaymentNote.setText("");
   }
 
   public POSStore getStore() {
@@ -177,6 +184,8 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     request.setTipAmount(store.getTipAmount());
     request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
     request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
+    request.setNote(mPaymentNote.getText().toString());
+    store.setPaymentNote(mPaymentNote.getText().toString());
     cloverConnector.sale(request);
   }
 
@@ -209,6 +218,8 @@ public class RegisterFragment extends Fragment implements CurrentOrderFragmentLi
     request.setDisableDuplicateChecking(store.getDisableDuplicateChecking());
     request.setAutoAcceptPaymentConfirmations(store.getAutomaticPaymentConfirmation());
     request.setAutoAcceptSignature(store.getAutomaticSignatureConfirmation());
+    request.setNote(mPaymentNote.getText().toString());
+    store.setPaymentNote(mPaymentNote.getText().toString());
     cloverConnector.auth(request);
   }
 

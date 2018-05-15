@@ -39,6 +39,7 @@ public class POSStore {
   private List<POSNakedRefund> refunds;
   private List<POSPayment> preAuths;
   private POSOrder currentOrder;
+  private String paymentNote;
 
   private transient Map<String, POSOrder> orderIdToOrder = new HashMap<String, POSOrder>();
   private transient Map<String, POSPayment> paymentIdToPOSPayment = new HashMap<String, POSPayment>();
@@ -279,5 +280,13 @@ public class POSStore {
 
   public void setAutomaticPaymentConfirmation(Boolean automaticPaymentConfirmation) {
     this.automaticPaymentConfirmation = automaticPaymentConfirmation;
+  }
+
+  public String getPaymentNote() {
+    return paymentNote;
+  }
+
+  public void setPaymentNote(String paymentNote) {
+    this.paymentNote = paymentNote;
   }
 }

@@ -206,7 +206,7 @@ public class CloverGoConnectorImpl {
         url = "https://api-cert.payeezy.com/clovergosdk/v2/";
         break;
       default: // DEMO is default
-        url = "https://api-qa.payeezy.com/clovergosdk/v2/";
+        url = "https://api-int.payeezy.com/clovergosdk/v2/";
     }
 
     isQuickChip = configuration.isQuickChip();
@@ -887,6 +887,7 @@ public class CloverGoConnectorImpl {
     mLastTransactionRequest = transactionRequest;
     clearReferenceData();
     mOrder = new Order();
+    mOrder.setOrderNote(transactionRequest.getNote());
     mOrder.addCustomItem(new Order.CustomItem("item", ((double) transactionRequest.getAmount()) / 100, 1, null, null));
 
     if (transactionType == TransactionType.AUTH || transactionType == TransactionType.PRE_AUTH) {

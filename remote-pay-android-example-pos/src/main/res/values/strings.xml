@@ -171,5 +171,6 @@
   <string name="payment_type_rp450">RP450 (Bluetooth)</string>
   <string name="payment_type_rp350">RP350 (Audio Jack)</string>
   <string name="payment_type_key_enter">Key Enter (Manual)</string>
+  <string name="payment_note_hint">Sample Payment Note (Optional)</string>
 
 </resources>

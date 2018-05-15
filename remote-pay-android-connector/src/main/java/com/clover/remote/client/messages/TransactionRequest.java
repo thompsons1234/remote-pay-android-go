@@ -40,6 +40,7 @@ public abstract class TransactionRequest extends BaseRequest {
   private Boolean disableDuplicateChecking = null;
   private Boolean autoAcceptPaymentConfirmations = null;
   private Boolean autoAcceptSignature = null;
+  private String note = null;
 
   /**
    * Constructor
@@ -294,5 +295,21 @@ public abstract class TransactionRequest extends BaseRequest {
    */
   public Boolean getAutoAcceptSignature() {
     return this.autoAcceptSignature;
+  }
+
+  /**
+   * Returns the payment note which is part of a transaction request
+   * @return
+   */
+  public String getNote() {
+    return note;
+  }
+
+  /**
+   * This is a payment note added as part of each transaction request
+   * @param note
+   */
+  public void setNote(String note) {
+    this.note = note;
   }
 }

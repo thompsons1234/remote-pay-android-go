@@ -35,15 +35,33 @@
         android:id="@+id/PendingOrder">
     </fragment>
   </LinearLayout>
-  <GridView
+
+  <RelativeLayout
       android:layout_width="wrap_content"
-      android:layout_height="fill_parent"
-      android:layout_weight="1"
-      android:id="@+id/AvailableItems"
-      android:stretchMode="columnWidth"
-      android:columnWidth="195dp"
-      android:layout_marginLeft="20dp"
-      android:gravity="right"
-      android:numColumns="auto_fit">
-  </GridView>
+      android:layout_height="wrap_content">
+    <GridView
+        android:id="@+id/AvailableItems"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_above="@id/payment_note_et"
+        android:layout_marginStart="20dp"
+        android:columnWidth="195dp"
+        android:gravity="right"
+        android:numColumns="auto_fit"
+        android:stretchMode="columnWidth">
+    </GridView>
+
+    <EditText
+        android:id="@+id/payment_note_et"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_alignParentBottom="true"
+        android:hint="@string/payment_note_hint"
+        android:maxLines="1"
+        />
+
+  </RelativeLayout>
+
 </LinearLayout>
