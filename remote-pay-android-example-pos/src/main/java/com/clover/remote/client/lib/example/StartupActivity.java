@@ -461,9 +461,9 @@ public class StartupActivity extends Activity {
      * Update the URLs accordingly based on the environment you want to point to
      * e.g. sandbox.dev.clover.com or www.clover.com
      */
-    mOAuthEnv = "www.clover.com";
-    mOAuthUrl = "https://clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
-    mOAuthTokenUrl = "https://clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=token";
+    mOAuthEnv = "sandbox.dev.clover.com";
+    mOAuthUrl = "https://sandbox.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=code";
+    mOAuthTokenUrl = "https://sandbox.dev.clover.com/oauth/authorize?client_id=" + mOAuthClientId + "&response_type=token";
 
 
     /**
