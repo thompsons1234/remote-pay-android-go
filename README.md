@@ -139,7 +139,7 @@ To integrate SDK in your project, you have two options:
 ```
       include ':remote-pay-android-connector', ':reader', ':data', ':domain', ':roam', ':clover-android-sdk', ':clover-remote-interface', ':<your_app_module_here>'
 ```
-  - In your project’s build.gradle file under buildscript, make the following changes
+  - In your project’s build.gradle file under buildscript, make the following changes 
 ```
       buildscript {
         repositories {
@@ -148,12 +148,14 @@ To integrate SDK in your project, you have two options:
       }
       def mavenPlugin = "com.github.dcendents:android-maven-gradle-plugin:1.5"
       dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
-        classpath 'io.realm:realm-gradle-plugin:3.3.1'
+        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'io.realm:realm-gradle-plugin:5.0.1'
         classpath mavenPlugin
         classpath 'io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.10.0'
       }
 ```
+**Note**: Please make sure to update your realm plugin in the [gradle file](build.gradle).
+
   - In your app module’s build.gradle file, add the following line under dependencies
 ```
       compile project(':remote-pay-android-connector')
